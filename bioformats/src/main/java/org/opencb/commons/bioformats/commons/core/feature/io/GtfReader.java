@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
-import org.bioinfo.formats.core.feature.Gtf;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.feature.Gtf;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class GtfReader {
 

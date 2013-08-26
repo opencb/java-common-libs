@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.bioinfo.commons.io.TextFileReader;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.sequence.Fasta;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.sequence.Fasta;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class FastaReader extends AbstractFormatReader<Fasta> {
 

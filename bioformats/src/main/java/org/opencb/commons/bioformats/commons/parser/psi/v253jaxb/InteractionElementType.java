@@ -144,7 +144,7 @@ import java.util.List;
     "attributeList"
 })
 @XmlSeeAlso({
-    org.bioinfo.formats.parser.psi.v253jaxb.EntrySet.Entry.InteractionList.Interaction.class
+        org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.EntrySet.Entry.InteractionList.Interaction.class
 })
 public class InteractionElementType {
 

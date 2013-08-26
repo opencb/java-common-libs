@@ -1,14 +1,14 @@
 package org.opencb.commons.bioformats.commons.core.feature.io;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.bioinfo.commons.io.BeanReader;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.feature.Bed;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.feature.Bed;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public class BedReader extends AbstractFormatReader<Bed> {
 

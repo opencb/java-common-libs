@@ -11,13 +11,11 @@ import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.variant.Vcf4;
-import org.bioinfo.formats.core.variant.vcf4.VcfFilter;
-import org.bioinfo.formats.core.variant.vcf4.VcfFormat;
-import org.bioinfo.formats.core.variant.vcf4.VcfInfo;
-import org.bioinfo.formats.core.variant.vcf4.VcfRecord;
-import org.bioinfo.formats.core.variant.vcf4.filter.VcfGenericFilter;
-import org.bioinfo.formats.exception.FileFormatException;
+
+import org.opencb.commons.bioformats.commons.core.variant.Vcf4;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.filter.*;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 

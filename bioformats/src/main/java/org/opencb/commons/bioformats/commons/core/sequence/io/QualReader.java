@@ -8,8 +8,8 @@ import java.util.List;
 import org.bioinfo.commons.io.TextFileReader;
 import org.bioinfo.commons.utils.ArrayUtils;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.sequence.Qual;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.sequence.Qual;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class QualReader extends AbstractFormatReader<Qual> {
 	

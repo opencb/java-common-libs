@@ -1,6 +1,6 @@
 package org.opencb.commons.bioformats.commons.core.variant.vcf4.filter;
 
-import org.bioinfo.formats.core.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
 public class VcfRegionFilter implements VcfGenericFilter {
 

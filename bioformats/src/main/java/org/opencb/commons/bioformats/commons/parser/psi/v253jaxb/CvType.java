@@ -39,9 +39,9 @@ import javax.xml.bind.annotation.*;
     "xref"
 })
 @XmlSeeAlso({
-    org.bioinfo.formats.parser.psi.v253jaxb.ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod.class,
-    org.bioinfo.formats.parser.psi.v253jaxb.ParticipantType.ExperimentalRoleList.ExperimentalRole.class,
-    org.bioinfo.formats.parser.psi.v253jaxb.ParticipantType.ExperimentalPreparationList.ExperimentalPreparation.class
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod.class,
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ParticipantType.ExperimentalRoleList.ExperimentalRole.class,
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ParticipantType.ExperimentalPreparationList.ExperimentalPreparation.class
 })
 public class CvType {
 

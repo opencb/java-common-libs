@@ -17,5 +17,24 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.bioinfo</groupId>
+        <artifactId>bioinfo-commons</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+    </dependency>
+
 </dependencies>
 </project>

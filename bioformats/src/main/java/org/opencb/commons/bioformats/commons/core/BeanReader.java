@@ -1,6 +1,8 @@
 package org.opencb.commons.bioformats.commons.core;
 
 
+import org.bioinfo.commons.io.utils.FileUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

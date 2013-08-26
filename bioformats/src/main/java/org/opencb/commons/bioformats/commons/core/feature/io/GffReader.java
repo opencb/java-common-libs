@@ -7,8 +7,8 @@ import java.util.List;
 import org.bioinfo.commons.io.BeanReader;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.feature.Gff;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.feature.Gff;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class GffReader extends AbstractFormatReader<Gff> {
 

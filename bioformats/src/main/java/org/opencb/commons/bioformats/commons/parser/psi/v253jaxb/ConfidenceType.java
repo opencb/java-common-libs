@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.*;
     "value"
 })
 @XmlSeeAlso({
-    org.bioinfo.formats.parser.psi.v253jaxb.ConfidenceListType.Confidence.class
+        org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ConfidenceListType.Confidence.class
 })
 public class ConfidenceType {
 

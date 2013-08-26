@@ -44,9 +44,9 @@ import javax.xml.bind.annotation.*;
     "tissue"
 })
 @XmlSeeAlso({
-    org.bioinfo.formats.parser.psi.v253jaxb.ExperimentType.HostOrganismList.HostOrganism.class,
-    org.bioinfo.formats.parser.psi.v253jaxb.InteractorElementType.Organism.class,
-    org.bioinfo.formats.parser.psi.v253jaxb.ParticipantType.HostOrganismList.HostOrganism.class
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ExperimentType.HostOrganismList.HostOrganism.class,
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.InteractorElementType.Organism.class,
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ParticipantType.HostOrganismList.HostOrganism.class
 })
 public class BioSourceType {
 

@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.*;
 })
 @XmlSeeAlso({
     HostOrganism.class,
-    org.bioinfo.formats.parser.psi.v254jaxb.Interactor.Organism.class
+        org.opencb.commons.bioformats.commons.parser.psi.v254jaxb.Interactor.Organism.class
 })
 public class BioSource {
 

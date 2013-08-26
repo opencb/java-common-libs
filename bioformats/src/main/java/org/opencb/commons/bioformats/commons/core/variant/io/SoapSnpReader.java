@@ -7,8 +7,8 @@ import java.util.List;
 import org.bioinfo.commons.io.BeanReader;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.variant.SoapSnp;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.variant.SoapSnp;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class SoapSnpReader extends AbstractFormatReader<SoapSnp> {
 	

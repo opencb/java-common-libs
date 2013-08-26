@@ -64,8 +64,8 @@ import java.math.BigDecimal;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "parameterType")
 @XmlSeeAlso({
-    org.bioinfo.formats.parser.psi.v253jaxb.InteractionElementType.ParameterList.Parameter.class,
-    org.bioinfo.formats.parser.psi.v253jaxb.ParticipantType.ParameterList.Parameter.class
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.InteractionElementType.ParameterList.Parameter.class,
+    org.opencb.commons.bioformats.commons.parser.psi.v253jaxb.ParticipantType.ParameterList.Parameter.class
 })
 public class ParameterType {
 

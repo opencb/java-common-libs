@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.opencb.commons.bioformats.commons.AbstractFormatReader;
-import org.bioinfo.formats.core.variant.vcf4.VcfRecord;
-import org.bioinfo.formats.exception.FileFormatException;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
 public class BcfReader extends AbstractFormatReader<VcfRecord> {
 

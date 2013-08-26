@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.bioinfo.commons.utils.ListUtils;
-import org.bioinfo.formats.core.variant.vcf4.VcfAlternate;
-import org.bioinfo.formats.core.variant.vcf4.VcfFilter;
-import org.bioinfo.formats.core.variant.vcf4.VcfFormat;
-import org.bioinfo.formats.core.variant.vcf4.VcfInfo;
-import org.bioinfo.formats.core.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
+
+
+
+
 
 public class Vcf4 {
 

@@ -66,7 +66,8 @@ public class VcfRecord {
 	 * @param filter
 	 * @param info
 	 * @param format
-	 * @param samples
+	 * @param sampleList
+     *
 	 */
 	public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info, String format, String ... sampleList) {
 		this(chromosome, position, id, reference, alternate, quality, filter, info, format);
