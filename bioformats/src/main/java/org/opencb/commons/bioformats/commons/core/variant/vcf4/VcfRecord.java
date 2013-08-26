@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bioinfo.commons.utils.ListUtils;
-import org.opencb.commons.bioformats.commons.core.vcfstats.Genotype;
 
 public class VcfRecord {
 

@@ -1,4 +1,6 @@
-package org.opencb.commons.bioformats.commons.core.vcfstats;
+package org.opencb.commons.bioformats.commons.core.variant.vcf4;
+
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.AllelesCode;
 
 /**
  * Created with IntelliJ IDEA.
