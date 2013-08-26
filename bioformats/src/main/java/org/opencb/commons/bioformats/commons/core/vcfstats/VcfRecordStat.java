@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class VcfRecordStat {
     private Integer num_alleles;
     private Integer[] alleles_count;
     private Integer[] genotypes_count;
-    private Float[] alleles_freg;
+    private Float[] alleles_freq;
     private Float[] genotypes_freq;
     private Float maf;
     private Float mgf;
@@ -46,7 +47,7 @@ public class VcfRecordStat {
         this.missing_alleles            = new Integer(0);
         this.missing_genotypes          = new Integer(0);
         this.mendelinan_errors          = new Integer(0);
-        this.alleles_freg               = null;
+        this.alleles_freq               = null;
         this.genotypes_freq             = null;
         this.maf                        = new Float(0.0);
         this.mgf                        = new Float(0.0);
@@ -63,14 +64,14 @@ public class VcfRecordStat {
                 "chromosome='" + chromosome + '\'' +
                 ", position=" + position +
                 ", ref_allele='" + ref_allele + '\'' +
-                ", alt_allele='" + alt_alleles + '\'' +
+                ", alt_alleles='" + Arrays.toString(alt_alleles) + '\'' +
                 ", maf_allele='" + maf_allele + '\'' +
                 ", mgf_allele='" + mgf_allele + '\'' +
                 ", num_alleles=" + num_alleles +
-                ", alleles_count=" + alleles_count +
-                ", genotypes_count=" + genotypes_count +
-                ", alleles_freg=" + alleles_freg +
-                ", genotypes_freq=" + genotypes_freq +
+                ", alleles_count=" + Arrays.toString(alleles_count) +
+                ", genotypes_count=" + Arrays.toString(genotypes_count) +
+                ", alleles_freg=" + Arrays.toString(alleles_freq) +
+                ", genotypes_freq=" + Arrays.toString(genotypes_freq) +
                 ", maf=" + maf +
                 ", mgf=" + mgf +
                 ", missing_alleles=" + missing_alleles +
@@ -121,7 +122,7 @@ public class VcfRecordStat {
     }
 
     public Float[] getAlleles_freg() {
-        return alleles_freg;
+        return alleles_freq;
     }
 
     public Float[] getGenotypes_freq() {
@@ -205,7 +206,7 @@ public class VcfRecordStat {
     }
 
     public void setAlleles_freg(Float[] alleles_freg) {
-        this.alleles_freg = alleles_freg;
+        this.alleles_freq = alleles_freg;
     }
 
     public void setGenotypes_freq(Float[] genotypes_freq) {

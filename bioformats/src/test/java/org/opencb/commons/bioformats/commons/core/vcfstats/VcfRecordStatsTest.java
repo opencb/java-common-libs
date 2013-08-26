@@ -8,6 +8,8 @@ import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aaleman
@@ -56,6 +58,10 @@ public class VcfRecordStatsTest {
 
     @Test
     public void testCalculateStatsList() throws Exception {
+
+        List<VcfRecord> list_vcf_records = vcf.readAll();
+        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records);
+        System.out.println(list_vcf_stats);
 
     }
 }

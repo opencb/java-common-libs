@@ -1,9 +1,11 @@
 package org.opencb.commons.bioformats.commons.core.variant.vcf4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bioinfo.commons.utils.ListUtils;
+import org.opencb.commons.bioformats.commons.core.vcfstats.Genotype;
 
 public class VcfRecord {
 
@@ -52,7 +54,6 @@ public class VcfRecord {
 	public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info, String format) {
 		this(chromosome, position, id, reference, alternate, quality, filter, info);
 		this.format =  format;
-        System.out.println(format);
 	}
 
 	/**
@@ -72,7 +73,6 @@ public class VcfRecord {
 	public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info, String format, String ... sampleList) {
 		this(chromosome, position, id, reference, alternate, quality, filter, info, format);
 
-        System.out.println("hola");
 		samples = new ArrayList<String>();
 		for(String sample: sampleList) {
 			samples.add(sample);
@@ -83,7 +83,6 @@ public class VcfRecord {
 //		this(chromosome, position, id, reference, alternate, quality, filter, info, format);
 		this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
 
-        System.out.println("entra");
 		samples = new ArrayList<String>(fields.length-9);
 		for(int i=9; i<fields.length; i++) {
 			samples.add(fields[i]);
@@ -240,4 +239,30 @@ public class VcfRecord {
     public void setSamples(List<String> samples) {
         this.samples = samples;
     }
+
+    public String[]  getAltAlleles(){
+        return this.getAlternate().split(",");
+    }
+
+    public String getValueFormatSample(String key, String sample) {
+
+        String[] array_format = this.format.split(":");
+        int field_pos = Arrays.asList(array_format).indexOf(key);
+        if( field_pos >= 0){
+            return sample.split(":")[field_pos];
+        }   else{
+            return null;
+        }
+    }
+
+    public Genotype getSampleGenotype(String sample){
+        Genotype g = null;
+        String gt_val = getValueFormatSample("GT", sample);
+        if(gt_val != null){
+            g = new Genotype(gt_val);
+        }
+        return g;
+
+    }
+
 }
