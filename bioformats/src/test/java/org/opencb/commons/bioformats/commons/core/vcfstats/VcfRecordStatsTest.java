@@ -2,7 +2,11 @@ package org.opencb.commons.bioformats.commons.core.vcfstats;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,18 +16,46 @@ import org.junit.Test;
  * To change this template use File | Settings | File Templates.
  */
 public class VcfRecordStatsTest {
+
+    private Long start, end;
+    private Vcf4Reader vcf;
+
+    @Rule
+    public TestName name = new TestName();
+
+
     @Before
     public void setUp() throws Exception {
+        start = System.currentTimeMillis();
+        vcf = new Vcf4Reader("/home/aaleman/tmp/small.vcf");
+
 
     }
 
     @After
     public void tearDown() throws Exception {
+        end = System.currentTimeMillis();
+        vcf.close();
+        System.out.println("Time "+ name.getMethodName()+": " + (end - start));
 
     }
 
     @Test
     public void testCalculateStats() throws Exception {
+
+        VcfRecord v_record;
+        VcfRecordStat v_stat;
+
+
+        while((v_record = vcf.read()) != null){
+              v_stat = VcfRecordStats.calculateStats(v_record);
+            System.out.println(v_stat);
+        }
+
+    }
+
+    @Test
+    public void testCalculateStatsList() throws Exception {
 
     }
 }

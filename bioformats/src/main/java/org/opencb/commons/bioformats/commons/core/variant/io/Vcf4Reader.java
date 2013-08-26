@@ -133,13 +133,17 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 			}
 			if(line != null) {
 //				logger.debug("line: "+line);
-				String [] fields = line.split("\t");
-				StringBuilder format = new StringBuilder();
-				for(int i=8; i<fields.length; i++) {
-					format.append(fields[i]).append("\t");
-				}
-				return new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], format.toString().trim());
-			}
+                String[] fields = line.split("\t");
+                VcfRecord vcfRecord = null;
+                if(fields.length == 8) {
+                    vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
+                }else {
+                    if(fields.length > 8) {
+                        vcfRecord = new VcfRecord(fields);
+                    }
+                }
+                return vcfRecord;
+            }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
