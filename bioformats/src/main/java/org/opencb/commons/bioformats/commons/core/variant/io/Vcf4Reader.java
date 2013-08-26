@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import org.bioinfo.commons.io.utils.FileUtils;
 import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.utils.StringUtils;
@@ -22,7 +24,8 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 	private Vcf4 vcf4;
 	private BufferedReader bufferedReader;
 
-	private List<VcfGenericFilter> vcfFilters;
+	private List<Predicate<VcfRecord>> vcfFilters;
+    private Predicate<VcfRecord> andVcfFilters;
 	
 	private static final int DEFAULT_NUMBER_RECORDS = 40000;
 	
@@ -36,19 +39,18 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 		this.file = file;
 	
 		init();
-//		metaInformation = new LinkedHashMap<String, String>();
-		
-//		vcfInfos = new ArrayList<VcfInfo>();
-//		vcfFilters = new ArrayList<VcfGenericFilter>();
-//		vcfFormats = new ArrayList<VcfFormat>();
-		
-//		bufferedReader = new BufferedReader(new FileReader(file));
-//		processMetaInformation();
+
 	}
+
+    public Vcf4Reader(File file, List<Predicate<VcfRecord>> list_filters) throws IOException, FileFormatException {
+        this(file);
+        this.vcfFilters = list_filters;
+        this.andVcfFilters = Predicates.and(this.vcfFilters);
+    }
 	
 	public void init() throws FileFormatException, IOException {
 		vcf4 = new Vcf4();
-		vcfFilters = new ArrayList<VcfGenericFilter>();
+		// vcfFilters = new ArrayList<VcfGenericFilter>();
 		
 		FileUtils.checkFile(file);
 		bufferedReader = new BufferedReader(new FileReader(file));
@@ -119,8 +121,9 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 		return vcf4;
 	}
 	
-	public void addFilter(VcfGenericFilter vcfFilter) {
+	public void addFilter(Predicate<VcfRecord> vcfFilter) {
 		vcfFilters.add(vcfFilter);
+        this.andVcfFilters = Predicates.and(this.vcfFilters);
 	}
 	
 	@Override
@@ -181,13 +184,11 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 					}
 				}
 				if(vcfFilters != null && vcfFilters.size() > 0) {
-					passFilter = false;
-					for(int i=0; i<vcfFilters.size() && !passFilter; i++) {
-						passFilter = vcfFilters.get(i).filter(vcfRecord);
-					}
-					if(passFilter) {
-						records.add(vcfRecord);
-					}
+                    if(andVcfFilters.apply(vcfRecord)){
+                        records.add(vcfRecord);
+                    }
+
+
 				}else {
 					records.add(vcfRecord);
 				}
@@ -220,15 +221,16 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
 	/**
 	 * @return the vcfFilters
 	 */
-	public List<VcfGenericFilter> getVcfFilters() {
+	public List<Predicate<VcfRecord>> getVcfFilters() {
 		return vcfFilters;
 	}
 
 	/**
 	 * @param vcfFilters the vcfFilters to set
 	 */
-	public void setVcfGenericFilters(List<VcfGenericFilter> vcfFilters) {
+	public void setVcfFilters(List<Predicate<VcfRecord>> vcfFilters) {
 		this.vcfFilters = vcfFilters;
+        this.andVcfFilters = Predicates.and(this.vcfFilters);
 	}
 
 	

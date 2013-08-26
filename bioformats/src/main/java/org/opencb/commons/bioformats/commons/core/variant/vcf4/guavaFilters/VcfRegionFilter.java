@@ -25,7 +25,7 @@ public class VcfRegionFilter implements Predicate<VcfRecord> {
     @Override
     public boolean apply(VcfRecord vcfRecord) {
         return (vcfRecord.getChromosome().equalsIgnoreCase(chromosome) &&
-                vcfRecord.getPosition() > start
-                && vcfRecord.getPosition() < end);
+                vcfRecord.getPosition() >= start
+                && vcfRecord.getPosition() <= end);
     }
 }
