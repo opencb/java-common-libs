@@ -48,7 +48,7 @@ public class PedReaderTest {
     @Test
     public void test() throws Exception {
 
-        ped = new Pedigree("/home/aaleman/tmp/file.ped");
+        ped = new Pedigree("/Users/aleman/tmp/bier.ped");
 
         System.out.println("Individuos");
         for(Map.Entry<String, Individual> elem: ped.getIndividuals().entrySet()){
@@ -58,7 +58,7 @@ public class PedReaderTest {
 
         System.out.println("Familias");
         for(Map.Entry<String, Set<Individual>> elem: ped.getFamilies().entrySet()){
-            System.out.println(elem);
+            System.out.println(elem.getKey());
             for(Individual ind : elem.getValue()){
                 System.out.println(ind);
             }

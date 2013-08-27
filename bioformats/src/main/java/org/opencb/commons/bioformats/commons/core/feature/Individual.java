@@ -12,29 +12,26 @@ import java.util.List;
 public class Individual implements Comparable<Individual>{
     private String id;
     private String family;
-    private String phenotype;
-    private String sex;
     private Individual father;
+    private String fatherId;
     private Individual mother;
+    private String motherId;
+    private String sex;
+    private String phenotype;
     private List<String> fields;
 
 
-    public Individual(String id, String family, Individual father, Individual mother) {
+    public Individual(){
+
+    }
+    public Individual(String id, String family, Individual father, Individual mother, String sex, String phenotype, List<String> fields) {
         this.id = id;
         this.family = family;
-        this.phenotype = phenotype;
-        this.sex = sex;
         this.father = father;
         this.mother = mother;
-        this.fields = fields;
-    }
-
-    public Individual(String id, String phenotype, String sex, String father, String mother) {
-        this.id = id;
-        this.phenotype = phenotype;
         this.sex = sex;
-//        this.father = father;
-//        this.mother = mother;
+        this.phenotype = phenotype;
+        this.fields = fields;
     }
 
     @Override
@@ -121,5 +118,29 @@ public class Individual implements Comparable<Individual>{
     @Override
     public int compareTo(Individual o) {
         return this.getId().compareTo(o.getId());
+    }
+
+    public String getFatherId() {
+        return fatherId;
+    }
+
+    public void setFatherId(String fatherId) {
+        this.fatherId = fatherId;
+    }
+
+    public String getMotherId() {
+        return motherId;
+    }
+
+    public void setMotherId(String motherId) {
+        this.motherId = motherId;
+    }
+
+    public String getFamily() {
+        return family;
+    }
+
+    public void setFamily(String family) {
+        this.family = family;
     }
 }

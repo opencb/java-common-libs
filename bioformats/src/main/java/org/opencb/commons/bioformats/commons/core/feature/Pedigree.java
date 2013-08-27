@@ -6,10 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,10 +41,11 @@ public class Pedigree {
         String line = "";
         Individual ind, father, mother;
         String[]  fields;
-        String sample_id, family_id, father_id, mother_id;
+        String sample_id, family_id, father_id, mother_id, sex, phenotype;
         Set<Individual> family;
+        Queue<Individual> queue = new LinkedList<>();
 
-        while( (line = reader.readLine()) != null){
+        while( (line = reader.readLine()) != null)  {
             if(line.startsWith("#")){
                 this.parseHeader(line);
             }else{
@@ -56,28 +54,77 @@ public class Pedigree {
                 sample_id = fields[1];
                 father_id = fields[2];
                 mother_id = fields[3];
+                sex = fields[4];
+                phenotype = fields[5];
 
-                ind = this.getIndividual(sample_id);
                 family =  this.getFamily(family_id);
                 if(family == null){
                     family = new TreeSet<>();
                     families.put(family_id, family);
                 }
 
-                if(ind == null){
-                    father = this.getIndividual(father_id);
-                    mother = this.getIndividual(mother_id);
-                    ind = new Individual(sample_id, family_id, father, mother);
+
+                    if( father_id.equals("0") && mother_id.equals("0")){
+                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, null);
+                        individuals.put(ind.getId(), ind);
+                        family.add(ind);
+                    }else{
+                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, null);
+                        ind.setFatherId(father_id);
+                        ind.setMotherId(mother_id);
+                        queue.offer(ind);
+                    }
+
+
+
+            }
+        }
+
+        while(!queue.isEmpty()){
+            ind = queue.poll();
+            father = null;
+            mother = null;
+            father_id = ind.getFatherId();
+            mother_id = ind.getMotherId();
+
+            if(!father_id.equals("0") && !mother_id.equals("0")){ // Existen padre y Madre (hay ID)
+                father = this.getIndividual(father_id);
+                mother = this.getIndividual(mother_id);
+                if(father == null || mother == null){  // Existen pero aún no se han metido en la HASH
+                    queue.offer(ind);
+                }else{ // Tenemos el padre y la madre y están en la HASH
+                    ind.setFather(father);
+                    ind.setMother(mother);
                     individuals.put(ind.getId(), ind);
 
+                    family =  this.getFamily(ind.getFamily());
                     family.add(ind);
+                }
+            }else if(!father_id.equals("0") && mother_id.equals("0")){ // No existe la madre
+                father = this.getIndividual(father_id);
+                mother = null;
+                if(father == null){ // Existe el padre pero aún no se ha metido en la hash
+                    queue.offer(ind);
                 }else{
-                    // error
-                    // throw new Exception("Duplicate Element" + line);
+                    ind.setFather(father);
+                    ind.setMother(mother);
+                    individuals.put(ind.getId(), ind);
 
+                    family =  this.getFamily(ind.getFamily());
+                    family.add(ind);
+                }
+            }else if(father_id.equals("0") && !mother_id.equals("0")){ // No existe el padre
+                father = null;
+                mother = this.getIndividual(mother_id);
+                if(mother == null){ // Existe la madre pero aún no se ha metido en la hash
+                    queue.offer(ind);
+                }else{
+                    ind.setFather(father);
+                    ind.setMother(mother);
+                    individuals.put(ind.getId(), ind);
 
-                    // Creamos el padre aunque sea NULL y aquí lo recogemos y le ponemos los valores bien
-
+                    family =  this.getFamily(ind.getFamily());
+                    family.add(ind);
                 }
             }
         }
@@ -107,8 +154,6 @@ public class Pedigree {
     public Individual getIndividual(String id){
         return individuals.get(id);
     }
-
-
 
     public Map<String, Individual> getIndividuals() {
         return individuals;
