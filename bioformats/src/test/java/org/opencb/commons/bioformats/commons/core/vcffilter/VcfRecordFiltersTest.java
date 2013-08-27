@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfFilter;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfFilterList;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfRegionFilter;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfSnpFilter;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
@@ -51,9 +53,11 @@ public class VcfRecordFiltersTest {
     public void testFilterList() throws IOException, FileFormatException {
 
         List<VcfRecord> list_records = vcf.readAll();
-        List<Predicate<VcfRecord>> list_filters = new ArrayList<Predicate<VcfRecord>>(2);
+        List<VcfFilter> list_filters = new VcfFilterList(2);
         list_filters.add(new VcfSnpFilter());
-        list_filters.add(new VcfRegionFilter("1", 1,3));
+        list_filters.add(new VcfRegionFilter("1", 1,3, 100));
+
+        System.out.println(list_filters);
 
         List<VcfRecord> filter_list = VcfRecordFilters.filter(list_records, list_filters);
 

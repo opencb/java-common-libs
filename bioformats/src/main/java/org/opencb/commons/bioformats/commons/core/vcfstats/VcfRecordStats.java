@@ -51,7 +51,7 @@ public class VcfRecordStats {
         Float[] alleles_freq = new Float[vcf_stat.getNum_alleles()];
         Float[] genotypes_freq = new Float[vcf_stat.getNum_alleles() * vcf_stat.getNum_alleles()];
 
-        int pos = 0
+        int pos = 0;
         for (String sample : vcf_record.getSamples()) {
 
             Genotype g = vcf_record.getSampleGenotype(sample);
