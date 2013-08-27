@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.commons.core.vcfstats;
 
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.AllelesCode;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotypes;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class VcfRecordStats {
             for(String sample: vcf_record.getSamples()){
 
                 Genotype g = vcf_record.getSampleGenotype(sample);
+                Genotypes.addGenotypeToList(vcf_stat.getGenotypes(), g);
 
 
                 // Check missing alleles and genotypes

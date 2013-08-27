@@ -1,13 +1,19 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
+import org.bioinfo.commons.utils.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,7 +35,7 @@ public class VcfRecordStatsTest {
     @Before
     public void setUp() throws Exception {
         start = System.currentTimeMillis();
-        vcf = new Vcf4Reader("/home/aaleman/tmp/small.vcf");
+        vcf = new Vcf4Reader("/home/aaleman/tmp/file.vcf");
 
 
     }
@@ -38,21 +44,7 @@ public class VcfRecordStatsTest {
     public void tearDown() throws Exception {
         end = System.currentTimeMillis();
         vcf.close();
-        System.out.println("Time "+ name.getMethodName()+": " + (end - start));
-
-    }
-
-    @Test
-    public void testCalculateStats() throws Exception {
-
-        VcfRecord v_record;
-        VcfRecordStat v_stat;
-
-
-        while((v_record = vcf.read()) != null){
-              v_stat = VcfRecordStats.calculateStats(v_record);
-            System.out.println(v_stat);
-        }
+        System.out.println("Time " + name.getMethodName() + ": " + (end - start));
 
     }
 
@@ -61,7 +53,35 @@ public class VcfRecordStatsTest {
 
         List<VcfRecord> list_vcf_records = vcf.readAll();
         List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records);
-        System.out.println(list_vcf_stats);
+        printListStats(list_vcf_stats);
+
+    }
+
+    private void printListStats(List<VcfRecordStat> list) throws FileNotFoundException {
+
+        File file = new File("/home/aaleman/tmp/vcf.stats");
+        PrintWriter pw = new PrintWriter(file);
+
+        pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
+                "%-10s%-15s%-10s\n",
+                "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
+                "NumAll.", "All. Count", "Gt count"));
+        for (VcfRecordStat v : list) {
+            pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
+                    "s%-10d%-15s%-10s\n",
+                    v.getChromosome(),
+                    v.getPosition(),
+                    v.getRef_allele(),
+                    Arrays.toString(v.getAlt_allele()),
+                    v.getMaf_allele(),
+                    v.getMgf_allele(),
+                    v.getNum_alleles(),
+                    Arrays.toString(v.getAlleles_count()),
+                    v.getGenotypes()
+            ));
+        }
+
+        pw.close();
 
     }
 }

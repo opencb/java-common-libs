@@ -1,5 +1,7 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +23,9 @@ public class VcfRecordStat {
     private Integer num_alleles;
     private Integer[] alleles_count;
     private Integer[] genotypes_count;
+    private List<Genotype> genotypes;
+
+
     private Float[] alleles_freq;
     private Float[] genotypes_freq;
     private Float maf;
@@ -56,6 +61,7 @@ public class VcfRecordStat {
         this.cases_percent_recessive    = new Float(0.0);
         this.controls_percent_recessive = new Float(0.0);
         this.is_indel                   = false;
+        this.genotypes = new ArrayList<Genotype>((int) Math.pow(this.num_alleles, 2));
     }
 
     @Override
@@ -121,7 +127,7 @@ public class VcfRecordStat {
         return genotypes_count;
     }
 
-    public Float[] getAlleles_freg() {
+    public Float[] getAlleles_freq() {
         return alleles_freq;
     }
 
@@ -251,5 +257,14 @@ public class VcfRecordStat {
 
     public void setControls_percent_recessive(Float controls_percent_recessive) {
         this.controls_percent_recessive = controls_percent_recessive;
+    }
+
+
+    public List<Genotype> getGenotypes() {
+        return genotypes;
+    }
+
+    public void setGenotypes(List<Genotype> genotypes) {
+        this.genotypes = genotypes;
     }
 }

@@ -51,7 +51,7 @@ public class Vcf4ReaderTest {
 
         List<Predicate<VcfRecord>> list_filters = new ArrayList<Predicate<VcfRecord>>(2);
         list_filters.add(new VcfSnpFilter());
-        list_filters.add(new VcfRegionFilter("1", 1,100));
+        list_filters.add(new VcfRegionFilter("1", 1, 100));
 
         vcf.setVcfFilters(list_filters);
 
@@ -60,5 +60,30 @@ public class Vcf4ReaderTest {
         for(VcfRecord v: list_records){
             System.out.println(v);
         }
+    }
+
+    @Test
+    public void testReadSizeWithFilters() throws Exception {
+
+        List<Predicate<VcfRecord>> list_filters = new ArrayList<Predicate<VcfRecord>>(2);
+        list_filters.add(new VcfSnpFilter());
+        list_filters.add(new VcfRegionFilter("1", 1,5));
+
+        vcf.setVcfFilters(list_filters);
+
+        List<VcfRecord> list_records = vcf.read(2);
+
+        System.out.println("First Chunk");
+        for(VcfRecord v: list_records){
+            System.out.println(v);
+        }
+
+        list_records = vcf.read(2);
+        System.out.println("Second Chunk");
+
+        for(VcfRecord v: list_records){
+            System.out.println(v);
+        }
+
     }
 }
