@@ -245,5 +245,8 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
         this.andVcfFilters = Predicates.and(this.vcfFilters);
     }
 
+    public List<String> getSampleNames() {
+        return this.vcf4.getSamples();
+    }
 
 }

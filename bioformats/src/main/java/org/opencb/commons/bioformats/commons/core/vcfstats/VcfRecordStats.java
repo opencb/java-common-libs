@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
+import org.opencb.commons.bioformats.commons.core.feature.Ped;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.AllelesCode;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotypes;
@@ -18,7 +19,12 @@ import java.util.List;
  */
 public class VcfRecordStats {
 
+
     public static VcfRecordStat calculateStats(VcfRecord vcf_record) {
+        return calculateStats(vcf_record, null, null);
+    }
+
+    public static VcfRecordStat calculateStats(VcfRecord vcf_record, List<String> sampleNames, List<Ped> ped) {
         int genotype_current_pos;
         int total_alleles_count = 0;
         int total_genotypes_count = 0;
@@ -45,6 +51,7 @@ public class VcfRecordStats {
         Float[] alleles_freq = new Float[vcf_stat.getNum_alleles()];
         Float[] genotypes_freq = new Float[vcf_stat.getNum_alleles() * vcf_stat.getNum_alleles()];
 
+        int pos = 0
         for (String sample : vcf_record.getSamples()) {
 
             Genotype g = vcf_record.getSampleGenotype(sample);
@@ -94,7 +101,16 @@ public class VcfRecordStats {
 
             }
 
+           // Include statistics that depend on pedigree information
+            if( ped != null){
+                if(g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID){
+//                    if(g.isMendelianError())
 
+                }
+            }
+
+
+         pos++;
         }
 
         for (int i = 0; i < vcf_stat.getNum_alleles(); i++) {
@@ -156,43 +172,43 @@ public class VcfRecordStats {
             vcf_stat.setIs_indel(false);
         }
 
-         // Transitions and transversions
+        // Transitions and transversions
 
-        for (int i = 0; i < vcf_stat.getAlt_alleles().length; i++){
-            if(vcf_record.getReference().length() == 1 && vcf_stat.getAlt_alleles().length == 1){
+        for (int i = 0; i < vcf_stat.getAlt_alleles().length; i++) {
+            if (vcf_record.getReference().length() == 1 && vcf_stat.getAlt_alleles().length == 1) {
                 char ref = vcf_stat.getRef_alleles().toUpperCase().charAt(0);
                 char alt = vcf_stat.getAlt_alleles()[i].toUpperCase().charAt(0);
 
-                 switch (ref){
-                     case 'C':
-                         if(alt == 'T'){
-                             vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
-                         }else{
-                             vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
-                         }
-                         break;
-                     case 'T':
-                         if(alt == 'C'){
-                             vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
-                         }else{
-                             vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
-                         }
-                         break;
-                     case 'A' :
-                         if(alt == 'G'){
-                             vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
-                         }else{
-                             vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
-                         }
-                         break;
-                     case 'G':
-                         if(alt == 'A'){
-                             vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
-                         }else{
-                             vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
-                         }
-                         break;
-                 }
+                switch (ref) {
+                    case 'C':
+                        if (alt == 'T') {
+                            vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
+                        } else {
+                            vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
+                        }
+                        break;
+                    case 'T':
+                        if (alt == 'C') {
+                            vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
+                        } else {
+                            vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
+                        }
+                        break;
+                    case 'A':
+                        if (alt == 'G') {
+                            vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
+                        } else {
+                            vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
+                        }
+                        break;
+                    case 'G':
+                        if (alt == 'A') {
+                            vcf_stat.setTransitions_count(vcf_stat.getTransitions_count() + 1);
+                        } else {
+                            vcf_stat.setTransversions_count(vcf_stat.getTransversions_count() + 1);
+                        }
+                        break;
+                }
             }
 
         }
@@ -201,13 +217,18 @@ public class VcfRecordStats {
 
     }
 
-    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records) {
+    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, List<Ped> ped) {
         List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
         VcfRecordStat vcf_record_stat;
         for (VcfRecord vcf_record : list_vcf_records) {
-            vcf_record_stat = calculateStats(vcf_record);
+            vcf_record_stat = calculateStats(vcf_record, sampleNames, ped);
             list_stats.add(vcf_record_stat);
         }
         return list_stats;
     }
+
+    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records) {
+        return calculateStats(list_vcf_records, null, null);
+    }
+
 }

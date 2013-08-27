@@ -5,6 +5,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.feature.Ped;
+import org.opencb.commons.bioformats.commons.core.feature.io.PedReader;
+import org.opencb.commons.bioformats.commons.core.variant.Vcf4;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
@@ -52,6 +55,20 @@ public class VcfRecordStatsTest {
         List<VcfRecord> list_vcf_records = vcf.readAll();
         List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records);
         printListStats(list_vcf_stats);
+
+    }
+
+    @Test
+    public void testCalculateStatsPed() throws Exception {
+
+        List<VcfRecord> list_vcf_records = vcf.readAll();
+
+        PedReader pr = new PedReader("/home/aaleman/tmp/file.ped");
+        List<Ped> ped = pr.readAll();
+        pr.close();
+
+        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records, vcf.getSampleNames(), ped);
+        System.out.println(list_vcf_stats);
 
     }
 

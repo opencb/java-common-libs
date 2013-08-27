@@ -26,6 +26,7 @@ public class Vcf4 {
 	
 	private List<String> headerLine;
 	private List<VcfRecord> records;
+    private List<String> samples;
 	
 	public Vcf4() {
 		this("VCFv4.0");
@@ -235,4 +236,8 @@ public class Vcf4 {
 		this.records = records;
 	}
 
+    public List<String> getSamples() {
+        List<String> list_samples = this.headerLine.subList(9, this.headerLine.size());
+        return list_samples;
+    }
 }
