@@ -61,12 +61,12 @@ public class VcfRecordStatsTest {
         PrintWriter pw = new PrintWriter(file);
 
         pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                "%-10s%-15s%-25s%-10s%-10s\n",
+                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s\n",
                 "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                "NumAll.", "All. Count", "Gt count", "Trans", "Transv"));
+                "NumAll.", "Miss All.","Miss Gt","All. Count", "Gt count", "Trans", "Transv"));
         for (VcfRecordStat v : list) {
             pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                    "s%-10d%-15s%-25s%-10d%-10d\n",
+                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d\n",
                     v.getChromosome(),
                     v.getPosition(),
                     v.getRef_alleles(),
@@ -74,6 +74,8 @@ public class VcfRecordStatsTest {
                     v.getMaf_allele(),
                     v.getMgf_allele(),
                     v.getNum_alleles(),
+                    v.getMissing_alleles(),
+                    v.getMissing_genotypes(),
                     Arrays.toString(v.getAlleles_count()),
                     v.getGenotypes(),
                     v.getTransitions_count(),

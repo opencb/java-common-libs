@@ -15,14 +15,13 @@ import java.util.List;
  * Time: 10:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFilters {
+public class VcfRecordFilters {
 
     public static List<VcfRecord> filter(List<VcfRecord> list_records, List<Predicate<VcfRecord>> filters){
-        List<VcfRecord> filtered_list = null;
 
         Predicate<VcfRecord> and_filters = Predicates.and(filters);
 
-        filtered_list = Lists.newArrayList(Iterables.filter(list_records, and_filters));
+        List<VcfRecord> filtered_list = Lists.newArrayList(Iterables.filter(list_records, and_filters));
 
         return filtered_list;
 

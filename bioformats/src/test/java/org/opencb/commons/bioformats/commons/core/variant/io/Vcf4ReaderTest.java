@@ -9,7 +9,6 @@ import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfRegionFilter;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfSnpFilter;
-import org.opencb.commons.bioformats.commons.core.vcffilter.VcfFilters;
 
 import java.util.ArrayList;
 import java.util.List;

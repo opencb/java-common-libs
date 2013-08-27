@@ -23,7 +23,7 @@ import java.util.List;
  * Time: 10:29 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFiltersTest {
+public class VcfRecordFiltersTest {
     private Long start, end;
     private Vcf4Reader vcf;
 
@@ -55,7 +55,7 @@ public class VcfFiltersTest {
         list_filters.add(new VcfSnpFilter());
         list_filters.add(new VcfRegionFilter("1", 1,3));
 
-        List<VcfRecord> filter_list = VcfFilters.filter(list_records, list_filters);
+        List<VcfRecord> filter_list = VcfRecordFilters.filter(list_records, list_filters);
 
         for(VcfRecord v: filter_list){
             System.out.println(v);
