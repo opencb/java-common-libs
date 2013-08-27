@@ -38,6 +38,9 @@ public class VcfRecordStat {
     private Float controls_percent_dominant;
     private Float cases_percent_recessive;
     private Float controls_percent_recessive;
+    private Integer transitions_count;
+    private Integer transversions_count;
+
 
     public VcfRecordStat() {
         this.chromosome                 = "";
@@ -62,6 +65,8 @@ public class VcfRecordStat {
         this.controls_percent_recessive = new Float(0.0);
         this.is_indel                   = false;
         this.genotypes = new ArrayList<Genotype>((int) Math.pow(this.num_alleles, 2));
+        this.transitions_count = 0;
+        this.transversions_count = 0;
     }
 
     @Override
@@ -99,11 +104,11 @@ public class VcfRecordStat {
         return position;
     }
 
-    public String getRef_allele() {
+    public String getRef_alleles() {
         return ref_allele;
     }
 
-    public String[] getAlt_allele() {
+    public String[] getAlt_alleles() {
         return alt_alleles;
     }
 
@@ -266,5 +271,21 @@ public class VcfRecordStat {
 
     public void setGenotypes(List<Genotype> genotypes) {
         this.genotypes = genotypes;
+    }
+
+    public Integer getTransitions_count() {
+        return transitions_count;
+    }
+
+    public void setTransitions_count(Integer transitions_count) {
+        this.transitions_count = transitions_count;
+    }
+
+    public Integer getTransversions_count() {
+        return transversions_count;
+    }
+
+    public void setTransversions_count(Integer transversions_count) {
+        this.transversions_count = transversions_count;
     }
 }

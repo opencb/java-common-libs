@@ -1,13 +1,11 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
-import org.bioinfo.commons.utils.ArrayUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
-import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
 import java.io.File;
@@ -35,7 +33,7 @@ public class VcfRecordStatsTest {
     @Before
     public void setUp() throws Exception {
         start = System.currentTimeMillis();
-        vcf = new Vcf4Reader("/home/aaleman/tmp/file.vcf");
+        vcf = new Vcf4Reader("/home/aaleman/tmp/small.vcf");
 
 
     }
@@ -63,21 +61,23 @@ public class VcfRecordStatsTest {
         PrintWriter pw = new PrintWriter(file);
 
         pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                "%-10s%-15s%-10s\n",
+                "%-10s%-15s%-25s%-10s%-10s\n",
                 "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                "NumAll.", "All. Count", "Gt count"));
+                "NumAll.", "All. Count", "Gt count", "Trans", "Transv"));
         for (VcfRecordStat v : list) {
             pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                    "s%-10d%-15s%-10s\n",
+                    "s%-10d%-15s%-25s%-10d%-10d\n",
                     v.getChromosome(),
                     v.getPosition(),
-                    v.getRef_allele(),
-                    Arrays.toString(v.getAlt_allele()),
+                    v.getRef_alleles(),
+                    Arrays.toString(v.getAlt_alleles()),
                     v.getMaf_allele(),
                     v.getMgf_allele(),
                     v.getNum_alleles(),
                     Arrays.toString(v.getAlleles_count()),
-                    v.getGenotypes()
+                    v.getGenotypes(),
+                    v.getTransitions_count(),
+                    v.getTransversions_count()
             ));
         }
 
