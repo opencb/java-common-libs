@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.feature.Ped;
 import org.opencb.commons.bioformats.commons.core.feature.io.PedReader;
-import org.opencb.commons.bioformats.commons.core.variant.Vcf4;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
@@ -87,16 +86,16 @@ public class VcfRecordStatsTest {
                     v.getChromosome(),
                     v.getPosition(),
                     v.getRef_alleles(),
-                    Arrays.toString(v.getAlt_alleles()),
-                    v.getMaf_allele(),
-                    v.getMgf_allele(),
-                    v.getNum_alleles(),
-                    v.getMissing_alleles(),
-                    v.getMissing_genotypes(),
-                    Arrays.toString(v.getAlleles_count()),
+                    Arrays.toString(v.getAltAlleles()),
+                    v.getMafAllele(),
+                    v.getMgfAllele(),
+                    v.getNumAlleles(),
+                    v.getMissingAlleles(),
+                    v.getMissingGenotypes(),
+                    Arrays.toString(v.getAllelesCount()),
                     v.getGenotypes(),
-                    v.getTransitions_count(),
-                    v.getTransversions_count()
+                    v.getTransitionsCount(),
+                    v.getTransversionsCount()
             ));
         }
 

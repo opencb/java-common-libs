@@ -5,10 +5,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Ped;
+import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +24,7 @@ import java.util.List;
  */
 public class PedReaderTest {
     private Long start, end;
-    private PedReader ped;
+    private Pedigree ped;
 
     @Rule
     public TestName name = new TestName();
@@ -28,7 +33,6 @@ public class PedReaderTest {
     @Before
     public void setUp() throws Exception {
         start = System.currentTimeMillis();
-        ped = new PedReader("/home/aaleman/tmp/file.ped");
 
 
     }
@@ -36,43 +40,30 @@ public class PedReaderTest {
     @After
     public void tearDown() throws Exception {
         end = System.currentTimeMillis();
-        ped.close();
         System.out.println("Time "+ name.getMethodName()+": " + (end - start));
 
     }
 
+
     @Test
-    public void testRead() throws Exception {
+    public void test() throws Exception {
 
-        Ped p = null;
+        ped = new Pedigree("/home/aaleman/tmp/file.ped");
 
-        while((p = ped.read()) != null){
-            System.out.println("p = " + p);
+        System.out.println("Individuos");
+        for(Map.Entry<String, Individual> elem: ped.getIndividuals().entrySet()){
+            System.out.println(elem);
+
         }
 
-    }
+        System.out.println("Familias");
+        for(Map.Entry<String, Set<Individual>> elem: ped.getFamilies().entrySet()){
+            System.out.println(elem);
+            for(Individual ind : elem.getValue()){
+                System.out.println(ind);
+            }
 
-//    @Test
-//    public void testReadSize() throws Exception {
-//
-//        List<Ped> list = ped.read(2);
-//        for(Ped p : list){
-//            System.out.println(p);
-//        }
-//
-//    }
-//
-//    @Test
-//    public void testReadAll() throws Exception {
-//
-//        List<Ped> list = ped.readAll();
-//        for(Ped p : list){
-//            System.out.println(p);
-//        }
-//
-//    }
-    @Test
-    public void testTree(){
+        }
 
     }
 }
