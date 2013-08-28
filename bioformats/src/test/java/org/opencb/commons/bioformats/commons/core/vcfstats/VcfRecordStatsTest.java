@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.feature.Ped;
+import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.feature.io.PedReader;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
@@ -48,26 +49,26 @@ public class VcfRecordStatsTest {
 
     }
 
-    @Test
-    public void testCalculateStatsList() throws Exception {
-
-        List<VcfRecord> list_vcf_records = vcf.readAll();
-        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records);
-        printListStats(list_vcf_stats);
-
-    }
+//    @Test
+//    public void testCalculateStatsList() throws Exception {
+//
+//        List<VcfRecord> list_vcf_records = vcf.readAll();
+//        Pedigree ped = new Pedigree("/home/aaleman/tmp/file.ped");
+//
+//        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records,vcf.getSampleNames(), ped);
+//        printListStats(list_vcf_stats);
+//
+//    }
 
     @Test
     public void testCalculateStatsPed() throws Exception {
 
         List<VcfRecord> list_vcf_records = vcf.readAll();
 
-        PedReader pr = new PedReader("/home/aaleman/tmp/file.ped");
-        List<Ped> ped = pr.readAll();
-        pr.close();
+        Pedigree ped = new Pedigree("/home/aaleman/tmp/file.ped");
 
         List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records, vcf.getSampleNames(), ped);
-        System.out.println(list_vcf_stats);
+        System.out.println("STATS: " +  list_vcf_stats);
 
     }
 
@@ -77,12 +78,13 @@ public class VcfRecordStatsTest {
         PrintWriter pw = new PrintWriter(file);
 
         pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s\n",
+                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
                 "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                "NumAll.", "Miss All.","Miss Gt","All. Count", "Gt count", "Trans", "Transv"));
+                "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
+                "Mend Error"));
         for (VcfRecordStat v : list) {
             pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d\n",
+                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
                     v.getChromosome(),
                     v.getPosition(),
                     v.getRef_alleles(),
@@ -95,7 +97,8 @@ public class VcfRecordStatsTest {
                     Arrays.toString(v.getAllelesCount()),
                     v.getGenotypes(),
                     v.getTransitionsCount(),
-                    v.getTransversionsCount()
+                    v.getTransversionsCount(),
+                    v.getMendelinanErrors()
             ));
         }
 

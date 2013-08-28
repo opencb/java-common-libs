@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.commons.core.variant.vcf4;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.bioinfo.commons.utils.ListUtils;
 
@@ -18,6 +19,9 @@ public class VcfRecord {
 	private String info;
 	private String format;
     private List<String> samples;
+    private List<Map<String, String>> samplesValues; // GT => 0/0  AD:0123
+
+    private Map<String, Integer> sampleIndex;
 	
 	/**
 	 * @param chromosome
@@ -264,4 +268,11 @@ public class VcfRecord {
 
     }
 
+    public Map<String, Integer> getSampleIndex() {
+        return sampleIndex;
+    }
+
+    public void setSampleIndex(Map<String, Integer> sampleIndex) {
+        this.sampleIndex = sampleIndex;
+    }
 }

@@ -1,7 +1,9 @@
 package org.opencb.commons.bioformats.commons.core.feature;
 
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.Condition;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.Sex;
+
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -20,7 +22,9 @@ public class Individual implements Comparable<Individual> {
     private Individual mother;
     private String motherId;
     private String sex;
+    private Sex sexCode;
     private String phenotype;
+    private Condition condition;
     private String[] fields;
     private Set<Individual> children;
 
@@ -30,8 +34,8 @@ public class Individual implements Comparable<Individual> {
         this.family = family;
         this.father = father;
         this.mother = mother;
-        this.sex = sex;
-        this.phenotype = phenotype;
+        this.setSex(sex);
+        this.setPhenotype(phenotype);
         this.fields = fields;
         this.children = new TreeSet<>();
     }
@@ -42,30 +46,30 @@ public class Individual implements Comparable<Individual> {
         StringBuilder sb = new StringBuilder();
 
         sb.append("{");
-        sb.append("id=" + id );
-        sb.append(", family=" + family );
+        sb.append("id=" + id);
+        sb.append(", family=" + family);
         sb.append(", father=");
-        if(father != null)
+        if (father != null)
             sb.append(father.getId());
         else
-        sb.append("0");
+            sb.append("0");
 
         sb.append(", mother=");
-        if(mother != null)
+        if (mother != null)
             sb.append(mother.getId());
         else
             sb.append("0");
 
-        sb.append(", sex=" + sex );
+        sb.append(", sex=" + sex);
         sb.append(" phenotype=" + phenotype);
-        if(fields != null && fields.length > 0)
+        if (fields != null && fields.length > 0)
             sb.append(", fields=" + Arrays.toString(fields));
-        if(children.size() > 0){
+        if (children.size() > 0) {
             sb.append(", children=[");
-           for(Individual ind: children){
+            for (Individual ind : children) {
                 sb.append(ind.getId() + " ");
-           }
-sb.append("]");
+            }
+            sb.append("]");
         }
         sb.append("}");
         return sb.toString();
@@ -85,7 +89,22 @@ sb.append("]");
 
     public void setPhenotype(String phenotype) {
         this.phenotype = phenotype;
-    }
+        if(phenotype == null || phenotype.equals("")){
+            condition = Condition.MISSING_CONDITION;
+        }else{
+            switch (phenotype){
+                case "1":
+                    condition = Condition.AFFECTED;
+                    break;
+                case "2":
+                    condition = Condition.UNAFFECTED;
+                    break;
+                default:
+                    condition = Condition.UNKNOWN_CONDITION;
+
+            }
+
+        }    }
 
     public String getSex() {
         return sex;
@@ -93,6 +112,17 @@ sb.append("]");
 
     public void setSex(String sex) {
         this.sex = sex;
+        switch (sex) {
+            case "1":
+                this.sexCode = Sex.MALE;
+                break;
+            case "2":
+                this.sexCode = Sex.FEMALE;
+                break;
+            default:
+                this.sexCode = Sex.UNKNOWN_SEX;
+        }
+
     }
 
     public Individual getFather() {
@@ -160,6 +190,10 @@ sb.append("]");
         this.motherId = motherId;
     }
 
+    public Sex getSexCode() {
+        return sexCode;
+    }
+
     public String getFamily() {
         return family;
     }
@@ -179,4 +213,9 @@ sb.append("]");
     public boolean addChild(Individual ind) {
         return this.children.add(ind);
     }
+
+    public Condition getCondition() {
+        return condition;
+    }
+
 }

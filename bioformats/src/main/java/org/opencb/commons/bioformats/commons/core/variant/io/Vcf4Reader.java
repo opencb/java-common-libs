@@ -138,9 +138,11 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
                 VcfRecord vcfRecord = null;
                 if (fields.length == 8) {
                     vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
+                    vcfRecord.setSampleIndex(vcf4.getSamples());
                 } else {
                     if (fields.length > 8) {
                         vcfRecord = new VcfRecord(fields);
+                        vcfRecord.setSampleIndex(vcf4.getSamples());
                     }
                 }
                 return vcfRecord;
@@ -162,21 +164,26 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
     @Override
     public List<VcfRecord> read(int size) throws FileFormatException {
 
-        List<VcfRecord> list_records = new ArrayList<VcfRecord>(size);
-        VcfRecord vcf_record;
+        List<VcfRecord> listRecords = new ArrayList<>(size);
+        VcfRecord vcfRecord;
         int i = 0;
 
-        while ((i < size) && (vcf_record = this.read()) != null) {
+        while ((i < size) && (vcfRecord = this.read()) != null) {
 
             if (vcfFilters != null && vcfFilters.size() > 0) {
-                if (andVcfFilters.apply(vcf_record)) {
-                    list_records.add(vcf_record);
+                if (andVcfFilters.apply(vcfRecord)) {
+                    vcfRecord.setSampleIndex(vcf4.getSamples());
+                    listRecords.add(vcfRecord);
                     i++;
                 }
+            } else {
+                vcfRecord.setSampleIndex(vcf4.getSamples());
+                listRecords.add(vcfRecord);
+                i++;
             }
 
         }
-        return list_records;
+        return listRecords;
     }
 
     @Override
@@ -185,24 +192,24 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
         String line;
         String[] fields;
         VcfRecord vcfRecord = null;
-        boolean passFilter;
+
         bufferedReader = new BufferedReader(new FileReader(file));
         while ((line = bufferedReader.readLine()) != null) {
             if (!line.startsWith("#")) {
                 fields = line.split("\t");
                 if (fields.length == 8) {
                     vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
-                } else {
-                    if (fields.length > 8) {
-                        vcfRecord = new VcfRecord(fields);
-                    }
+                    vcfRecord.setSampleIndex(vcf4.getSamples());
+
+                } else if (fields.length > 8) {
+                    vcfRecord = new VcfRecord(fields);
+                    vcfRecord.setSampleIndex(vcf4.getSamples());
                 }
+
                 if (vcfFilters != null && vcfFilters.size() > 0) {
                     if (andVcfFilters.apply(vcfRecord)) {
                         records.add(vcfRecord);
                     }
-
-
                 } else {
                     records.add(vcfRecord);
                 }
@@ -245,9 +252,8 @@ public class Vcf4Reader extends AbstractFormatReader<VcfRecord> {
         this.andVcfFilters = Predicates.and(this.vcfFilters);
     }
 
-    public List<String>
-    getSampleNames() {
-        return this.vcf4.getSamples();
+    public List<String> getSampleNames() {
+        return this.vcf4.getSampleNames();
     }
 
 }
