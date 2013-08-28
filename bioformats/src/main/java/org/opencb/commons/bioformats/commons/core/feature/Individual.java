@@ -1,6 +1,9 @@
 package org.opencb.commons.bioformats.commons.core.feature;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,7 +12,7 @@ import java.util.List;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Individual implements Comparable<Individual>{
+public class Individual implements Comparable<Individual> {
     private String id;
     private String family;
     private Individual father;
@@ -18,13 +21,11 @@ public class Individual implements Comparable<Individual>{
     private String motherId;
     private String sex;
     private String phenotype;
-    private List<String> fields;
+    private String[] fields;
+    private Set<Individual> children;
 
 
-    public Individual(){
-
-    }
-    public Individual(String id, String family, Individual father, Individual mother, String sex, String phenotype, List<String> fields) {
+    public Individual(String id, String family, Individual father, Individual mother, String sex, String phenotype, String[] fields) {
         this.id = id;
         this.family = family;
         this.father = father;
@@ -32,19 +33,42 @@ public class Individual implements Comparable<Individual>{
         this.sex = sex;
         this.phenotype = phenotype;
         this.fields = fields;
+        this.children = new TreeSet<>();
     }
 
     @Override
     public String toString() {
-        return "Individual{" +
-                "id='" + id + '\'' +
-                "family='" + family + '\'' +
-                ", phenotype='" + phenotype + '\'' +
-                ", sex='" + sex + '\'' +
-                ", father=" + father +
-                ", mother=" + mother +
-                ", fields=" + fields +
-                '}';
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{");
+        sb.append("id=" + id );
+        sb.append(", family=" + family );
+        sb.append(", father=");
+        if(father != null)
+            sb.append(father.getId());
+        else
+        sb.append("0");
+
+        sb.append(", mother=");
+        if(mother != null)
+            sb.append(mother.getId());
+        else
+            sb.append("0");
+
+        sb.append(", sex=" + sex );
+        sb.append(" phenotype=" + phenotype);
+        if(fields != null && fields.length > 0)
+            sb.append(", fields=" + Arrays.toString(fields));
+        if(children.size() > 0){
+            sb.append(", children=[");
+           for(Individual ind: children){
+                sb.append(ind.getId() + " ");
+           }
+sb.append("]");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     public String getId() {
@@ -87,11 +111,11 @@ public class Individual implements Comparable<Individual>{
         this.mother = mother;
     }
 
-    public List<String> getFields() {
+    public String[] getFields() {
         return fields;
     }
 
-    public void setFields(List<String> fields) {
+    public void setFields(String[] fields) {
         this.fields = fields;
     }
 
@@ -142,5 +166,17 @@ public class Individual implements Comparable<Individual>{
 
     public void setFamily(String family) {
         this.family = family;
+    }
+
+    public Set<Individual> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<Individual> children) {
+        this.children = children;
+    }
+
+    public boolean addChild(Individual ind) {
+        return this.children.add(ind);
     }
 }

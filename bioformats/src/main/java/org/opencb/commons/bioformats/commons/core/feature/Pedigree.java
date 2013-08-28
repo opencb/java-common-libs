@@ -30,9 +30,6 @@ public class Pedigree {
 
         this.filename = filename;
         this.parse();
-        this.reCheckFamilyDependencies();
-
-
     }
 
     private void parse() throws Exception {
@@ -44,6 +41,7 @@ public class Pedigree {
         String sample_id, family_id, father_id, mother_id, sex, phenotype;
         Set<Individual> family;
         Queue<Individual> queue = new LinkedList<>();
+        String[] aux_fields = null;
 
         while( (line = reader.readLine()) != null)  {
             if(line.startsWith("#")){
@@ -57,6 +55,10 @@ public class Pedigree {
                 sex = fields[4];
                 phenotype = fields[5];
 
+                if(fields.length > 6){
+                     aux_fields  = Arrays.copyOfRange(fields, 6, fields.length);
+                }
+
                 family =  this.getFamily(family_id);
                 if(family == null){
                     family = new TreeSet<>();
@@ -65,11 +67,11 @@ public class Pedigree {
 
 
                     if( father_id.equals("0") && mother_id.equals("0")){
-                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, null);
+                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, aux_fields);
                         individuals.put(ind.getId(), ind);
                         family.add(ind);
                     }else{
-                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, null);
+                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, aux_fields);
                         ind.setFatherId(father_id);
                         ind.setMotherId(mother_id);
                         queue.offer(ind);
@@ -97,6 +99,10 @@ public class Pedigree {
                     ind.setMother(mother);
                     individuals.put(ind.getId(), ind);
 
+                    // Añadimos "ind" como hijo a los padres
+                    father.addChild(ind);
+                    mother.addChild(ind);
+
                     family =  this.getFamily(ind.getFamily());
                     family.add(ind);
                 }
@@ -109,6 +115,9 @@ public class Pedigree {
                     ind.setFather(father);
                     ind.setMother(mother);
                     individuals.put(ind.getId(), ind);
+
+                    // Añadimos "ind" como hijo al padre
+                    father.addChild(ind);
 
                     family =  this.getFamily(ind.getFamily());
                     family.add(ind);
@@ -123,6 +132,9 @@ public class Pedigree {
                     ind.setMother(mother);
                     individuals.put(ind.getId(), ind);
 
+                    // Añadimos "ind" como hijo a la madre
+                    mother.addChild(ind);
+
                     family =  this.getFamily(ind.getFamily());
                     family.add(ind);
                 }
@@ -132,23 +144,19 @@ public class Pedigree {
         reader.close();
     }
 
-    private void reCheckFamilyDependencies(){
-
-        Individual aux;
-        for(Map.Entry<String, Individual> elem: this.getIndividuals().entrySet()){
-            if(elem.getValue().getFather() == null){
-
-            }
-        }
-
-    }
-
     private Set<Individual> getFamily(String family_id) {
         return families.get(family_id);
     }
 
     private void parseHeader(String lineHeader) {
-        // TODO aaleman: terminar parserHeader
+
+        String header = lineHeader.substring(1, lineHeader.length());
+        String[] all_fields = header.split("\t");
+
+        all_fields = Arrays.copyOfRange(all_fields, 6, all_fields.length);
+        for (int i = 0; i< all_fields.length; i++){
+            this.fields.put(all_fields[i], i);
+        }
     }
 
     public Individual getIndividual(String id){
@@ -177,5 +185,23 @@ public class Pedigree {
 
     public void setFields(Map<String, Integer> fields) {
         this.fields = fields;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Pedigree\n");
+        if(fields.size() > 0){
+            sb.append("fields = " + fields.keySet().toString() + "\n");
+        }
+
+        for(Map.Entry<String,Set<Individual>> elem: this.families.entrySet()){
+            sb.append(elem.getKey() + "\n");
+            for(Individual ind : elem.getValue()){
+                sb.append("\t" + ind.toString() + "\n");
+            }
+        }
+        return sb.toString();
     }
 }
