@@ -4,12 +4,11 @@ import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
-import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.PrintWriter;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +20,7 @@ import java.util.List;
 public class CalculateStats {
 
     public static List<VcfRecordStat> variantStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
-        List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
+        List<VcfRecordStat> list_stats = new ArrayList<>(list_vcf_records.size());
         VcfRecordStat vcf_record_stat;
         for (VcfRecord vcf_record : list_vcf_records) {
             vcf_record_stat = variantStats(vcf_record, sampleNames, ped);
@@ -30,25 +29,100 @@ public class CalculateStats {
         return list_stats;
     }
 
+    public static VcfGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
+
+        Set<String> groupValues = getGroupValues(ped, group);
+        List<String> list_samples;
+        VcfGroupStat groupStats = null;
+        List<VcfRecordStat> variantStats = null;
+
+        if (groupValues != null) {
+            groupStats = new VcfGroupStat(group, groupValues);
+
+            for (String val : groupValues) {
+                list_samples = getSamplesValueGroup(val, group, ped);
+                variantStats = variantStats(vcfRecords, list_samples, ped);
+                System.out.println("list_samples = " + list_samples);
+                groupStats.getVariantStats().put(val, variantStats);
+            }
+
+        }
+
+        System.out.println("groupStats = " + groupStats);
+        return groupStats;
+    }
+
+    private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
+        List<String> list = new ArrayList<>(100);
+        Individual ind;
+        for (Map.Entry<String, Individual> entry : ped.getIndividuals().entrySet()) {
+            ind = entry.getValue();
+            if (group.toLowerCase().equals("phenotype")) {
+                if (ind.getPhenotype().equals(val)) {
+                    list.add(ind.getId());
+                }
+            } else if (group.toLowerCase().equals("family")) {
+                if (ind.getFamily().equals(val)) {
+                    list.add(ind.getId());
+                }
+            }
+        }
+
+        return list;
+    }
+
+    private static Set<String> getGroupValues(Pedigree ped, String group) {
+
+        Set<String> values = new TreeSet<>();
+        Individual ind;
+        for (Map.Entry<String, Individual> entry : ped.getIndividuals().entrySet()) {
+            ind = entry.getValue();
+            if (group.toLowerCase().equals("phenotype")) {
+                values.add(ind.getPhenotype());
+            } else if (group.toLowerCase().equals("family")) {
+                values.add(ind.getFamily());
+            }
+
+
+        }
+        return values;  //To change body of created methods use File | Settings | File Templates.
+    }
+
     public static void runner(String vcfFileName, String pedFileName) throws Exception {
 
         Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
         Pedigree ped = new Pedigree(pedFileName);
+
+        VariantStatsWriter variant_writer = new VariantStatsWriter("/Users/aleman/tmp/stats/");
+        GroupStatsWriter groupWriter = new GroupStatsWriter("/Users/aleman/tmp/stats/");
         int batch_size = 4;
         List<VcfRecord> batch = new ArrayList<>(batch_size);
+        VcfGroupStat groupStatsBatch;
         List<VcfRecordStat> stats_list = new ArrayList<>(batch_size);
+
+        variant_writer.printHeader();
+
 
         batch = vcf.read(batch_size);
 
-        while(!batch.isEmpty()){
+         groupStatsBatch = groupStats(batch, ped, "phenotype");
+
+        groupWriter.setFilenames(groupStatsBatch);
+        groupWriter.printHeader();
+
+
+        while (!batch.isEmpty()) {
             stats_list = variantStats(batch, vcf.getSampleNames(), ped);
-            printListStats(stats_list);
+            variant_writer.printStatRecord(stats_list);
+            groupWriter.printGroupStats(groupStatsBatch);
 
 
             batch = vcf.read(batch_size);
         }
 
         vcf.close();
+        variant_writer.close();
+        groupWriter.close();
     }
 
     private static VcfRecordStat variantStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
@@ -84,7 +158,8 @@ public class CalculateStats {
         Float[] alleles_freq = new Float[vcf_stat.getNumAlleles()];
         Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
 
-        for(String sampleName: sampleNames){
+        for (String sampleName : sampleNames) {
+
             //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
             // String sample = vcf_record.getSamples().get(i);
 
@@ -409,35 +484,124 @@ public class CalculateStats {
         return mendel_type;
     }
 
-    private static void printListStats(List<VcfRecordStat> list){
+    private static class VariantStatsWriter {
+        private PrintWriter pw;
 
-        StringBuffer sb = new StringBuffer();
-
-        sb.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
-                "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
-                "Mend Error"));
-        for (VcfRecordStat v : list) {
-            sb.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
-                    v.getChromosome(),
-                    v.getPosition(),
-                    v.getRef_alleles(),
-                    Arrays.toString(v.getAltAlleles()),
-                    v.getMafAllele(),
-                    v.getMgfAllele(),
-                    v.getNumAlleles(),
-                    v.getMissingAlleles(),
-                    v.getMissingGenotypes(),
-                    Arrays.toString(v.getAllelesCount()),
-                    v.getGenotypes(),
-                    v.getTransitionsCount(),
-                    v.getTransversionsCount(),
-                    v.getMendelinanErrors()
-            ));
+        private VariantStatsWriter(String path) throws IOException {
+            this.pw = new PrintWriter(new FileWriter(path + "variants.stats"));
         }
-        System.out.println(sb.toString());
+
+        public void printHeader() {
+            pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
+                    "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
+                    "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
+                    "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
+                    "Mend Error"));
+        }
+
+        public void printStatRecord(List<VcfRecordStat> list) {
+            for (VcfRecordStat v : list) {
+                pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
+                        "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
+                        v.getChromosome(),
+                        v.getPosition(),
+                        v.getRef_alleles(),
+                        Arrays.toString(v.getAltAlleles()),
+                        v.getMafAllele(),
+                        v.getMgfAllele(),
+                        v.getNumAlleles(),
+                        v.getMissingAlleles(),
+                        v.getMissingGenotypes(),
+                        Arrays.toString(v.getAllelesCount()),
+                        v.getGenotypes(),
+                        v.getTransitionsCount(),
+                        v.getTransversionsCount(),
+                        v.getMendelinanErrors()
+                ));
+            }
+        }
+
+        public void close() {
+            pw.close();
+        }
     }
 
+    private static class GroupStatsWriter {
+
+        private Map<String, PrintWriter> mapPw;
+        private String path;
+
+        public GroupStatsWriter(String path) {
+            this.path = path;
+
+        }
+
+        public void setFilenames(VcfGroupStat gs) throws IOException {
+            PrintWriter aux;
+            String filename;
+
+            mapPw = new LinkedHashMap<>(gs.getVariantStats().size());
+
+            for (Map.Entry<String, List<VcfRecordStat>> entry : gs.getVariantStats().entrySet()) {
+                filename = path + "variant_stats_" + gs.getGroup() + "_" + entry.getKey() + ".stats";
+                aux = new PrintWriter(new FileWriter(filename));
+                mapPw.put(entry.getKey(), aux);
+            }
+
+            System.out.println(mapPw);
+        }
+
+        public void printHeader() {
+
+            PrintWriter pw;
+            for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
+                pw = entry.getValue();
+                pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
+                        "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
+                        "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
+                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
+                        "Mend Error"));
+            }
+        }
+
+
+        public void close() {
+            PrintWriter pw;
+            for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
+                pw = entry.getValue();
+                pw.close();
+            }
+        }
+
+        public void printGroupStats(VcfGroupStat groupStatsBatch) {
+            PrintWriter pw;
+            List<VcfRecordStat> list;
+            for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
+                pw = entry.getValue();
+                list = groupStatsBatch.getVariantStats().get(entry.getKey());
+                for(VcfRecordStat v : list){
+                    pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
+                            "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
+                            v.getChromosome(),
+                            v.getPosition(),
+                            v.getRef_alleles(),
+                            Arrays.toString(v.getAltAlleles()),
+                            v.getMafAllele(),
+                            v.getMgfAllele(),
+                            v.getNumAlleles(),
+                            v.getMissingAlleles(),
+                            v.getMissingGenotypes(),
+                            Arrays.toString(v.getAllelesCount()),
+                            v.getGenotypes(),
+                            v.getTransitionsCount(),
+                            v.getTransversionsCount(),
+                            v.getMendelinanErrors()
+                    ));
+
+                }
+
+            }
+                //To change body of created methods use File | Settings | File Templates.
+        }
+    }
 }
