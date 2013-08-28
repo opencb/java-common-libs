@@ -1,9 +1,6 @@
 package org.opencb.commons.bioformats.commons.core.variant.vcf4;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.bioinfo.commons.utils.ListUtils;
 
@@ -247,20 +244,24 @@ public class VcfRecord {
         return this.getAlternate().split(",");
     }
 
-    public String getValueFormatSample(String key, String sample) {
+    public String getValueFormatSample(String sample, String key) {
 
-        String[] array_format = this.format.split(":");
-        int field_pos = Arrays.asList(array_format).indexOf(key);
-        if( field_pos >= 0){
-            return sample.split(":")[field_pos];
-        }   else{
-            return null;
+        if(samplesValues == null){
+
+            initializeSamplesValues();
         }
+
+        Map<String,String> keyVals = samplesValues.get(sampleIndex.get(sample));
+
+        return keyVals.get(key);
+
     }
 
     public Genotype getSampleGenotype(String sample){
         Genotype g = null;
-        String gt_val = getValueFormatSample("GT", sample);
+
+
+        String gt_val = getValueFormatSample(sample, "GT");
         if(gt_val != null){
             g = new Genotype(gt_val);
         }
@@ -274,5 +275,39 @@ public class VcfRecord {
 
     public void setSampleIndex(Map<String, Integer> sampleIndex) {
         this.sampleIndex = sampleIndex;
+    }
+
+    public Map<String, String> getSample(String sampleName) {
+
+
+        if(samplesValues == null){
+
+            initializeSamplesValues();
+        }
+
+        System.out.println(samplesValues);
+
+        return samplesValues.get(sampleIndex.get(sampleName));
+    }
+
+    private void initializeSamplesValues() {
+        Map<String,String> sampleVal;
+        String[]  fields = this.format.split(":");
+        String[]  values;
+        String[] samplesName = new String[sampleIndex.size()];
+
+        for(Map.Entry<String, Integer> entry: sampleIndex.entrySet()){
+            samplesName[entry.getValue()] = entry.getKey();
+        }
+
+        samplesValues = new ArrayList<>(sampleIndex.size());
+        for(String sample: samplesName){
+            sampleVal = new LinkedHashMap<>(10);
+            values = samples.get(sampleIndex.get(sample)).split(":");
+            for(int i = 0; i< values.length; i++){
+                sampleVal.put(fields[i], values[i]);
+            }
+            samplesValues.add(sampleVal);
+        }
     }
 }

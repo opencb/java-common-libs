@@ -5,9 +5,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.commons.core.feature.Ped;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
-import org.opencb.commons.bioformats.commons.core.feature.io.PedReader;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
@@ -24,7 +22,7 @@ import java.util.List;
  * Time: 1:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfRecordStatsTest {
+public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
@@ -36,7 +34,7 @@ public class VcfRecordStatsTest {
     @Before
     public void setUp() throws Exception {
         start = System.currentTimeMillis();
-        vcf = new Vcf4Reader("/home/aaleman/tmp/small.vcf");
+        vcf = new Vcf4Reader("/Users/aleman/tmp/file.vcf");
 
 
     }
@@ -49,32 +47,22 @@ public class VcfRecordStatsTest {
 
     }
 
-//    @Test
-//    public void testCalculateStatsList() throws Exception {
-//
-//        List<VcfRecord> list_vcf_records = vcf.readAll();
-//        Pedigree ped = new Pedigree("/home/aaleman/tmp/file.ped");
-//
-//        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records,vcf.getSampleNames(), ped);
-//        printListStats(list_vcf_stats);
-//
-//    }
-
     @Test
-    public void testCalculateStatsPed() throws Exception {
+    public void testCalculateStatsList() throws Exception {
 
         List<VcfRecord> list_vcf_records = vcf.readAll();
+        Pedigree ped = new Pedigree("/Users/aleman/tmp/file.ped");
 
-        Pedigree ped = new Pedigree("/home/aaleman/tmp/file.ped");
 
-        List<VcfRecordStat> list_vcf_stats = VcfRecordStats.calculateStats(list_vcf_records, vcf.getSampleNames(), ped);
-        System.out.println("STATS: " +  list_vcf_stats);
+        List<VcfRecordStat> list_vcf_stats = CalculateStats.calculateStats(list_vcf_records, vcf.getSampleNames(), ped);
+        printListStats(list_vcf_stats);
 
     }
 
+
     private void printListStats(List<VcfRecordStat> list) throws FileNotFoundException {
 
-        File file = new File("/home/aaleman/tmp/vcf.stats");
+        File file = new File("/Users/aleman/tmp/vcf.stats");
         PrintWriter pw = new PrintWriter(file);
 
         pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +

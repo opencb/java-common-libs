@@ -8,6 +8,7 @@ import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,11 +17,15 @@ import java.util.List;
  * Time: 12:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfRecordStats {
+public class CalculateStats {
 
 
     public static VcfRecordStat calculateStats(VcfRecord vcf_record) {
         return calculateStats(vcf_record, null, null);
+    }
+
+    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records) {
+        return calculateStats(list_vcf_records, null, null);
     }
 
     public static VcfRecordStat calculateStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
@@ -28,8 +33,8 @@ public class VcfRecordStats {
         int total_alleles_count = 0;
         int total_genotypes_count = 0;
         String mgf_genotype = "";
-        String sampleName;
         Individual ind;
+
         int control_dominant = 0;
         int cases_dominant = 0;
         int control_recessive = 0;
@@ -56,14 +61,13 @@ public class VcfRecordStats {
         Float[] alleles_freq = new Float[vcf_stat.getNumAlleles()];
         Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
 
-        for (int i = 0; i < vcf_record.getSamples().size(); i++) {
-            String sample = vcf_record.getSamples().get(i);
+        for(String sampleName: sampleNames){
+        //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
+            // String sample = vcf_record.getSamples().get(i);
 
-            sampleName = sampleNames.get(i);
+            Genotype g = vcf_record.getSampleGenotype(sampleName);
 
-            Genotype g = vcf_record.getSampleGenotype(sample);
             Genotypes.addGenotypeToList(vcf_stat.getGenotypes(), g);
-
 
             // Check missing alleles and genotypes
             if (g.getCode() == AllelesCode.ALLELES_OK) {
@@ -249,6 +253,18 @@ public class VcfRecordStats {
 
     }
 
+    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
+        List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
+        VcfRecordStat vcf_record_stat;
+        for (VcfRecord vcf_record : list_vcf_records) {
+            vcf_record_stat = calculateStats(vcf_record, sampleNames, ped);
+            list_stats.add(vcf_record_stat);
+        }
+        return list_stats;
+    }
+
+
+
     private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcf_record, List<String> sampleNames) {
 
         Genotype g_father;
@@ -258,11 +274,8 @@ public class VcfRecordStats {
             return false;
         }
 
-        int father_pos = sampleNames.indexOf(ind.getFather().getId());
-        int mother_pos = sampleNames.indexOf(ind.getMother().getId());
-
-        g_father = vcf_record.getSampleGenotype(vcf_record.getSamples().get(father_pos));
-        g_mother = vcf_record.getSampleGenotype(vcf_record.getSamples().get(mother_pos));
+        g_father = vcf_record.getSampleGenotype(ind.getFather().getId());
+        g_mother = vcf_record.getSampleGenotype(ind.getMother().getId());
 
         if (g_father.getCode() != AllelesCode.ALLELES_OK || g_mother.getCode() != AllelesCode.ALLELES_OK) {
             return false;
@@ -386,18 +399,5 @@ public class VcfRecordStats {
     }
 
 
-    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
-        List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
-        VcfRecordStat vcf_record_stat;
-        for (VcfRecord vcf_record : list_vcf_records) {
-            vcf_record_stat = calculateStats(vcf_record, sampleNames, ped);
-            list_stats.add(vcf_record_stat);
-        }
-        return list_stats;
-    }
-
-    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records) {
-        return calculateStats(list_vcf_records, null, null);
-    }
 
 }
