@@ -42,13 +42,10 @@ public class CalculateStats {
             for (String val : groupValues) {
                 list_samples = getSamplesValueGroup(val, group, ped);
                 variantStats = variantStats(vcfRecords, list_samples, ped);
-                System.out.println("list_samples = " + list_samples);
                 groupStats.getVariantStats().put(val, variantStats);
             }
 
         }
-
-        System.out.println("groupStats = " + groupStats);
         return groupStats;
     }
 
@@ -94,35 +91,45 @@ public class CalculateStats {
         Pedigree ped = new Pedigree(pedFileName);
 
         VariantStatsWriter variant_writer = new VariantStatsWriter("/Users/aleman/tmp/stats/");
-        GroupStatsWriter groupWriter = new GroupStatsWriter("/Users/aleman/tmp/stats/");
+        GroupStatsWriter groupWriterPhen = new GroupStatsWriter("/Users/aleman/tmp/stats/");
+        GroupStatsWriter groupWriterFam = new GroupStatsWriter("/Users/aleman/tmp/stats/");
         int batch_size = 4;
         List<VcfRecord> batch = new ArrayList<>(batch_size);
-        VcfGroupStat groupStatsBatch;
+        VcfGroupStat groupStatsBatchPhen;
+        VcfGroupStat groupStatsBatchFam;
         List<VcfRecordStat> stats_list = new ArrayList<>(batch_size);
+        boolean firstTime = true;
 
         variant_writer.printHeader();
 
 
         batch = vcf.read(batch_size);
 
-         groupStatsBatch = groupStats(batch, ped, "phenotype");
-
-        groupWriter.setFilenames(groupStatsBatch);
-        groupWriter.printHeader();
-
-
         while (!batch.isEmpty()) {
             stats_list = variantStats(batch, vcf.getSampleNames(), ped);
-            variant_writer.printStatRecord(stats_list);
-            groupWriter.printGroupStats(groupStatsBatch);
+            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
+            groupStatsBatchFam = groupStats(batch, ped, "family");
 
+            if(firstTime){
+                groupWriterPhen.setFilenames(groupStatsBatchPhen);
+                groupWriterPhen.printHeader();
+
+                groupWriterFam.setFilenames(groupStatsBatchFam);
+                groupWriterFam.printHeader();
+                firstTime = false;
+            }
+
+            variant_writer.printStatRecord(stats_list);
+            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
+            groupWriterFam.printGroupStats(groupStatsBatchFam);
 
             batch = vcf.read(batch_size);
         }
 
         vcf.close();
         variant_writer.close();
-        groupWriter.close();
+        groupWriterPhen.close();
+        groupWriterFam.close();
     }
 
     private static VcfRecordStat variantStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
@@ -347,6 +354,11 @@ public class CalculateStats {
 
         }
 
+        vcf_stat.setCasesPercentDominant(Float.valueOf(cases_dominant));
+        vcf_stat.setControlsPercentDominant(Float.valueOf(control_dominant));
+        vcf_stat.setCasesPercentRecessive(Float.valueOf(cases_recessive));
+        vcf_stat.setControlsPercentRecessive(Float.valueOf(control_recessive));
+
         return vcf_stat;
 
     }
@@ -492,17 +504,19 @@ public class CalculateStats {
         }
 
         public void printHeader() {
-            pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                    "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
+            pw.append(String.format("%-5s%-10s%-5s%-10s%-10s%-10s" +
+                    "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
+                    "%-10s%-10s%-10s%-10s\n",
                     "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                    "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
-                    "Mend Error"));
+                    "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv","Mend Error",
+                    "Cases D", "Controls D", "Cases R", "Controls R"));
         }
 
         public void printStatRecord(List<VcfRecordStat> list) {
             for (VcfRecordStat v : list) {
-                pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                        "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
+                pw.append(String.format("%-5s%-10d%-5s%-10s%-10s%-10s" +
+                        "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
+                        "%-10.0f%-10.0f%-10.0f%-10.0f\n",
                         v.getChromosome(),
                         v.getPosition(),
                         v.getRef_alleles(),
@@ -516,7 +530,11 @@ public class CalculateStats {
                         v.getGenotypes(),
                         v.getTransitionsCount(),
                         v.getTransversionsCount(),
-                        v.getMendelinanErrors()
+                        v.getMendelinanErrors(),
+                        v.getCasesPercentDominant(),
+                        v.getControlsPercentDominant(),
+                        v.getCasesPercentRecessive(),
+                        v.getControlsPercentRecessive()
                 ));
             }
         }
@@ -548,7 +566,6 @@ public class CalculateStats {
                 mapPw.put(entry.getKey(), aux);
             }
 
-            System.out.println(mapPw);
         }
 
         public void printHeader() {
@@ -556,11 +573,12 @@ public class CalculateStats {
             PrintWriter pw;
             for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
                 pw = entry.getValue();
-                pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                        "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
+                pw.append(String.format("%-5s%-10s%-5s%-10s%-10s%-10s" +
+                        "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
+                        "%-10s%-10s%-10s%-10s\n",
                         "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
-                        "Mend Error"));
+                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv","Mend Error",
+                        "Cases D", "Controls D", "Cases R", "Controls R"));
             }
         }
 
@@ -580,8 +598,9 @@ public class CalculateStats {
                 pw = entry.getValue();
                 list = groupStatsBatch.getVariantStats().get(entry.getKey());
                 for(VcfRecordStat v : list){
-                    pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                            "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
+                    pw.append(String.format("%-5s%-10d%-5s%-10s%-10s%-10s" +
+                            "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
+                            "%-10.0f%-10.0f%-10.0f%-10.0f\n",
                             v.getChromosome(),
                             v.getPosition(),
                             v.getRef_alleles(),
@@ -595,7 +614,11 @@ public class CalculateStats {
                             v.getGenotypes(),
                             v.getTransitionsCount(),
                             v.getTransversionsCount(),
-                            v.getMendelinanErrors()
+                            v.getMendelinanErrors(),
+                            v.getCasesPercentDominant(),
+                            v.getControlsPercentDominant(),
+                            v.getCasesPercentRecessive(),
+                            v.getControlsPercentRecessive()
                     ));
 
                 }
