@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfFilter;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class VcfRecordFilters {
 
-    public static List<VcfRecord> filter(List<VcfRecord> list_records, List<Predicate<VcfRecord>> filters){
+    public static List<VcfRecord> filter(List<VcfRecord> list_records, List<VcfFilter> filters){
 
         Predicate<VcfRecord> and_filters = Predicates.and(filters);
 
@@ -27,7 +28,7 @@ public class VcfRecordFilters {
 
     }
 
-    public static boolean filter(VcfRecord vcf_record, List<Predicate<VcfRecord>> filters){
+    public static boolean filter(VcfRecord vcf_record, List<VcfFilter> filters){
 
            Predicate<VcfRecord> and_filters = Predicates.and(filters);
 

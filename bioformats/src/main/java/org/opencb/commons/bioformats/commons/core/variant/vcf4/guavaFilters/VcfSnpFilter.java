@@ -10,9 +10,20 @@ import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
  * Time: 10:39 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSnpFilter implements Predicate<VcfRecord> {
+public class VcfSnpFilter extends VcfFilter {
+
+
+    public VcfSnpFilter(int priority) {
+        super(priority);
+    }
+
+    public VcfSnpFilter() {
+        super();
+    }
+
     @Override
     public boolean apply(VcfRecord vcfRecord) {
         return (!vcfRecord.getId().equalsIgnoreCase(".") && !vcfRecord.getId().equalsIgnoreCase(""));
     }
+
 }
