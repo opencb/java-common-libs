@@ -170,14 +170,14 @@ public class CalculateStats {
             // Check missing alleles and genotypes
             if (g.getCode() == AllelesCode.ALLELES_OK) {
                 // Both alleles set
-                genotype_current_pos = g.getAllele_1() * (vcf_stat.getNumAlleles()) + g.getAllele_2();
-                assert (g.getAllele_1() <= vcf_stat.getNumAlleles());
-                assert (g.getAllele_2() <= vcf_stat.getNumAlleles());
+                genotype_current_pos = g.getAllele1() * (vcf_stat.getNumAlleles()) + g.getAllele2();
+                assert (g.getAllele1() <= vcf_stat.getNumAlleles());
+                assert (g.getAllele2() <= vcf_stat.getNumAlleles());
                 assert (genotype_current_pos <= vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles());
 
 
-                alleles_count[g.getAllele_1()]++;
-                alleles_count[g.getAllele_2()]++;
+                alleles_count[g.getAllele1()]++;
+                alleles_count[g.getAllele2()]++;
                 genotypes_count[genotype_current_pos]++;
 
                 total_alleles_count += 2;
@@ -185,24 +185,24 @@ public class CalculateStats {
 
             } else if (g.getCode() == AllelesCode.HAPLOID) {
                 // Haploid (chromosome X/Y)
-                alleles_count[g.getAllele_1()]++;
+                alleles_count[g.getAllele1()]++;
                 total_alleles_count++;
             } else {
                 // Missing genotype (one or both alleles missing)
 
                 vcf_stat.setMissingGenotypes(vcf_stat.getMissingGenotypes() + 1);
-                if (g.getAllele_1() == null) {
+                if (g.getAllele1() == null) {
                     vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
                 } else {
-                    alleles_count[g.getAllele_1()]++;
+                    alleles_count[g.getAllele1()]++;
                     total_alleles_count++;
                 }
 
 
-                if (g.getAllele_2() == null) {
+                if (g.getAllele2() == null) {
                     vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
                 } else {
-                    alleles_count[g.getAllele_2()]++;
+                    alleles_count[g.getAllele2()]++;
                     total_alleles_count++;
 
                 }
@@ -222,19 +222,19 @@ public class CalculateStats {
                     if (g.getCode() == AllelesCode.ALLELES_OK) {
                         // Check inheritance models
                         if (ind.getCondition() == Condition.UNAFFECTED) {
-                            if (g.getAllele_1() == 0 && g.getAllele_2() == 0) { // 0|0
+                            if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
                                 control_dominant++;
                                 control_recessive++;
 
-                            } else if ((g.getAllele_1() == 0 && g.getAllele_2() == 1) || (g.getAllele_1() == 1 || g.getAllele_1() == 0)) { // 0|1 or 1|0
+                            } else if ((g.isAllele1Ref() && !g.isAllele2Ref()) || (!g.isAllele1Ref() || g.isAllele2Ref())) { // 0|1 or 1|0
                                 control_recessive++;
 
                             }
                         } else if (ind.getCondition() == Condition.AFFECTED) {
-                            if (g.getAllele_1() == 1 && g.getAllele_1() == 1 && g.getAllele_1() == g.getAllele_2()) {// 1|1, 2|2, and so on
+                            if (!g.isAllele1Ref() && !g.isAllele2Ref() && g.getAllele1() == g.getAllele2()) {// 1|1, 2|2, and so on
                                 cases_recessive++;
                                 cases_dominant++;
-                            } else if (g.getAllele_1() == 1 || g.getAllele_2() == 1) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
+                            } else if (!g.isAllele1Ref() || !g.isAllele2Ref()) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
                                 cases_dominant++;
 
                             }
@@ -377,12 +377,12 @@ public class CalculateStats {
     private static int check_mendel(String chromosome, Genotype g_father, Genotype g_mother, Genotype g_ind, Sex sex) {
 
         // Ignore if any allele is missing
-        if (g_father.getAllele_1() < 0 ||
-                g_father.getAllele_2() < 0 ||
-                g_mother.getAllele_1() < 0 ||
-                g_mother.getAllele_2() < 0 ||
-                g_ind.getAllele_1() < 0 ||
-                g_ind.getAllele_2() < 0) {
+        if (g_father.getAllele1() < 0 ||
+                g_father.getAllele2() < 0 ||
+                g_mother.getAllele1() < 0 ||
+                g_mother.getAllele2() < 0 ||
+                g_ind.getAllele1() < 0 ||
+                g_ind.getAllele2() < 0) {
             return -1;
         }
 
@@ -395,19 +395,19 @@ public class CalculateStats {
         int mendel_type = 0;
 
         if (!chromosome.toUpperCase().equals("X") || sex == Sex.FEMALE) {
-            if ((g_ind.getAllele_1() == 1 && g_ind.getAllele_2() == 0) ||
-                    (g_ind.getAllele_1() == 0 && g_ind.getAllele_2() == 1)) {
+            if ((!g_ind.isAllele1Ref() && g_ind.isAllele2Ref()) ||
+                    (g_ind.isAllele1Ref() && !g_ind.isAllele2Ref())) {
                 // KID = 01/10
                 // 00x00 -> 01  (m1)
                 // 11x11 -> 01  (m2)
-                if ((g_father.getAllele_1() == 0 && g_father.getAllele_2() == 0) &&
-                        (g_mother.getAllele_1() == 0 && g_mother.getAllele_2() == 0)) {
+                if ((g_father.isAllele1Ref() && g_father.isAllele2Ref()) &&
+                        (g_mother.isAllele1Ref() && g_mother.isAllele2Ref())) {
                     mendel_type = 1;
-                } else if ((g_father.getAllele_1() == 1 && g_father.getAllele_2() == 1) &&
-                        (g_mother.getAllele_1() == 1 && g_mother.getAllele_2() == 1)) {
+                } else if ((!g_father.isAllele1Ref() && !g_father.isAllele2Ref()) &&
+                        (!g_mother.isAllele1Ref() && !g_mother.isAllele2Ref())) {
                     mendel_type = 2;
                 }
-            } else if (g_ind.getAllele_1() == 0 && g_ind.getAllele_2() == 0) {
+            } else if (g_ind.isAllele1Ref() && g_ind.isAllele2Ref()) {
                 // KID = 00
                 // 00x11 -> 00 (m3) P11->00
                 // 01x11 -> 00 (m3)
@@ -422,14 +422,14 @@ public class CalculateStats {
                 // Hom parent can't breed opposite hom child
 
                 // rule = at least one '11' parent
-                if ((g_father.getAllele_1() == 1 && g_father.getAllele_2() == 1) ||
-                        g_mother.getAllele_1() == 1 && g_mother.getAllele_2() == 1) {
+                if ((!g_father.isAllele1Ref() && !g_father.isAllele2Ref()) ||
+                        !g_mother.isAllele1Ref() && !g_mother.isAllele2Ref()) {
 
-                    if (g_father.getAllele_1() == 1 && g_father.getAllele_2() == 1 &&
-                            g_mother.getAllele_1() == 1 && g_mother.getAllele_2() == 1
+                    if (!g_father.isAllele1Ref() && !g_father.isAllele2Ref() &&
+                            !g_mother.isAllele1Ref() && !g_mother.isAllele2Ref()
                             ) {
                         mendel_type = 5;
-                    } else if (g_father.getAllele_1() == 1 && g_father.getAllele_2() == 1) {
+                    } else if (!g_father.isAllele1Ref() && !g_father.isAllele2Ref()) {
                         mendel_type = 4;
                     } else {
                         mendel_type = 3;
@@ -452,13 +452,13 @@ public class CalculateStats {
 
                 // rule = at least one '00' parent
 
-                if ((g_father.getAllele_1() == 0 && g_father.getAllele_2() == 0) ||
-                        (g_mother.getAllele_1() == 0 && g_mother.getAllele_2() == 0)
+                if ((g_father.isAllele1Ref() && g_father.isAllele2Ref()) ||
+                        (g_mother.isAllele1Ref() && g_mother.isAllele2Ref())
                         ) {
-                    if (g_father.getAllele_1() == 0 && g_father.getAllele_2() == 0 &&
-                            g_mother.getAllele_1() == 0 && g_mother.getAllele_2() == 0) {
+                    if (g_father.isAllele1Ref() && g_father.isAllele2Ref() &&
+                            g_mother.isAllele1Ref() && g_mother.isAllele2Ref()) {
                         mendel_type = 8;
-                    } else if (g_father.getAllele_1() == 0 && g_father.getAllele_2() == 0) {
+                    } else if (g_father.isAllele1Ref() && g_father.isAllele2Ref()) {
                         mendel_type = 6;
 
                     } else {
@@ -471,10 +471,10 @@ public class CalculateStats {
 
         } else {
             // Chromosome X in inherited only from the mother and it is haploid
-            if (g_ind.getAllele_1() == 1 && g_mother.getAllele_1() == 0 && g_mother.getAllele_2() == 0) {
+            if (!g_ind.isAllele1Ref() && g_mother.isAllele1Ref() && g_mother.isAllele2Ref()) {
                 mendel_type = 9;
             }
-            if (g_ind.getAllele_1() == 0 && g_mother.getAllele_1() == 1 && g_mother.getAllele_2() == 1) {
+            if (g_ind.isAllele1Ref() && !g_mother.isAllele1Ref() && !g_mother.isAllele2Ref()) {
                 mendel_type = 10;
             }
 
