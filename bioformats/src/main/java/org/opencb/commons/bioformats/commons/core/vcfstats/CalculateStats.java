@@ -1,14 +1,15 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
 import org.opencb.commons.bioformats.commons.core.feature.Individual;
-import org.opencb.commons.bioformats.commons.core.feature.Ped;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
+import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
+import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,16 +20,38 @@ import java.util.Map;
  */
 public class CalculateStats {
 
-
-    public static VcfRecordStat calculateStats(VcfRecord vcf_record) {
-        return calculateStats(vcf_record, null, null);
+    public static List<VcfRecordStat> variantStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
+        List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
+        VcfRecordStat vcf_record_stat;
+        for (VcfRecord vcf_record : list_vcf_records) {
+            vcf_record_stat = variantStats(vcf_record, sampleNames, ped);
+            list_stats.add(vcf_record_stat);
+        }
+        return list_stats;
     }
 
-    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records) {
-        return calculateStats(list_vcf_records, null, null);
+    public static void runner(String vcfFileName, String pedFileName) throws Exception {
+
+        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
+        Pedigree ped = new Pedigree(pedFileName);
+        int batch_size = 4;
+        List<VcfRecord> batch = new ArrayList<>(batch_size);
+        List<VcfRecordStat> stats_list = new ArrayList<>(batch_size);
+
+        batch = vcf.read(batch_size);
+
+        while(!batch.isEmpty()){
+            stats_list = variantStats(batch, vcf.getSampleNames(), ped);
+            printListStats(stats_list);
+
+
+            batch = vcf.read(batch_size);
+        }
+
+        vcf.close();
     }
 
-    public static VcfRecordStat calculateStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
+    private static VcfRecordStat variantStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
         int genotype_current_pos;
         int total_alleles_count = 0;
         int total_genotypes_count = 0;
@@ -62,7 +85,7 @@ public class CalculateStats {
         Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
 
         for(String sampleName: sampleNames){
-        //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
+            //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
             // String sample = vcf_record.getSamples().get(i);
 
             Genotype g = vcf_record.getSampleGenotype(sampleName);
@@ -253,18 +276,6 @@ public class CalculateStats {
 
     }
 
-    public static List<VcfRecordStat> calculateStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
-        List<VcfRecordStat> list_stats = new ArrayList<VcfRecordStat>(list_vcf_records.size());
-        VcfRecordStat vcf_record_stat;
-        for (VcfRecord vcf_record : list_vcf_records) {
-            vcf_record_stat = calculateStats(vcf_record, sampleNames, ped);
-            list_stats.add(vcf_record_stat);
-        }
-        return list_stats;
-    }
-
-
-
     private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcf_record, List<String> sampleNames) {
 
         Genotype g_father;
@@ -398,6 +409,35 @@ public class CalculateStats {
         return mendel_type;
     }
 
+    private static void printListStats(List<VcfRecordStat> list){
 
+        StringBuffer sb = new StringBuffer();
+
+        sb.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
+                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
+                "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
+                "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
+                "Mend Error"));
+        for (VcfRecordStat v : list) {
+            sb.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
+                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
+                    v.getChromosome(),
+                    v.getPosition(),
+                    v.getRef_alleles(),
+                    Arrays.toString(v.getAltAlleles()),
+                    v.getMafAllele(),
+                    v.getMgfAllele(),
+                    v.getNumAlleles(),
+                    v.getMissingAlleles(),
+                    v.getMissingGenotypes(),
+                    Arrays.toString(v.getAllelesCount()),
+                    v.getGenotypes(),
+                    v.getTransitionsCount(),
+                    v.getTransversionsCount(),
+                    v.getMendelinanErrors()
+            ));
+        }
+        System.out.println(sb.toString());
+    }
 
 }

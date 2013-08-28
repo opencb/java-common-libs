@@ -26,6 +26,9 @@ public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
+    private String vcfFileName = "/Users/aleman/tmp/small.vcf";
+    private String pedFileName = "/Users/aleman/tmp/file.ped";
+
 
     @Rule
     public TestName name = new TestName();
@@ -34,7 +37,6 @@ public class CalculateStatsTest {
     @Before
     public void setUp() throws Exception {
         start = System.currentTimeMillis();
-        vcf = new Vcf4Reader("/Users/aleman/tmp/file.vcf");
 
 
     }
@@ -42,7 +44,6 @@ public class CalculateStatsTest {
     @After
     public void tearDown() throws Exception {
         end = System.currentTimeMillis();
-        vcf.close();
         System.out.println("Time " + name.getMethodName() + ": " + (end - start));
 
     }
@@ -50,47 +51,13 @@ public class CalculateStatsTest {
     @Test
     public void testCalculateStatsList() throws Exception {
 
-        List<VcfRecord> list_vcf_records = vcf.readAll();
-        Pedigree ped = new Pedigree("/Users/aleman/tmp/file.ped");
 
+        CalculateStats.runner(vcfFileName, pedFileName);
 
-        List<VcfRecordStat> list_vcf_stats = CalculateStats.calculateStats(list_vcf_records, vcf.getSampleNames(), ped);
-        printListStats(list_vcf_stats);
+        // printListStats(list_vcf_stats);
 
     }
 
 
-    private void printListStats(List<VcfRecordStat> list) throws FileNotFoundException {
 
-        File file = new File("/Users/aleman/tmp/vcf.stats");
-        PrintWriter pw = new PrintWriter(file);
-
-        pw.append(String.format("%-5s%-5s%-5s%-10s%-10s%-10s" +
-                "%-10s%-10s%-10s%-15s%-30s%-10s%-10s%-10s\n",
-                "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv",
-                "Mend Error"));
-        for (VcfRecordStat v : list) {
-            pw.append(String.format("%-5s%-5d%-5s%-10s%-10s%-10" +
-                    "s%-10d%-10d%-10d%-15s%-30s%-10d%-10d%-10d\n",
-                    v.getChromosome(),
-                    v.getPosition(),
-                    v.getRef_alleles(),
-                    Arrays.toString(v.getAltAlleles()),
-                    v.getMafAllele(),
-                    v.getMgfAllele(),
-                    v.getNumAlleles(),
-                    v.getMissingAlleles(),
-                    v.getMissingGenotypes(),
-                    Arrays.toString(v.getAllelesCount()),
-                    v.getGenotypes(),
-                    v.getTransitionsCount(),
-                    v.getTransversionsCount(),
-                    v.getMendelinanErrors()
-            ));
-        }
-
-        pw.close();
-
-    }
 }
