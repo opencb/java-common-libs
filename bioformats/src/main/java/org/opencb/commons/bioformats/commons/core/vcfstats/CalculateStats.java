@@ -28,6 +28,7 @@ public class CalculateStats {
         float accum_quality = 0;
 
 
+        int cont = 0;
         for (VcfRecord vcf_record : list_vcf_records) {
 
             int genotype_current_pos;
@@ -41,10 +42,10 @@ public class CalculateStats {
             float cur_gt_freq;
 
 
-            int control_dominant = 0;
-            int cases_dominant = 0;
-            int control_recessive = 0;
-            int cases_recessive = 0;
+            float controlsDominant = 0;
+            float casesDominant = 0;
+            float controlsRecessive = 0;
+            float casesRecessive = 0;
 
 
             VcfRecordStat vcf_stat = new VcfRecordStat();
@@ -67,9 +68,6 @@ public class CalculateStats {
             Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
 
             for (String sampleName : sampleNames) {
-
-                //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
-                // String sample = vcf_record.getSamples().get(i);
 
                 Genotype g = vcf_record.getSampleGenotype(sampleName);
 
@@ -126,24 +124,32 @@ public class CalculateStats {
                             vcf_stat.setMendelinanErrors(vcf_stat.getMendelinanErrors() + 1);
 
                         }
-
                         if (g.getCode() == AllelesCode.ALLELES_OK) {
+                            System.out.println("                                 " + cont + " - g = " + g + " cond => " + ind.getCondition() + " - " + ind.getId());
+
                             // Check inheritance models
                             if (ind.getCondition() == Condition.UNAFFECTED) {
                                 if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
-                                    control_dominant++;
-                                    control_recessive++;
+                                    System.out.println(cont + " - 0|0");
+                                    controlsDominant++;
+                                    controlsRecessive++;
 
                                 } else if ((g.isAllele1Ref() && !g.isAllele2Ref()) || (!g.isAllele1Ref() || g.isAllele2Ref())) { // 0|1 or 1|0
-                                    control_recessive++;
+                                    System.out.println(cont + " - 0|1");
+
+                                    controlsRecessive++;
 
                                 }
                             } else if (ind.getCondition() == Condition.AFFECTED) {
                                 if (!g.isAllele1Ref() && !g.isAllele2Ref() && g.getAllele1() == g.getAllele2()) {// 1|1, 2|2, and so on
-                                    cases_recessive++;
-                                    cases_dominant++;
+                                    System.out.println(cont + " - 1|1");
+
+                                    casesRecessive++;
+                                    casesDominant++;
                                 } else if (!g.isAllele1Ref() || !g.isAllele2Ref()) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
-                                    cases_dominant++;
+                                    System.out.println(cont + " - other");
+
+                                    casesDominant++;
 
                                 }
                             }
@@ -286,15 +292,26 @@ public class CalculateStats {
             }
 
 
+            System.out.println(controlsDominant + " - " + casesDominant + " - " + controlsRecessive + " - " + casesRecessive);
+
+            // Once all samples have been traverse, calculate % that follow inheritance model
+            controlsDominant = controlsDominant * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
+            casesDominant = casesDominant * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
+            controlsRecessive = controlsRecessive * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
+            casesRecessive = casesRecessive * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
+
+
+
             vcf_stat.setTransitionsCount(transitions_count);
             vcf_stat.setTransversionsCount(transversions_count);
 
-            vcf_stat.setCasesPercentDominant(Float.valueOf(cases_dominant));
-            vcf_stat.setControlsPercentDominant(Float.valueOf(control_dominant));
-            vcf_stat.setCasesPercentRecessive(Float.valueOf(cases_recessive));
-            vcf_stat.setControlsPercentRecessive(Float.valueOf(control_recessive));
+            vcf_stat.setCasesPercentDominant(casesDominant);
+            vcf_stat.setControlsPercentDominant(controlsDominant);
+            vcf_stat.setCasesPercentRecessive(casesRecessive);
+            vcf_stat.setControlsPercentRecessive(controlsRecessive);
 
             list_stats.add(vcf_stat);
+            cont++;
         }
 
         samples_count = sampleNames.size();
@@ -395,21 +412,21 @@ public class CalculateStats {
 
             sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
 
-            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
-            groupStatsBatchFam = groupStats(batch, ped, "family");
+//            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
+//            groupStatsBatchFam = groupStats(batch, ped, "family");
 
             if (firstTime) {
-                groupWriterPhen.setFilenames(groupStatsBatchPhen);
-                groupWriterPhen.printHeader();
-
-                groupWriterFam.setFilenames(groupStatsBatchFam);
-                groupWriterFam.printHeader();
-                firstTime = false;
+//                groupWriterPhen.setFilenames(groupStatsBatchPhen);
+//                groupWriterPhen.printHeader();
+//
+//                groupWriterFam.setFilenames(groupStatsBatchFam);
+//                groupWriterFam.printHeader();
+//                firstTime = false;
             }
 
             variantWriter.printStatRecord(stats_list);
-            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
-            groupWriterFam.printGroupStats(groupStatsBatchFam);
+//            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
+//            groupWriterFam.printGroupStats(groupStatsBatchFam);
 
             batch = vcf.read(batch_size);
         }
@@ -428,8 +445,8 @@ public class CalculateStats {
 
         vcf.close();
         variantWriter.close();
-        groupWriterPhen.close();
-        groupWriterFam.close();
+//        groupWriterPhen.close();
+//        groupWriterFam.close();
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
@@ -609,21 +626,22 @@ public class CalculateStats {
         }
 
         public void printHeader() {
-            pw.append(String.format("%-5s%-10s%-5s%-10s%-10s%-10s" +
+            pw.append(String.format("%-5s%-10s%-10s%-5s%-10s%-10s%-10s" +
                     "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
                     "%-10s%-10s%-10s%-10s\n",
-                    "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
+                    "Chr", "Pos", "Indel?", "Ref", "Alt", "Maf", "Mgf",
                     "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv", "Mend Error",
                     "Cases D", "Controls D", "Cases R", "Controls R"));
         }
 
         public void printStatRecord(List<VcfRecordStat> list) {
             for (VcfRecordStat v : list) {
-                pw.append(String.format("%-5s%-10d%-5s%-10s%-10s%-10s" +
+                pw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                         "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
-                        "%-10.0f%-10.0f%-10.0f%-10.0f\n",
+                        "%-10.2f%-10.2f%-10.2f%-10.2f\n",
                         v.getChromosome(),
                         v.getPosition(),
+                        (v.getIndel()?"Y":"N"),
                         v.getRef_alleles(),
                         Arrays.toString(v.getAltAlleles()),
                         v.getMafAllele(),

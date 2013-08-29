@@ -94,10 +94,10 @@ public class Individual implements Comparable<Individual> {
         }else{
             switch (phenotype){
                 case "1":
-                    condition = Condition.AFFECTED;
+                    condition = Condition.UNAFFECTED;
                     break;
                 case "2":
-                    condition = Condition.UNAFFECTED;
+                    condition = Condition.AFFECTED;
                     break;
                 default:
                     condition = Condition.UNKNOWN_CONDITION;
