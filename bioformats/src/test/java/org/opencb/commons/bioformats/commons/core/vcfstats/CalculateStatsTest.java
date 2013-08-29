@@ -26,8 +26,9 @@ public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
-    private String vcfFileName = "/Users/aleman/tmp/big.vcf";
-    private String pedFileName = "/Users/aleman/tmp/big.ped";
+    private String vcfFileName = "/home/aaleman/tmp/file.vcf";
+    private String pedFileName = "/home/aaleman/tmp/file.ped";
+    private String pathStats   = "/home/aaleman/tmp/jstats/";
 
 
     @Rule
@@ -52,7 +53,7 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
 
-        CalculateStats.runner(vcfFileName, pedFileName);
+        CalculateStats.runner(vcfFileName, pedFileName, pathStats);
 
         // printListStats(list_vcf_stats);
 

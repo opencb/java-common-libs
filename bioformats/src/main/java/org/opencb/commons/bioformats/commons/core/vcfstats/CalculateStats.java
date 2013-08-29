@@ -49,6 +49,100 @@ public class CalculateStats {
         return groupStats;
     }
 
+    public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat){
+
+        Genotype g = null;
+        Individual ind = null;
+
+        for(VcfRecord record: vcfRecords){
+
+            for(String sample: sampleNames){
+
+
+                g = record.getSampleGenotype(sample);
+
+                // Find the missing alleles
+                if(g.getCode() != AllelesCode.ALLELES_OK){                   // Missing genotype (one or both alleles missing)
+
+                    sampleStat.incrementMissingGenotypes(sample);
+                }
+                // Check mendelian errors
+                if(ped != null){
+                    ind = ped.getIndividual(sample);
+                    if(g.getCode() == AllelesCode.ALLELES_OK && isMendelianError(ind, g, record)){
+                        sampleStat.incrementMendelianErrors(sample);
+
+                    }
+
+                    //Count homozygotes
+                    if(g.getAllele1() == g.getAllele2()){
+                        sampleStat.incrementHomozygotesNumber(sample);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void runner(String vcfFileName, String pedFileName, String path) throws Exception {
+
+        int batch_size = 4;
+        boolean firstTime = true;
+
+        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
+        Pedigree ped = new Pedigree(pedFileName);
+
+        VariantStatsWriter variantWriter = new VariantStatsWriter(path);
+        SampleStatsWriter sampleWriter = new SampleStatsWriter(path);
+        GroupStatsWriter groupWriterPhen = new GroupStatsWriter(path);
+        GroupStatsWriter groupWriterFam = new GroupStatsWriter(path);
+
+        List<VcfRecord> batch;
+        List<VcfRecordStat> stats_list;
+
+        VcfGroupStat groupStatsBatchPhen;
+        VcfGroupStat groupStatsBatchFam;
+        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
+
+
+        variantWriter.printHeader();
+
+
+        batch = vcf.read(batch_size);
+
+        while (!batch.isEmpty()) {
+            stats_list = variantStats(batch, vcf.getSampleNames(), ped);
+
+            sampleStats(batch,vcf.getSampleNames(), ped, vcfSampleStat);
+
+            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
+            groupStatsBatchFam = groupStats(batch, ped, "family");
+
+            if(firstTime){
+                groupWriterPhen.setFilenames(groupStatsBatchPhen);
+                groupWriterPhen.printHeader();
+
+                groupWriterFam.setFilenames(groupStatsBatchFam);
+                groupWriterFam.printHeader();
+                firstTime = false;
+            }
+
+            variantWriter.printStatRecord(stats_list);
+            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
+            groupWriterFam.printGroupStats(groupStatsBatchFam);
+
+            batch = vcf.read(batch_size);
+        }
+
+
+        sampleWriter.printStats(vcfSampleStat);
+        sampleWriter.close();
+
+        vcf.close();
+        variantWriter.close();
+        groupWriterPhen.close();
+        groupWriterFam.close();
+    }
+
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
         List<String> list = new ArrayList<>(100);
         Individual ind;
@@ -83,53 +177,6 @@ public class CalculateStats {
 
         }
         return values;  //To change body of created methods use File | Settings | File Templates.
-    }
-
-    public static void runner(String vcfFileName, String pedFileName) throws Exception {
-
-        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
-        Pedigree ped = new Pedigree(pedFileName);
-
-        VariantStatsWriter variant_writer = new VariantStatsWriter("/Users/aleman/tmp/stats/");
-        GroupStatsWriter groupWriterPhen = new GroupStatsWriter("/Users/aleman/tmp/stats/");
-        GroupStatsWriter groupWriterFam = new GroupStatsWriter("/Users/aleman/tmp/stats/");
-        int batch_size = 4;
-        List<VcfRecord> batch = new ArrayList<>(batch_size);
-        VcfGroupStat groupStatsBatchPhen;
-        VcfGroupStat groupStatsBatchFam;
-        List<VcfRecordStat> stats_list = new ArrayList<>(batch_size);
-        boolean firstTime = true;
-
-        variant_writer.printHeader();
-
-
-        batch = vcf.read(batch_size);
-
-        while (!batch.isEmpty()) {
-            stats_list = variantStats(batch, vcf.getSampleNames(), ped);
-            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
-            groupStatsBatchFam = groupStats(batch, ped, "family");
-
-            if(firstTime){
-                groupWriterPhen.setFilenames(groupStatsBatchPhen);
-                groupWriterPhen.printHeader();
-
-                groupWriterFam.setFilenames(groupStatsBatchFam);
-                groupWriterFam.printHeader();
-                firstTime = false;
-            }
-
-            variant_writer.printStatRecord(stats_list);
-            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
-            groupWriterFam.printGroupStats(groupStatsBatchFam);
-
-            batch = vcf.read(batch_size);
-        }
-
-        vcf.close();
-        variant_writer.close();
-        groupWriterPhen.close();
-        groupWriterFam.close();
     }
 
     private static VcfRecordStat variantStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
@@ -221,7 +268,7 @@ public class CalculateStats {
             if (ped != null) {
                 if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
                     ind = ped.getIndividual(sampleName);
-                    if (isMendelianError(ind, g, vcf_record, sampleNames)) {
+                    if (isMendelianError(ind, g, vcf_record)) {
                         vcf_stat.setMendelinanErrors(vcf_stat.getMendelinanErrors() + 1);
 
                     }
@@ -363,7 +410,7 @@ public class CalculateStats {
 
     }
 
-    private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcf_record, List<String> sampleNames) {
+    private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcf_record) {
 
         Genotype g_father;
         Genotype g_mother;
@@ -624,7 +671,29 @@ public class CalculateStats {
                 }
 
             }
-                //To change body of created methods use File | Settings | File Templates.
+        }
+    }
+
+    private static class SampleStatsWriter {
+        private PrintWriter pw;
+
+        private SampleStatsWriter(String path) throws IOException {
+            this.pw = new PrintWriter(new FileWriter(path + "sample.stats"));
+        }
+
+        public void printStats(VcfSampleStat samplesStats) {
+            SampleStat s;
+           pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
+            for(Map.Entry<String, SampleStat> entry: samplesStats.getSamplesStats().entrySet()){
+                s = entry.getValue();
+                pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+
+            }
+
+        }
+
+        public void close() {
+            pw.close();
         }
     }
 }
