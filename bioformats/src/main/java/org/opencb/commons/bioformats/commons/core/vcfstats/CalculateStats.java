@@ -322,6 +322,7 @@ public class CalculateStats {
         if (groupValues != null) {
             groupStats = new VcfGroupStat(group, groupValues);
 
+
             for (String val : groupValues) {
                 list_samples = getSamplesValueGroup(val, group, ped);
                 variantStats = variantStats(vcfRecords, list_samples, ped, globalStats);
@@ -368,7 +369,7 @@ public class CalculateStats {
 
     public static void runner(String vcfFileName, String pedFileName, String path) throws Exception {
 
-        int batch_size = 4;
+        int batch_size = 1000;
         boolean firstTime = true;
 
         Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
@@ -384,36 +385,35 @@ public class CalculateStats {
         List<VcfRecordStat> stats_list;
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
-        VcfGroupStat groupStatsBatchPhen;
-        VcfGroupStat groupStatsBatchFam;
         VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
 
-
-        variantWriter.printHeader();
-
+        VcfGroupStat groupStatsBatchPhen;
+        VcfGroupStat groupStatsBatchFam;
 
         batch = vcf.read(batch_size);
+
+        variantWriter.printHeader();
 
         while (!batch.isEmpty()) {
             stats_list = variantStats(batch, vcf.getSampleNames(), ped, globalStats);
 
             sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
 
-//            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
-//            groupStatsBatchFam = groupStats(batch, ped, "family");
+            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
+            groupStatsBatchFam = groupStats(batch, ped, "family");
 
             if (firstTime) {
-//                groupWriterPhen.setFilenames(groupStatsBatchPhen);
-//                groupWriterPhen.printHeader();
-//
-//                groupWriterFam.setFilenames(groupStatsBatchFam);
-//                groupWriterFam.printHeader();
-//                firstTime = false;
+                groupWriterPhen.setFilenames(groupStatsBatchPhen);
+                groupWriterPhen.printHeader();
+
+                groupWriterFam.setFilenames(groupStatsBatchFam);
+                groupWriterFam.printHeader();
+                firstTime = false;
             }
 
             variantWriter.printStatRecord(stats_list);
-//            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
-//            groupWriterFam.printGroupStats(groupStatsBatchFam);
+            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
+            groupWriterFam.printGroupStats(groupStatsBatchFam);
 
             batch = vcf.read(batch_size);
         }
@@ -428,8 +428,8 @@ public class CalculateStats {
 
         vcf.close();
         variantWriter.close();
-//        groupWriterPhen.close();
-//        groupWriterFam.close();
+        groupWriterPhen.close();
+        groupWriterFam.close();
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
