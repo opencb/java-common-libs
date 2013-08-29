@@ -48,13 +48,13 @@ public class VcfRecordStat {
         this.altAlleles = null;
         this.mafAllele = "";
         this.mgfAllele = "";
-        this.position                   = new Long(0);
-        this.numAlleles = new Integer(0);
+        this.position                   = (long) 0;
+        this.numAlleles = 0;
         this.allelesCount = null;
         this.genotypesCount = null;
-        this.missingAlleles = new Integer(0);
-        this.missingGenotypes = new Integer(0);
-        this.mendelinanErrors = new Integer(0);
+        this.missingAlleles = 0;
+        this.missingGenotypes = 0;
+        this.mendelinanErrors = 0;
         this.allelesFreq = null;
         this.genotypesFreq = null;
         this.maf                        = new Float(0.0);
@@ -64,7 +64,7 @@ public class VcfRecordStat {
         this.casesPercentRecessive = new Float(0.0);
         this.controlsPercentRecessive = new Float(0.0);
         this.isIndel = false;
-        this.genotypes = new ArrayList<Genotype>((int) Math.pow(this.numAlleles, 2));
+        this.genotypes = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
         this.transitionsCount = 0;
         this.transversionsCount = 0;
     }

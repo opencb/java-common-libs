@@ -22,9 +22,7 @@ public class VcfRecordFilters {
 
         Predicate<VcfRecord> and_filters = Predicates.and(filters);
 
-        List<VcfRecord> filtered_list = Lists.newArrayList(Iterables.filter(list_records, and_filters));
-
-        return filtered_list;
+        return Lists.newArrayList(Iterables.filter(list_records, and_filters));
 
     }
 
