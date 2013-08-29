@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.commons.core.vcfstats;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,7 +71,32 @@ public class VcfRecordStat {
 
     @Override
     public String toString() {
-        return "";
+        return "VcfRecordStat{" +
+                "chromosome='" + chromosome + '\'' +
+                ", position=" + position +
+                ", refAllele='" + refAllele + '\'' +
+                ", altAlleles=" + Arrays.toString(altAlleles) +
+                ", mafAllele='" + mafAllele + '\'' +
+                ", mgfAllele='" + mgfAllele + '\'' +
+                ", numAlleles=" + numAlleles +
+                ", allelesCount=" + Arrays.toString(allelesCount) +
+                ", genotypesCount=" + Arrays.toString(genotypesCount) +
+                ", genotypes=" + genotypes +
+                ", allelesFreq=" + Arrays.toString(allelesFreq) +
+                ", genotypesFreq=" + Arrays.toString(genotypesFreq) +
+                ", maf=" + maf +
+                ", mgf=" + mgf +
+                ", missingAlleles=" + missingAlleles +
+                ", missingGenotypes=" + missingGenotypes +
+                ", mendelinanErrors=" + mendelinanErrors +
+                ", isIndel=" + isIndel +
+                ", casesPercentDominant=" + casesPercentDominant +
+                ", controlsPercentDominant=" + controlsPercentDominant +
+                ", casesPercentRecessive=" + casesPercentRecessive +
+                ", controlsPercentRecessive=" + controlsPercentRecessive +
+                ", transitionsCount=" + transitionsCount +
+                ", transversionsCount=" + transversionsCount +
+                '}';
     }
 
     public String getChromosome() {
@@ -265,4 +291,7 @@ public class VcfRecordStat {
     public void setTransversionsCount(Integer transversionsCount) {
         this.transversionsCount = transversionsCount;
     }
+
+
+
 }
