@@ -16,7 +16,7 @@ public class VcfSampleStat {
     private Map<String, SampleStat> samplesStats;
 
 
-    VcfSampleStat(List<String> sampleNames) {
+    public VcfSampleStat(List<String> sampleNames) {
         samplesStats = new LinkedHashMap<>(sampleNames.size());
         SampleStat s = null;
 

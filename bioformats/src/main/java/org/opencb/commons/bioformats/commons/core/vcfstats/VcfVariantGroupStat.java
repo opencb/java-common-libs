@@ -9,13 +9,13 @@ import java.util.*;
  * Time: 5:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfGroupStat {
+public class VcfVariantGroupStat {
 
     private String group;
     private Map<String, List<VcfRecordStat>> variantStats;
     private Object samples;
 
-    public VcfGroupStat(String group, Set<String> groupValues) {
+    public VcfVariantGroupStat(String group, Set<String> groupValues) {
         this.group = group;
         variantStats = new LinkedHashMap<>(groupValues.size());
         List<VcfRecordStat> list;
@@ -23,14 +23,6 @@ public class VcfGroupStat {
             list = new ArrayList<>(1000);
             variantStats.put(groupVal, list);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "VcfGroupStat{" +
-                "variants=" + variantStats +
-                ", samples=" + samples +
-                '}';
     }
 
     public String getGroup() {

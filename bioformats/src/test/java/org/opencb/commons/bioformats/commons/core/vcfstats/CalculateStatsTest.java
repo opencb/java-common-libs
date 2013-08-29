@@ -26,9 +26,9 @@ public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
-    private String vcfFileName = "/home/aaleman/tmp/file.vcf";
-    private String pedFileName = "/home/aaleman/tmp/file.ped";
-    private String pathStats   = "/home/aaleman/tmp/jstats/";
+    private String vcfFileName = "/Users/aleman/tmp/big.vcf";
+    private String pedFileName = "/Users/aleman/tmp/big.ped";
+    private String pathStats   = "/Users/aleman/tmp/jstats/";
 
 
     @Rule
