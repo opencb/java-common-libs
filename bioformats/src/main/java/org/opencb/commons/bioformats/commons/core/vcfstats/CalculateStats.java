@@ -19,13 +19,290 @@ import java.util.*;
  */
 public class CalculateStats {
 
-    public static List<VcfRecordStat> variantStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped) {
+    public static List<VcfRecordStat> variantStats(List<VcfRecord> list_vcf_records, List<String> sampleNames, Pedigree ped, VcfGlobalStat globalStats) {
         List<VcfRecordStat> list_stats = new ArrayList<>(list_vcf_records.size());
-        VcfRecordStat vcf_record_stat;
+
+        // Temporary variables for file stats updating
+        int variants_count = 0, samples_count = 0, snps_count = 0, indels_count = 0, pass_count = 0;
+        int transitions_count = 0, transversions_count = 0, biallelics_count = 0, multiallelics_count = 0;
+        float accum_quality = 0;
+
+
         for (VcfRecord vcf_record : list_vcf_records) {
-            vcf_record_stat = variantStats(vcf_record, sampleNames, ped);
-            list_stats.add(vcf_record_stat);
+
+            int genotype_current_pos;
+            int total_alleles_count = 0;
+            int total_genotypes_count = 0;
+            String mgf_genotype = "";
+            Individual ind;
+
+            float maf = Float.MAX_VALUE;
+            float mgf = Float.MAX_VALUE;
+            float cur_gt_freq;
+
+
+            int control_dominant = 0;
+            int cases_dominant = 0;
+            int control_recessive = 0;
+            int cases_recessive = 0;
+
+
+            VcfRecordStat vcf_stat = new VcfRecordStat();
+
+
+            vcf_stat.setChromosome(vcf_record.getChromosome());
+            vcf_stat.setPosition(new Long(vcf_record.getPosition()));
+            vcf_stat.setRefAllele(vcf_record.getReference());
+
+            String[] alt_alleles = vcf_record.getAltAlleles();
+
+            vcf_stat.setAltAlleles(alt_alleles);
+            vcf_stat.setNumAlleles(alt_alleles.length + 1);
+
+            Integer[] alleles_count = new Integer[vcf_stat.getNumAlleles()];
+            Arrays.fill(alleles_count, 0);
+            Integer[] genotypes_count = new Integer[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
+            Arrays.fill(genotypes_count, 0);
+            Float[] alleles_freq = new Float[vcf_stat.getNumAlleles()];
+            Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
+
+            for (String sampleName : sampleNames) {
+
+                //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
+                // String sample = vcf_record.getSamples().get(i);
+
+                Genotype g = vcf_record.getSampleGenotype(sampleName);
+
+                Genotypes.addGenotypeToList(vcf_stat.getGenotypes(), g);
+
+                // Check missing alleles and genotypes
+                if (g.getCode() == AllelesCode.ALLELES_OK) {
+                    // Both alleles set
+                    genotype_current_pos = g.getAllele1() * (vcf_stat.getNumAlleles()) + g.getAllele2();
+                    assert (g.getAllele1() <= vcf_stat.getNumAlleles());
+                    assert (g.getAllele2() <= vcf_stat.getNumAlleles());
+                    assert (genotype_current_pos <= vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles());
+
+
+                    alleles_count[g.getAllele1()]++;
+                    alleles_count[g.getAllele2()]++;
+                    genotypes_count[genotype_current_pos]++;
+
+                    total_alleles_count += 2;
+                    total_genotypes_count++;
+
+                } else if (g.getCode() == AllelesCode.HAPLOID) {
+                    // Haploid (chromosome X/Y)
+                    alleles_count[g.getAllele1()]++;
+                    total_alleles_count++;
+                } else {
+                    // Missing genotype (one or both alleles missing)
+
+                    vcf_stat.setMissingGenotypes(vcf_stat.getMissingGenotypes() + 1);
+                    if (g.getAllele1() == null) {
+                        vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
+                    } else {
+                        alleles_count[g.getAllele1()]++;
+                        total_alleles_count++;
+                    }
+
+
+                    if (g.getAllele2() == null) {
+                        vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
+                    } else {
+                        alleles_count[g.getAllele2()]++;
+                        total_alleles_count++;
+
+                    }
+
+
+                }
+
+                // Include statistics that depend on pedigree information
+                if (ped != null) {
+                    if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
+                        ind = ped.getIndividual(sampleName);
+                        if (isMendelianError(ind, g, vcf_record)) {
+                            vcf_stat.setMendelinanErrors(vcf_stat.getMendelinanErrors() + 1);
+
+                        }
+
+                        if (g.getCode() == AllelesCode.ALLELES_OK) {
+                            // Check inheritance models
+                            if (ind.getCondition() == Condition.UNAFFECTED) {
+                                if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
+                                    control_dominant++;
+                                    control_recessive++;
+
+                                } else if ((g.isAllele1Ref() && !g.isAllele2Ref()) || (!g.isAllele1Ref() || g.isAllele2Ref())) { // 0|1 or 1|0
+                                    control_recessive++;
+
+                                }
+                            } else if (ind.getCondition() == Condition.AFFECTED) {
+                                if (!g.isAllele1Ref() && !g.isAllele2Ref() && g.getAllele1() == g.getAllele2()) {// 1|1, 2|2, and so on
+                                    cases_recessive++;
+                                    cases_dominant++;
+                                } else if (!g.isAllele1Ref() || !g.isAllele2Ref()) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
+                                    cases_dominant++;
+
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+
+            }  // Finish all samples loop
+
+
+            for (int i = 0; i < vcf_stat.getNumAlleles(); i++) {
+                alleles_freq[i] = (total_alleles_count > 0) ? new Float(alleles_count[i] / (float) total_alleles_count) : 0;
+                if (alleles_freq[i] < maf) {
+                    maf = alleles_freq[i];
+                    vcf_stat.setMafAllele((i == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[i - 1]);
+
+
+                }
+            }
+
+            vcf_stat.setMaf(maf);
+
+            for (int i = 0; i < vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles(); i++) {
+                genotypes_freq[i] = (total_genotypes_count > 0) ? new Float(genotypes_count[i] / (float) total_genotypes_count) : 0;
+
+
+            }
+
+
+            for (int i = 0; i < vcf_stat.getNumAlleles(); i++) {
+                for (int j = 0; j < vcf_stat.getNumAlleles(); j++) {
+                    int idx1 = i * vcf_stat.getNumAlleles() + j;
+                    if (i == j) {
+                        cur_gt_freq = genotypes_freq[idx1];
+                    } else {
+                        int idx2 = j * vcf_stat.getNumAlleles() + i;
+                        cur_gt_freq = genotypes_freq[idx1] + genotypes_freq[idx2];
+                    }
+
+                    if (cur_gt_freq < mgf) {
+                        String first_allele = (i == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[i - 1];
+                        String second_allele = (j == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[j - 1];
+                        mgf_genotype = first_allele + "|" + second_allele;
+                        mgf = cur_gt_freq;
+
+                    }
+                }
+            }
+
+            vcf_stat.setMgf(mgf);
+            vcf_stat.setMgfAllele(mgf_genotype);
+
+            vcf_stat.setAllelesCount(alleles_count);
+            vcf_stat.setGenotypesCount(genotypes_count);
+
+            vcf_stat.setAlleles_freg(alleles_freq);
+            vcf_stat.setGenotypesFreq(genotypes_freq);
+
+                       /*
+         * 3 possibilities for being an INDEL:
+         * - The value of the ALT field is <DEL> or <INS>
+         * - The REF allele is not . but the ALT is
+         * - The REF allele is . but the ALT is not
+         * - The REF field length is different than the ALT field length
+         */
+            if ((!vcf_stat.getRef_alleles().equals(".") && vcf_record.getAlternate().equals(".")) ||
+                    (vcf_record.getAlternate().equals(".") && !vcf_stat.getRef_alleles().equals(".")) ||
+                    (vcf_record.getAlternate().equals("<INS>")) ||
+                    (vcf_record.getAlternate().equals("<DEL>")) ||
+                    vcf_record.getReference().length() != vcf_record.getAlternate().length()) {
+                vcf_stat.setIndel(true);
+                indels_count++;
+            } else {
+                vcf_stat.setIndel(false);
+            }
+
+            // Transitions and transversions
+
+            String ref = vcf_record.getReference().toUpperCase();
+            for (String alt: vcf_record.getAltAlleles()){
+                alt = alt.toUpperCase();
+
+                if (ref.length() == 1 && alt.length() == 1) {
+
+                    switch (ref) {
+                        case "C":
+                            if (alt.equals("T")) {
+                                transitions_count++;
+                            } else {
+                                transversions_count++;
+                            }
+                            break;
+                        case "T":
+                            if (alt.equals("C")) {
+                                transitions_count++;
+                            } else {
+                                transversions_count++;
+                            }
+                            break;
+                        case "A":
+                            if (alt.equals("G")) {
+                                transitions_count++;
+
+                            } else {
+                                transversions_count++;
+                            }
+                            break;
+                        case "G":
+                            if (alt.equals("A")) {
+                                transitions_count++;
+                            } else {
+                                transversions_count++;
+                            }
+                            break;
+                    }
+                }
+
+            }
+
+            // Update variables finally used to update file_stats_t structure
+            variants_count++;
+            if (!vcf_record.getId().equals(".")) {
+                snps_count++;
+            }
+            if (vcf_record.getFilter().toUpperCase().equals("PASS")) {
+                pass_count++;
+            }
+
+            if (vcf_stat.getNumAlleles() > 2) {
+                multiallelics_count++;
+            } else if (vcf_stat.getNumAlleles() > 1) {
+                biallelics_count++;
+            }
+
+            float qualAux = Float.valueOf(vcf_record.getQuality());
+            if (qualAux >= 0) {
+                accum_quality += qualAux;
+            }
+
+
+            vcf_stat.setTransitionsCount(transitions_count);
+            vcf_stat.setTransversionsCount(transversions_count);
+
+            vcf_stat.setCasesPercentDominant(Float.valueOf(cases_dominant));
+            vcf_stat.setControlsPercentDominant(Float.valueOf(control_dominant));
+            vcf_stat.setCasesPercentRecessive(Float.valueOf(cases_recessive));
+            vcf_stat.setControlsPercentRecessive(Float.valueOf(control_recessive));
+
+            list_stats.add(vcf_stat);
         }
+
+        samples_count = sampleNames.size();
+
+        globalStats.updateStats(variants_count, samples_count, snps_count, indels_count,
+                pass_count, transitions_count, transversions_count, biallelics_count,
+                multiallelics_count, accum_quality);
+
         return list_stats;
     }
 
@@ -36,12 +313,14 @@ public class CalculateStats {
         VcfGroupStat groupStats = null;
         List<VcfRecordStat> variantStats = null;
 
+        VcfGlobalStat globalStats = new VcfGlobalStat();
+
         if (groupValues != null) {
             groupStats = new VcfGroupStat(group, groupValues);
 
             for (String val : groupValues) {
                 list_samples = getSamplesValueGroup(val, group, ped);
-                variantStats = variantStats(vcfRecords, list_samples, ped);
+                variantStats = variantStats(vcfRecords, list_samples, ped, globalStats);
                 groupStats.getVariantStats().put(val, variantStats);
             }
 
@@ -49,33 +328,33 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat){
+    public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
 
         Genotype g = null;
         Individual ind = null;
 
-        for(VcfRecord record: vcfRecords){
+        for (VcfRecord record : vcfRecords) {
 
-            for(String sample: sampleNames){
+            for (String sample : sampleNames) {
 
 
                 g = record.getSampleGenotype(sample);
 
                 // Find the missing alleles
-                if(g.getCode() != AllelesCode.ALLELES_OK){                   // Missing genotype (one or both alleles missing)
+                if (g.getCode() != AllelesCode.ALLELES_OK) {                   // Missing genotype (one or both alleles missing)
 
                     sampleStat.incrementMissingGenotypes(sample);
                 }
                 // Check mendelian errors
-                if(ped != null){
+                if (ped != null) {
                     ind = ped.getIndividual(sample);
-                    if(g.getCode() == AllelesCode.ALLELES_OK && isMendelianError(ind, g, record)){
+                    if (g.getCode() == AllelesCode.ALLELES_OK && isMendelianError(ind, g, record)) {
                         sampleStat.incrementMendelianErrors(sample);
 
                     }
 
                     //Count homozygotes
-                    if(g.getAllele1() == g.getAllele2()){
+                    if (g.getAllele1() == g.getAllele2()) {
                         sampleStat.incrementHomozygotesNumber(sample);
                     }
                 }
@@ -95,10 +374,12 @@ public class CalculateStats {
         SampleStatsWriter sampleWriter = new SampleStatsWriter(path);
         GroupStatsWriter groupWriterPhen = new GroupStatsWriter(path);
         GroupStatsWriter groupWriterFam = new GroupStatsWriter(path);
+        GlobalStatsWriter globalWriter = new GlobalStatsWriter(path);
 
         List<VcfRecord> batch;
         List<VcfRecordStat> stats_list;
 
+        VcfGlobalStat globalStats = new VcfGlobalStat();
         VcfGroupStat groupStatsBatchPhen;
         VcfGroupStat groupStatsBatchFam;
         VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
@@ -110,14 +391,14 @@ public class CalculateStats {
         batch = vcf.read(batch_size);
 
         while (!batch.isEmpty()) {
-            stats_list = variantStats(batch, vcf.getSampleNames(), ped);
+            stats_list = variantStats(batch, vcf.getSampleNames(), ped, globalStats);
 
-            sampleStats(batch,vcf.getSampleNames(), ped, vcfSampleStat);
+            sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
 
             groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
             groupStatsBatchFam = groupStats(batch, ped, "family");
 
-            if(firstTime){
+            if (firstTime) {
                 groupWriterPhen.setFilenames(groupStatsBatchPhen);
                 groupWriterPhen.printHeader();
 
@@ -134,8 +415,16 @@ public class CalculateStats {
         }
 
 
+
+
         sampleWriter.printStats(vcfSampleStat);
         sampleWriter.close();
+
+        globalWriter.printStats(globalStats);
+        globalWriter.close();
+
+
+
 
         vcf.close();
         variantWriter.close();
@@ -177,237 +466,6 @@ public class CalculateStats {
 
         }
         return values;  //To change body of created methods use File | Settings | File Templates.
-    }
-
-    private static VcfRecordStat variantStats(VcfRecord vcf_record, List<String> sampleNames, Pedigree ped) {
-        int genotype_current_pos;
-        int total_alleles_count = 0;
-        int total_genotypes_count = 0;
-        String mgf_genotype = "";
-        Individual ind;
-
-        int control_dominant = 0;
-        int cases_dominant = 0;
-        int control_recessive = 0;
-        int cases_recessive = 0;
-
-
-        VcfRecordStat vcf_stat = new VcfRecordStat();
-        vcf_stat.setChromosome(vcf_record.getChromosome());
-        vcf_stat.setPosition(new Long(vcf_record.getPosition()));
-        vcf_stat.setRefAllele(vcf_record.getReference());
-        Float maf = Float.MAX_VALUE;
-        Float mgf = Float.MAX_VALUE;
-        Float cur_gt_freq;
-
-        String[] alt_alleles = vcf_record.getAltAlleles();
-
-        vcf_stat.setAltAlleles(alt_alleles);
-        vcf_stat.setNumAlleles(alt_alleles.length + 1);
-
-        Integer[] alleles_count = new Integer[vcf_stat.getNumAlleles()];
-        Arrays.fill(alleles_count, 0);
-        Integer[] genotypes_count = new Integer[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
-        Arrays.fill(genotypes_count, 0);
-        Float[] alleles_freq = new Float[vcf_stat.getNumAlleles()];
-        Float[] genotypes_freq = new Float[vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles()];
-
-        for (String sampleName : sampleNames) {
-
-            //for (int i = 0; i < vcf_record.getSamples().size(); i++) {
-            // String sample = vcf_record.getSamples().get(i);
-
-            Genotype g = vcf_record.getSampleGenotype(sampleName);
-
-            Genotypes.addGenotypeToList(vcf_stat.getGenotypes(), g);
-
-            // Check missing alleles and genotypes
-            if (g.getCode() == AllelesCode.ALLELES_OK) {
-                // Both alleles set
-                genotype_current_pos = g.getAllele1() * (vcf_stat.getNumAlleles()) + g.getAllele2();
-                assert (g.getAllele1() <= vcf_stat.getNumAlleles());
-                assert (g.getAllele2() <= vcf_stat.getNumAlleles());
-                assert (genotype_current_pos <= vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles());
-
-
-                alleles_count[g.getAllele1()]++;
-                alleles_count[g.getAllele2()]++;
-                genotypes_count[genotype_current_pos]++;
-
-                total_alleles_count += 2;
-                total_genotypes_count++;
-
-            } else if (g.getCode() == AllelesCode.HAPLOID) {
-                // Haploid (chromosome X/Y)
-                alleles_count[g.getAllele1()]++;
-                total_alleles_count++;
-            } else {
-                // Missing genotype (one or both alleles missing)
-
-                vcf_stat.setMissingGenotypes(vcf_stat.getMissingGenotypes() + 1);
-                if (g.getAllele1() == null) {
-                    vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
-                } else {
-                    alleles_count[g.getAllele1()]++;
-                    total_alleles_count++;
-                }
-
-
-                if (g.getAllele2() == null) {
-                    vcf_stat.setMissingAlleles(vcf_stat.getMissingAlleles() + 1);
-                } else {
-                    alleles_count[g.getAllele2()]++;
-                    total_alleles_count++;
-
-                }
-
-
-            }
-
-            // Include statistics that depend on pedigree information
-            if (ped != null) {
-                if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
-                    ind = ped.getIndividual(sampleName);
-                    if (isMendelianError(ind, g, vcf_record)) {
-                        vcf_stat.setMendelinanErrors(vcf_stat.getMendelinanErrors() + 1);
-
-                    }
-
-                    if (g.getCode() == AllelesCode.ALLELES_OK) {
-                        // Check inheritance models
-                        if (ind.getCondition() == Condition.UNAFFECTED) {
-                            if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
-                                control_dominant++;
-                                control_recessive++;
-
-                            } else if ((g.isAllele1Ref() && !g.isAllele2Ref()) || (!g.isAllele1Ref() || g.isAllele2Ref())) { // 0|1 or 1|0
-                                control_recessive++;
-
-                            }
-                        } else if (ind.getCondition() == Condition.AFFECTED) {
-                            if (!g.isAllele1Ref() && !g.isAllele2Ref() && g.getAllele1() == g.getAllele2()) {// 1|1, 2|2, and so on
-                                cases_recessive++;
-                                cases_dominant++;
-                            } else if (!g.isAllele1Ref() || !g.isAllele2Ref()) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
-                                cases_dominant++;
-
-                            }
-                        }
-
-                    }
-
-                }
-            }
-
-        }
-
-        for (int i = 0; i < vcf_stat.getNumAlleles(); i++) {
-            alleles_freq[i] = (total_alleles_count > 0) ? new Float(alleles_count[i] / (float) total_alleles_count) : 0;
-            if (alleles_freq[i] < maf) {
-                maf = alleles_freq[i];
-                vcf_stat.setMafAllele((i == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[i - 1]);
-
-
-            }
-        }
-
-        vcf_stat.setMaf(maf);
-
-        for (int i = 0; i < vcf_stat.getNumAlleles() * vcf_stat.getNumAlleles(); i++) {
-            genotypes_freq[i] = (total_genotypes_count > 0) ? new Float(genotypes_count[i] / (float) total_genotypes_count) : 0;
-
-
-        }
-
-
-        for (int i = 0; i < vcf_stat.getNumAlleles(); i++) {
-            for (int j = 0; j < vcf_stat.getNumAlleles(); j++) {
-                int idx1 = i * vcf_stat.getNumAlleles() + j;
-                if (i == j) {
-                    cur_gt_freq = genotypes_freq[idx1];
-                } else {
-                    int idx2 = j * vcf_stat.getNumAlleles() + i;
-                    cur_gt_freq = genotypes_freq[idx1] + genotypes_freq[idx2];
-                }
-
-                if (cur_gt_freq < mgf) {
-                    String first_allele = (i == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[i - 1];
-                    String second_allele = (j == 0) ? vcf_stat.getRef_alleles() : vcf_stat.getAltAlleles()[j - 1];
-                    mgf_genotype = first_allele + "|" + second_allele;
-                    mgf = cur_gt_freq;
-
-                }
-            }
-        }
-
-        vcf_stat.setMgf(mgf);
-        vcf_stat.setMgfAllele(mgf_genotype);
-
-        vcf_stat.setAllelesCount(alleles_count);
-        vcf_stat.setGenotypesCount(genotypes_count);
-
-        vcf_stat.setAlleles_freg(alleles_freq);
-        vcf_stat.setGenotypesFreq(genotypes_freq);
-
-
-        if ((vcf_stat.getRef_alleles().equals(".") && !vcf_record.getAlternate().equals(".")) ||
-                (vcf_record.getAlternate().equals(".") && !vcf_stat.getRef_alleles().equals(".")) ||
-                (!vcf_record.getAlternate().equals("<INS>")) ||
-                (!vcf_record.getAlternate().equals("<DEL>")) ||
-                vcf_record.getReference().length() != vcf_record.getAlternate().length()) {
-            vcf_stat.setIndel(true);
-        } else {
-            vcf_stat.setIndel(false);
-        }
-
-        // Transitions and transversions
-
-        for (int i = 0; i < vcf_stat.getAltAlleles().length; i++) {
-            if (vcf_record.getReference().length() == 1 && vcf_stat.getAltAlleles().length == 1) {
-                char ref = vcf_stat.getRef_alleles().toUpperCase().charAt(0);
-                char alt = vcf_stat.getAltAlleles()[i].toUpperCase().charAt(0);
-
-                switch (ref) {
-                    case 'C':
-                        if (alt == 'T') {
-                            vcf_stat.setTransitionsCount(vcf_stat.getTransitionsCount() + 1);
-                        } else {
-                            vcf_stat.setTransversionsCount(vcf_stat.getTransversionsCount() + 1);
-                        }
-                        break;
-                    case 'T':
-                        if (alt == 'C') {
-                            vcf_stat.setTransitionsCount(vcf_stat.getTransitionsCount() + 1);
-                        } else {
-                            vcf_stat.setTransversionsCount(vcf_stat.getTransversionsCount() + 1);
-                        }
-                        break;
-                    case 'A':
-                        if (alt == 'G') {
-                            vcf_stat.setTransitionsCount(vcf_stat.getTransitionsCount() + 1);
-                        } else {
-                            vcf_stat.setTransversionsCount(vcf_stat.getTransversionsCount() + 1);
-                        }
-                        break;
-                    case 'G':
-                        if (alt == 'A') {
-                            vcf_stat.setTransitionsCount(vcf_stat.getTransitionsCount() + 1);
-                        } else {
-                            vcf_stat.setTransversionsCount(vcf_stat.getTransversionsCount() + 1);
-                        }
-                        break;
-                }
-            }
-
-        }
-
-        vcf_stat.setCasesPercentDominant(Float.valueOf(cases_dominant));
-        vcf_stat.setControlsPercentDominant(Float.valueOf(control_dominant));
-        vcf_stat.setCasesPercentRecessive(Float.valueOf(cases_recessive));
-        vcf_stat.setControlsPercentRecessive(Float.valueOf(control_recessive));
-
-        return vcf_stat;
-
     }
 
     private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcf_record) {
@@ -555,7 +613,7 @@ public class CalculateStats {
                     "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
                     "%-10s%-10s%-10s%-10s\n",
                     "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                    "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv","Mend Error",
+                    "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv", "Mend Error",
                     "Cases D", "Controls D", "Cases R", "Controls R"));
         }
 
@@ -624,7 +682,7 @@ public class CalculateStats {
                         "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
                         "%-10s%-10s%-10s%-10s\n",
                         "Chr", "Pos", "Ref", "Alt", "Maf", "Mgf",
-                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv","Mend Error",
+                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv", "Mend Error",
                         "Cases D", "Controls D", "Cases R", "Controls R"));
             }
         }
@@ -644,7 +702,7 @@ public class CalculateStats {
             for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
                 pw = entry.getValue();
                 list = groupStatsBatch.getVariantStats().get(entry.getKey());
-                for(VcfRecordStat v : list){
+                for (VcfRecordStat v : list) {
                     pw.append(String.format("%-5s%-10d%-5s%-10s%-10s%-10s" +
                             "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                             "%-10.0f%-10.0f%-10.0f%-10.0f\n",
@@ -683,13 +741,39 @@ public class CalculateStats {
 
         public void printStats(VcfSampleStat samplesStats) {
             SampleStat s;
-           pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
-            for(Map.Entry<String, SampleStat> entry: samplesStats.getSamplesStats().entrySet()){
+            pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
+            for (Map.Entry<String, SampleStat> entry : samplesStats.getSamplesStats().entrySet()) {
                 s = entry.getValue();
                 pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
 
             }
 
+        }
+
+        public void close() {
+            pw.close();
+        }
+    }
+
+    private static class GlobalStatsWriter {
+        private PrintWriter pw;
+
+        private GlobalStatsWriter(String path) throws IOException {
+            this.pw = new PrintWriter(new FileWriter(path + "global.stats"));
+        }
+
+        public void printStats(VcfGlobalStat globalStats) {
+            pw.append("Number of variants = " + globalStats.getVariantsCount() + "\n");
+            pw.append("Number of samples = " + globalStats.getSamplesCount() + "\n");
+            pw.append("Number of biallelic variants = " + globalStats.getBiallelicsCount() + "\n");
+            pw.append("Number of multiallelic variants = " + globalStats.getMultiallelicsCount() + "\n");
+            pw.append("Number of SNP = " + globalStats.getSnpsCount() + "\n");
+            pw.append("Number of indels = " + globalStats.getIndelsCount() + "\n");
+            pw.append("Number of transitions = " + globalStats.getTransitionsCount() + "\n");
+            pw.append("Number of transversions = " + globalStats.getTransversionsCount() + "\n");
+            pw.append("Ti/TV ratio = " + ((float) globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount()) + "\n");
+            pw.append("Percentage of PASS = " + (((float) globalStats.getPassCount() / (float) globalStats.getVariantsCount()) * 100) + "%\n");
+            pw.append("Average quality = " + ((float) globalStats.getAccumQuality() / (float) globalStats.getVariantsCount()) + "\n");
         }
 
         public void close() {
