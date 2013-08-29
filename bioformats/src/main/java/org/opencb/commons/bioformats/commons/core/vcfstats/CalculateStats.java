@@ -309,17 +309,17 @@ public class CalculateStats {
         return list_stats;
     }
 
-    public static VcfGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
+    public static VcfVariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
 
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> list_samples;
-        VcfGroupStat groupStats = null;
+        VcfVariantGroupStat groupStats = null;
         List<VcfRecordStat> variantStats = null;
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
 
         if (groupValues != null) {
-            groupStats = new VcfGroupStat(group, groupValues);
+            groupStats = new VcfVariantGroupStat(group, groupValues);
 
 
             for (String val : groupValues) {
@@ -386,8 +386,8 @@ public class CalculateStats {
         VcfGlobalStat globalStats = new VcfGlobalStat();
         VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
 
-        VcfGroupStat groupStatsBatchPhen;
-        VcfGroupStat groupStatsBatchFam;
+        VcfVariantGroupStat groupStatsBatchPhen;
+        VcfVariantGroupStat groupStatsBatchFam;
 
         batch = vcf.read(batch_size);
 
@@ -659,7 +659,7 @@ public class CalculateStats {
 
         }
 
-        public void setFilenames(VcfGroupStat gs) throws IOException {
+        public void setFilenames(VcfVariantGroupStat gs) throws IOException {
             PrintWriter aux;
             String filename;
 
@@ -696,7 +696,7 @@ public class CalculateStats {
             }
         }
 
-        public void printGroupStats(VcfGroupStat groupStatsBatch) {
+        public void printGroupStats(VcfVariantGroupStat groupStatsBatch) {
             PrintWriter pw;
             List<VcfRecordStat> list;
             for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
