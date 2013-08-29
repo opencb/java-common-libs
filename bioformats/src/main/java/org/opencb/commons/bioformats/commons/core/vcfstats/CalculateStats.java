@@ -125,30 +125,22 @@ public class CalculateStats {
 
                         }
                         if (g.getCode() == AllelesCode.ALLELES_OK) {
-                            System.out.println("                                 " + cont + " - g = " + g + " cond => " + ind.getCondition() + " - " + ind.getId());
 
                             // Check inheritance models
                             if (ind.getCondition() == Condition.UNAFFECTED) {
                                 if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
-                                    System.out.println(cont + " - 0|0");
                                     controlsDominant++;
                                     controlsRecessive++;
 
                                 } else if ((g.isAllele1Ref() && !g.isAllele2Ref()) || (!g.isAllele1Ref() || g.isAllele2Ref())) { // 0|1 or 1|0
-                                    System.out.println(cont + " - 0|1");
-
                                     controlsRecessive++;
 
                                 }
                             } else if (ind.getCondition() == Condition.AFFECTED) {
                                 if (!g.isAllele1Ref() && !g.isAllele2Ref() && g.getAllele1() == g.getAllele2()) {// 1|1, 2|2, and so on
-                                    System.out.println(cont + " - 1|1");
-
                                     casesRecessive++;
                                     casesDominant++;
                                 } else if (!g.isAllele1Ref() || !g.isAllele2Ref()) { // 0|1, 1|0, 1|2, 2|1, 1|3, and so on
-                                    System.out.println(cont + " - other");
-
                                     casesDominant++;
 
                                 }
@@ -231,7 +223,7 @@ public class CalculateStats {
             // Transitions and transversions
 
             String ref = vcf_record.getReference().toUpperCase();
-            for (String alt: vcf_record.getAltAlleles()){
+            for (String alt : vcf_record.getAltAlleles()) {
                 alt = alt.toUpperCase();
 
                 if (ref.length() == 1 && alt.length() == 1) {
@@ -290,16 +282,11 @@ public class CalculateStats {
             if (qualAux >= 0) {
                 accum_quality += qualAux;
             }
-
-
-            System.out.println(controlsDominant + " - " + casesDominant + " - " + controlsRecessive + " - " + casesRecessive);
-
             // Once all samples have been traverse, calculate % that follow inheritance model
-            controlsDominant = controlsDominant * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
-            casesDominant = casesDominant * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
-            controlsRecessive = controlsRecessive * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
-            casesRecessive = casesRecessive * 100 /(sampleNames.size() - vcf_stat.getMissingGenotypes());
-
+            controlsDominant = controlsDominant * 100 / (sampleNames.size() - vcf_stat.getMissingGenotypes());
+            casesDominant = casesDominant * 100 / (sampleNames.size() - vcf_stat.getMissingGenotypes());
+            controlsRecessive = controlsRecessive * 100 / (sampleNames.size() - vcf_stat.getMissingGenotypes());
+            casesRecessive = casesRecessive * 100 / (sampleNames.size() - vcf_stat.getMissingGenotypes());
 
 
             vcf_stat.setTransitionsCount(transitions_count);
@@ -432,15 +419,11 @@ public class CalculateStats {
         }
 
 
-
-
         sampleWriter.printStats(vcfSampleStat);
         sampleWriter.close();
 
         globalWriter.printStats(globalStats);
         globalWriter.close();
-
-
 
 
         vcf.close();
@@ -641,7 +624,7 @@ public class CalculateStats {
                         "%-10.2f%-10.2f%-10.2f%-10.2f\n",
                         v.getChromosome(),
                         v.getPosition(),
-                        (v.getIndel()?"Y":"N"),
+                        (v.getIndel() ? "Y" : "N"),
                         v.getRef_alleles(),
                         Arrays.toString(v.getAltAlleles()),
                         v.getMafAllele(),
