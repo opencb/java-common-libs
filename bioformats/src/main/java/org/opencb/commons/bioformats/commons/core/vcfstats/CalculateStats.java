@@ -274,7 +274,7 @@ public class CalculateStats {
                 biallelicsCount++;
             }
 
-            if(!vcfRecord.getQuality().equals(".")){
+            if (!vcfRecord.getQuality().equals(".")) {
                 float qualAux = Float.valueOf(vcfRecord.getQuality());
                 if (qualAux >= 0) {
                     accumQuality += qualAux;
@@ -332,6 +332,90 @@ public class CalculateStats {
         return groupStats;
     }
 
+    public static void runner(String vcfFileName, String pedFileName, String path) throws Exception {
+
+        int batch_size = 2;
+        boolean firstTime = true;
+
+        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
+        Pedigree ped = new Pedigree(pedFileName);
+
+        VariantStatsWriter variantWriter = new VariantStatsWriter(path);
+        SampleStatsWriter sampleWriter = new SampleStatsWriter(path);
+        GlobalStatsWriter globalWriter = new GlobalStatsWriter(path);
+
+        VariantGroupStatsWriter groupWriterPhen = new VariantGroupStatsWriter(path);
+        VariantGroupStatsWriter groupWriterFam = new VariantGroupStatsWriter(path);
+        SampleGroupStatWriter sampleGroupWriterPhen = new SampleGroupStatWriter(path);
+        SampleGroupStatWriter sampleGroupWriterFam = new SampleGroupStatWriter(path);
+
+
+
+        List<VcfRecord> batch;
+        List<VcfRecordStat> stats_list;
+
+        VcfGlobalStat globalStats = new VcfGlobalStat();
+        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
+
+        VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
+        VcfSampleGroupStats vcfSampleGroupStatsFam = new VcfSampleGroupStats();
+
+        VcfVariantGroupStat groupStatsBatchPhen;
+        VcfVariantGroupStat groupStatsBatchFam;
+
+        batch = vcf.read(batch_size);
+
+        variantWriter.printHeader();
+
+        while (!batch.isEmpty()) {
+            stats_list = variantStats(batch, vcf.getSampleNames(), ped, globalStats);
+
+            sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
+
+            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
+            groupStatsBatchFam = groupStats(batch, ped, "family");
+
+            sampleGroupStats(batch, ped, "phenotype", vcfSampleGroupStatsPhen);
+            sampleGroupStats(batch, ped, "family", vcfSampleGroupStatsFam);
+
+
+            if (firstTime) {
+                groupWriterPhen.setFilenames(groupStatsBatchPhen);
+                groupWriterPhen.printHeader();
+
+                groupWriterFam.setFilenames(groupStatsBatchFam);
+                groupWriterFam.printHeader();
+                firstTime = false;
+            }
+
+            variantWriter.printStatRecord(stats_list);
+            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
+            groupWriterFam.printGroupStats(groupStatsBatchFam);
+
+            batch = vcf.read(batch_size);
+        }
+
+        sampleGroupWriterPhen.setFilenames(vcfSampleGroupStatsPhen);
+        sampleGroupWriterPhen.printStats(vcfSampleGroupStatsPhen);
+        sampleGroupWriterPhen.close();
+
+        sampleGroupWriterFam.setFilenames(vcfSampleGroupStatsFam);
+        sampleGroupWriterFam.printStats(vcfSampleGroupStatsFam);
+        sampleGroupWriterFam.close();
+
+        sampleWriter.printStats(vcfSampleStat);
+        sampleWriter.close();
+
+        globalWriter.printStats(globalStats);
+        globalWriter.close();
+
+
+        vcf.close();
+        variantWriter.close();
+        groupWriterPhen.close();
+        groupWriterFam.close();
+    }
+
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
 
         Genotype g = null;
@@ -366,69 +450,35 @@ public class CalculateStats {
         }
     }
 
-    public static void runner(String vcfFileName, String pedFileName, String path) throws Exception {
+    public static void sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group, VcfSampleGroupStats vcfSampleGroupStats) {
 
-        int batch_size = 1000;
-        boolean firstTime = true;
+        Set<String> groupValues = getGroupValues(ped, group);
+        SampleStat s;
+        VcfSampleStat vcfSampleStat;
 
-        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
-        Pedigree ped = new Pedigree(pedFileName);
+        List<String> list_samples;
 
-        VariantStatsWriter variantWriter = new VariantStatsWriter(path);
-        SampleStatsWriter sampleWriter = new SampleStatsWriter(path);
-        GroupStatsWriter groupWriterPhen = new GroupStatsWriter(path);
-        GroupStatsWriter groupWriterFam = new GroupStatsWriter(path);
-        GlobalStatsWriter globalWriter = new GlobalStatsWriter(path);
-
-        List<VcfRecord> batch;
-        List<VcfRecordStat> stats_list;
-
-        VcfGlobalStat globalStats = new VcfGlobalStat();
-        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
-
-        VcfVariantGroupStat groupStatsBatchPhen;
-        VcfVariantGroupStat groupStatsBatchFam;
-
-        batch = vcf.read(batch_size);
-
-        variantWriter.printHeader();
-
-        while (!batch.isEmpty()) {
-            stats_list = variantStats(batch, vcf.getSampleNames(), ped, globalStats);
-
-            sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
-
-            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
-            groupStatsBatchFam = groupStats(batch, ped, "family");
-
-            if (firstTime) {
-                groupWriterPhen.setFilenames(groupStatsBatchPhen);
-                groupWriterPhen.printHeader();
-
-                groupWriterFam.setFilenames(groupStatsBatchFam);
-                groupWriterFam.printHeader();
-                firstTime = false;
-            }
-
-            variantWriter.printStatRecord(stats_list);
-            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
-            groupWriterFam.printGroupStats(groupStatsBatchFam);
-
-            batch = vcf.read(batch_size);
+        if (vcfSampleGroupStats.getGroup() == null) {
+            vcfSampleGroupStats.setGroup(group);
         }
 
+        if (vcfSampleGroupStats.getSampleStats().size() == 0) {
+            for (String groupVal : groupValues) {
+                list_samples = getSamplesValueGroup(groupVal, group, ped);
+                vcfSampleStat = new VcfSampleStat(list_samples);
 
-        sampleWriter.printStats(vcfSampleStat);
-        sampleWriter.close();
+                vcfSampleGroupStats.getSampleStats().put(groupVal, vcfSampleStat);
 
-        globalWriter.printStats(globalStats);
-        globalWriter.close();
+            }
 
 
-        vcf.close();
-        variantWriter.close();
-        groupWriterPhen.close();
-        groupWriterFam.close();
+        }
+
+        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
+            list_samples = getSamplesValueGroup(entry.getKey(), group, ped);
+            vcfSampleStat = entry.getValue();
+            sampleStats(batch, list_samples, ped, vcfSampleStat);
+        }
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
@@ -649,12 +699,12 @@ public class CalculateStats {
         }
     }
 
-    private static class GroupStatsWriter {
+    private static class VariantGroupStatsWriter {
 
         private Map<String, PrintWriter> mapPw;
         private String path;
 
-        public GroupStatsWriter(String path) {
+        public VariantGroupStatsWriter(String path) {
             this.path = path;
 
         }
@@ -780,5 +830,77 @@ public class CalculateStats {
         public void close() {
             pw.close();
         }
+    }
+
+    private static class SampleGroupStatWriter {
+        private Map<String, PrintWriter> mapPw;
+        private String path;
+
+        public SampleGroupStatWriter(String path) {
+            this.path = path;
+        }
+
+        public void setFilenames(VcfSampleGroupStats gs) throws IOException {
+            PrintWriter aux;
+            String filename;
+
+            mapPw = new LinkedHashMap<>(gs.getSampleStats().size());
+
+            for (Map.Entry<String, VcfSampleStat> entry : gs.getSampleStats().entrySet()) {
+                filename = path + "variant_stats_" + gs.getGroup() + "_" + entry.getKey() + ".sample.stats";
+                aux = new PrintWriter(new FileWriter(filename));
+                mapPw.put(entry.getKey(), aux);
+            }
+
+        }
+
+        public void printHeader() {
+
+            PrintWriter pw;
+            for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
+                pw = entry.getValue();
+                pw.append(String.format("%-5s%-10s%-10s%-5s%-10s%-10s%-10s" +
+                        "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
+                        "%-10s%-10s%-10s%-10s\n",
+                        "Chr", "Pos", "Indel?", "Ref", "Alt", "Maf", "Mgf",
+                        "NumAll.", "Miss All.", "Miss Gt", "All. Count", "Gt count", "Trans", "Transv", "Mend Error",
+                        "Cases D", "Controls D", "Cases R", "Controls R"));
+            }
+        }
+
+        public void close() {
+            PrintWriter pw;
+            for (Map.Entry<String, PrintWriter> entry : mapPw.entrySet()) {
+                pw = entry.getValue();
+                pw.close();
+            }
+        }
+
+        public void printStats(VcfSampleGroupStats samplesStats) {
+            PrintWriter pw;
+
+            VcfSampleStat sampleStat;
+            String val;
+            SampleStat s;
+
+
+            for (Map.Entry<String, VcfSampleStat> entry : samplesStats.getSampleStats().entrySet()) {
+                val = entry.getKey();
+                pw = mapPw.get(val);
+                sampleStat = entry.getValue();
+
+                pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
+
+                for (Map.Entry<String, SampleStat> entry_sample : sampleStat.getSamplesStats().entrySet()) {
+                    s = entry_sample.getValue();
+                    pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+
+                }
+            }
+
+
+        }
+
+
     }
 }
