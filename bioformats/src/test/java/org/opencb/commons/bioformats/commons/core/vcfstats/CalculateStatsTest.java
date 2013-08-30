@@ -21,9 +21,11 @@ public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
-    private String vcfFileName = "/home/aaleman/tmp/small.vcf";
-    private String pedFileName = "/home/aaleman/tmp/file.ped";
-    private String pathStats   = "/home/aaleman/tmp/jstats/";
+    private String path = "/opt/data/";
+    private String vcfFileName;
+    private String pedFileName;
+    private String pathStats;
+    private String dbFilename;
 
 
     @Rule
@@ -32,6 +34,11 @@ public class CalculateStatsTest {
 
     @Before
     public void setUp() throws Exception {
+
+        vcfFileName = path + "small.vcf";
+        pedFileName= path + "file.ped";
+        pathStats = path + "jstats/";
+        dbFilename = path + "jstats/stats.db";
         start = System.currentTimeMillis();
 
 
@@ -39,6 +46,7 @@ public class CalculateStatsTest {
 
     @After
     public void tearDown() throws Exception {
+
         end = System.currentTimeMillis();
         System.out.println("Time " + name.getMethodName() + ": " + (end - start));
 
@@ -48,7 +56,8 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
+        //VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
+        VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
 
         CalculateStats.runner(vcfReader, vcfWriter, pedFileName, pathStats);
 
