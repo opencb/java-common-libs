@@ -380,6 +380,8 @@ public class CalculateStats {
         vcfWriter.write(vcfSampleGroupStatsFam);
         vcfWriter.write(vcfSampleGroupStatsPhen);
 
+        vcfWriter.post();
+
         vcfReader.close();
         vcfWriter.close();
 

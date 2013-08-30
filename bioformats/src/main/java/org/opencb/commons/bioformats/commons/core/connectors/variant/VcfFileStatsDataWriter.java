@@ -149,7 +149,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
         samplePw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
         for (Map.Entry<String, SampleStat> entry : vcfSampleStat.getSamplesStats().entrySet()) {
             s = entry.getValue();
-            samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+            samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
         }
         return true;
@@ -171,7 +171,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
 
             for (Map.Entry<String, SampleStat> entrySample : sampleStat.getSamplesStats().entrySet()) {
                 s = entrySample.getValue();
-                pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+                pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
             }
             pw.close();

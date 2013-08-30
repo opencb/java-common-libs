@@ -35,7 +35,7 @@ public class CalculateStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        vcfFileName = path + "small.vcf";
+        vcfFileName = path + "file.vcf";
         pedFileName= path + "file.ped";
         pathStats = path + "jstats/";
         dbFilename = path + "jstats/stats.db";
