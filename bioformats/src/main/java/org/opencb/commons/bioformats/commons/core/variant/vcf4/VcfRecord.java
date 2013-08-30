@@ -261,9 +261,9 @@ public class VcfRecord {
         Genotype g = null;
 
 
-        String gt_val = getValueFormatSample(sample, "GT");
-        if(gt_val != null){
-            g = new Genotype(gt_val);
+        String gtVal = getValueFormatSample(sample, "GT");
+        if(gtVal != null){
+            g = new Genotype(gtVal);
         }
         return g;
 

@@ -1,11 +1,8 @@
 package org.opencb.commons.bioformats.commons.core.feature;
 
-import org.opencb.commons.bioformats.commons.core.feature.io.PedReader;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -38,42 +35,42 @@ public class Pedigree {
         String line = "";
         Individual ind, father, mother;
         String[]  fields;
-        String sample_id, family_id, father_id, mother_id, sex, phenotype;
+        String sampleId, familyId, fatherId, motherId, sex, phenotype;
         Set<Individual> family;
         Queue<Individual> queue = new LinkedList<>();
-        String[] aux_fields = null;
+        String[] auxFields = null;
 
         while( (line = reader.readLine()) != null)  {
             if(line.startsWith("#")){
                 this.parseHeader(line);
             }else{
                 fields = line.split("\t");
-                family_id = fields[0];
-                sample_id = fields[1];
-                father_id = fields[2];
-                mother_id = fields[3];
+                familyId = fields[0];
+                sampleId = fields[1];
+                fatherId = fields[2];
+                motherId = fields[3];
                 sex = fields[4];
                 phenotype = fields[5];
 
                 if(fields.length > 6){
-                     aux_fields  = Arrays.copyOfRange(fields, 6, fields.length);
+                     auxFields  = Arrays.copyOfRange(fields, 6, fields.length);
                 }
 
-                family =  this.getFamily(family_id);
+                family =  this.getFamily(familyId);
                 if(family == null){
                     family = new TreeSet<>();
-                    families.put(family_id, family);
+                    families.put(familyId, family);
                 }
 
 
-                    if( father_id.equals("0") && mother_id.equals("0")){
-                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, aux_fields);
+                    if( fatherId.equals("0") && motherId.equals("0")){
+                        ind = new Individual(sampleId, familyId, null, null, sex, phenotype, auxFields);
                         individuals.put(ind.getId(), ind);
                         family.add(ind);
                     }else{
-                        ind = new Individual(sample_id, family_id, null, null, sex, phenotype, aux_fields);
-                        ind.setFatherId(father_id);
-                        ind.setMotherId(mother_id);
+                        ind = new Individual(sampleId, familyId, null, null, sex, phenotype, auxFields);
+                        ind.setFatherId(fatherId);
+                        ind.setMotherId(motherId);
                         queue.offer(ind);
                     }
 
@@ -86,12 +83,12 @@ public class Pedigree {
             ind = queue.poll();
             father = null;
             mother = null;
-            father_id = ind.getFatherId();
-            mother_id = ind.getMotherId();
+            fatherId = ind.getFatherId();
+            motherId = ind.getMotherId();
 
-            if(!father_id.equals("0") && !mother_id.equals("0")){ // Existen padre y Madre (hay ID)
-                father = this.getIndividual(father_id);
-                mother = this.getIndividual(mother_id);
+            if(!fatherId.equals("0") && !motherId.equals("0")){ // Existen padre y Madre (hay ID)
+                father = this.getIndividual(fatherId);
+                mother = this.getIndividual(motherId);
                 if(father == null || mother == null){  // Existen pero aún no se han metido en la HASH
                     queue.offer(ind);
                 }else{ // Tenemos el padre y la madre y están en la HASH
@@ -106,8 +103,8 @@ public class Pedigree {
                     family =  this.getFamily(ind.getFamily());
                     family.add(ind);
                 }
-            }else if(!father_id.equals("0") && mother_id.equals("0")){ // No existe la madre
-                father = this.getIndividual(father_id);
+            }else if(!fatherId.equals("0") && motherId.equals("0")){ // No existe la madre
+                father = this.getIndividual(fatherId);
                 mother = null;
                 if(father == null){ // Existe el padre pero aún no se ha metido en la hash
                     queue.offer(ind);
@@ -122,9 +119,9 @@ public class Pedigree {
                     family =  this.getFamily(ind.getFamily());
                     family.add(ind);
                 }
-            }else if(father_id.equals("0") && !mother_id.equals("0")){ // No existe el padre
+            }else if(fatherId.equals("0") && !motherId.equals("0")){ // No existe el padre
                 father = null;
-                mother = this.getIndividual(mother_id);
+                mother = this.getIndividual(motherId);
                 if(mother == null){ // Existe la madre pero aún no se ha metido en la hash
                     queue.offer(ind);
                 }else{
@@ -144,18 +141,18 @@ public class Pedigree {
         reader.close();
     }
 
-    private Set<Individual> getFamily(String family_id) {
-        return families.get(family_id);
+    private Set<Individual> getFamily(String familyId) {
+        return families.get(familyId);
     }
 
     private void parseHeader(String lineHeader) {
 
         String header = lineHeader.substring(1, lineHeader.length());
-        String[] all_fields = header.split("\t");
+        String[] allFields = header.split("\t");
 
-        all_fields = Arrays.copyOfRange(all_fields, 6, all_fields.length);
-        for (int i = 0; i< all_fields.length; i++){
-            this.fields.put(all_fields[i], i);
+        allFields = Arrays.copyOfRange(allFields, 6, allFields.length);
+        for (int i = 0; i< allFields.length; i++){
+            this.fields.put(allFields[i], i);
         }
     }
 

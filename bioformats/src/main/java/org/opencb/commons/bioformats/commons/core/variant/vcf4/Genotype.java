@@ -22,24 +22,24 @@ public class Genotype {
             this.allele2 = null;
             this.code = AllelesCode.ALL_ALLELES_MISSING;
         } else {
-            String[] aux_alleles = genotype.split("/");
-            if (aux_alleles[0].equals(".")) {
+            String[] auxAlleles = genotype.split("/");
+            if (auxAlleles[0].equals(".")) {
                 this.allele1 = null;
                 this.code = AllelesCode.FIRST_ALLELE_MISSING;
             } else {
-                this.allele1 = Integer.valueOf(aux_alleles[0]);
+                this.allele1 = Integer.valueOf(auxAlleles[0]);
             }
 
-            if (aux_alleles.length == 1) { // Haploid
+            if (auxAlleles.length == 1) { // Haploid
                 this.allele2 = null;
                 this.code = AllelesCode.HAPLOID;
 
             } else {
-                if (aux_alleles[1].equals(".")) {
+                if (auxAlleles[1].equals(".")) {
                     this.allele2 = null;
                     this.code = (this.code == AllelesCode.FIRST_ALLELE_MISSING) ? AllelesCode.ALL_ALLELES_MISSING : AllelesCode.SECOND_ALLELE_MISSING;
                 } else {
-                    this.allele2 = Integer.valueOf(aux_alleles[1]);
+                    this.allele2 = Integer.valueOf(auxAlleles[1]);
                 }
             }
 
