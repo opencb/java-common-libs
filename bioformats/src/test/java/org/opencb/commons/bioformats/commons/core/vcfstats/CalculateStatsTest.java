@@ -61,8 +61,6 @@ public class CalculateStatsTest {
 
         CalculateStats.runner(vcfReader, vcfWriter, pedFileName, pathStats);
 
-        // printListStats(list_vcf_stats);
-
     }
 
 
