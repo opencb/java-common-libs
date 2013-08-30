@@ -12,14 +12,14 @@ public class SampleStat {
     private String id;
     private int mendelianErrors;
     private int missingGenotypes;
-    private int homozygotesNumeber;
+    private int homozygotesNumber;
 
 
     public SampleStat(String id) {
         this.id = id;
         this.mendelianErrors = 0;
         this.missingGenotypes = 0;
-        this.homozygotesNumeber = 0;
+        this.homozygotesNumber = 0;
     }
 
     public void incrementMendelianErrors(){
@@ -31,7 +31,7 @@ public class SampleStat {
     }
 
     public void incrementHomozygotesNumber(){
-        this.homozygotesNumeber++;
+        this.homozygotesNumber++;
     }
 
     public String getId() {
@@ -46,8 +46,8 @@ public class SampleStat {
         return missingGenotypes;
     }
 
-    public int getHomozygotesNumeber() {
-        return homozygotesNumeber;
+    public int getHomozygotesNumber() {
+        return homozygotesNumber;
     }
 
 }

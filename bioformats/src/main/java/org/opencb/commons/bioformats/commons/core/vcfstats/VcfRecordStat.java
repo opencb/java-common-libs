@@ -293,5 +293,4 @@ public class VcfRecordStat {
     }
 
 
-
 }

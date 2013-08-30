@@ -1,18 +1,11 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
 import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
-import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -335,7 +328,7 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void runner(VcfDataReader vcfReader, VcfDataWriter vcfWriter, String pedFileName, String path) throws Exception {
+    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, String pedFileName, String path) throws Exception {
 
         int batchSize = 2;
 
@@ -386,6 +379,8 @@ public class CalculateStats {
 
         vcfWriter.write(vcfSampleGroupStatsFam);
         vcfWriter.write(vcfSampleGroupStatsPhen);
+
+        vcfWriter.post();
 
         vcfReader.close();
         vcfWriter.close();

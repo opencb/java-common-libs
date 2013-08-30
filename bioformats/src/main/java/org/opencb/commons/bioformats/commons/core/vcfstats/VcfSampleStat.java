@@ -54,7 +54,7 @@ public class VcfSampleStat {
         sb.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
         for(Map.Entry<String, SampleStat> entry: samplesStats.entrySet()){
             s = entry.getValue();
-            sb.append(String.format("%-10s%-10d%-10d%10d\n",s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+            sb.append(String.format("%-10s%-10d%-10d%10d\n",s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
         }
         return sb.toString();

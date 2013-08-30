@@ -20,7 +20,7 @@ import java.util.Map;
  * Time: 12:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFileDataWriter implements VcfDataWriter {
+public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
 
     private PrintWriter variantPw;
     private PrintWriter globalPw;
@@ -33,7 +33,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
     private String pathGroup;
 
 
-    public VcfFileDataWriter(String path) {
+    public VcfFileStatsDataWriter(String path) {
         if (path.charAt(path.length() - 1) != '/') {
             path += "/";
         }
@@ -149,7 +149,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
         samplePw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
         for (Map.Entry<String, SampleStat> entry : vcfSampleStat.getSamplesStats().entrySet()) {
             s = entry.getValue();
-            samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+            samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
         }
         return true;
@@ -171,7 +171,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
 
             for (Map.Entry<String, SampleStat> entrySample : sampleStat.getSamplesStats().entrySet()) {
                 s = entrySample.getValue();
-                pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumeber()));
+                pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
             }
             pw.close();
