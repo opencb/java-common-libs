@@ -5,6 +5,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
@@ -26,8 +30,8 @@ public class CalculateStatsTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
-    private String vcfFileName = "/home/aaleman/tmp/big.vcf";
-    private String pedFileName = "/home/aaleman/tmp/big.ped";
+    private String vcfFileName = "/home/aaleman/tmp/small.vcf";
+    private String pedFileName = "/home/aaleman/tmp/file.ped";
     private String pathStats   = "/home/aaleman/tmp/jstats/";
 
 
@@ -52,8 +56,10 @@ public class CalculateStatsTest {
     @Test
     public void testCalculateStatsList() throws Exception {
 
+        VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
+        VcfDataWriter vcfWriter = new VcfFileDataWriter(pathStats);
 
-        CalculateStats.runner(vcfFileName, pedFileName, pathStats);
+        CalculateStats.runner(vcfReader, vcfWriter, pedFileName, pathStats);
 
         // printListStats(list_vcf_stats);
 

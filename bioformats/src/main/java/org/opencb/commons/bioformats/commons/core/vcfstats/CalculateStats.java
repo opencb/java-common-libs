@@ -1,5 +1,7 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
@@ -333,29 +335,25 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void runner(String vcfFileName, String pedFileName, String path) throws Exception {
+    public static void runner(VcfDataReader vcfReader, VcfDataWriter vcfWriter, String pedFileName, String path) throws Exception {
 
         int batchSize = 2;
         boolean firstTime = true;
 
-        Vcf4Reader vcf = new Vcf4Reader(vcfFileName);
         Pedigree ped = new Pedigree(pedFileName);
-
-        VariantStatsWriter variantWriter = new VariantStatsWriter(path);
-        SampleStatsWriter sampleWriter = new SampleStatsWriter(path);
-        GlobalStatsWriter globalWriter = new GlobalStatsWriter(path);
-
-        VariantGroupStatsWriter groupWriterPhen = new VariantGroupStatsWriter(path);
-        VariantGroupStatsWriter groupWriterFam = new VariantGroupStatsWriter(path);
-        SampleGroupStatWriter sampleGroupWriterPhen = new SampleGroupStatWriter(path);
-        SampleGroupStatWriter sampleGroupWriterFam = new SampleGroupStatWriter(path);
-
 
         List<VcfRecord> batch;
         List<VcfRecordStat> statsList;
 
+        vcfReader.open();
+        vcfWriter.open();
+
+        vcfReader.pre();
+        vcfWriter.pre();
+
+
         VcfGlobalStat globalStats = new VcfGlobalStat();
-        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcf.getSampleNames());
+        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames());
 
         VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
         VcfSampleGroupStats vcfSampleGroupStatsFam = new VcfSampleGroupStats();
@@ -363,14 +361,12 @@ public class CalculateStats {
         VcfVariantGroupStat groupStatsBatchPhen;
         VcfVariantGroupStat groupStatsBatchFam;
 
-        batch = vcf.read(batchSize);
-
-        variantWriter.printHeader();
+        batch = vcfReader.read(batchSize);
 
         while (!batch.isEmpty()) {
-            statsList = variantStats(batch, vcf.getSampleNames(), ped, globalStats);
+            statsList = variantStats(batch, vcfReader.getSampleNames(), ped, globalStats);
 
-            sampleStats(batch, vcf.getSampleNames(), ped, vcfSampleStat);
+            sampleStats(batch, vcfReader.getSampleNames(), ped, vcfSampleStat);
 
             groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
             groupStatsBatchFam = groupStats(batch, ped, "family");
@@ -379,41 +375,22 @@ public class CalculateStats {
             sampleGroupStats(batch, ped, "family", vcfSampleGroupStatsFam);
 
 
-            if (firstTime) {
-                groupWriterPhen.setFilenames(groupStatsBatchPhen);
-                groupWriterPhen.printHeader();
+            vcfWriter.write(statsList);
+            vcfWriter.write(groupStatsBatchPhen);
+            vcfWriter.write(groupStatsBatchFam);
 
-                groupWriterFam.setFilenames(groupStatsBatchFam);
-                groupWriterFam.printHeader();
-                firstTime = false;
-            }
-
-            variantWriter.printStatRecord(statsList);
-            groupWriterPhen.printGroupStats(groupStatsBatchPhen);
-            groupWriterFam.printGroupStats(groupStatsBatchFam);
-
-            batch = vcf.read(batchSize);
+            batch = vcfReader.read(batchSize);
         }
 
-        sampleGroupWriterPhen.setFilenames(vcfSampleGroupStatsPhen);
-        sampleGroupWriterPhen.printStats(vcfSampleGroupStatsPhen);
-        sampleGroupWriterPhen.close();
+        vcfWriter.write(globalStats);
+        vcfWriter.write(vcfSampleStat);
 
-        sampleGroupWriterFam.setFilenames(vcfSampleGroupStatsFam);
-        sampleGroupWriterFam.printStats(vcfSampleGroupStatsFam);
-        sampleGroupWriterFam.close();
+        vcfWriter.write(vcfSampleGroupStatsFam);
+        vcfWriter.write(vcfSampleGroupStatsPhen);
 
-        sampleWriter.printStats(vcfSampleStat);
-        sampleWriter.close();
+        vcfReader.close();
+        vcfWriter.close();
 
-        globalWriter.printStats(globalStats);
-        globalWriter.close();
-
-
-        vcf.close();
-        variantWriter.close();
-        groupWriterPhen.close();
-        groupWriterFam.close();
     }
 
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
