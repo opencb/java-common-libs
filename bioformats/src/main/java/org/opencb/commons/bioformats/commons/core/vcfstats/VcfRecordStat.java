@@ -15,58 +15,58 @@ import java.util.List;
  */
 public class VcfRecordStat {
     private String chromosome;
-    private Long position;
+    private long position;
     private String refAllele;
     private String[] altAlleles;
     private String mafAllele;
     private String mgfAllele;
-    private Integer numAlleles;
-    private Integer[] allelesCount;
-    private Integer[] genotypesCount;
+    private int numAlleles;
+    private int[] allelesCount;
+    private int[] genotypesCount;
     private List<Genotype> genotypes;
 
 
-    private Float[] allelesFreq;
-    private Float[] genotypesFreq;
-    private Float maf;
-    private Float mgf;
-    private Integer missingAlleles;
-    private Integer missingGenotypes;
-    private Integer mendelinanErrors;
-    private Boolean isIndel;
-    private Float casesPercentDominant;
-    private Float controlsPercentDominant;
-    private Float casesPercentRecessive;
-    private Float controlsPercentRecessive;
-    private Integer transitionsCount;
-    private Integer transversionsCount;
+    private float[] allelesFreq;
+    private float[] genotypesFreq;
+    private float maf;
+    private float mgf;
+    private int missingAlleles;
+    private int missingGenotypes;
+    private int mendelinanErrors;
+    private boolean isIndel;
+    private float casesPercentDominant;
+    private float controlsPercentDominant;
+    private float casesPercentRecessive;
+    private float controlsPercentRecessive;
+    private int transitionsCount;
+    private int transversionsCount;
 
 
     public VcfRecordStat() {
-        this.chromosome                 = "";
-        this.refAllele = "";
-        this.altAlleles = null;
-        this.mafAllele = "";
-        this.mgfAllele = "";
-        this.position                   = (long) 0;
-        this.numAlleles = 0;
-        this.allelesCount = null;
-        this.genotypesCount = null;
-        this.missingAlleles = 0;
-        this.missingGenotypes = 0;
-        this.mendelinanErrors = 0;
-        this.allelesFreq = null;
-        this.genotypesFreq = null;
-        this.maf                        = new Float(0.0);
-        this.mgf                        = new Float(0.0);
-        this.casesPercentDominant = new Float(0.0);
-        this.controlsPercentDominant = new Float(0.0);
-        this.casesPercentRecessive = new Float(0.0);
-        this.controlsPercentRecessive = new Float(0.0);
-        this.isIndel = false;
-        this.genotypes = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
-        this.transitionsCount = 0;
-        this.transversionsCount = 0;
+        this.chromosome               = "";
+        this.refAllele                = "";
+        this.altAlleles               = null;
+        this.mafAllele                = "";
+        this.mgfAllele                = "";
+        this.position                 = (long) 0;
+        this.numAlleles               = 0;
+        this.allelesCount             = null;
+        this.genotypesCount           = null;
+        this.missingAlleles           = 0;
+        this.missingGenotypes         = 0;
+        this.mendelinanErrors         = 0;
+        this.allelesFreq              = null;
+        this.genotypesFreq            = null;
+        this.maf                      = 0;
+        this.mgf                      = 0;
+        this.casesPercentDominant     = 0;
+        this.controlsPercentDominant  = 0;
+        this.casesPercentRecessive    = 0;
+        this.controlsPercentRecessive = 0;
+        this.isIndel                  = false;
+        this.genotypes                = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
+        this.transitionsCount         = 0;
+        this.transversionsCount       = 0;
     }
 
     @Override
@@ -107,7 +107,7 @@ public class VcfRecordStat {
         return position;
     }
 
-    public String getRef_alleles() {
+    public String getRefAlleles() {
         return refAllele;
     }
 
@@ -127,59 +127,59 @@ public class VcfRecordStat {
         return numAlleles;
     }
 
-    public Integer[] getAllelesCount() {
+    public int[] getAllelesCount() {
         return allelesCount;
     }
 
-    public Integer[] getGenotypesCount() {
+    public int[] getGenotypesCount() {
         return genotypesCount;
     }
 
-    public Float[] getAllelesFreq() {
+    public float[] getAllelesFreq() {
         return allelesFreq;
     }
 
-    public Float[] getGenotypesFreq() {
+    public float[] getGenotypesFreq() {
         return genotypesFreq;
     }
 
-    public Float getMaf() {
+    public float getMaf() {
         return maf;
     }
 
-    public Float getMgf() {
+    public float getMgf() {
         return mgf;
     }
 
-    public Integer getMissingAlleles() {
+    public int getMissingAlleles() {
         return missingAlleles;
     }
 
-    public Integer getMissingGenotypes() {
+    public int getMissingGenotypes() {
         return missingGenotypes;
     }
 
-    public Integer getMendelinanErrors() {
+    public int getMendelinanErrors() {
         return mendelinanErrors;
     }
 
-    public Boolean getIndel() {
+    public boolean getIndel() {
         return isIndel;
     }
 
-    public Float getCasesPercentDominant() {
+    public float getCasesPercentDominant() {
         return casesPercentDominant;
     }
 
-    public Float getControlsPercentDominant() {
+    public float getControlsPercentDominant() {
         return controlsPercentDominant;
     }
 
-    public Float getCasesPercentRecessive() {
+    public float getCasesPercentRecessive() {
         return casesPercentRecessive;
     }
 
-    public Float getControlsPercentRecessive() {
+    public float getControlsPercentRecessive() {
         return controlsPercentRecessive;
     }
 
@@ -187,7 +187,7 @@ public class VcfRecordStat {
         this.chromosome = chromosome;
     }
 
-    public void setPosition(Long position) {
+    public void setPosition(long position) {
         this.position = position;
     }
 
@@ -207,63 +207,63 @@ public class VcfRecordStat {
         this.mgfAllele = mgfAllele;
     }
 
-    public void setNumAlleles(Integer numAlleles) {
+    public void setNumAlleles(int numAlleles) {
         this.numAlleles = numAlleles;
     }
 
-    public void setAllelesCount(Integer[] allelesCount) {
+    public void setAllelesCount(int[] allelesCount) {
         this.allelesCount = allelesCount;
     }
 
-    public void setGenotypesCount(Integer[] genotypesCount) {
+    public void setGenotypesCount(int[] genotypesCount) {
         this.genotypesCount = genotypesCount;
     }
 
-    public void setAlleles_freg(Float[] alleles_freg) {
-        this.allelesFreq = alleles_freg;
+    public void setAllelesFreq(float[] allelesFreg) {
+        this.allelesFreq = allelesFreg;
     }
 
-    public void setGenotypesFreq(Float[] genotypesFreq) {
+    public void setGenotypesFreq(float[] genotypesFreq) {
         this.genotypesFreq = genotypesFreq;
     }
 
-    public void setMaf(Float maf) {
+    public void setMaf(float maf) {
         this.maf = maf;
     }
 
-    public void setMgf(Float mgf) {
+    public void setMgf(float mgf) {
         this.mgf = mgf;
     }
 
-    public void setMissingAlleles(Integer missingAlleles) {
+    public void setMissingAlleles(int missingAlleles) {
         this.missingAlleles = missingAlleles;
     }
 
-    public void setMissingGenotypes(Integer missingGenotypes) {
+    public void setMissingGenotypes(int missingGenotypes) {
         this.missingGenotypes = missingGenotypes;
     }
 
-    public void setMendelinanErrors(Integer mendelinanErrors) {
+    public void setMendelinanErrors(int mendelinanErrors) {
         this.mendelinanErrors = mendelinanErrors;
     }
 
-    public void setIndel(Boolean indel) {
+    public void setIndel(boolean indel) {
         this.isIndel = indel;
     }
 
-    public void setCasesPercentDominant(Float casesPercentDominant) {
+    public void setCasesPercentDominant(float casesPercentDominant) {
         this.casesPercentDominant = casesPercentDominant;
     }
 
-    public void setControlsPercentDominant(Float controlsPercentDominant) {
+    public void setControlsPercentDominant(float controlsPercentDominant) {
         this.controlsPercentDominant = controlsPercentDominant;
     }
 
-    public void setCasesPercentRecessive(Float casesPercentRecessive) {
+    public void setCasesPercentRecessive(float casesPercentRecessive) {
         this.casesPercentRecessive = casesPercentRecessive;
     }
 
-    public void setControlsPercentRecessive(Float controlsPercentRecessive) {
+    public void setControlsPercentRecessive(float controlsPercentRecessive) {
         this.controlsPercentRecessive = controlsPercentRecessive;
     }
 
@@ -276,19 +276,19 @@ public class VcfRecordStat {
         this.genotypes = genotypes;
     }
 
-    public Integer getTransitionsCount() {
+    public int getTransitionsCount() {
         return transitionsCount;
     }
 
-    public void setTransitionsCount(Integer transitionsCount) {
+    public void setTransitionsCount(int transitionsCount) {
         this.transitionsCount = transitionsCount;
     }
 
-    public Integer getTransversionsCount() {
+    public int getTransversionsCount() {
         return transversionsCount;
     }
 
-    public void setTransversionsCount(Integer transversionsCount) {
+    public void setTransversionsCount(int transversionsCount) {
         this.transversionsCount = transversionsCount;
     }
 

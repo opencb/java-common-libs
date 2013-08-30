@@ -18,19 +18,19 @@ import java.util.List;
  */
 public class VcfRecordFilters {
 
-    public static List<VcfRecord> filter(List<VcfRecord> list_records, List<VcfFilter> filters){
+    public static List<VcfRecord> filter(List<VcfRecord> recordList, List<VcfFilter> filters){
 
-        Predicate<VcfRecord> and_filters = Predicates.and(filters);
+        Predicate<VcfRecord> andFilter = Predicates.and(filters);
 
-        return Lists.newArrayList(Iterables.filter(list_records, and_filters));
+        return Lists.newArrayList(Iterables.filter(recordList, andFilter));
 
     }
 
-    public static boolean filter(VcfRecord vcf_record, List<VcfFilter> filters){
+    public static boolean filter(VcfRecord vcfRecord, List<VcfFilter> filters){
 
-           Predicate<VcfRecord> and_filters = Predicates.and(filters);
+           Predicate<VcfRecord> andFilter = Predicates.and(filters);
 
-        return and_filters.apply(vcf_record);
+        return andFilter.apply(vcfRecord);
 
     }
 }

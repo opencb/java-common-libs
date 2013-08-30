@@ -34,18 +34,18 @@ public class VcfGlobalStat {
         this.accumQuality = 0;
     }
 
-    public void updateStats(int variants_count, int samples_count, int snps_count, int indels_count, int pass_count, int transitions_count, int transversions_count, int biallelics_count, int multiallelics_count, float accum_quality) {
-        this.variantsCount += variants_count;
+    public void updateStats(int variantsCount, int samplesCount, int snpsCount, int indelsCount, int passCount, int transitionsCount, int transversionsCount, int biallelicsCount, int multiallelicsCount, float accumQuality) {
+        this.variantsCount += variantsCount;
         if(this.samplesCount == 0)
-            this.samplesCount += samples_count;
-        this.snpsCount += snps_count;
-        this.indelsCount += indels_count;
-        this.passCount += pass_count;
-        this.transitionsCount += transitions_count;
-        this.transversionsCount += transversions_count;
-        this.biallelicsCount += biallelics_count;
-        this.multiallelicsCount += multiallelics_count;
-        this.accumQuality += accum_quality;
+            this.samplesCount += samplesCount;
+        this.snpsCount += snpsCount;
+        this.indelsCount += indelsCount;
+        this.passCount += passCount;
+        this.transitionsCount += transitionsCount;
+        this.transversionsCount += transversionsCount;
+        this.biallelicsCount += biallelicsCount;
+        this.multiallelicsCount += multiallelicsCount;
+        this.accumQuality += accumQuality;
     }
 
     public int getVariantsCount() {

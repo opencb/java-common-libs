@@ -13,12 +13,12 @@ public class Genotypes {
 
     public static void addGenotypeToList(List<Genotype> list, Genotype g) {
 
-        Genotype aux_g;
+        Genotype auxG;
         int index = list.indexOf(g);
 
         if (index >= 0) {
-            aux_g = list.get(index);
-            aux_g.setCount(aux_g.getCount() + 1);
+            auxG = list.get(index);
+            auxG.setCount(auxG.getCount() + 1);
         } else {
             g.setCount(g.getCount() + 1);
             list.add(g);
