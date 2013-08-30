@@ -160,7 +160,6 @@ public class VcfFileDataWriter implements VcfDataWriter {
         PrintWriter pw;
         String filename;
         VcfSampleStat sampleStat;
-        String val;
         SampleStat s;
 
         for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
