@@ -5,19 +5,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataWriter;
-import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.*;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
-import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -57,7 +48,7 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfDataWriter vcfWriter = new VcfFileDataWriter(pathStats);
+        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
 
         CalculateStats.runner(vcfReader, vcfWriter, pedFileName, pathStats);
 

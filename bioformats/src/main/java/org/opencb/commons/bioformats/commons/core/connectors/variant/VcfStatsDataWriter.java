@@ -12,7 +12,7 @@ import java.io.IOException;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface VcfDataWriter extends DataWriter<VcfRecordStat>{
+public interface VcfStatsDataWriter extends DataWriter<VcfRecordStat>{
     public boolean write(VcfGlobalStat globalStats);
 
     public boolean write(VcfSampleStat sampleStat);

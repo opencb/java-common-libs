@@ -12,7 +12,7 @@ import java.util.List;
  * Time: 1:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSqliteDataWriter implements VcfDataWriter {
+public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
 
     @Override
     public boolean open() throws IOException {
