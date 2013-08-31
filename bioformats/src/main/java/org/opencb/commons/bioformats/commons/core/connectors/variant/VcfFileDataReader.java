@@ -54,7 +54,7 @@ public class VcfFileDataReader implements VcfDataReader {
     @Override
     public boolean pre() throws IOException, FileFormatException {
 
-        processMetaInformation();
+        processHeader();
 
         return true;
     }
@@ -121,7 +121,8 @@ public class VcfFileDataReader implements VcfDataReader {
             }
 
         }
-        return listRecords;    }
+        return listRecords;
+    }
 
 
     @Override
@@ -130,58 +131,44 @@ public class VcfFileDataReader implements VcfDataReader {
     }
 
 
-    private void processMetaInformation() throws IOException, FileFormatException {
+    private void processHeader() throws IOException, FileFormatException {
         VcfInfo vcfInfo;
         VcfFilter vcfFilter;
         VcfFormat vcfFormat;
         List<String> headerLine;
-        String line = "";
+        String line;
         String[] fields;
         BufferedReader localBufferedReader = new BufferedReader(new FileReader(file));
         while ((line = localBufferedReader.readLine()) != null && line.startsWith("#")) {
-//			logger.debug("line: "+line);
+
             if (line.startsWith("##fileformat")) {
                 if (line.split("=").length > 1) {
-//					this.fileFormat = line.split("=")[1].trim();
+
                     vcf4.setFileFormat(line.split("=")[1].trim());
                 } else {
                     throw new FileFormatException("");
                 }
+            } else if (line.startsWith("##INFO")) {
+
+                vcfInfo = new VcfInfo(line);
+                vcf4.getInfo().put(vcfInfo.getId(), vcfInfo);
+            } else if (line.startsWith("##FILTER")) {
+
+                vcfFilter = new VcfFilter(line);
+                vcf4.getFilter().put(vcfFilter.getId(), vcfFilter);
+            } else if (line.startsWith("##FORMAT")) {
+
+                vcfFormat = new VcfFormat(line);
+                vcf4.getFormat().put(vcfFormat.getId(), vcfFormat);
+            } else if (line.startsWith("#CHROM")) {
+                headerLine = StringUtils.toList(line.replace("#", ""), "\t");
+
+                vcf4.setHeaderLine(headerLine);
             } else {
-                if (line.startsWith("##INFO")) {
-//					System.out.println(line);
-//					System.out.println(new VcfInfo(line).toString()+"\n");
-                    vcfInfo = new VcfInfo(line);
-                    vcf4.getInfo().put(vcfInfo.getId(), vcfInfo);
-                } else {
-                    if (line.startsWith("##FILTER")) {
-//						System.out.println(line);
-//						System.out.println(new VcfGenericFilter(line).toString()+"\n");
-                        vcfFilter = new VcfFilter(line);
-                        vcf4.getFilter().put(vcfFilter.getId(), vcfFilter);
-                    } else {
-                        if (line.startsWith("##FORMAT")) {
-//							System.out.println(line);
-//							System.out.println(new VcfFormat(line).toString()+"\n");
-                            vcfFormat = new VcfFormat(line);
-                            vcf4.getFormat().put(vcfFormat.getId(), vcfFormat);
-                        } else {
-                            if (line.startsWith("#CHROM")) {
-                                headerLine = StringUtils.toList(line.replace("#", ""), "\t");
-//								System.out.println(headerLine.toString());
-                                vcf4.setHeaderLine(headerLine);
-                            } else {
-                                fields = line.replace("#", "").split("=", 2);
-                                vcf4.getMetaInformation().put(fields[0], fields[1]);
-//								System.out.println(metaInformation.toString());
-//								logger.warn("Warning in 'processMetaInformation': Execution cannot reach this code, line: "+line);
-                            }
-                        }
-                    }
-                }
+                fields = line.replace("#", "").split("=", 2);
+                vcf4.getMetaInformation().put(fields[0], fields[1]);
             }
         }
         localBufferedReader.close();
     }
-
 }

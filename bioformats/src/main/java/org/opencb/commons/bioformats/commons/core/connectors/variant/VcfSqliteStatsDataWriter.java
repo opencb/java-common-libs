@@ -58,6 +58,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             con.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -105,6 +106,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             con.commit();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            return false;
         }
 
         return true;
@@ -123,22 +125,24 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
 
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            return false;
 
         }
 
-        return true;  //To change body of implemented methods use File | Settings | File Templates.
+        return true;
     }
 
     @Override
     public boolean write(VcfRecordStat data) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     @Override
     public boolean write(List<VcfRecordStat> data) {
 
         String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-                
+        boolean res = true;
+
 
         try {
             pstmt = con.prepareStatement(sql);
@@ -168,15 +172,16 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             pstmt.close();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
+            res = false;
         }
 
 
-        return true;
+        return res;
     }
 
     @Override
     public boolean write(VcfGlobalStat globalStats) {
+        boolean res = true;
         try {
             String sql;
             stmt = con.createStatement();
@@ -209,9 +214,10 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
 
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            res = false;
         }
 
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return res;
     }
 
     @Override
@@ -219,11 +225,12 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
         String sql = "INSERT INTO sample_stats VALUES(?,?,?,?);";
         SampleStat s;
         String name;
+        boolean res = true;
         try {
             pstmt = con.prepareStatement(sql);
 
-            for (Map.Entry<String,SampleStat> entry : sampleStat.getSamplesStats().entrySet()) {
-                     s = entry.getValue();
+            for (Map.Entry<String, SampleStat> entry : sampleStat.getSamplesStats().entrySet()) {
+                s = entry.getValue();
                 name = entry.getKey();
 
                 pstmt.setString(1, name);
@@ -238,19 +245,21 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             pstmt.close();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            res = false;
         }
 
 
-        return true;    }
+        return res;
+    }
 
     @Override
     public boolean write(VcfSampleGroupStats sampleGroupStats) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     @Override
     public boolean write(VcfVariantGroupStat groupStats) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
 }

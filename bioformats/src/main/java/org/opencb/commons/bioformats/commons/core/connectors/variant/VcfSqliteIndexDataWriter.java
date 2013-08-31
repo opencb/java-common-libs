@@ -22,7 +22,6 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
     private String dbName;
     private Connection con;
     private java.sql.Statement stmt;
-    private PreparedStatement pstmt;
     private boolean createdSampleTable;
 
     public VcfSqliteIndexDataWriter(String dbName) {
@@ -146,7 +145,9 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
         int allele_1, allele_2;
         Genotype g;
         int id;
+        boolean res = true;
 
+        PreparedStatement pstmt;
         if (!createdSampleTable) {
             try {
                 sql = "INSERT INTO sample (name) VALUES(?);";
@@ -163,7 +164,7 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
                 createdSampleTable = true;
             } catch (SQLException e) {
                 System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                return false;
+                res = false;
             }
         }
 
@@ -208,7 +209,7 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
                     }
 
                 } else {
-                    return false;
+                    res = false;
                 }
 
 
@@ -219,9 +220,9 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
             con.commit();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
+            res = false;
         }
 
-        return true;
+        return res;
     }
 }
