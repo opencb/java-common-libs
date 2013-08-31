@@ -5,8 +5,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.*;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfFileStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
 /**
@@ -55,10 +60,11 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        //VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
-        VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
+        //VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        PedDataReader pedReader = new PedFileDataReader(pedFileName);
 
-        CalculateStats.runner(vcfReader, vcfWriter, pedFileName);
+        CalculateStats.runner(vcfReader, vcfWriter, pedReader);
 
     }
 

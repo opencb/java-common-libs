@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.readers;
 
 import com.google.common.base.Predicate;
 import org.bioinfo.commons.io.utils.FileUtils;
@@ -40,28 +40,45 @@ public class VcfFileDataReader implements VcfDataReader {
 
 
     @Override
-    public boolean open() throws IOException {
-        this.file = new File(this.filename);
-        vcf4 = new Vcf4();
+    public boolean open(){
 
-        FileUtils.checkFile(this.file);
-        this.reader = new BufferedReader(new FileReader(this.file));
+        try {
+            this.file = new File(this.filename);
+            vcf4 = new Vcf4();
+
+            FileUtils.checkFile(this.file);
+
+            this.reader = new BufferedReader(new FileReader(this.file));
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
 
         return true;
     }
 
 
     @Override
-    public boolean pre() throws IOException, FileFormatException {
+    public boolean pre(){
 
-        processHeader();
+        try {
+            processHeader();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (FileFormatException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
 
         return true;
     }
 
     @Override
-    public boolean close() throws IOException {
-        reader.close();
+    public boolean close(){
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         return true;
     }
 

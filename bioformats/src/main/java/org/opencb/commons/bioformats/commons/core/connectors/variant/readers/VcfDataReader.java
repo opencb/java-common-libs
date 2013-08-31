@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.readers;
 
 import org.opencb.commons.bioformats.commons.core.connectors.DataReader;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;

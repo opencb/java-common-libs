@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface DataWriter<T> {
 
-    public boolean open() throws IOException;
+    public boolean open();
 
     public boolean close();
 

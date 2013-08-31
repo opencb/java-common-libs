@@ -5,10 +5,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfIndexDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfSqliteIndexDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfIndexDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteIndexDataWriter;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
 /**

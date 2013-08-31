@@ -14,11 +14,11 @@ import java.util.List;
  */
 public interface DataReader<T> {
 
-    public boolean open() throws IOException;
+    public boolean open();
 
-    public boolean close() throws IOException;
+    public boolean close();
 
-    public boolean pre() throws IOException, FileFormatException;
+    public boolean pre();
 
     public boolean post();
 

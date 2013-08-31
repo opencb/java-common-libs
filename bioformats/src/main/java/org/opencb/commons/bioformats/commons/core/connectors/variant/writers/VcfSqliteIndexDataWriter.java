@@ -1,10 +1,9 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.writers;
 
 import org.bioinfo.commons.utils.StringUtils;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.Genotype;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 
-import java.beans.Statement;
 import java.io.IOException;
 import java.sql.*;
 import java.util.List;
@@ -30,7 +29,7 @@ public class VcfSqliteIndexDataWriter implements VcfIndexDataWriter {
     }
 
     @Override
-    public boolean open() throws IOException {
+    public boolean open() {
 
         try {
             Class.forName("org.sqlite.JDBC");

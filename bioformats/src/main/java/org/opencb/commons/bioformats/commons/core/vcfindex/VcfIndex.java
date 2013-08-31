@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.commons.core.vcfindex;
 
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfIndexDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfIndexDataWriter;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 

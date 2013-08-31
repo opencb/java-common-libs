@@ -1,7 +1,8 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
@@ -328,14 +329,19 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, String pedFileName) throws Exception {
+    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
 
         int batchSize = 10000;
 
-        Pedigree ped = new Pedigree(pedFileName);
+        Pedigree ped;
 
         List<VcfRecord> batch;
         List<VcfRecordStat> statsList;
+
+        pedReader.open();
+        ped = pedReader.read();
+        pedReader.close();
+
 
         vcfReader.open();
         vcfWriter.open();

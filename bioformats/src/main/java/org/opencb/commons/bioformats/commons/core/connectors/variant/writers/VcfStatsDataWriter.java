@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.writers;
 
 import org.opencb.commons.bioformats.commons.core.connectors.DataWriter;
 import org.opencb.commons.bioformats.commons.core.vcfstats.*;

@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.writers;
 
 import org.bioinfo.commons.utils.StringUtils;
 import org.opencb.commons.bioformats.commons.core.vcfstats.*;
@@ -6,7 +6,6 @@ import org.opencb.commons.bioformats.commons.core.vcfstats.*;
 import java.io.IOException;
 
 import java.sql.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean open() throws IOException {
+    public boolean open(){
 
         try {
             Class.forName("org.sqlite.JDBC");

@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons.core.connectors.variant;
+package org.opencb.commons.bioformats.commons.core.connectors.variant.writers;
 
 import org.opencb.commons.bioformats.commons.core.vcfstats.*;
 
@@ -43,19 +43,25 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean open() throws IOException {
+    public boolean open() {
 
-        variantPw = new PrintWriter(new FileWriter(path + "variants.stats"));
-        globalPw = new PrintWriter(new FileWriter(path + "global.stats"));
-        samplePw = new PrintWriter(new FileWriter(path + "sample.stats"));
+        try {
+            variantPw = new PrintWriter(new FileWriter(path + "variants.stats"));
+            globalPw = new PrintWriter(new FileWriter(path + "global.stats"));
+            samplePw = new PrintWriter(new FileWriter(path + "sample.stats"));
 
-        Path dirPath = Paths.get(path + "sampleGroupStats");
-        Path dir = Files.createDirectories(dirPath);
-        this.pathSampleGroup = dir.toString() + "/";
+            Path dirPath = Paths.get(path + "sampleGroupStats");
+            Path dir = Files.createDirectories(dirPath);
+            this.pathSampleGroup = dir.toString() + "/";
 
-        dirPath = Paths.get(path + "groupStats");
-        dir = Files.createDirectories(dirPath);
-        this.pathGroup = dir.toString() + "/";
+            dirPath = Paths.get(path + "groupStats");
+            dir = Files.createDirectories(dirPath);
+            this.pathGroup = dir.toString() + "/";
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+
 
 
         return true;
