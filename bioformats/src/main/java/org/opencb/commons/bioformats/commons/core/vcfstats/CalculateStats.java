@@ -328,9 +328,9 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, String pedFileName, String path) throws Exception {
+    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, String pedFileName) throws Exception {
 
-        int batchSize = 2;
+        int batchSize = 10000;
 
         Pedigree ped = new Pedigree(pedFileName);
 

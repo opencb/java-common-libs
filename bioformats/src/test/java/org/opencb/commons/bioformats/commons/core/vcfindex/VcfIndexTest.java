@@ -1,29 +1,30 @@
-package org.opencb.commons.bioformats.commons.core.vcfstats;
+package org.opencb.commons.bioformats.commons.core.vcfindex;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.*;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfIndexDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.VcfSqliteIndexDataWriter;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
 /**
  * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 8/26/13
- * Time: 1:12 PM
+ * User: aleman
+ * Date: 8/30/13
+ * Time: 7:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CalculateStatsTest {
+public class VcfIndexTest {
 
     private Long start, end;
     private Vcf4Reader vcf;
     private String path = "/opt/data/";
     private String vcfFileName;
-    private String pedFileName;
-    private String pathStats;
+    private String pathIndex;
     private String dbFilename;
 
 
@@ -33,35 +34,27 @@ public class CalculateStatsTest {
 
     @Before
     public void setUp() throws Exception {
-
-        vcfFileName = path + "small.vcf";
-        pedFileName= path + "file.ped";
-        pathStats = path + "jstats/";
-        dbFilename = path + "jstats/stats.db";
+        vcfFileName = path + "file.vcf";
+        pathIndex = path + "jstats/";
+        dbFilename = path + "jstats/index.db";
         start = System.currentTimeMillis();
-
 
     }
 
     @After
     public void tearDown() throws Exception {
-
         end = System.currentTimeMillis();
         System.out.println("Time " + name.getMethodName() + ": " + (end - start));
 
     }
 
     @Test
-    public void testCalculateStatsList() throws Exception {
+    public void testRunner() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        //VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
-        VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        VcfIndexDataWriter vcfWriter = new VcfSqliteIndexDataWriter(dbFilename);
 
-        CalculateStats.runner(vcfReader, vcfWriter, pedFileName);
+        VcfIndex.runner(vcfReader, vcfWriter);
 
     }
-
-
-
 }

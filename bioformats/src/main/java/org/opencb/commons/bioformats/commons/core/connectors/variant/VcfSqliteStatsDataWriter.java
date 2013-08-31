@@ -36,6 +36,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             System.out.println("dbName = " + dbName);
             con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
             con.setAutoCommit(false);
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -69,6 +70,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
                 " value TEXT," +
                 "PRIMARY KEY (name));";
         String variant_stats = "CREATE TABLE IF NOT EXISTS variant_stats (" +
+                "id_variant INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "chromosome TEXT, " +
                 "position INT64, " +
                 "allele_ref TEXT, " +
@@ -86,11 +88,11 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
                 "cases_percent_recessive DOUBLE, " +
                 "controls_percent_recessive DOUBLE);";
         String sample_stats = "CREATE TABLE IF NOT EXISTS sample_stats(" +
-                "id TEXT, " +
+                "name TEXT, " +
                 "mendelian_errors INT, " +
                 "missing_genotypes INT, " +
                 "homozygotesNumber INT, " +
-                "PRIMARY KEY (id));";
+                "PRIMARY KEY (name));";
 
 
         try {
@@ -99,6 +101,8 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             stmt.execute(variant_stats);
             stmt.execute(sample_stats);
             stmt.close();
+
+            con.commit();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
         }
@@ -133,7 +137,8 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
     @Override
     public boolean write(List<VcfRecordStat> data) {
 
-        String sql = "INSERT INTO variant_stats VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                
 
         try {
             pstmt = con.prepareStatement(sql);
@@ -163,6 +168,7 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
             pstmt.close();
         } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            return false;
         }
 
 
