@@ -20,11 +20,13 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
 
     private String dbName;
     private Connection con;
-    private Statement stmt = null;
-    private PreparedStatement pstmt = null;
+    private Statement stmt;
+    private PreparedStatement pstmt;
 
     public VcfSqliteStatsDataWriter(String dbName) {
         this.dbName = dbName;
+        stmt = null;
+        pstmt = null;
     }
 
     @Override

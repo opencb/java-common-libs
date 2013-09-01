@@ -7,11 +7,14 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedSqliteDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfFileStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
+import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
 /**
@@ -39,7 +42,7 @@ public class CalculateStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        vcfFileName = path + "small.vcf";
+        vcfFileName = path + "file.vcf";
         pedFileName= path + "file.ped";
         pathStats = path + "jstats/";
         dbFilename = path + "jstats/stats.db";
@@ -60,9 +63,22 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
-        //VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        // VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
+        VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
         PedDataReader pedReader = new PedFileDataReader(pedFileName);
+        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
+
+        pedReader.open();
+        pedReader.pre();
+        Pedigree ped = pedReader.read();
+        pedReader.post();
+        pedReader.close();
+
+        pedWriter.open();
+        pedWriter.pre();
+        pedWriter.write(ped);
+        pedWriter.post();
+        pedWriter.close();
 
         CalculateStats.runner(vcfReader, vcfWriter, pedReader);
 

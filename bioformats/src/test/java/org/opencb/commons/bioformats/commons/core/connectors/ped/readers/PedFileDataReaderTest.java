@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedSqliteDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
@@ -23,7 +25,10 @@ public class PedFileDataReaderTest {
     private Long start, end;
     private Vcf4Reader vcf;
     private String path = "/opt/data/";
-    private String pedFile = "file.ped";
+    private String pedFile;
+    private String dbFilename;
+    private String pathStats;
+
 
 
 
@@ -35,7 +40,9 @@ public class PedFileDataReaderTest {
     public void setUp() throws Exception {
 
 
-        pedFile = path + pedFile;
+        pedFile = path + "big.ped";
+        pathStats = path + "jstats/";
+        dbFilename = pathStats + "stats.db";
         start = System.currentTimeMillis();
 
 
@@ -52,6 +59,7 @@ public class PedFileDataReaderTest {
     @Test
     public void test() throws IOException, FileFormatException {
         PedDataReader pedReader = new PedFileDataReader(pedFile);
+        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
         Pedigree ped;
 
         pedReader.open();
@@ -60,6 +68,11 @@ public class PedFileDataReaderTest {
         pedReader.post();
         pedReader.close();
 
-        System.out.println("ped = " + ped);
+        pedWriter.open();
+        pedWriter.pre();
+        pedWriter.write(ped);
+        pedWriter.post();
+        pedWriter.close();
+
     }
 }
