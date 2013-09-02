@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfIndexDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteIndexDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteDataWriter;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
 
 /**
@@ -36,7 +36,7 @@ public class VcfIndexTest {
     public void setUp() throws Exception {
         vcfFileName = path + "file.vcf";
         pathIndex = path + "jstats/";
-        dbFilename = path + "jstats/index.db";
+        dbFilename = path + "jstats/variant.db";
         start = System.currentTimeMillis();
 
     }
@@ -52,7 +52,7 @@ public class VcfIndexTest {
     public void testRunner() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfIndexDataWriter vcfWriter = new VcfSqliteIndexDataWriter(dbFilename);
+        VcfDataWriter vcfWriter = new VcfSqliteDataWriter(dbFilename);
 
         VcfIndex.runner(vcfReader, vcfWriter);
 

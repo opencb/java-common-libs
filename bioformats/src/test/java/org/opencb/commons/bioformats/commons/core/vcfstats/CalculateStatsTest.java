@@ -7,11 +7,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedFileDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.ped.writers.PedSqliteDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfFileStatsDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteStatsDataWriter;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfFileDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
@@ -45,7 +42,7 @@ public class CalculateStatsTest {
         vcfFileName = path + "file.vcf";
         pedFileName= path + "file.ped";
         pathStats = path + "jstats/";
-        dbFilename = path + "jstats/stats.db";
+        dbFilename = path + "jstats/variant.db";
         start = System.currentTimeMillis();
 
 
@@ -63,8 +60,7 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
-        //VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        VcfDataWriter vcfWriter = new VcfFileDataWriter(pathStats);
         PedDataReader pedReader = new PedFileDataReader(pedFileName);
 //        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
 
@@ -80,7 +76,7 @@ public class CalculateStatsTest {
 //        pedWriter.post();
 //        pedWriter.close();
 
-        CalculateStats.runnerMulti(vcfReader, vcfWriter, pedReader);
+        CalculateStats.runner(vcfReader, vcfWriter, pedReader);
 
     }
 

@@ -3,7 +3,7 @@ package org.opencb.commons.bioformats.commons.core.vcfstats;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
-import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Individual;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
@@ -348,7 +348,7 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void runner(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
+    public static void runner(VcfDataReader vcfReader, VcfDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
 
         int batchSize = 10000;
 
@@ -366,7 +366,7 @@ public class CalculateStats {
         vcfWriter.open();
 
         vcfReader.pre();
-        vcfWriter.pre();
+        vcfWriter.statsPre();
 
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
@@ -392,76 +392,76 @@ public class CalculateStats {
             sampleGroupStats(batch, ped, "family", vcfSampleGroupStatsFam);
 
 
-            vcfWriter.write(statsList);
-            vcfWriter.write(groupStatsBatchPhen);
-            vcfWriter.write(groupStatsBatchFam);
+            vcfWriter.writeVariantStats(statsList);
+            vcfWriter.writeVariantGroupStats(groupStatsBatchPhen);
+            vcfWriter.writeVariantGroupStats(groupStatsBatchFam);
 
             batch = vcfReader.read(batchSize);
         }
 
-        vcfWriter.write(globalStats);
-        vcfWriter.write(vcfSampleStat);
+        vcfWriter.writeGlobalStats(globalStats);
+        vcfWriter.writeSampleStats(vcfSampleStat);
 
-        vcfWriter.write(vcfSampleGroupStatsFam);
-        vcfWriter.write(vcfSampleGroupStatsPhen);
+        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsFam);
+        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsPhen);
 
-        vcfWriter.post();
+        vcfWriter.statsPost();
 
         vcfReader.close();
         vcfWriter.close();
 
     }
 
-    public static void runnerMulti(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
+    public static void runnerMulti(VcfDataReader vcfReader, VcfDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
 
 
-        ExecutorService threadPool = Executors.newFixedThreadPool(4);
-        CompletionService<List<VcfRecordStat>> pool = new ExecutorCompletionService<>(threadPool);
-
-        List<Future<List<VcfRecordStat>>> futures = new ArrayList<>(10);
-        int batchSize = 10000;
-        int cont = 0;
-
-        Pedigree ped;
-
-        List<VcfRecord> batch;
-        List<VcfRecordStat> statsList;
-
-        pedReader.open();
-        ped = pedReader.read();
-        pedReader.close();
-
-
-        vcfReader.open();
-        vcfWriter.open();
-
-        vcfReader.pre();
-        vcfWriter.pre();
-
-
-        VcfGlobalStat globalStats = new VcfGlobalStat();
-
-
-        batch = vcfReader.read(batchSize);
-
-        while (!batch.isEmpty()) {
-            cont++;
-            pool.submit(new StatsTask(batch, vcfReader.getSampleNames(), ped, globalStats));
-
-            batch = vcfReader.read(batchSize);
-        }
-
-        for(int i=0; i< cont; i++ ){
-            statsList = pool.take().get();
-            vcfWriter.write(statsList);
-        }
-
-
-
-        vcfWriter.post();
-
-        vcfReader.close();
-        vcfWriter.close();
+//        ExecutorService threadPool = Executors.newFixedThreadPool(4);
+//        CompletionService<List<VcfRecordStat>> pool = new ExecutorCompletionService<>(threadPool);
+//
+//        List<Future<List<VcfRecordStat>>> futures = new ArrayList<>(10);
+//        int batchSize = 10000;
+//        int cont = 0;
+//
+//        Pedigree ped;
+//
+//        List<VcfRecord> batch;
+//        List<VcfRecordStat> statsList;
+//
+//        pedReader.open();
+//        ped = pedReader.read();
+//        pedReader.close();
+//
+//
+//        vcfReader.open();
+//        vcfWriter.open();
+//
+//        vcfReader.pre();
+//        vcfWriter.pre();
+//
+//
+//        VcfGlobalStat globalStats = new VcfGlobalStat();
+//
+//
+//        batch = vcfReader.read(batchSize);
+//
+//        while (!batch.isEmpty()) {
+//            cont++;
+//            pool.submit(new StatsTask(batch, vcfReader.getSampleNames(), ped, globalStats));
+//
+//            batch = vcfReader.read(batchSize);
+//        }
+//
+//        for(int i=0; i< cont; i++ ){
+//            statsList = pool.take().get();
+//            vcfWriter.writeVariantStats(statsList);
+//        }
+//
+//
+//
+//        vcfWriter.post();
+//
+//        vcfReader.close();
+//        vcfWriter.close();
 
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
  * Time: 12:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DataWriter<T> {
+public interface DataWriter {
 
     public boolean open();
 
@@ -20,6 +20,4 @@ public interface DataWriter<T> {
 
     public boolean post();
 
-    public boolean write(T data);
-    public boolean write(List<T> data);
 }
