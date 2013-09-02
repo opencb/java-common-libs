@@ -9,6 +9,7 @@ import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.vcf4.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -324,70 +325,6 @@ public class CalculateStats {
         return statList;
     }
 
-    private static void calculateHardyWeinberChiSquareTest(List<VcfRecordStat> statList) {
-        //To change body of created methods use File | Settings | File Templates.
-    }
-
-    private static void hardyWeinbergTest(VcfHardyWeinbergStat hw) {
-
-        hw.setN(hw.getN_AA() + hw.getN_Aa() + hw.getN_aa());
-        int n = hw.getN();
-        int n_AA = hw.getN_AA();
-        int n_Aa = hw.getN_Aa();
-        int n_aa = hw.getN_aa();
-
-        ChiSquareTest chiSquareTest = new ChiSquareTest();
-
-        float chi, pValue;
-
-
-        if(n > 0){
-            float p = (float) ((2.0 * n_AA+n_Aa)/(2*n));
-            float q = 1 - p;
-
-            hw.setP(p);
-            hw.setQ(q);
-
-            hw.setE_AA(p*p*n);
-            hw.setE_Aa(2*p*q*n);
-            hw.setE_aa(q*q*n);
-
-            if(hw.getE_AA() == n_AA){
-                n_AA = 1;
-                hw.setE_AA(n_AA);
-            }
-
-            if(hw.getE_Aa() == n_Aa){
-                n_Aa = 1;
-                hw.setE_Aa(n_Aa);
-            }
-
-            if(hw.getE_aa() == n_aa){
-                n_aa = 1;
-                hw.setE_aa(n_aa);
-            }
-
-
-            chi = (n_AA - hw.getE_AA()) * (n_AA - hw.getE_AA()) / hw.getE_AA()
-                + (n_Aa - hw.getE_Aa()) * (n_Aa - hw.getE_Aa()) / hw.getE_Aa()
-                + (n_aa - hw.getE_aa()) * (n_aa - hw.getE_aa()) / hw.getE_aa();
-
-//            pValue = chiSquareTest.chiSquare(chi, 1);
-            hw.setChi2(chi);
-
-                        //hw->p_value = 1-gsl_cdf_chisq_P(hw->chi2,1);
-
-
-
-
-
-
-
-        }
-
-
-    }
-
     public static VcfVariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
 
         Set<String> groupValues = getGroupValues(ped, group);
@@ -473,6 +410,78 @@ public class CalculateStats {
         vcfReader.close();
         vcfWriter.close();
 
+    }
+
+    public static void runnerMulti(VcfDataReader vcfReader, VcfStatsDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
+
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(4);
+        CompletionService<List<VcfRecordStat>> pool = new ExecutorCompletionService<>(threadPool);
+
+        List<Future<List<VcfRecordStat>>> futures = new ArrayList<>(10);
+        int batchSize = 10000;
+        int cont = 0;
+
+        Pedigree ped;
+
+        List<VcfRecord> batch;
+        List<VcfRecordStat> statsList;
+
+        pedReader.open();
+        ped = pedReader.read();
+        pedReader.close();
+
+
+        vcfReader.open();
+        vcfWriter.open();
+
+        vcfReader.pre();
+        vcfWriter.pre();
+
+
+        VcfGlobalStat globalStats = new VcfGlobalStat();
+
+
+        batch = vcfReader.read(batchSize);
+
+        while (!batch.isEmpty()) {
+            cont++;
+            pool.submit(new StatsTask(batch, vcfReader.getSampleNames(), ped, globalStats));
+
+            batch = vcfReader.read(batchSize);
+        }
+
+        for(int i=0; i< cont; i++ ){
+            statsList = pool.take().get();
+            vcfWriter.write(statsList);
+        }
+
+
+
+        vcfWriter.post();
+
+        vcfReader.close();
+        vcfWriter.close();
+
+    }
+
+    private static class StatsTask implements Callable<List<VcfRecordStat>> {
+        private List<VcfRecord> list;
+        private List<String> sampleNames;
+        private Pedigree ped;
+        private VcfGlobalStat gs;
+
+        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VcfGlobalStat gs) {
+            this.list = list;
+            this.sampleNames = sampleNames;
+            this.ped = ped;
+            this.gs = gs;
+        }
+
+        @Override
+        public List<VcfRecordStat> call() throws Exception {
+            return variantStats(list, sampleNames, ped, gs);
+        }
     }
 
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
@@ -707,6 +716,65 @@ public class CalculateStats {
 
 
         return mendelType;
+    }
+
+    private static void calculateHardyWeinberChiSquareTest(List<VcfRecordStat> statList) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
+
+    private static void hardyWeinbergTest(VcfHardyWeinbergStat hw) {
+
+        hw.setN(hw.getN_AA() + hw.getN_Aa() + hw.getN_aa());
+        int n = hw.getN();
+        int n_AA = hw.getN_AA();
+        int n_Aa = hw.getN_Aa();
+        int n_aa = hw.getN_aa();
+
+        ChiSquareTest chiSquareTest = new ChiSquareTest();
+
+        float chi, pValue;
+
+
+        if (n > 0) {
+            float p = (float) ((2.0 * n_AA + n_Aa) / (2 * n));
+            float q = 1 - p;
+
+            hw.setP(p);
+            hw.setQ(q);
+
+            hw.setE_AA(p * p * n);
+            hw.setE_Aa(2 * p * q * n);
+            hw.setE_aa(q * q * n);
+
+            if (hw.getE_AA() == n_AA) {
+                n_AA = 1;
+                hw.setE_AA(n_AA);
+            }
+
+            if (hw.getE_Aa() == n_Aa) {
+                n_Aa = 1;
+                hw.setE_Aa(n_Aa);
+            }
+
+            if (hw.getE_aa() == n_aa) {
+                n_aa = 1;
+                hw.setE_aa(n_aa);
+            }
+
+
+            chi = (n_AA - hw.getE_AA()) * (n_AA - hw.getE_AA()) / hw.getE_AA()
+                    + (n_Aa - hw.getE_Aa()) * (n_Aa - hw.getE_Aa()) / hw.getE_Aa()
+                    + (n_aa - hw.getE_aa()) * (n_aa - hw.getE_aa()) / hw.getE_aa();
+
+//            pValue = chiSquareTest.chiSquare(chi, 1);
+            hw.setChi2(chi);
+
+            //hw->p_value = 1-gsl_cdf_chisq_P(hw->chi2,1);
+
+
+        }
+
+
     }
 
 }

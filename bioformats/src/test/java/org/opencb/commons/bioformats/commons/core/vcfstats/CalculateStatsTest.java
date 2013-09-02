@@ -42,7 +42,7 @@ public class CalculateStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        vcfFileName = path + "small.vcf";
+        vcfFileName = path + "file.vcf";
         pedFileName= path + "file.ped";
         pathStats = path + "jstats/";
         dbFilename = path + "jstats/stats.db";
@@ -63,10 +63,10 @@ public class CalculateStatsTest {
     public void testCalculateStatsList() throws Exception {
 
         VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        // VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
-        VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
+        VcfStatsDataWriter vcfWriter = new VcfFileStatsDataWriter(pathStats);
+        //VcfStatsDataWriter vcfWriter = new VcfSqliteStatsDataWriter(dbFilename);
         PedDataReader pedReader = new PedFileDataReader(pedFileName);
-        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
+//        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
 
         pedReader.open();
         pedReader.pre();
@@ -74,13 +74,13 @@ public class CalculateStatsTest {
         pedReader.post();
         pedReader.close();
 
-        pedWriter.open();
-        pedWriter.pre();
-        pedWriter.write(ped);
-        pedWriter.post();
-        pedWriter.close();
+//        pedWriter.open();
+//        pedWriter.pre();
+//        pedWriter.write(ped);
+//        pedWriter.post();
+//        pedWriter.close();
 
-        CalculateStats.runner(vcfReader, vcfWriter, pedReader);
+        CalculateStats.runnerMulti(vcfReader, vcfWriter, pedReader);
 
     }
 
