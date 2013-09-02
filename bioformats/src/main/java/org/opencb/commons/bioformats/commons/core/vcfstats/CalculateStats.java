@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
+import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfStatsDataWriter;
@@ -81,6 +82,18 @@ public class CalculateStats {
 
                         totalAllelesCount += 2;
                         totalGenotypesCount++;
+
+                        // Counting genotypes for Hardy-Weinberg (all phenotypes)
+
+                        if (g.isAllele1Ref() && g.isAllele2Ref()) { // 0|0
+                            vcfStat.getHw().incNAA();
+                        } else if ((g.isAllele1Ref() && g.getAllele2() == 1) || (g.getAllele1() == 1 && g.isAllele2Ref())) {  // 0|1, 1|0
+                            vcfStat.getHw().incNAa();
+
+                        } else if (g.getAllele1() == 1 && g.getAllele2() == 1) {
+                            vcfStat.getHw().incNaa();
+                        }
+
                         break;
                     case HAPLOID:
                         // Haploid (chromosome X/Y)
@@ -108,7 +121,7 @@ public class CalculateStats {
 
                 }
 
-               // Include statistics that depend on pedigree information
+                // Include statistics that depend on pedigree information
                 if (ped != null) {
                     if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
                         ind = ped.getIndividual(sampleName);
@@ -194,7 +207,10 @@ public class CalculateStats {
             vcfStat.setAllelesFreq(allelesFreq);
             vcfStat.setGenotypesFreq(genotypesFreq);
 
-         // INDELS
+            hardyWeinbergTest(vcfStat.getHw());
+
+
+            // INDELS
          /*
          * 3 possibilities for being an INDEL:
          * - The value of the ALT field is <DEL> or <INS>
@@ -297,6 +313,8 @@ public class CalculateStats {
             cont++;
         }
 
+        calculateHardyWeinberChiSquareTest(statList);
+
         samplesCount = sampleNames.size();
 
         globalStats.updateStats(variantsCount, samplesCount, snpsCount, indelsCount,
@@ -304,6 +322,70 @@ public class CalculateStats {
                 multiallelicsCount, accumQuality);
 
         return statList;
+    }
+
+    private static void calculateHardyWeinberChiSquareTest(List<VcfRecordStat> statList) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
+
+    private static void hardyWeinbergTest(VcfHardyWeinbergStat hw) {
+
+        hw.setN(hw.getN_AA() + hw.getN_Aa() + hw.getN_aa());
+        int n = hw.getN();
+        int n_AA = hw.getN_AA();
+        int n_Aa = hw.getN_Aa();
+        int n_aa = hw.getN_aa();
+
+        ChiSquareTest chiSquareTest = new ChiSquareTest();
+
+        float chi, pValue;
+
+
+        if(n > 0){
+            float p = (float) ((2.0 * n_AA+n_Aa)/(2*n));
+            float q = 1 - p;
+
+            hw.setP(p);
+            hw.setQ(q);
+
+            hw.setE_AA(p*p*n);
+            hw.setE_Aa(2*p*q*n);
+            hw.setE_aa(q*q*n);
+
+            if(hw.getE_AA() == n_AA){
+                n_AA = 1;
+                hw.setE_AA(n_AA);
+            }
+
+            if(hw.getE_Aa() == n_Aa){
+                n_Aa = 1;
+                hw.setE_Aa(n_Aa);
+            }
+
+            if(hw.getE_aa() == n_aa){
+                n_aa = 1;
+                hw.setE_aa(n_aa);
+            }
+
+
+            chi = (n_AA - hw.getE_AA()) * (n_AA - hw.getE_AA()) / hw.getE_AA()
+                + (n_Aa - hw.getE_Aa()) * (n_Aa - hw.getE_Aa()) / hw.getE_Aa()
+                + (n_aa - hw.getE_aa()) * (n_aa - hw.getE_aa()) / hw.getE_aa();
+
+//            pValue = chiSquareTest.chiSquare(chi, 1);
+            hw.setChi2(chi);
+
+                        //hw->p_value = 1-gsl_cdf_chisq_P(hw->chi2,1);
+
+
+
+
+
+
+
+        }
+
+
     }
 
     public static VcfVariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {

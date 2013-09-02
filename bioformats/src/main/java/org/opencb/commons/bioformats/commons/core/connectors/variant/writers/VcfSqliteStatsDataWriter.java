@@ -34,7 +34,6 @@ public class VcfSqliteStatsDataWriter implements VcfStatsDataWriter {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            System.out.println("dbName = " + dbName);
             con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
             con.setAutoCommit(false);
 

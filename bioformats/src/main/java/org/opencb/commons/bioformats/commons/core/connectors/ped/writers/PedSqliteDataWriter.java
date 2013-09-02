@@ -33,7 +33,6 @@ public class PedSqliteDataWriter implements PedDataWriter {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            System.out.println("dbName = " + dbName);
             con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
             con.setAutoCommit(false);
 
@@ -145,9 +144,6 @@ public class PedSqliteDataWriter implements PedDataWriter {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             res = false;
         }
-        System.out.println(data);
-
-
 
         return res;
     }

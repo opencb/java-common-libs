@@ -1,7 +1,5 @@
 package org.opencb.commons.bioformats.commons.core.vcfstats;
 
-import sun.awt.util.IdentityLinkedList;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

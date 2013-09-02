@@ -41,6 +41,8 @@ public class VcfRecordStat {
     private int transitionsCount;
     private int transversionsCount;
 
+    private VcfHardyWeinbergStat hw;
+
 
     public VcfRecordStat() {
         this.chromosome               = "";
@@ -67,6 +69,7 @@ public class VcfRecordStat {
         this.genotypes                = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
         this.transitionsCount         = 0;
         this.transversionsCount       = 0;
+        this.hw = new VcfHardyWeinbergStat();
     }
 
     @Override
@@ -292,5 +295,7 @@ public class VcfRecordStat {
         this.transversionsCount = transversionsCount;
     }
 
-
+    public VcfHardyWeinbergStat getHw() {
+        return hw;
+    }
 }
