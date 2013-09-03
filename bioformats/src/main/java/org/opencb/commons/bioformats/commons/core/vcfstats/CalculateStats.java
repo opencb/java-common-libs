@@ -24,7 +24,7 @@ public class CalculateStats {
         List<VcfRecordStat> statList = new ArrayList<>(vcfRecordsList.size());
 
         // Temporary variables for file stats updating
-        int variantsCount = 0, samplesCount = 0, snpsCount = 0, indelsCount = 0, passCount = 0;
+        int variantsCount = 0, samplesCount, snpsCount = 0, indelsCount = 0, passCount = 0;
         int transitionsCount = 0, transversionsCount = 0, biallelicsCount = 0, multiallelicsCount = 0;
         float accumQuality = 0;
 
@@ -330,7 +330,7 @@ public class CalculateStats {
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> sampleList;
         VcfVariantGroupStat groupStats = null;
-        List<VcfRecordStat> variantStats = null;
+        List<VcfRecordStat> variantStats;
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
 
@@ -346,70 +346,6 @@ public class CalculateStats {
 
         }
         return groupStats;
-    }
-
-    public static void runner(VcfDataReader vcfReader, VcfDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
-
-        int batchSize = 10000;
-
-        Pedigree ped;
-
-        List<VcfRecord> batch;
-        List<VcfRecordStat> statsList;
-
-        pedReader.open();
-        ped = pedReader.read();
-        pedReader.close();
-
-
-        vcfReader.open();
-        vcfWriter.open();
-
-        vcfReader.pre();
-        vcfWriter.pre();
-
-
-        VcfGlobalStat globalStats = new VcfGlobalStat();
-        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames());
-
-        VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
-        VcfSampleGroupStats vcfSampleGroupStatsFam = new VcfSampleGroupStats();
-
-        VcfVariantGroupStat groupStatsBatchPhen;
-        VcfVariantGroupStat groupStatsBatchFam;
-
-        batch = vcfReader.read(batchSize);
-
-        while (!batch.isEmpty()) {
-            statsList = variantStats(batch, vcfReader.getSampleNames(), ped, globalStats);
-
-            sampleStats(batch, vcfReader.getSampleNames(), ped, vcfSampleStat);
-
-            groupStatsBatchPhen = groupStats(batch, ped, "phenotype");
-            groupStatsBatchFam = groupStats(batch, ped, "family");
-
-            sampleGroupStats(batch, ped, "phenotype", vcfSampleGroupStatsPhen);
-            sampleGroupStats(batch, ped, "family", vcfSampleGroupStatsFam);
-
-
-            vcfWriter.writeVariantStats(statsList);
-            vcfWriter.writeVariantGroupStats(groupStatsBatchPhen);
-            vcfWriter.writeVariantGroupStats(groupStatsBatchFam);
-
-            batch = vcfReader.read(batchSize);
-        }
-
-        vcfWriter.writeGlobalStats(globalStats);
-        vcfWriter.writeSampleStats(vcfSampleStat);
-
-        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsFam);
-        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsPhen);
-
-        vcfWriter.post();
-
-        vcfReader.close();
-        vcfWriter.close();
-
     }
 
     public static void runnerMulti(VcfDataReader vcfReader, VcfDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
@@ -486,8 +422,8 @@ public class CalculateStats {
 
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
 
-        Genotype g = null;
-        Individual ind = null;
+        Genotype g;
+        Individual ind;
 
         for (VcfRecord record : vcfRecords) {
 
@@ -521,7 +457,6 @@ public class CalculateStats {
     public static void sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group, VcfSampleGroupStats vcfSampleGroupStats) {
 
         Set<String> groupValues = getGroupValues(ped, group);
-        SampleStat s;
         VcfSampleStat vcfSampleStat;
 
         List<String> sampleList;
@@ -730,7 +665,7 @@ public class CalculateStats {
         int n_Aa = hw.getN_Aa();
         int n_aa = hw.getN_aa();
 
-        ChiSquareTest chiSquareTest = new ChiSquareTest();
+//        ChiSquareTest chiSquareTest = new ChiSquareTest();
 
         float chi, pValue;
 

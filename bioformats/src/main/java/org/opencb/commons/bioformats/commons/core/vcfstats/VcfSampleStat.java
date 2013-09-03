@@ -18,7 +18,7 @@ public class VcfSampleStat {
 
     public VcfSampleStat(List<String> sampleNames) {
         samplesStats = new LinkedHashMap<>(sampleNames.size());
-        SampleStat s = null;
+        SampleStat s;
 
         for (String name : sampleNames) {
             s = new SampleStat(name);
@@ -48,8 +48,7 @@ public class VcfSampleStat {
 
     @Override
     public String toString() {
-        int gt,mend,hom;
-         SampleStat s;
+        SampleStat s;
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
         for(Map.Entry<String, SampleStat> entry: samplesStats.entrySet()){

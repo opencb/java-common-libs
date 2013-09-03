@@ -63,10 +63,8 @@ public class VcfFileDataReader implements VcfDataReader {
 
         try {
             processHeader();
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (FileFormatException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (IOException | FileFormatException e) {
+            e.printStackTrace();
         }
 
         return true;
@@ -77,7 +75,7 @@ public class VcfFileDataReader implements VcfDataReader {
         try {
             reader.close();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return true;
     }

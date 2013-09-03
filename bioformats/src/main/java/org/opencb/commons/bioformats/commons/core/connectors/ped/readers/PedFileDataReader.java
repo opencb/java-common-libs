@@ -60,7 +60,7 @@ public class PedFileDataReader implements PedDataReader {
     @Override
     public Pedigree read() {
 
-        String line = "";
+        String line;
         Individual ind, father, mother;
         String[] fields;
         String sampleId, familyId, fatherId, motherId, sex, phenotype;
@@ -112,8 +112,6 @@ public class PedFileDataReader implements PedDataReader {
 
         while (!queue.isEmpty()) {
             ind = queue.poll();
-            father = null;
-            mother = null;
             fatherId = ind.getFatherId();
             motherId = ind.getMotherId();
 
