@@ -24,12 +24,11 @@ public class CalculateStats {
         List<VcfRecordStat> statList = new ArrayList<>(vcfRecordsList.size());
 
         // Temporary variables for file stats updating
-        int variantsCount = 0, samplesCount, snpsCount = 0, indelsCount = 0, passCount = 0;
+        int variantsCount = 0, samplesCount = 0, snpsCount = 0, indelsCount = 0, passCount = 0;
         int transitionsCount = 0, transversionsCount = 0, biallelicsCount = 0, multiallelicsCount = 0;
         float accumQuality = 0;
 
 
-        int cont = 0;
         for (VcfRecord vcfRecord : vcfRecordsList) {
 
             int genotypeCurrentPos;
@@ -311,7 +310,6 @@ public class CalculateStats {
             vcfStat.setControlsPercentRecessive(controlsRecessive);
 
             statList.add(vcfStat);
-            cont++;
         }
 
         calculateHardyWeinberChiSquareTest(statList);
@@ -399,25 +397,6 @@ public class CalculateStats {
 //        vcfReader.close();
 //        vcfWriter.close();
 
-    }
-
-    private static class StatsTask implements Callable<List<VcfRecordStat>> {
-        private List<VcfRecord> list;
-        private List<String> sampleNames;
-        private Pedigree ped;
-        private VcfGlobalStat gs;
-
-        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VcfGlobalStat gs) {
-            this.list = list;
-            this.sampleNames = sampleNames;
-            this.ped = ped;
-            this.gs = gs;
-        }
-
-        @Override
-        public List<VcfRecordStat> call() throws Exception {
-            return variantStats(list, sampleNames, ped, gs);
-        }
     }
 
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
@@ -712,4 +691,22 @@ public class CalculateStats {
 
     }
 
+    private static class StatsTask implements Callable<List<VcfRecordStat>> {
+        private List<VcfRecord> list;
+        private List<String> sampleNames;
+        private Pedigree ped;
+        private VcfGlobalStat gs;
+
+        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VcfGlobalStat gs) {
+            this.list = list;
+            this.sampleNames = sampleNames;
+            this.ped = ped;
+            this.gs = gs;
+        }
+
+        @Override
+        public List<VcfRecordStat> call() throws Exception {
+            return variantStats(list, sampleNames, ped, gs);
+        }
+    }
 }
