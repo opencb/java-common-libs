@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.bioinfo.commons.utils.ListUtils;
 
+@Deprecated
 public class VcfRecord {
 
 	private String chromosome;
@@ -254,18 +255,6 @@ public class VcfRecord {
         Map<String,String> keyVals = samplesValues.get(sampleIndex.get(sample));
 
         return keyVals.get(key);
-
-    }
-
-    public Genotype getSampleGenotype(String sample){
-        Genotype g = null;
-
-
-        String gtVal = getValueFormatSample(sample, "GT");
-        if(gtVal != null){
-            g = new Genotype(gtVal);
-        }
-        return g;
 
     }
 
