@@ -5,14 +5,22 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.opencb.commons.bioformats.commons.core.connectors.VariantRunner;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.ped.readers.PedFileDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfFileDataWriter;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfDataReader;
 import org.opencb.commons.bioformats.commons.core.connectors.variant.readers.VcfFileDataReader;
+import org.opencb.commons.bioformats.commons.core.connectors.variant.writers.VcfSqliteDataWriter;
 import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
 import org.opencb.commons.bioformats.commons.core.variant.io.Vcf4Reader;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfFilter;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfFilterList;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfRegionFilter;
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.guavaFilters.VcfSnpFilter;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +38,7 @@ public class CalculateStatsTest {
     private String pedFileName;
     private String pathStats;
     private String dbFilename;
+    private String dbFilters;
 
 
     @Rule
@@ -40,9 +49,10 @@ public class CalculateStatsTest {
     public void setUp() throws Exception {
 
         vcfFileName = path + "file.vcf";
-        pedFileName= path + "file.ped";
+        pedFileName = path + "file.ped";
         pathStats = path + "jstats/";
         dbFilename = path + "jstats/variant.db";
+        dbFilters = path + "jstats/filters.db";
         start = System.currentTimeMillis();
 
 
@@ -56,27 +66,42 @@ public class CalculateStatsTest {
 
     }
 
+
+    @Test
+    public void testCalculateStatsRegionFilter() throws Exception {
+
+        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "regionFilter.db", pedFileName);
+
+        List<VcfFilter> filterList = new VcfFilterList(1);
+        filterList.add(new VcfRegionFilter("1", 0, 100000));
+
+        vr.filter(filterList).run();
+
+
+    }
+
+    @Test
+    public void testCalculateStatsSnpFilter() throws Exception {
+
+        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "snpFilter.db", pedFileName);
+
+        List<VcfFilter> filterList = new VcfFilterList(1);
+        filterList.add(new VcfSnpFilter());
+
+        vr.filter(filterList).run();
+
+
+    }
+
+
+
     @Test
     public void testCalculateStatsList() throws Exception {
 
-        VcfDataReader vcfReader = new VcfFileDataReader(vcfFileName);
-        VcfDataWriter vcfWriter = new VcfFileDataWriter(pathStats);
-        PedDataReader pedReader = new PedFileDataReader(pedFileName);
-//        PedDataWriter pedWriter = new PedSqliteDataWriter(dbFilename);
+        VariantRunner vr = new VariantRunner(vcfFileName, dbFilename, pedFileName);
 
-        pedReader.open();
-        pedReader.pre();
-        Pedigree ped = pedReader.read();
-        pedReader.post();
-        pedReader.close();
+        vr.run();
 
-//        pedWriter.open();
-//        pedWriter.pre();
-//        pedWriter.write(ped);
-//        pedWriter.post();
-//        pedWriter.close();
-
-        CalculateStats.runner(vcfReader, vcfWriter, pedReader);
 
     }
 

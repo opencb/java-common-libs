@@ -33,7 +33,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean open(){
+    public boolean open() {
 
         try {
             Class.forName("org.sqlite.JDBC");
@@ -68,16 +68,6 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
 
     @Override
     public boolean pre() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean post() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean statsPre() {
         String globalStatsTable = "CREATE TABLE IF NOT EXISTS global_stats (" +
                 "name TEXT," +
                 " title TEXT," +
@@ -108,17 +98,47 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 "homozygotesNumber INT, " +
                 "PRIMARY KEY (name));";
 
+        String variantTable = "CREATE TABLE IF NOT EXISTS variant (" +
+                "id_variant INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "chromosome TEXT, " +
+                "position INT64, " +
+                "id TEXT, " +
+                "ref TEXT, " +
+                "alt TEXT, " +
+                "qual DOUBLE, " +
+                "filter TEXT, " +
+                "info TEXT, " +
+                "format TEXT);";
+
+        String sampleTable = "CREATE TABLE IF NOT EXISTS sample(" +
+                "name TEXT PRIMARY KEY);";
+
+        String sampleInfoTable = "CREATE TABLE IF NOT EXISTS sample_info(" +
+                "id_sample_info INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "id_variant INTEGER, " +
+                "sample_name TEXT, " +
+                "allele_1 INTEGER, " +
+                "allele_2 INTEGER, " +
+                "data TEXT, " +
+                "FOREIGN KEY(id_variant) REFERENCES variant(id_variant)," +
+                "FOREIGN KEY(sample_name) REFERENCES sample(name));";
+
 
         try {
             stmt = con.createStatement();
+
             stmt.execute(globalStatsTable);
             stmt.execute(variant_stats);
             stmt.execute(sample_stats);
+            stmt.execute(variantTable);
+            stmt.execute(sampleTable);
+            stmt.execute(sampleInfoTable);
+
             stmt.close();
 
             con.commit();
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("PRE: " + e.getClass().getName() + ": " + e.getMessage());
             return false;
         }
 
@@ -126,18 +146,21 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean statsPost() {
-        String sql = "CREATE INDEX variant_stats_chromosome_position_idx ON variant_stats (chromosome, position);";
+    public boolean post() {
 
         try {
 
             stmt = con.createStatement();
-            stmt.execute(sql);
+            stmt.execute("CREATE INDEX variant_stats_chromosome_position_idx ON variant_stats (chromosome, position);");
+            stmt.execute("CREATE INDEX variant_chromosome_position_idx ON variant (chromosome, position);");
+            stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
+            stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
+            stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
             stmt.close();
             con.commit();
 
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("POST: " + e.getClass().getName() + ": " + e.getMessage());
             return false;
 
         }
@@ -179,7 +202,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             con.commit();
             pstmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("VARIANT_STATS: " + e.getClass().getName() + ": " + e.getMessage());
             res = false;
         }
 
@@ -190,6 +213,9 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     @Override
     public boolean writeGlobalStats(VcfGlobalStat globalStats) {
         boolean res = true;
+        float titv = 0;
+        float pass = 0;
+        float avg = 0;
         try {
             String sql;
             stmt = con.createStatement();
@@ -210,18 +236,27 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             stmt.executeUpdate(sql);
             sql = "INSERT INTO global_stats VALUES ('NUM_TRANSVERSSIONS', 'Number of transversions'," + globalStats.getTransversionsCount() + ");";
             stmt.executeUpdate(sql);
-            sql = "INSERT INTO global_stats VALUES ('TITV_RATIO', 'Ti/TV ratio'," + ((float) globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount()) + ");";
+            if(globalStats.getTransversionsCount() > 0){
+                titv = globalStats.getTransitionsCount()/ (float) globalStats.getTransversionsCount();
+            }
+            sql = "INSERT INTO global_stats VALUES ('TITV_RATIO', 'Ti/TV ratio'," + titv + ");";
             stmt.executeUpdate(sql);
-            sql = "INSERT INTO global_stats VALUES ('PERCENT_PASS', 'Percentage of PASS'," + (((float) globalStats.getPassCount() / (float) globalStats.getVariantsCount()) * 100) + ");";
+            if(globalStats.getVariantsCount() > 0){
+                pass = globalStats.getPassCount()/ (float) globalStats.getVariantsCount();
+                avg = globalStats.getAccumQuality()/(float) globalStats.getVariantsCount();
+            }
+
+            sql = "INSERT INTO global_stats VALUES ('PERCENT_PASS', 'Percentage of PASS'," + (pass * 100) + ");";
             stmt.executeUpdate(sql);
-            sql = "INSERT INTO global_stats VALUES ('AVG_QUALITY', 'Average quality'," + (globalStats.getAccumQuality() / (float) globalStats.getVariantsCount()) + ");";
+
+            sql = "INSERT INTO global_stats VALUES ('AVG_QUALITY', 'Average quality'," + avg + ");";
             stmt.executeUpdate(sql);
 
             con.commit();
             stmt.close();
 
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("GLOBAL_STATS: " + e.getClass().getName() + ": " + e.getMessage());
             res = false;
         }
 
@@ -252,7 +287,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             con.commit();
             pstmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("SAMPLE_STATS: " + e.getClass().getName() + ": " + e.getMessage());
             res = false;
         }
 
@@ -271,72 +306,6 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean indexPre() {
-
-        String variantTable = "CREATE TABLE IF NOT EXISTS variant (" +
-                "id_variant INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "chromosome TEXT, " +
-                "position INT64, " +
-                "id TEXT, " +
-                "ref TEXT, " +
-                "alt TEXT, " +
-                "qual DOUBLE, " +
-                "filter TEXT, " +
-                "info TEXT, " +
-                "format TEXT);";
-
-        String sampleTable = "CREATE TABLE IF NOT EXISTS sample(" +
-                "name TEXT PRIMARY KEY);";
-
-        String sampleInfoTable = "CREATE TABLE IF NOT EXISTS sample_info(" +
-                "id_sample_info INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "id_variant INTEGER, " +
-                "sample_name TEXT, " +
-                "allele_1 INTEGER, " +
-                "allele_2 INTEGER, " +
-                "data TEXT, " +
-                "FOREIGN KEY(id_variant) REFERENCES variant(id_variant)," +
-                "FOREIGN KEY(sample_name) REFERENCES sample(name));";
-
-
-        try {
-
-            stmt = con.createStatement();
-            stmt.execute(variantTable);
-            stmt.execute(sampleTable);
-            stmt.execute(sampleInfoTable);
-            stmt.close();
-            con.commit();
-
-        } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean indexPost() {
-
-        try {
-
-            stmt = con.createStatement();
-            stmt.execute("CREATE INDEX variant_chromosome_position_idx ON variant (chromosome, position);");
-            stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
-            stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
-            stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
-            stmt.close();
-            con.commit();
-
-        } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-
-        }
-
-        return true;
-    }
-
-    @Override
     public boolean writeVariantIndex(List<VcfRecord> data) {
         String sql, sqlAux;
         PreparedStatement pstmt_aux;
@@ -348,7 +317,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
         boolean res = true;
 
         PreparedStatement pstmt;
-        if (!createdSampleTable) {
+        if (!createdSampleTable && data.size() > 0) {
             try {
                 sql = "INSERT INTO sample (name) VALUES(?);";
                 pstmt = con.prepareStatement(sql);
@@ -363,7 +332,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 con.commit();
                 createdSampleTable = true;
             } catch (SQLException e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
+                System.err.println("SAMPLE: " + e.getClass().getName() + ": " + e.getMessage());
                 res = false;
             }
         }
@@ -419,7 +388,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
 
             con.commit();
         } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("VARIANT/SAMPLE_INFO: " + e.getClass().getName() + ": " + e.getMessage());
             res = false;
         }
 

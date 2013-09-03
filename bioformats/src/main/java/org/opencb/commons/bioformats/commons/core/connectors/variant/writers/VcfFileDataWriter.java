@@ -63,8 +63,6 @@ public class VcfFileDataWriter implements VcfDataWriter {
         }
 
 
-
-
         return true;
     }
 
@@ -88,33 +86,14 @@ public class VcfFileDataWriter implements VcfDataWriter {
 
     @Override
     public boolean pre() {
+        writeVariantStatsHeader();
+
         return true;
     }
 
     @Override
     public boolean post() {
         return true;
-    }
-
-    @Override
-    public boolean statsPre() {
-        writeVariantStatsHeader();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean statsPost() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean indexPre() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean indexPost() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

@@ -366,7 +366,7 @@ public class CalculateStats {
         vcfWriter.open();
 
         vcfReader.pre();
-        vcfWriter.statsPre();
+        vcfWriter.pre();
 
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
@@ -405,7 +405,7 @@ public class CalculateStats {
         vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsFam);
         vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsPhen);
 
-        vcfWriter.statsPost();
+        vcfWriter.post();
 
         vcfReader.close();
         vcfWriter.close();

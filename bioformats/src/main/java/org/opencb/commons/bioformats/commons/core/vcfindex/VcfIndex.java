@@ -26,7 +26,7 @@ public class VcfIndex {
         vcfWriter.open();
 
         vcfReader.pre();
-        vcfWriter.indexPre();
+        vcfWriter.pre();
 
         batch = vcfReader.read(batchSize);
 
@@ -38,7 +38,7 @@ public class VcfIndex {
         }
 
         vcfReader.post();
-        vcfWriter.indexPost();
+        vcfWriter.post();
 
         vcfReader.close();
         vcfWriter.close();
