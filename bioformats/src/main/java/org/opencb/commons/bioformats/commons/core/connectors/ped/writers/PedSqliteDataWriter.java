@@ -148,8 +148,5 @@ public class PedSqliteDataWriter implements PedDataWriter {
         return res;
     }
 
-    @Override
-    public boolean write(List<Pedigree> data) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+
 }

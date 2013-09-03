@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.commons.core.connectors.variant.writers;
 
+import org.opencb.commons.bioformats.commons.core.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.commons.core.vcfstats.*;
 
 import java.io.FileWriter;
@@ -20,7 +21,7 @@ import java.util.Map;
  * Time: 12:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
+public class VcfFileDataWriter implements VcfDataWriter {
 
     private PrintWriter variantPw;
     private PrintWriter globalPw;
@@ -33,7 +34,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     private String pathGroup;
 
 
-    public VcfFileStatsDataWriter(String path) {
+    public VcfFileDataWriter(String path) {
         if (path.charAt(path.length() - 1) != '/') {
             path += "/";
         }
@@ -62,8 +63,6 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
         }
 
 
-
-
         return true;
     }
 
@@ -87,22 +86,18 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
 
     @Override
     public boolean pre() {
-        printVariantStatsHeader();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        writeVariantStatsHeader();
+
+        return true;
     }
 
     @Override
     public boolean post() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return true;
     }
 
     @Override
-    public boolean write(VcfRecordStat data) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public boolean write(List<VcfRecordStat> data) {
+    public boolean writeVariantStats(List<VcfRecordStat> data) {
         for (VcfRecordStat v : data) {
             variantPw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                     "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
@@ -132,7 +127,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean write(VcfGlobalStat globalStats) {
+    public boolean writeGlobalStats(VcfGlobalStat globalStats) {
 
         globalPw.append("Number of variants = " + globalStats.getVariantsCount() + "\n");
         globalPw.append("Number of samples = " + globalStats.getSamplesCount() + "\n");
@@ -150,7 +145,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean write(VcfSampleStat vcfSampleStat) {
+    public boolean writeSampleStats(VcfSampleStat vcfSampleStat) {
         SampleStat s;
         samplePw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
         for (Map.Entry<String, SampleStat> entry : vcfSampleStat.getSamplesStats().entrySet()) {
@@ -162,7 +157,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean write(VcfSampleGroupStats vcfSampleGroupStats) throws IOException {
+    public boolean writeSampleGroupStats(VcfSampleGroupStats vcfSampleGroupStats) throws IOException {
         PrintWriter pw;
         String filename;
         VcfSampleStat sampleStat;
@@ -188,7 +183,7 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
     }
 
     @Override
-    public boolean write(VcfVariantGroupStat groupStats) throws IOException {
+    public boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException {
         PrintWriter pw;
         String filename;
         List<VcfRecordStat> list;
@@ -259,7 +254,12 @@ public class VcfFileStatsDataWriter implements VcfStatsDataWriter {
         return true;
     }
 
-    private void printVariantStatsHeader() {
+    @Override
+    public boolean writeVariantIndex(List<VcfRecord> data) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void writeVariantStatsHeader() {
         variantPw.append(String.format("%-5s%-10s%-10s%-5s%-10s%-10s%-10s" +
                 "%-10s%-10s%-10s%-15s%-40s%-10s%-10s%-15s" +
                 "%-10s%-10s%-10s%-10s\n",

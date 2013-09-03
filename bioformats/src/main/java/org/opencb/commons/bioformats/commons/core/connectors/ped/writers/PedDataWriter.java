@@ -10,6 +10,7 @@ import org.opencb.commons.bioformats.commons.core.feature.Pedigree;
  * Time: 12:54 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface PedDataWriter extends DataWriter<Pedigree> {
+public interface PedDataWriter extends DataWriter {
 
+    boolean write(Pedigree data);
 }

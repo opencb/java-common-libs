@@ -22,16 +22,16 @@ public class VcfFilterList extends ArrayList<VcfFilter> {
 
     @Override
     public boolean add(VcfFilter vcfFilter){
-        return this.add(vcfFilter);
+        return this.addList(vcfFilter);
     }
 
-    public boolean add(VcfFilter ... vcfFilter) {
+    private boolean addList(VcfFilter ... vcfFilter) {
         boolean res = true;
         if(vcfFilter.length == 1) {
-            res = this.add(vcfFilter[0]);
+            res = super.add(vcfFilter[0]);
         }else {
             for(VcfFilter v: vcfFilter) {
-                res &= this.add(v);
+                res &= super.add(v);
             }
         }
 
