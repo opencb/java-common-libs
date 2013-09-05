@@ -10,6 +10,8 @@ import org.opencb.variant.lib.core.filters.VcfFilterList;
 import org.opencb.variant.lib.core.filters.VcfRegionFilter;
 import org.opencb.variant.lib.core.filters.VcfSnpFilter;
 import org.opencb.variant.lib.io.VariantRunner;
+import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
+import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
 
 import java.util.List;
 
@@ -87,7 +89,10 @@ public class CalculateStatsTest {
     @Test
     public void testCalculateStatsList() throws Exception {
 
+
         VariantRunner vr = new VariantRunner(vcfFileName, dbFilename, pedFileName);
+
+        vr.writer(new VcfFileDataWriter(pathStats));
 
         vr.run();
 

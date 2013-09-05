@@ -107,10 +107,16 @@ public class VariantRunner {
 
         VcfFilter andFilter;
 
+        VcfGlobalStat globalStat;
+        VcfSampleStat vcfSampleStat;
+
         List<VcfRecord> batch;
         List<VcfVariantStat> statsList;
         List<VcfGlobalStat> globalStats = new ArrayList<>(100);
         List<VcfSampleStat> sampleStats = new ArrayList<>(100);
+        List<VcfSampleGroupStats> sampleGroupPhen = new ArrayList<>(100);
+        List<VcfSampleGroupStats> sampleGroupFam = new ArrayList<>(100);
+
 
         pedReader.open();
         ped = pedReader.read();
@@ -123,11 +129,10 @@ public class VariantRunner {
         vcfReader.pre();
         vcfWriter.pre();
 
-        VcfGlobalStat globalStat;
-        VcfSampleStat vcfSampleStat;
 
         VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
         VcfSampleGroupStats vcfSampleGroupStatsFam;
+
         vcfSampleGroupStatsFam = new VcfSampleGroupStats();
 
         VcfVariantGroupStat groupStatsBatchPhen;
@@ -152,20 +157,22 @@ public class VariantRunner {
                 groupStatsBatchPhen = CalculateStats.groupStats(batch, ped, "phenotype");
                 groupStatsBatchFam = CalculateStats.groupStats(batch, ped, "family");
 
-                CalculateStats.sampleGroupStats(batch, ped, "phenotype", vcfSampleGroupStatsPhen);
-                CalculateStats.sampleGroupStats(batch, ped, "family", vcfSampleGroupStatsFam);
+                vcfSampleGroupStatsPhen = CalculateStats.sampleGroupStats(batch, ped, "phenotype");
+                sampleGroupPhen.add(vcfSampleGroupStatsPhen);
 
+                vcfSampleGroupStatsFam = CalculateStats.sampleGroupStats(batch, ped, "family");
+                sampleGroupFam.add(vcfSampleGroupStatsFam);
 
                 vcfWriter.writeVariantStats(statsList);
                 vcfWriter.writeVariantGroupStats(groupStatsBatchPhen);
                 vcfWriter.writeVariantGroupStats(groupStatsBatchFam);
             }
 
-            if(index){
+            if (index) {
                 vcfWriter.writeVariantIndex(batch);
             }
 
-            if(effect){
+            if (effect) {
                 ;
             }
 
@@ -174,6 +181,8 @@ public class VariantRunner {
 
         globalStat = new VcfGlobalStat(globalStats);
         vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames(), sampleStats);
+        vcfSampleGroupStatsPhen = new VcfSampleGroupStats(sampleGroupPhen);
+        vcfSampleGroupStatsFam = new VcfSampleGroupStats(sampleGroupFam);
 
         vcfWriter.writeGlobalStats(globalStat);
         vcfWriter.writeSampleStats(vcfSampleStat);

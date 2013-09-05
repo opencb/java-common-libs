@@ -11,7 +11,7 @@ import java.util.Map;
  * Time: 8:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSampleGroupStats{
+public class VcfSampleGroupStats {
 
     private String group;
     private Map<String, VcfSampleStat> sampleStats;
@@ -19,6 +19,37 @@ public class VcfSampleGroupStats{
     public VcfSampleGroupStats() {
         sampleStats = new LinkedHashMap<>();
 
+    }
+
+    public VcfSampleGroupStats(List<VcfSampleGroupStats> sampleGroup) {
+        this();
+
+
+        String val;
+        VcfSampleStat sampleStatAux;
+        SampleStat sampleStat;
+
+
+        for (VcfSampleGroupStats sgs : sampleGroup) {
+            this.setGroup(sgs.getGroup());
+            for (Map.Entry<String, VcfSampleStat> ss : sgs.getSampleStats().entrySet()) {
+                if (!this.sampleStats.containsKey(ss.getKey())) {
+                    this.sampleStats.put(ss.getKey(), ss.getValue());
+                } else {
+                    sampleStatAux = this.sampleStats.get(ss.getKey());
+                    for (Map.Entry<String, SampleStat> entry : sampleStatAux.getSamplesStats().entrySet()) {
+                        sampleStat = entry.getValue();
+                        sampleStat.incrementHomozygotesNumber(ss.getValue().getSamplesStats().get(entry.getKey()).getHomozygotesNumber());
+                        sampleStat.incrementMendelianErrors(ss.getValue().getSamplesStats().get(entry.getKey()).getMendelianErrors());
+                        sampleStat.incrementMissingGenotypes(ss.getValue().getSamplesStats().get(entry.getKey()).getMissingGenotypes());
+                    }
+
+
+                }
+
+
+            }
+        }
     }
 
     public Map<String, VcfSampleStat> getSampleStats() {

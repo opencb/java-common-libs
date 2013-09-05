@@ -310,20 +310,20 @@ public class CalculateStats {
         return statList;
     }
 
-    public static VcfGlobalStat globalStats(List<VcfVariantStat> variantStats){
+    public static VcfGlobalStat globalStats(List<VcfVariantStat> variantStats) {
 
         VcfGlobalStat gs = new VcfGlobalStat();
 
         gs.setVariantsCount(variantStats.size());
-        for(VcfVariantStat vs: variantStats){
+        for (VcfVariantStat vs : variantStats) {
             gs.setSamplesCount(vs.getSamples());
-            if(vs.isIndel()){
+            if (vs.isIndel()) {
                 gs.addIndel();
             }
-            if(vs.isSNP()){
+            if (vs.isSNP()) {
                 gs.addSNP();
             }
-            if(vs.isPass()){
+            if (vs.isPass()) {
                 gs.addPass();
             }
 
@@ -401,7 +401,9 @@ public class CalculateStats {
         return sampleStat;
     }
 
-    public static void sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group, VcfSampleGroupStats vcfSampleGroupStats) {
+    public static VcfSampleGroupStats sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
+
+        VcfSampleGroupStats vcfSampleGroupStats = new VcfSampleGroupStats();
 
         Set<String> groupValues = getGroupValues(ped, group);
         VcfSampleStat vcfSampleStat;
@@ -426,9 +428,11 @@ public class CalculateStats {
 
         for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
             sampleList = getSamplesValueGroup(entry.getKey(), group, ped);
-            vcfSampleStat = entry.getValue();
-            sampleStats(batch, sampleList, ped);
+            entry.setValue(sampleStats(batch, sampleList, ped));
+//            vcfSampleStat = entry.getValue();
+//            sampleStats(batch, sampleList, ped);
         }
+        return vcfSampleGroupStats;
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
