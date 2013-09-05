@@ -22,15 +22,15 @@ public class SampleStat {
         this.homozygotesNumber = 0;
     }
 
-    public void incrementMendelianErrors(){
+    public void incrementMendelianErrors() {
         this.mendelianErrors++;
     }
 
-    public void incrementMissingGenotypes(){
+    public void incrementMissingGenotypes() {
         this.missingGenotypes++;
     }
 
-    public void incrementHomozygotesNumber(){
+    public void incrementHomozygotesNumber() {
         this.homozygotesNumber++;
     }
 
@@ -50,4 +50,16 @@ public class SampleStat {
         return homozygotesNumber;
     }
 
+    public void incrementMendelianErrors(int mendelianErrors) {
+        this.mendelianErrors += mendelianErrors;
+    }
+
+    public void incrementMissingGenotypes(int missingGenotypes) {
+        this.missingGenotypes += missingGenotypes;
+    }
+
+    public void incrementHomozygotesNumber(int homozygotesNumber) {
+        this.homozygotesNumber += homozygotesNumber;
+
+    }
 }

@@ -365,10 +365,11 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
+    public static VcfSampleStat sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
 
         Genotype g;
         Individual ind;
+        VcfSampleStat sampleStat = new VcfSampleStat(sampleNames);
 
         for (VcfRecord record : vcfRecords) {
 
@@ -397,6 +398,7 @@ public class CalculateStats {
                 }
             }
         }
+        return sampleStat;
     }
 
     public static void sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group, VcfSampleGroupStats vcfSampleGroupStats) {
@@ -425,7 +427,7 @@ public class CalculateStats {
         for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
             sampleList = getSamplesValueGroup(entry.getKey(), group, ped);
             vcfSampleStat = entry.getValue();
-            sampleStats(batch, sampleList, ped, vcfSampleStat);
+            sampleStats(batch, sampleList, ped);
         }
     }
 

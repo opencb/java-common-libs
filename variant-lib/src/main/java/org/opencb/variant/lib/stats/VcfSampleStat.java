@@ -26,6 +26,24 @@ public class VcfSampleStat {
         }
     }
 
+    public VcfSampleStat(List<String> sampleNames, List<VcfSampleStat> sampleStats) {
+        this(sampleNames);
+        String sampleName;
+        SampleStat ss, ssAux;
+        Map<String, SampleStat> map;
+        for(VcfSampleStat vcfSampleStat : sampleStats){
+            map = vcfSampleStat.getSamplesStats();
+            for(Map.Entry<String, SampleStat> entry: map.entrySet()){
+                sampleName = entry.getKey();
+                ss = entry.getValue();
+                ssAux = this.getSamplesStats().get(sampleName);
+                ssAux.incrementMendelianErrors(ss.getMendelianErrors());
+                ssAux.incrementMissingGenotypes(ss.getMissingGenotypes());
+                ssAux.incrementHomozygotesNumber(ss.getHomozygotesNumber());
+            }
+        }
+    }
+
 
     public Map<String, SampleStat> getSamplesStats() {
         return samplesStats;

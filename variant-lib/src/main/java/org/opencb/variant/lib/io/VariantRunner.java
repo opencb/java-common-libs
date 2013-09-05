@@ -16,6 +16,7 @@ import org.opencb.variant.lib.stats.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -109,6 +110,7 @@ public class VariantRunner {
         List<VcfRecord> batch;
         List<VcfVariantStat> statsList;
         List<VcfGlobalStat> globalStats = new ArrayList<>(100);
+        List<VcfSampleStat> sampleStats = new ArrayList<>(100);
 
         pedReader.open();
         ped = pedReader.read();
@@ -121,8 +123,8 @@ public class VariantRunner {
         vcfReader.pre();
         vcfWriter.pre();
 
-        VcfGlobalStat globalStat = new VcfGlobalStat();
-        VcfSampleStat vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames());
+        VcfGlobalStat globalStat;
+        VcfSampleStat vcfSampleStat;
 
         VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
         VcfSampleGroupStats vcfSampleGroupStatsFam;
@@ -143,9 +145,9 @@ public class VariantRunner {
                 statsList = CalculateStats.variantStats(batch, vcfReader.getSampleNames(), ped);
                 globalStat = CalculateStats.globalStats(statsList);
                 globalStats.add(globalStat);
-//                System.out.println("globalStat = " + globalStat);
 
-                CalculateStats.sampleStats(batch, vcfReader.getSampleNames(), ped, vcfSampleStat);
+                vcfSampleStat = CalculateStats.sampleStats(batch, vcfReader.getSampleNames(), ped);
+                sampleStats.add(vcfSampleStat);
 
                 groupStatsBatchPhen = CalculateStats.groupStats(batch, ped, "phenotype");
                 groupStatsBatchFam = CalculateStats.groupStats(batch, ped, "family");
@@ -171,8 +173,7 @@ public class VariantRunner {
         }
 
         globalStat = new VcfGlobalStat(globalStats);
-        System.out.println(globalStat);
-
+        vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames(), sampleStats);
 
         vcfWriter.writeGlobalStats(globalStat);
         vcfWriter.writeSampleStats(vcfSampleStat);
