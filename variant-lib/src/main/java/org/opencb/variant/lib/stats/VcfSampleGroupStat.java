@@ -11,17 +11,17 @@ import java.util.Map;
  * Time: 8:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSampleGroupStats {
+public class VcfSampleGroupStat {
 
     private String group;
     private Map<String, VcfSampleStat> sampleStats;
 
-    public VcfSampleGroupStats() {
+    public VcfSampleGroupStat() {
         sampleStats = new LinkedHashMap<>();
 
     }
 
-    public VcfSampleGroupStats(List<VcfSampleGroupStats> sampleGroup) {
+    public VcfSampleGroupStat(List<VcfSampleGroupStat> sampleGroup) {
         this();
 
 
@@ -30,7 +30,7 @@ public class VcfSampleGroupStats {
         SampleStat sampleStat;
 
 
-        for (VcfSampleGroupStats sgs : sampleGroup) {
+        for (VcfSampleGroupStat sgs : sampleGroup) {
             this.setGroup(sgs.getGroup());
             for (Map.Entry<String, VcfSampleStat> ss : sgs.getSampleStats().entrySet()) {
                 if (!this.sampleStats.containsKey(ss.getKey())) {

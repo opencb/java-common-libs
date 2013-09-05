@@ -157,14 +157,14 @@ public class VcfFileDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean writeSampleGroupStats(VcfSampleGroupStats vcfSampleGroupStats) throws IOException {
+    public boolean writeSampleGroupStats(VcfSampleGroupStat vcfSampleGroupStat) throws IOException {
         PrintWriter pw;
         String filename;
         VcfSampleStat sampleStat;
         SampleStat s;
 
-        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
-            filename = pathSampleGroup + "variant_stats_" + vcfSampleGroupStats.getGroup() + "_" + entry.getKey() + ".sample.stats";
+        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStat.getSampleStats().entrySet()) {
+            filename = pathSampleGroup + "variant_stats_" + vcfSampleGroupStat.getGroup() + "_" + entry.getKey() + ".sample.stats";
             sampleStat = entry.getValue();
             pw = new PrintWriter(new FileWriter(filename));
 

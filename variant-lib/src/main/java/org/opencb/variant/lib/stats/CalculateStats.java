@@ -401,38 +401,38 @@ public class CalculateStats {
         return sampleStat;
     }
 
-    public static VcfSampleGroupStats sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
+    public static VcfSampleGroupStat sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
 
-        VcfSampleGroupStats vcfSampleGroupStats = new VcfSampleGroupStats();
+        VcfSampleGroupStat vcfSampleGroupStat = new VcfSampleGroupStat();
 
         Set<String> groupValues = getGroupValues(ped, group);
         VcfSampleStat vcfSampleStat;
 
         List<String> sampleList;
 
-        if (vcfSampleGroupStats.getGroup() == null) {
-            vcfSampleGroupStats.setGroup(group);
+        if (vcfSampleGroupStat.getGroup() == null) {
+            vcfSampleGroupStat.setGroup(group);
         }
 
-        if (vcfSampleGroupStats.getSampleStats().size() == 0) {
+        if (vcfSampleGroupStat.getSampleStats().size() == 0) {
             for (String groupVal : groupValues) {
                 sampleList = getSamplesValueGroup(groupVal, group, ped);
                 vcfSampleStat = new VcfSampleStat(sampleList);
 
-                vcfSampleGroupStats.getSampleStats().put(groupVal, vcfSampleStat);
+                vcfSampleGroupStat.getSampleStats().put(groupVal, vcfSampleStat);
 
             }
 
 
         }
 
-        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStats.getSampleStats().entrySet()) {
+        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStat.getSampleStats().entrySet()) {
             sampleList = getSamplesValueGroup(entry.getKey(), group, ped);
             entry.setValue(sampleStats(batch, sampleList, ped));
 //            vcfSampleStat = entry.getValue();
 //            sampleStats(batch, sampleList, ped);
         }
-        return vcfSampleGroupStats;
+        return vcfSampleGroupStat;
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {

@@ -296,7 +296,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean writeSampleGroupStats(VcfSampleGroupStats sampleGroupStats) {
+    public boolean writeSampleGroupStats(VcfSampleGroupStat sampleGroupStats) {
         return false;
     }
 

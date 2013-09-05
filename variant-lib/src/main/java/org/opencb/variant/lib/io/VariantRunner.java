@@ -16,7 +16,6 @@ import org.opencb.variant.lib.stats.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -114,8 +113,10 @@ public class VariantRunner {
         List<VcfVariantStat> statsList;
         List<VcfGlobalStat> globalStats = new ArrayList<>(100);
         List<VcfSampleStat> sampleStats = new ArrayList<>(100);
-        List<VcfSampleGroupStats> sampleGroupPhen = new ArrayList<>(100);
-        List<VcfSampleGroupStats> sampleGroupFam = new ArrayList<>(100);
+        List<VcfSampleGroupStat> sampleGroupPhen = new ArrayList<>(100);
+        List<VcfSampleGroupStat> sampleGroupFam = new ArrayList<>(100);
+
+
 
 
         pedReader.open();
@@ -130,10 +131,10 @@ public class VariantRunner {
         vcfWriter.pre();
 
 
-        VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
-        VcfSampleGroupStats vcfSampleGroupStatsFam;
+        VcfSampleGroupStat vcfSampleGroupStatPhen = new VcfSampleGroupStat();
+        VcfSampleGroupStat vcfSampleGroupStatFam;
 
-        vcfSampleGroupStatsFam = new VcfSampleGroupStats();
+        vcfSampleGroupStatFam = new VcfSampleGroupStat();
 
         VcfVariantGroupStat groupStatsBatchPhen;
         VcfVariantGroupStat groupStatsBatchFam;
@@ -157,11 +158,11 @@ public class VariantRunner {
                 groupStatsBatchPhen = CalculateStats.groupStats(batch, ped, "phenotype");
                 groupStatsBatchFam = CalculateStats.groupStats(batch, ped, "family");
 
-                vcfSampleGroupStatsPhen = CalculateStats.sampleGroupStats(batch, ped, "phenotype");
-                sampleGroupPhen.add(vcfSampleGroupStatsPhen);
+                vcfSampleGroupStatPhen = CalculateStats.sampleGroupStats(batch, ped, "phenotype");
+                sampleGroupPhen.add(vcfSampleGroupStatPhen);
 
-                vcfSampleGroupStatsFam = CalculateStats.sampleGroupStats(batch, ped, "family");
-                sampleGroupFam.add(vcfSampleGroupStatsFam);
+                vcfSampleGroupStatFam = CalculateStats.sampleGroupStats(batch, ped, "family");
+                sampleGroupFam.add(vcfSampleGroupStatFam);
 
                 vcfWriter.writeVariantStats(statsList);
                 vcfWriter.writeVariantGroupStats(groupStatsBatchPhen);
@@ -181,14 +182,14 @@ public class VariantRunner {
 
         globalStat = new VcfGlobalStat(globalStats);
         vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames(), sampleStats);
-        vcfSampleGroupStatsPhen = new VcfSampleGroupStats(sampleGroupPhen);
-        vcfSampleGroupStatsFam = new VcfSampleGroupStats(sampleGroupFam);
+        vcfSampleGroupStatPhen = new VcfSampleGroupStat(sampleGroupPhen);
+        vcfSampleGroupStatFam = new VcfSampleGroupStat(sampleGroupFam);
 
         vcfWriter.writeGlobalStats(globalStat);
         vcfWriter.writeSampleStats(vcfSampleStat);
 
-        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsFam);
-        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsPhen);
+        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatFam);
+        vcfWriter.writeSampleGroupStats(vcfSampleGroupStatPhen);
 
         vcfReader.post();
         vcfWriter.post();

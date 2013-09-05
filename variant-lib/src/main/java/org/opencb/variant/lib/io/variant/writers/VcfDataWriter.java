@@ -22,7 +22,7 @@ public interface VcfDataWriter extends DataWriter {
 
     boolean writeSampleStats(VcfSampleStat vcfSampleStat);
 
-    boolean writeSampleGroupStats(VcfSampleGroupStats vcfSampleGroupStats) throws IOException;
+    boolean writeSampleGroupStats(VcfSampleGroupStat vcfSampleGroupStat) throws IOException;
 
     boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException;
 
