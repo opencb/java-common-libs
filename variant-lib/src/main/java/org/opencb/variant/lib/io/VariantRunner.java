@@ -14,6 +14,7 @@ import org.opencb.variant.lib.io.variant.writers.VcfSqliteDataWriter;
 import org.opencb.variant.lib.stats.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -106,7 +107,8 @@ public class VariantRunner {
         VcfFilter andFilter;
 
         List<VcfRecord> batch;
-        List<VcfRecordStat> statsList;
+        List<VcfVariantStat> statsList;
+        List<VcfGlobalStat> globalStats = new ArrayList<>(100);
 
         pedReader.open();
         ped = pedReader.read();
@@ -119,7 +121,7 @@ public class VariantRunner {
         vcfReader.pre();
         vcfWriter.pre();
 
-        VcfGlobalStat globalStats = new VcfGlobalStat();
+        VcfGlobalStat globalStat = new VcfGlobalStat();
         VcfSampleStat vcfSampleStat = new VcfSampleStat(vcfReader.getSampleNames());
 
         VcfSampleGroupStats vcfSampleGroupStatsPhen = new VcfSampleGroupStats();
@@ -138,7 +140,10 @@ public class VariantRunner {
             }
 
             if (stats) {
-                statsList = CalculateStats.variantStats(batch, vcfReader.getSampleNames(), ped, globalStats);
+                statsList = CalculateStats.variantStats(batch, vcfReader.getSampleNames(), ped);
+                globalStat = CalculateStats.globalStats(statsList);
+                globalStats.add(globalStat);
+//                System.out.println("globalStat = " + globalStat);
 
                 CalculateStats.sampleStats(batch, vcfReader.getSampleNames(), ped, vcfSampleStat);
 
@@ -165,7 +170,11 @@ public class VariantRunner {
             batch = vcfReader.read(batchSize);
         }
 
-        vcfWriter.writeGlobalStats(globalStats);
+        globalStat = new VcfGlobalStat(globalStats);
+        System.out.println(globalStat);
+
+
+        vcfWriter.writeGlobalStats(globalStat);
         vcfWriter.writeSampleStats(vcfSampleStat);
 
         vcfWriter.writeSampleGroupStats(vcfSampleGroupStatsFam);

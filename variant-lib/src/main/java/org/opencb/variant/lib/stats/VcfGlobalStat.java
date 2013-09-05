@@ -1,5 +1,7 @@
 package org.opencb.variant.lib.stats;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aaleman
@@ -34,9 +36,19 @@ public class VcfGlobalStat {
         this.accumQuality = 0;
     }
 
+    public VcfGlobalStat(List<VcfGlobalStat> globalStatList) {
+        this();
+
+        for (VcfGlobalStat gs : globalStatList) {
+            this.updateStats(gs.getVariantsCount(), gs.samplesCount, gs.getSnpsCount(), gs.indelsCount, gs.passCount, gs.transitionsCount, gs.transversionsCount, gs.getBiallelicsCount(), gs.getMultiallelicsCount(), gs.getAccumQuality());
+        }
+
+    }
+
+
     public void updateStats(int variantsCount, int samplesCount, int snpsCount, int indelsCount, int passCount, int transitionsCount, int transversionsCount, int biallelicsCount, int multiallelicsCount, float accumQuality) {
         this.variantsCount += variantsCount;
-        if(this.samplesCount == 0)
+        if (this.samplesCount == 0)
             this.samplesCount += samplesCount;
         this.snpsCount += snpsCount;
         this.indelsCount += indelsCount;
@@ -126,5 +138,53 @@ public class VcfGlobalStat {
 
     public void setAccumQuality(float accumQuality) {
         this.accumQuality = accumQuality;
+    }
+
+    public void addIndel() {
+        this.indelsCount++;
+    }
+
+    public void addSNP() {
+        this.snpsCount++;
+    }
+
+    public void addPass() {
+        this.passCount++;
+    }
+
+    public void addTransitions(int transitionsCount) {
+        this.transitionsCount += transitionsCount;
+    }
+
+    public void addTransversions(int transversionsCount) {
+        this.transversionsCount += transversionsCount;
+    }
+
+    public void addMultiallelic() {
+        this.multiallelicsCount++;
+    }
+
+    public void addBiallelic() {
+        this.biallelicsCount++;
+    }
+
+    public void addAccumQuality(float qual) {
+        this.accumQuality += qual;
+    }
+
+    @Override
+    public String toString() {
+        return "VcfGlobalStat{" +
+                "variantsCount=" + variantsCount +
+                ", samplesCount=" + samplesCount +
+                ", snpsCount=" + snpsCount +
+                ", indelsCount=" + indelsCount +
+                ", passCount=" + passCount +
+                ", transitionsCount=" + transitionsCount +
+                ", transversionsCount=" + transversionsCount +
+                ", biallelicsCount=" + biallelicsCount +
+                ", multiallelicsCount=" + multiallelicsCount +
+                ", accumQuality=" + accumQuality +
+                '}';
     }
 }

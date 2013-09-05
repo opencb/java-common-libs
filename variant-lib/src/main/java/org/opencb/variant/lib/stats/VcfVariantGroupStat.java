@@ -12,13 +12,13 @@ import java.util.*;
 public class VcfVariantGroupStat {
 
     private String group;
-    private Map<String, List<VcfRecordStat>> variantStats;
+    private Map<String, List<VcfVariantStat>> variantStats;
     private Object samples;
 
     public VcfVariantGroupStat(String group, Set<String> groupValues) {
         this.group = group;
         variantStats = new LinkedHashMap<>(groupValues.size());
-        List<VcfRecordStat> list;
+        List<VcfVariantStat> list;
         for(String groupVal: groupValues){
             list = new ArrayList<>(1000);
             variantStats.put(groupVal, list);
@@ -33,11 +33,11 @@ public class VcfVariantGroupStat {
         this.group = group;
     }
 
-    public Map<String, List<VcfRecordStat>> getVariantStats() {
+    public Map<String, List<VcfVariantStat>> getVariantStats() {
         return variantStats;
     }
 
-    public void setVariantStats(Map<String, List<VcfRecordStat>> variantStats) {
+    public void setVariantStats(Map<String, List<VcfVariantStat>> variantStats) {
         this.variantStats = variantStats;
     }
 

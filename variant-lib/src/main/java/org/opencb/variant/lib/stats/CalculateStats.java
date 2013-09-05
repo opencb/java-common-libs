@@ -2,9 +2,6 @@ package org.opencb.variant.lib.stats;
 
 
 import org.opencb.variant.lib.core.formats.*;
-import org.opencb.variant.lib.io.ped.readers.PedDataReader;
-import org.opencb.variant.lib.io.variant.readers.VcfDataReader;
-import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -19,16 +16,12 @@ import java.util.concurrent.*;
 public class CalculateStats {
 
 
-    public static List<VcfRecordStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped, VcfGlobalStat globalStats) {
-        List<VcfRecordStat> statList = new ArrayList<>(vcfRecordsList.size());
-
-        // Temporary variables for file stats updating
-        int variantsCount = 0, samplesCount = 0, snpsCount = 0, indelsCount = 0, passCount = 0;
-        int transitionsCount = 0, transversionsCount = 0, biallelicsCount = 0, multiallelicsCount = 0;
-        float accumQuality = 0;
-
+    public static List<VcfVariantStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
+        List<VcfVariantStat> statList = new ArrayList<>(vcfRecordsList.size());
 
         for (VcfRecord vcfRecord : vcfRecordsList) {
+            int transitionsCount = 0, transversionsCount = 0;
+
 
             int genotypeCurrentPos;
             int totalAllelesCount = 0;
@@ -47,7 +40,7 @@ public class CalculateStats {
             float casesRecessive = 0;
 
 
-            VcfRecordStat vcfStat = new VcfRecordStat();
+            VcfVariantStat vcfStat = new VcfVariantStat();
 
             vcfStat.setChromosome(vcfRecord.getChromosome());
             vcfStat.setPosition((long) vcfRecord.getPosition());
@@ -62,6 +55,8 @@ public class CalculateStats {
             int[] genotypesCount = new int[vcfStat.getNumAlleles() * vcfStat.getNumAlleles()];
             float[] allelesFreq = new float[vcfStat.getNumAlleles()];
             float[] genotypesFreq = new float[vcfStat.getNumAlleles() * vcfStat.getNumAlleles()];
+
+            vcfStat.setSamples(sampleNames.size());
 
             for (String sampleName : sampleNames) {
 
@@ -223,7 +218,6 @@ public class CalculateStats {
                     (vcfRecord.getAlternate().equals("<DEL>")) ||
                     vcfRecord.getReference().length() != vcfRecord.getAlternate().length()) {
                 vcfStat.setIndel(true);
-                indelsCount++;
             } else {
                 vcfStat.setIndel(false);
             }
@@ -272,24 +266,17 @@ public class CalculateStats {
             }
 
             // Update variables finally used to update file_stats_t structure
-            variantsCount++;
             if (!vcfRecord.getId().equals(".")) {
-                snpsCount++;
+                vcfStat.setSNP(true);
             }
             if (vcfRecord.getFilter().toUpperCase().equals("PASS")) {
-                passCount++;
-            }
-
-            if (vcfStat.getNumAlleles() > 2) {
-                multiallelicsCount++;
-            } else if (vcfStat.getNumAlleles() > 1) {
-                biallelicsCount++;
+                vcfStat.setPass(true);
             }
 
             if (!vcfRecord.getQuality().equals(".")) {
                 float qualAux = Float.valueOf(vcfRecord.getQuality());
                 if (qualAux >= 0) {
-                    accumQuality += qualAux;
+                    vcfStat.setQual(qualAux);
                 }
             }
 
@@ -308,18 +295,51 @@ public class CalculateStats {
             vcfStat.setCasesPercentRecessive(casesRecessive);
             vcfStat.setControlsPercentRecessive(controlsRecessive);
 
+
             statList.add(vcfStat);
         }
 
         calculateHardyWeinberChiSquareTest(statList);
 
-        samplesCount = sampleNames.size();
+//        samplesCount = sampleNames.size();
 
-        globalStats.updateStats(variantsCount, samplesCount, snpsCount, indelsCount,
-                passCount, transitionsCount, transversionsCount, biallelicsCount,
-                multiallelicsCount, accumQuality);
+//        globalStats.updateStats(variantsCount, samplesCount, snpsCount, indelsCount,
+//                passCount, transitionsCount, transversionsCount, biallelicsCount,
+//                multiallelicsCount, accumQuality);
 
         return statList;
+    }
+
+    public static VcfGlobalStat globalStats(List<VcfVariantStat> variantStats){
+
+        VcfGlobalStat gs = new VcfGlobalStat();
+
+        gs.setVariantsCount(variantStats.size());
+        for(VcfVariantStat vs: variantStats){
+            gs.setSamplesCount(vs.getSamples());
+            if(vs.isIndel()){
+                gs.addIndel();
+            }
+            if(vs.isSNP()){
+                gs.addSNP();
+            }
+            if(vs.isPass()){
+                gs.addPass();
+            }
+
+            if (vs.getNumAlleles() > 2) {
+                gs.addMultiallelic();
+            } else if (vs.getNumAlleles() > 1) {
+                gs.addBiallelic();
+            }
+
+            gs.addTransitions(vs.getTransitionsCount());
+            gs.addTransversions(vs.getTransversionsCount());
+            gs.addAccumQuality(vs.getQual());
+        }
+
+        return gs;
+
     }
 
     public static VcfVariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
@@ -327,7 +347,7 @@ public class CalculateStats {
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> sampleList;
         VcfVariantGroupStat groupStats = null;
-        List<VcfRecordStat> variantStats;
+        List<VcfVariantStat> variantStats;
 
         VcfGlobalStat globalStats = new VcfGlobalStat();
 
@@ -337,65 +357,12 @@ public class CalculateStats {
 
             for (String val : groupValues) {
                 sampleList = getSamplesValueGroup(val, group, ped);
-                variantStats = variantStats(vcfRecords, sampleList, ped, globalStats);
+                variantStats = variantStats(vcfRecords, sampleList, ped);
                 groupStats.getVariantStats().put(val, variantStats);
             }
 
         }
         return groupStats;
-    }
-
-    public static void runnerMulti(VcfDataReader vcfReader, VcfDataWriter vcfWriter, PedDataReader pedReader) throws Exception {
-
-
-//        ExecutorService threadPool = Executors.newFixedThreadPool(4);
-//        CompletionService<List<VcfRecordStat>> pool = new ExecutorCompletionService<>(threadPool);
-//
-//        List<Future<List<VcfRecordStat>>> futures = new ArrayList<>(10);
-//        int batchSize = 10000;
-//        int cont = 0;
-//
-//        Pedigree ped;
-//
-//        List<VcfRecord> batch;
-//        List<VcfRecordStat> statsList;
-//
-//        pedReader.open();
-//        ped = pedReader.read();
-//        pedReader.close();
-//
-//
-//        vcfReader.open();
-//        vcfWriter.open();
-//
-//        vcfReader.pre();
-//        vcfWriter.pre();
-//
-//
-//        VcfGlobalStat globalStats = new VcfGlobalStat();
-//
-//
-//        batch = vcfReader.read(batchSize);
-//
-//        while (!batch.isEmpty()) {
-//            cont++;
-//            pool.submit(new StatsTask(batch, vcfReader.getSampleNames(), ped, globalStats));
-//
-//            batch = vcfReader.read(batchSize);
-//        }
-//
-//        for(int i=0; i< cont; i++ ){
-//            statsList = pool.take().get();
-//            vcfWriter.writeVariantStats(statsList);
-//        }
-//
-//
-//
-//        vcfWriter.post();
-//
-//        vcfReader.close();
-//        vcfWriter.close();
-
     }
 
     public static void sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped, VcfSampleStat sampleStat) {
@@ -631,7 +598,7 @@ public class CalculateStats {
         return mendelType;
     }
 
-    private static void calculateHardyWeinberChiSquareTest(List<VcfRecordStat> statList) {
+    private static void calculateHardyWeinberChiSquareTest(List<VcfVariantStat> statList) {
         //To change body of created methods use File | Settings | File Templates.
     }
 
@@ -690,7 +657,7 @@ public class CalculateStats {
 
     }
 
-    private static class StatsTask implements Callable<List<VcfRecordStat>> {
+    private static class StatsTask implements Callable<List<VcfVariantStat>> {
         private List<VcfRecord> list;
         private List<String> sampleNames;
         private Pedigree ped;
@@ -704,8 +671,8 @@ public class CalculateStats {
         }
 
         @Override
-        public List<VcfRecordStat> call() throws Exception {
-            return variantStats(list, sampleNames, ped, gs);
+        public List<VcfVariantStat> call() throws Exception {
+            return variantStats(list, sampleNames, ped);
         }
     }
 }

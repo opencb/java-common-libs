@@ -169,7 +169,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean writeVariantStats(List<VcfRecordStat> data) {
+    public boolean writeVariantStats(List<VcfVariantStat> data) {
 
         String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
         boolean res = true;
@@ -178,7 +178,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
         try {
             pstmt = con.prepareStatement(sql);
 
-            for (VcfRecordStat v : data) {
+            for (VcfVariantStat v : data) {
                 pstmt.setString(1, v.getChromosome());
                 pstmt.setLong(2, v.getPosition());
                 pstmt.setString(3, v.getRefAlleles());

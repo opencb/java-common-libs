@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface VcfDataWriter extends DataWriter {
 
-    boolean writeVariantStats(List<VcfRecordStat> data);
+    boolean writeVariantStats(List<VcfVariantStat> data);
 
     boolean writeGlobalStats(VcfGlobalStat globalStats);
 

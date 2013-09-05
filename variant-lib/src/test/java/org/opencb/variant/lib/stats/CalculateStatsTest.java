@@ -56,31 +56,31 @@ public class CalculateStatsTest {
     }
 
 
-    @Test
-    public void testCalculateStatsRegionFilter() throws Exception {
-
-        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "regionFilter.db", pedFileName);
-
-        List<VcfFilter> filterList = new VcfFilterList(1);
-        filterList.add(new VcfRegionFilter("1", 0, 100000));
-
-        vr.filter(filterList).run();
-
-
-    }
-
-    @Test
-    public void testCalculateStatsSnpFilter() throws Exception {
-
-        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "snpFilter.db", pedFileName);
-
-        List<VcfFilter> filterList = new VcfFilterList(1);
-        filterList.add(new VcfSnpFilter());
-
-        vr.filter(filterList).run();
-
-
-    }
+//    @Test
+//    public void testCalculateStatsRegionFilter() throws Exception {
+//
+//        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "regionFilter.db", pedFileName);
+//
+//        List<VcfFilter> filterList = new VcfFilterList(1);
+//        filterList.add(new VcfRegionFilter("1", 0, 100000));
+//
+//        vr.filter(filterList).run();
+//
+//
+//    }
+//
+//    @Test
+//    public void testCalculateStatsSnpFilter() throws Exception {
+//
+//        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "snpFilter.db", pedFileName);
+//
+//        List<VcfFilter> filterList = new VcfFilterList(1);
+//        filterList.add(new VcfSnpFilter());
+//
+//        vr.filter(filterList).run();
+//
+//
+//    }
 
 
 

@@ -97,8 +97,8 @@ public class VcfFileDataWriter implements VcfDataWriter {
     }
 
     @Override
-    public boolean writeVariantStats(List<VcfRecordStat> data) {
-        for (VcfRecordStat v : data) {
+    public boolean writeVariantStats(List<VcfVariantStat> data) {
+        for (VcfVariantStat v : data) {
             variantPw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                     "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                     "%-10.2f%-10.2f%-10.2f%-10.2f\n",
@@ -186,7 +186,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
     public boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException {
         PrintWriter pw;
         String filename;
-        List<VcfRecordStat> list;
+        List<VcfVariantStat> list;
 
         Map<String, PrintWriter> auxMap;
 
@@ -197,7 +197,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
 
             auxMap = new LinkedHashMap<>(2);
 
-            for (Map.Entry<String, List<VcfRecordStat>> entry : groupStats.getVariantStats().entrySet()) {
+            for (Map.Entry<String, List<VcfVariantStat>> entry : groupStats.getVariantStats().entrySet()) {
                 filename = pathGroup + "variant_stats_" + groupStats.getGroup() + "_" + entry.getKey() + ".stats";
                 pw = new PrintWriter(new FileWriter(filename));
 
@@ -221,7 +221,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
         for (Map.Entry<String, PrintWriter> entry : auxMap.entrySet()) {
             pw = entry.getValue();
             list = groupStats.getVariantStats().get(entry.getKey());
-            for (VcfRecordStat v : list) {
+            for (VcfVariantStat v : list) {
                 pw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                         "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                         "%-10.2f%-10.2f%-10.2f%-10.2f\n",

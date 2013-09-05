@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 1:00 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfRecordStat {
+public class VcfVariantStat {
     private String chromosome;
     private long position;
     private String refAllele;
@@ -35,17 +35,21 @@ public class VcfRecordStat {
     private int missingGenotypes;
     private int mendelinanErrors;
     private boolean isIndel;
+    private boolean isSNP;
+    private boolean pass;
     private float casesPercentDominant;
     private float controlsPercentDominant;
     private float casesPercentRecessive;
     private float controlsPercentRecessive;
     private int transitionsCount;
     private int transversionsCount;
+    private float qual;
+    private int samples;
 
     private VcfHardyWeinbergStat hw;
 
 
-    public VcfRecordStat() {
+    public VcfVariantStat() {
         this.chromosome               = "";
         this.refAllele                = "";
         this.altAlleles               = null;
@@ -75,7 +79,7 @@ public class VcfRecordStat {
 
     @Override
     public String toString() {
-        return "VcfRecordStat{" +
+        return "VcfVariantStat{" +
                 "chromosome='" + chromosome + '\'' +
                 ", position=" + position +
                 ", refAllele='" + refAllele + '\'' +
@@ -298,5 +302,42 @@ public class VcfRecordStat {
 
     public VcfHardyWeinbergStat getHw() {
         return hw;
+    }
+
+
+    public boolean isIndel() {
+        return isIndel;
+    }
+
+    public boolean isSNP() {
+        return isSNP;
+    }
+
+    public void setSNP(boolean SNP) {
+        isSNP = SNP;
+    }
+
+    public boolean isPass() {
+        return pass;
+    }
+
+    public void setPass(boolean pass) {
+        this.pass = pass;
+    }
+
+    public float getQual() {
+        return qual;
+    }
+
+    public void setQual(float qual) {
+        this.qual = qual;
+    }
+
+    public int getSamples() {
+        return samples;
+    }
+
+    public void setSamples(int samples) {
+        this.samples = samples;
     }
 }
