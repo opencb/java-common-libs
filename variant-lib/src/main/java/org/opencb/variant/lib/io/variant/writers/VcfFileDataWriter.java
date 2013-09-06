@@ -190,6 +190,9 @@ public class VcfFileDataWriter implements VcfDataWriter {
 
         Map<String, PrintWriter> auxMap;
 
+        if(groupStats == null)
+            return false;
+
         String group = groupStats.getGroup();
         auxMap = mapGroupPw.get(group);
 

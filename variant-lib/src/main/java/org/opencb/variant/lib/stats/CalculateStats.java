@@ -391,10 +391,11 @@ public class CalculateStats {
 
                     }
 
-                    //Count homozygotes
-                    if (g.getAllele1() == g.getAllele2()) {
-                        sampleStat.incrementHomozygotesNumber(sample);
-                    }
+
+                }
+                //Count homozygotes
+                if (g.getAllele1() == g.getAllele2()) {
+                    sampleStat.incrementHomozygotesNumber(sample);
                 }
             }
         }
