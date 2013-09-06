@@ -1,9 +1,7 @@
 package org.opencb.variant.lib.io.variant.writers;
 
 import org.bioinfo.commons.utils.StringUtils;
-import org.opencb.variant.lib.core.formats.Genotype;
-import org.opencb.variant.lib.core.formats.VcfRecord;
-import org.opencb.variant.lib.stats.*;
+import org.opencb.variant.lib.core.formats.*;
 
 import java.sql.*;
 import java.util.List;

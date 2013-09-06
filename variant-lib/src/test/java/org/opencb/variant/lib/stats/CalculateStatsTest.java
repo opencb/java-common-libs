@@ -5,15 +5,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.variant.lib.core.filters.VcfFilter;
-import org.opencb.variant.lib.core.filters.VcfFilterList;
-import org.opencb.variant.lib.core.filters.VcfRegionFilter;
-import org.opencb.variant.lib.core.filters.VcfSnpFilter;
 import org.opencb.variant.lib.io.VariantRunner;
-import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
 import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

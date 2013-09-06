@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.stats;
+package org.opencb.variant.lib.core.formats;
 
 import java.util.LinkedHashMap;
 import java.util.List;

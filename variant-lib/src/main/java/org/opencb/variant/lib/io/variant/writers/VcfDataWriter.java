@@ -1,8 +1,7 @@
 package org.opencb.variant.lib.io.variant.writers;
 
-import org.opencb.variant.lib.core.formats.VcfRecord;
+import org.opencb.variant.lib.core.formats.*;
 import org.opencb.variant.lib.io.DataWriter;
-import org.opencb.variant.lib.stats.*;
 
 import java.io.IOException;
 import java.util.List;

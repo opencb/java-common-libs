@@ -1,7 +1,6 @@
 package org.opencb.variant.lib.io.variant.writers;
 
-import org.opencb.variant.lib.core.formats.VcfRecord;
-import org.opencb.variant.lib.stats.*;
+import org.opencb.variant.lib.core.formats.*;
 
 import java.io.FileWriter;
 import java.io.IOException;

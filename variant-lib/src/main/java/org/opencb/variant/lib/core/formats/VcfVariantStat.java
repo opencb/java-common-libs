@@ -1,7 +1,5 @@
-package org.opencb.variant.lib.stats;
+package org.opencb.variant.lib.core.formats;
 
-
-import org.opencb.variant.lib.core.formats.Genotype;
 
 import java.util.ArrayList;
 import java.util.Arrays;

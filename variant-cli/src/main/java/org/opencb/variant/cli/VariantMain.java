@@ -94,10 +94,10 @@ public class VariantMain {
                 break;
 
             case "filter":
+                System.out.println("===== STATS =====");
                 System.out.println("Under construction");
                 break;
         }
-
     }
 
     private static boolean checkCommand(String command) {

@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.core.filters;
+package org.opencb.variant.lib.filters.customfilters;
 
 import com.google.common.base.Predicate;
 import org.opencb.variant.lib.core.formats.VcfRecord;

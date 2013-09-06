@@ -1,6 +1,6 @@
 package org.opencb.variant.lib.io;
 
-import org.opencb.variant.lib.core.filters.VcfFilter;
+import org.opencb.variant.lib.filters.customfilters.VcfFilter;
 import org.opencb.variant.lib.core.formats.Pedigree;
 import org.opencb.variant.lib.core.formats.VcfRecord;
 import org.opencb.variant.lib.filters.VcfRecordFilters;

@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.opencb.variant.lib.core.filters.VcfFilter;
+import org.opencb.variant.lib.filters.customfilters.VcfFilter;
 import org.opencb.variant.lib.core.formats.VcfRecord;
 
 import java.util.List;

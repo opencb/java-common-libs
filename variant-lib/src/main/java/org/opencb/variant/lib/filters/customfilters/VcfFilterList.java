@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.core.filters;
+package org.opencb.variant.lib.filters.customfilters;
 
 import java.util.ArrayList;
 import java.util.Collections;
