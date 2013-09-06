@@ -151,6 +151,7 @@ public class VcfFileDataReader implements VcfDataReader {
         String line;
         String[] fields;
         BufferedReader localBufferedReader = new BufferedReader(new FileReader(file));
+        boolean header = false;
         while ((line = localBufferedReader.readLine()) != null && line.startsWith("#")) {
 
             if (line.startsWith("##fileformat")) {
@@ -176,10 +177,15 @@ public class VcfFileDataReader implements VcfDataReader {
                 headerLine = StringUtils.toList(line.replace("#", ""), "\t");
 
                 vcf4.setHeaderLine(headerLine);
+                header |= true;
             } else {
                 fields = line.replace("#", "").split("=", 2);
                 vcf4.getMetaInformation().put(fields[0], fields[1]);
             }
+        }
+        if(!header){
+            System.err.println("VCF Header must be provided.");
+            System.exit(-1);
         }
         localBufferedReader.close();
     }

@@ -50,11 +50,14 @@ public class VariantMain {
     public static void main(String[] args) throws IOException, InterruptedException {
         initOptions();
 
-        String[] argsAux = Arrays.copyOfRange(args, 1, args.length);
+        if (args.length == 0) {
+            help.printHelp("variant", options);
+            System.exit(-1);
+
+        }
         String command = args[0];
 
         VariantRunner vr;
-
 
         if (!checkCommand(command)) {
             help.printHelp("variant", options);
@@ -71,7 +74,7 @@ public class VariantMain {
 
                 String indexDir = commandLine.getOptionValue("outdir") + "/index";
                 File indexFileDir = new File(indexDir);
-                if(!indexFileDir.exists()){
+                if (!indexFileDir.exists()) {
                     indexFileDir.mkdir();
                 }
 
