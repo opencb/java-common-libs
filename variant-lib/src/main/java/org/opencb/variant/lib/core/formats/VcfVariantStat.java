@@ -75,6 +75,31 @@ public class VcfVariantStat {
         this.hw = new VcfHardyWeinbergStat();
     }
 
+    public VcfVariantStat(String chromosome, int position, String allele_ref, String allele_alt, double maf,
+                          double mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
+                          int mendel_err, int is_indel, double cases_percent_dominant,
+                          double controls_percent_dominant, double cases_percent_recessive,
+                          double controls_percent_recessive) {
+
+        this.chromosome = chromosome;
+        this.position = position;
+        this.refAllele = allele_ref;
+        this.altAlleles = allele_alt.split(",");
+        this.maf = (float) maf;
+        this.mgf = (float) mgf;
+        this.mafAllele = allele_maf;
+        this.mgfAllele = genotype_maf;
+        this.missingAlleles = miss_allele;
+        this.missingGenotypes = miss_gt;
+        this.mendelinanErrors = mendel_err;
+        this.isIndel = (is_indel == 1)? true:false;
+        this.casesPercentDominant = (float) cases_percent_dominant;
+        this.controlsPercentDominant = (float) controls_percent_dominant;
+        this.casesPercentRecessive = (float) cases_percent_recessive;
+        this.controlsPercentRecessive = (float) controls_percent_recessive;
+
+    }
+
     @Override
     public String toString() {
         return "VcfVariantStat{" +
