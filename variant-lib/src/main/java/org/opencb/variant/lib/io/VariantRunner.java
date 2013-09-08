@@ -1,8 +1,7 @@
 package org.opencb.variant.lib.io;
 
+import org.opencb.variant.lib.core.formats.*;
 import org.opencb.variant.lib.filters.customfilters.VcfFilter;
-import org.opencb.variant.lib.core.formats.Pedigree;
-import org.opencb.variant.lib.core.formats.VcfRecord;
 import org.opencb.variant.lib.filters.VcfRecordFilters;
 import org.opencb.variant.lib.io.ped.readers.PedDataReader;
 import org.opencb.variant.lib.io.ped.readers.PedFileDataReader;

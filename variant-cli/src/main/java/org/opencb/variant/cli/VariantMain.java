@@ -1,6 +1,11 @@
 package org.opencb.variant.cli;
 
+import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.cli.*;
+import org.opencb.variant.cli.servlets.GetFoldersServlet;
+import org.opencb.variant.cli.servlets.HelloServlet;
 import org.opencb.variant.lib.io.VariantRunner;
 import org.opencb.variant.lib.io.variant.readers.VcfFileDataReader;
 import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
@@ -59,11 +64,6 @@ public class VariantMain {
 
         VariantRunner vr;
 
-        if (!checkCommand(command)) {
-            help.printHelp("variant", options);
-            System.exit(-1);
-        }
-
         parse(args, false);
 
         switch (command) {
@@ -82,6 +82,7 @@ public class VariantMain {
 
                 p = r.exec(cmd);
                 p.waitFor();
+                break;
 
             case "stats":
                 System.out.println("===== STATS =====");
@@ -97,6 +98,40 @@ public class VariantMain {
                 System.out.println("===== STATS =====");
                 System.out.println("Under construction");
                 break;
+
+            case "server":
+                System.out.println("===== SERVER =====");
+
+                Tomcat tomcat;
+
+                tomcat = new Tomcat();
+                tomcat.setPort(31415);
+
+                Context ctx = tomcat.addContext("/variant/rest", new File(".").getAbsolutePath());
+
+                Tomcat.addServlet(ctx, "hello", new HelloServlet());
+                ctx.addServletMapping("/hello", "hello");
+
+                Tomcat.addServlet(ctx, "getdirs", new GetFoldersServlet());
+                ctx.addServletMapping("/getdirs", "getdirs");
+
+
+
+
+                try {
+                    tomcat.start();
+                    tomcat.getServer().await();
+
+                } catch (LifecycleException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+
+
+                break;
+
+            default:
+                help.printHelp("variant", options);
+                System.exit(-1);
         }
     }
 
