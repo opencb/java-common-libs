@@ -1,6 +1,7 @@
 package org.opencb.variant.lib.io;
 
 
+import org.opencb.variant.lib.core.formats.VariantInfo;
 import org.opencb.variant.lib.core.formats.VcfVariantStat;
 
 import java.sql.*;
@@ -19,14 +20,13 @@ import java.util.ResourceBundle;
  */
 public class WSSqliteManager {
 
-    private static final String pathDB = "/httpd/bioinfo/www-apps/bierapp/data/";
+    private static final String pathDB = "/Users/aleman/Sites/bierapp/data/";
 
-    public static List<VcfVariantStat> getRecords(HashMap<String, String> options) {
+    public static List<VariantInfo> getRecords(HashMap<String, String> options) {
 
         Connection con = null;
         Statement stmt;
-        List<VcfVariantStat> list = new ArrayList<>(100);
-        ResultSet res = null;
+        List<VariantInfo> list = new ArrayList<>(100);
 
         String dbName = options.get("db_name");
 
@@ -59,14 +59,14 @@ public class WSSqliteManager {
                 whereClauses.add("is_indel=1");
             }
 
-            if (options.containsKey("maf") && !options.get("maf").equals("")){
+            if (options.containsKey("maf") && !options.get("maf").equals("")) {
                 String val = options.get("maf");
                 String opt = options.get("option_maf");
                 whereClauses.add("maf " + opt + " " + val);
 
             }
 
-            if (options.containsKey("mgf") && !options.get("mgf").equals("")){
+            if (options.containsKey("mgf") && !options.get("mgf").equals("")) {
                 String val = options.get("mgf");
                 String opt = options.get("option_mgf");
                 whereClauses.add("mgf " + opt + " " + val);
@@ -109,10 +109,52 @@ public class WSSqliteManager {
             }
 
 
-            String sql = "SELECT * FROM variant_stats ";
+            String sql = "SELECT " +
+                    "variant_stats.chromosome , " +
+                    "variant_stats.position , " +
+                    "variant_stats.allele_ref , " +
+                    "variant_stats.allele_alt , " +
+                    "variant_stats.id , " +
+                    "variant_stats.maf , " +
+                    "variant_stats.mgf ," +
+                    "variant_stats.allele_maf , " +
+                    "variant_stats.genotype_maf , " +
+                    "variant_stats.miss_allele , " +
+                    "variant_stats.miss_gt , " +
+                    "variant_stats.mendel_err , " +
+                    "variant_stats.is_indel , " +
+                    "variant_stats.cases_percent_dominant , " +
+                    "variant_stats.controls_percent_dominant , " +
+                    "variant_stats.cases_percent_recessive , " +
+                    "variant_stats.controls_percent_recessive, " +
+                    "variant_effect.feature_id , " +
+                    "variant_effect.feature_name , " +
+                    "variant_effect.feature_type , " +
+                    "variant_effect.feature_biotype , " +
+                    "variant_effect.feature_chromsomome , " +
+                    "variant_effect.feature_start , " +
+                    "variant_effect.feature_end , " +
+                    "variant_effect.feature_strand , " +
+                    "variant_effect.snp_id , " +
+                    "variant_effect.ancestral , " +
+                    "variant_effect.alternative , " +
+                    "variant_effect.gene_id , " +
+                    "variant_effect.transcript_id , " +
+                    "variant_effect.gene_name , " +
+                    "variant_effect.consequence_type , " +
+                    "variant_effect.consequence_type_obo , " +
+                    "variant_effect.consequence_type_desc , " +
+                    "variant_effect.consequence_type_type , " +
+                    "variant_effect.aa_position, " +
+                    "variant_effect.aminoacid_change , " +
+                    "variant_effect.codon_change " +
+                    " FROM variant_stats INNER JOIN " +
+                    "variant_effect ON variant_stats.chromosome=variant_effect.chromosome " +
+                    "AND variant_stats.allele_ref=variant_effect.reference_allele " +
+                    "AND variant_stats.allele_alt =variant_effect.alternative_allele ";
 
 
-            if (whereClauses.size() > 0) {
+            if (whereClauses.size() > 0 && false) {
                 StringBuilder where = new StringBuilder(" where ");
 
                 for (int i = 0; i < whereClauses.size(); i++) {
@@ -131,14 +173,17 @@ public class WSSqliteManager {
             ResultSet rs = stmt.executeQuery(sql);
 
             VcfVariantStat vs;
+            VariantInfo vi;
             while (rs.next()) {
+                vi = new VariantInfo();
                 vs = new VcfVariantStat(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
                         rs.getDouble("maf"), rs.getDouble("mgf"), rs.getString("allele_maf"), rs.getString("genotype_maf"), rs.getInt("miss_allele"),
                         rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
                         rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
                 vs.setId(rs.getString("id"));
+                vi.setStats(vs);
 
-                list.add(vs);
+                list.add(vi);
             }
 
 
