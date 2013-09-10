@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  */
 public class WSSqliteManager {
 
-    private static final String pathDB = "/Users/aleman/Sites/bier-app/data/";
+    private static final String pathDB = "/httpd/bioinfo/www-apps/bierapp/data/";
 
     public static List<VcfVariantStat> getRecords(HashMap<String, String> options) {
 
@@ -57,6 +57,20 @@ public class WSSqliteManager {
 
             if (options.containsKey("is_indel") && options.get("is_indel").equalsIgnoreCase("on")) {
                 whereClauses.add("is_indel=1");
+            }
+
+            if (options.containsKey("maf") && !options.get("maf").equals("")){
+                String val = options.get("maf");
+                String opt = options.get("option_maf");
+                whereClauses.add("maf " + opt + " " + val);
+
+            }
+
+            if (options.containsKey("mgf") && !options.get("mgf").equals("")){
+                String val = options.get("mgf");
+                String opt = options.get("option_mgf");
+                whereClauses.add("mgf " + opt + " " + val);
+
             }
 
             if (options.containsKey("miss_allele") && !options.get("miss_allele").equals("")) {
