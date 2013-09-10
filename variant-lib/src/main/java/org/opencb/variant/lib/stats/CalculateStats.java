@@ -1,8 +1,17 @@
 package org.opencb.variant.lib.stats;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.variant.lib.core.formats.*;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -45,6 +54,7 @@ public class CalculateStats {
             vcfStat.setChromosome(vcfRecord.getChromosome());
             vcfStat.setPosition((long) vcfRecord.getPosition());
             vcfStat.setRefAllele(vcfRecord.getReference());
+            vcfStat.setId(vcfRecord.getId());
 
             String[] altAlleles = vcfRecord.getAltAlleles();
 
@@ -404,6 +414,7 @@ public class CalculateStats {
 
     public static VcfSampleGroupStat sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
 
+
         VcfSampleGroupStat vcfSampleGroupStat = new VcfSampleGroupStat();
 
         Set<String> groupValues = getGroupValues(ped, group);
@@ -434,6 +445,42 @@ public class CalculateStats {
 //            sampleStats(batch, sampleList, ped);
         }
         return vcfSampleGroupStat;
+    }
+
+    public static List<VariantEffect> variantEffects(List<VcfRecord> batch){
+
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<VariantEffect> batchEffect = new ArrayList<>();
+
+        StringBuilder chunkVcfRecords = new StringBuilder();
+
+        Client wsRestClient = Client.create();
+        WebResource webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+
+
+        for(VcfRecord record : batch){
+            chunkVcfRecords.append(record.getChromosome()).append(":");
+            chunkVcfRecords.append(record.getPosition()).append(":");
+            chunkVcfRecords.append(record.getReference()).append(":");
+            chunkVcfRecords.append(record.getAlternate()).append(",");
+
+        }
+
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length()-1));
+
+        String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
+
+        try {
+            batchEffect = mapper.readValue(response, new TypeReference<List<VariantEffect>>(){});
+        } catch (IOException e) {
+            System.err.println(chunkVcfRecords.toString());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+
+        return batchEffect;
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {

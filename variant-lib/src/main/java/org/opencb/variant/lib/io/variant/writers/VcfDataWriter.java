@@ -27,4 +27,5 @@ public interface VcfDataWriter extends DataWriter {
 
     boolean writeVariantIndex(List<VcfRecord> data);
 
+    boolean writeVariantEffect(List<VariantEffect> batchEffect);
 }

@@ -258,7 +258,12 @@ public class VcfFileDataWriter implements VcfDataWriter {
 
     @Override
     public boolean writeVariantIndex(List<VcfRecord> data) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
+    }
+
+    @Override
+    public boolean writeVariantEffect(List<VariantEffect> batchEffect) {
+        return false;
     }
 
 

@@ -17,6 +17,7 @@ public class VcfVariantStat {
     private long position;
     private String refAllele;
     private String[] altAlleles;
+    private String id;
     private String mafAllele;
     private String mgfAllele;
     private int numAlleles;
@@ -362,5 +363,13 @@ public class VcfVariantStat {
 
     public void setSamples(int samples) {
         this.samples = samples;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

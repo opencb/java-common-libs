@@ -32,7 +32,7 @@ public class CalculateStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        vcfFileName = path + "file.vcf";
+        vcfFileName = path + "small.vcf";
         pedFileName = path + "file.ped";
         pathStats = path + "jstats/";
         dbFilename = path + "jstats/variant.db";
@@ -86,6 +86,7 @@ public class CalculateStatsTest {
         VariantRunner vr = new VariantRunner(vcfFileName, dbFilename, pedFileName);
 
         vr.writer(new VcfFileDataWriter(pathStats));
+        vr.setEffect(true);
 
         vr.run();
 

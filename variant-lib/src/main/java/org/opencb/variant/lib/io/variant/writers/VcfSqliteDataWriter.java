@@ -77,6 +77,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 "position INT64, " +
                 "allele_ref TEXT, " +
                 "allele_alt TEXT, " +
+                "id TEXT, " +
                 "maf DOUBLE, " +
                 "mgf DOUBLE," +
                 "allele_maf TEXT, " +
@@ -121,6 +122,33 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 "FOREIGN KEY(id_variant) REFERENCES variant(id_variant)," +
                 "FOREIGN KEY(sample_name) REFERENCES sample(name));";
 
+        String variantEffectTable = "CREATE TABLE IF NOT EXISTS variant_effect(" +
+                "id_variant_effect INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "chromosome	TEXT, " +
+                "position INT64, " +
+                "reference_allele TEXT, " +
+                "alternative_allele TEXT, " +
+                "feature_id TEXT, " +
+                "feature_name TEXT, " +
+                "feature_type TEXT, " +
+                "feature_biotype TEXT, " +
+                "feature_chromsomome TEXT, " +
+                "feature_start INT64, " +
+                "feature_end INT64, " +
+                "feature_strand TEXT, " +
+                "snp_id TEXT, " +
+                "ancestral TEXT, " +
+                "alternative TEXT, " +
+                "gene_id TEXT, " +
+                "transcript_id TEXT, " +
+                "gene_name TEXT, " +
+                "consequence_type TEXT, " +
+                "consequence_type_obo TEXT, " +
+                "consequence_type_desc TEXT, " +
+                "consequence_type_type TEXT, " +
+                "aa_position INT64, " +
+                "aminoacid_change TEXT, " +
+                "codon_change TEXT); ";
 
         try {
             stmt = con.createStatement();
@@ -131,6 +159,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             stmt.execute(variantTable);
             stmt.execute(sampleTable);
             stmt.execute(sampleInfoTable);
+            stmt.execute(variantEffectTable);
 
             stmt.close();
 
@@ -151,6 +180,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             stmt = con.createStatement();
             stmt.execute("CREATE INDEX variant_stats_chromosome_position_idx ON variant_stats (chromosome, position);");
             stmt.execute("CREATE INDEX variant_chromosome_position_idx ON variant (chromosome, position);");
+            stmt.execute("CREATE INDEX variant_effect_chromosome_position_idx ON variant_effect (chromosome, position);");
             stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
             stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
             stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
@@ -169,7 +199,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     @Override
     public boolean writeVariantStats(List<VcfVariantStat> data) {
 
-        String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, id, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
         boolean res = true;
 
 
@@ -181,18 +211,19 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 pstmt.setLong(2, v.getPosition());
                 pstmt.setString(3, v.getRefAlleles());
                 pstmt.setString(4, StringUtils.join(v.getAltAlleles(), ","));
-                pstmt.setDouble(5, v.getMaf());
-                pstmt.setDouble(6, v.getMgf());
-                pstmt.setString(7, v.getMafAllele());
-                pstmt.setString(8, v.getMgfAllele());
-                pstmt.setInt(9, v.getMissingAlleles());
-                pstmt.setInt(10, v.getMissingGenotypes());
-                pstmt.setInt(11, v.getMendelinanErrors());
-                pstmt.setInt(12, (v.getIndel() ? 1 : 0));
-                pstmt.setDouble(13, v.getCasesPercentDominant());
-                pstmt.setDouble(14, v.getControlsPercentDominant());
-                pstmt.setDouble(15, v.getCasesPercentRecessive());
-                pstmt.setDouble(16, v.getControlsPercentRecessive());
+                pstmt.setString(5, v.getId());
+                pstmt.setDouble(6, v.getMaf());
+                pstmt.setDouble(7, v.getMgf());
+                pstmt.setString(8, v.getMafAllele());
+                pstmt.setString(9, v.getMgfAllele());
+                pstmt.setInt(10, v.getMissingAlleles());
+                pstmt.setInt(11, v.getMissingGenotypes());
+                pstmt.setInt(12, v.getMendelinanErrors());
+                pstmt.setInt(13, (v.getIndel() ? 1 : 0));
+                pstmt.setDouble(14, v.getCasesPercentDominant());
+                pstmt.setDouble(15, v.getControlsPercentDominant());
+                pstmt.setDouble(16, v.getCasesPercentRecessive());
+                pstmt.setDouble(17, v.getControlsPercentRecessive());
 
                 pstmt.execute();
 
@@ -234,14 +265,14 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             stmt.executeUpdate(sql);
             sql = "INSERT INTO global_stats VALUES ('NUM_TRANSVERSSIONS', 'Number of transversions'," + globalStats.getTransversionsCount() + ");";
             stmt.executeUpdate(sql);
-            if(globalStats.getTransversionsCount() > 0){
-                titv = globalStats.getTransitionsCount()/ (float) globalStats.getTransversionsCount();
+            if (globalStats.getTransversionsCount() > 0) {
+                titv = globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount();
             }
             sql = "INSERT INTO global_stats VALUES ('TITV_RATIO', 'Ti/TV ratio'," + titv + ");";
             stmt.executeUpdate(sql);
-            if(globalStats.getVariantsCount() > 0){
-                pass = globalStats.getPassCount()/ (float) globalStats.getVariantsCount();
-                avg = globalStats.getAccumQuality()/(float) globalStats.getVariantsCount();
+            if (globalStats.getVariantsCount() > 0) {
+                pass = globalStats.getPassCount() / (float) globalStats.getVariantsCount();
+                avg = globalStats.getAccumQuality() / (float) globalStats.getVariantsCount();
             }
 
             sql = "INSERT INTO global_stats VALUES ('PERCENT_PASS', 'Percentage of PASS'," + (pass * 100) + ");";
@@ -302,7 +333,6 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     public boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) {
         return false;
     }
-
 
     @Override
     public boolean writeVariantIndex(List<VcfRecord> data) {
@@ -391,6 +421,60 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
             res = false;
         }
 
+        return res;
+    }
+
+    @Override
+    public boolean writeVariantEffect(List<VariantEffect> batchEffect) {
+
+
+        String sql = "INSERT INTO variant_effect(chromosome	, position , reference_allele , alternative_allele , " +
+                "feature_id , feature_name , feature_type , feature_biotype , feature_chromsomome , feature_start , " +
+                "feature_end , feature_strand , snp_id , ancestral , alternative , gene_id , transcript_id , gene_name , " +
+                "consequence_type , consequence_type_obo , consequence_type_desc , consequence_type_type , aa_position , " +
+                "aminoacid_change , codon_change) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+
+        boolean res = true;
+
+        try {
+            pstmt = con.prepareStatement(sql);
+
+            for(VariantEffect v: batchEffect){
+                pstmt.setString(1, v.getChromosome());
+                pstmt.setInt(2, v.getPosition());
+                pstmt.setString(3, v.getReferenceAllele());
+                pstmt.setString(4, v.getAlternativeAllele());
+                pstmt.setString(5, v.getFeatureId());
+                pstmt.setString(6, v.getFeatureName());
+                pstmt.setString(7, v.getFeatureType());
+                pstmt.setString(8, v.getFeatureBiotype());
+                pstmt.setString(9, v.getFeatureChromosome());
+                pstmt.setInt(10, v.getFeatureStart());
+                pstmt.setInt(11, v.getFeatureEnd());
+                pstmt.setString(12, v.getFeatureStrand());
+                pstmt.setString(13, v.getSnpId());
+                pstmt.setString(14, v.getAncestral());
+                pstmt.setString(15, v.getAlternative());
+                pstmt.setString(16, v.getGeneId());
+                pstmt.setString(17, v.getTranscriptId());
+                pstmt.setString(18, v.getGeneName());
+                pstmt.setString(19, v.getConsequenceType());
+                pstmt.setString(20, v.getConsequenceTypeObo());
+                pstmt.setString(21, v.getConsequenceTypeDesc());
+                pstmt.setString(22, v.getConsequenceTypeType());
+                pstmt.setInt(23, v.getAaPosition());
+                pstmt.setString(24, v.getAminoacidChange());
+                pstmt.setString(25, v.getCodonChange());
+
+                pstmt.execute();
+
+            }
+            con.commit();
+            pstmt.close();
+        } catch (SQLException e) {
+            System.err.println("VARIANT_EFFECT: " + e.getClass().getName() + ": " + e.getMessage());
+            res = false;
+        }
         return res;
     }
 

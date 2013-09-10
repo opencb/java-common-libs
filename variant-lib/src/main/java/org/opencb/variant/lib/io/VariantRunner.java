@@ -1,5 +1,9 @@
 package org.opencb.variant.lib.io;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.variant.lib.core.formats.*;
 import org.opencb.variant.lib.filters.customfilters.VcfFilter;
 import org.opencb.variant.lib.filters.VcfRecordFilters;
@@ -12,6 +16,8 @@ import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
 import org.opencb.variant.lib.io.variant.writers.VcfSqliteDataWriter;
 import org.opencb.variant.lib.stats.*;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +47,7 @@ public class VariantRunner {
         this.numThreads = 1;
         this.stats = true;
         this.index = true;
-        this.effect = false;
+        this.effect = true;
     }
 
     public VariantRunner(String vcfFilePath, String sqliteFileName, String pedFilePath) {
@@ -99,7 +105,7 @@ public class VariantRunner {
     }
 
     public void run() throws IOException {
-        int batchSize = 10000;
+        int batchSize = 1000;
 
         Pedigree ped = null;
 
@@ -107,8 +113,10 @@ public class VariantRunner {
 
         VcfGlobalStat globalStat;
         VcfSampleStat vcfSampleStat;
+        StringBuilder chunkVcfRecords;
 
         List<VcfRecord> batch;
+        List<VariantEffect> batchEffect;
         List<VcfVariantStat> statsList;
         List<VcfGlobalStat> globalStats = new ArrayList<>(100);
         List<VcfSampleStat> sampleStats = new ArrayList<>(100);
@@ -132,7 +140,6 @@ public class VariantRunner {
         VcfSampleGroupStat vcfSampleGroupStatPhen = new VcfSampleGroupStat();
         VcfSampleGroupStat vcfSampleGroupStatFam;
 
-        vcfSampleGroupStatFam = new VcfSampleGroupStat();
 
         VcfVariantGroupStat groupStatsBatchPhen = null;
         VcfVariantGroupStat groupStatsBatchFam = null;
@@ -175,7 +182,11 @@ public class VariantRunner {
             }
 
             if (effect) {
-                ;
+
+
+                batchEffect = CalculateStats.variantEffects(batch);
+                vcfWriter.writeVariantEffect(batchEffect);
+
             }
 
             batch = vcfReader.read(batchSize);
@@ -197,5 +208,13 @@ public class VariantRunner {
 
         vcfReader.close();
         vcfWriter.close();
+    }
+
+    public boolean isEffect() {
+        return effect;
+    }
+
+    public void setEffect(boolean effect) {
+        this.effect = effect;
     }
 }
