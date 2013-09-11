@@ -234,4 +234,12 @@ public class VariantInfo {
     public void setStats_controls_percent_recessive(double stats_controls_percent_recessive) {
         this.stats_controls_percent_recessive = stats_controls_percent_recessive;
     }
+
+    public HashMap<String, String> getGenotypes() {
+        return genotypes;
+    }
+
+    public void setGenotypes(HashMap<String, String> genotypes) {
+        this.genotypes = genotypes;
+    }
 }

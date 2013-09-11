@@ -7,10 +7,7 @@ import org.opencb.variant.lib.core.formats.VcfVariantStat;
 
 import java.sql.*;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -151,11 +148,19 @@ public class WSSqliteManager {
                     "variant_effect.codon_change " +
                     " FROM variant_stats INNER JOIN " +
                     "variant_effect ON variant_stats.chromosome=variant_effect.chromosome " +
+                    "AND variant_stats.position=variant_effect.position " +
                     "AND variant_stats.allele_ref=variant_effect.reference_allele " +
                     "AND variant_stats.allele_alt =variant_effect.alternative_allele ";
 
+            System.out.println(sql);
 
-            if (whereClauses.size() > 0 && false) {
+            String sql_genotypes = "select sample_info.sample_name," +
+                    " sample_info.allele_1, sample_info.allele_2 from variant " +
+                    "inner join sample_info on sample_info.id_variant = variant.id_variant " +
+                    "where variant.chromosome=? AND variant.position=? AND variant.ref=? AND variant.alt=?;";
+            // sqlite> select * from variant inner join sample_info on sample_info.variant_id = variant.id_variant where chromosome='1' AND position=14653;
+
+            if (whereClauses.size() > 0) {
                 StringBuilder where = new StringBuilder(" where ");
 
                 for (int i = 0; i < whereClauses.size(); i++) {
@@ -168,10 +173,11 @@ public class WSSqliteManager {
                 sql += where.toString() + " ;";
             }
 
-            System.out.println(sql);
-
             stmt = con.createStatement();
+            PreparedStatement pstmt;
+            HashMap<String,String> genotypes;
             ResultSet rs = stmt.executeQuery(sql);
+            ResultSet rsG;
 
             VcfVariantStat vs;
             VariantInfo vi = null;
@@ -182,19 +188,37 @@ public class WSSqliteManager {
             String ref = "", alt = "";
 
             while (rs.next()) {
-                System.err.println(rs.getString("chromosome") + "-" + rs.getInt("position") + "-" + rs.getString("allele_ref") + "-" + rs.getString("allele_alt"));
-                System.err.println(chr + "-" + pos + "-" + ref + "-" + alt);
 
                 if (!rs.getString("chromosome").equals(chr) ||
                         rs.getInt("position") != pos ||
                         !rs.getString("allele_ref").equals(ref) ||
                         !rs.getString("allele_alt").equals(alt)) {
 
-                    System.err.println("Entra");
+
+
                     chr = rs.getString("chromosome");
                     pos = rs.getInt("position");
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
+
+                    genotypes = new LinkedHashMap<>();
+                    pstmt = con.prepareStatement(sql_genotypes);
+
+                    pstmt.setString(1, chr);
+                    pstmt.setInt(2, pos);
+                    pstmt.setString(3, ref);
+                    pstmt.setString(4, alt);
+
+                    rsG = pstmt.executeQuery();
+
+                    while(rsG.next()){
+                        String aux = rsG.getString("allele_1") + "/" + rsG.getString("allele_2");
+                        genotypes.put(rsG.getString("sample_name"), aux);
+
+                    }
+                    pstmt.close();
+
+                    System.out.println(genotypes);
 
                     if (vi != null) {
                         list.add(vi);
@@ -207,6 +231,9 @@ public class WSSqliteManager {
                     vs.setId(rs.getString("id"));
 
                     vi.addStats(vs);
+                    vi.setGenotypes(genotypes);
+
+
                 }
                 ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
                         rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
@@ -217,7 +244,7 @@ public class WSSqliteManager {
                 vi.addEffect(ve);
 
             }
-            if(vi != null){
+            if (vi != null) {
                 list.add(vi);
             }
 
