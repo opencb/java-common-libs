@@ -132,7 +132,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
                 "feature_name TEXT, " +
                 "feature_type TEXT, " +
                 "feature_biotype TEXT, " +
-                "feature_chromsomome TEXT, " +
+                "feature_chromosome TEXT, " +
                 "feature_start INT64, " +
                 "feature_end INT64, " +
                 "feature_strand TEXT, " +
@@ -429,7 +429,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
 
 
         String sql = "INSERT INTO variant_effect(chromosome	, position , reference_allele , alternative_allele , " +
-                "feature_id , feature_name , feature_type , feature_biotype , feature_chromsomome , feature_start , " +
+                "feature_id , feature_name , feature_type , feature_biotype , feature_chromosome , feature_start , " +
                 "feature_end , feature_strand , snp_id , ancestral , alternative , gene_id , transcript_id , gene_name , " +
                 "consequence_type , consequence_type_obo , consequence_type_desc , consequence_type_type , aa_position , " +
                 "aminoacid_change , codon_change) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";

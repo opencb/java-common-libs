@@ -1,6 +1,7 @@
 package org.opencb.variant.lib.io;
 
 
+import org.opencb.variant.lib.core.formats.VariantEffect;
 import org.opencb.variant.lib.core.formats.VariantInfo;
 import org.opencb.variant.lib.core.formats.VcfVariantStat;
 
@@ -20,7 +21,7 @@ import java.util.ResourceBundle;
  */
 public class WSSqliteManager {
 
-    private static final String pathDB = "/Users/aleman/Sites/bierapp/data/";
+    private static final String pathDB = "/opt/data/data/";
 
     public static List<VariantInfo> getRecords(HashMap<String, String> options) {
 
@@ -131,7 +132,7 @@ public class WSSqliteManager {
                     "variant_effect.feature_name , " +
                     "variant_effect.feature_type , " +
                     "variant_effect.feature_biotype , " +
-                    "variant_effect.feature_chromsomome , " +
+                    "variant_effect.feature_chromosome , " +
                     "variant_effect.feature_start , " +
                     "variant_effect.feature_end , " +
                     "variant_effect.feature_strand , " +
@@ -173,16 +174,50 @@ public class WSSqliteManager {
             ResultSet rs = stmt.executeQuery(sql);
 
             VcfVariantStat vs;
-            VariantInfo vi;
-            while (rs.next()) {
-                vi = new VariantInfo();
-                vs = new VcfVariantStat(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
-                        rs.getDouble("maf"), rs.getDouble("mgf"), rs.getString("allele_maf"), rs.getString("genotype_maf"), rs.getInt("miss_allele"),
-                        rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
-                        rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
-                vs.setId(rs.getString("id"));
-                vi.setStats(vs);
+            VariantInfo vi = null;
+            VariantEffect ve;
 
+            String chr = "";
+            int pos = 0;
+            String ref = "", alt = "";
+
+            while (rs.next()) {
+                System.err.println(rs.getString("chromosome") + "-" + rs.getInt("position") + "-" + rs.getString("allele_ref") + "-" + rs.getString("allele_alt"));
+                System.err.println(chr + "-" + pos + "-" + ref + "-" + alt);
+
+                if (!rs.getString("chromosome").equals(chr) ||
+                        rs.getInt("position") != pos ||
+                        !rs.getString("allele_ref").equals(ref) ||
+                        !rs.getString("allele_alt").equals(alt)) {
+
+                    System.err.println("Entra");
+                    chr = rs.getString("chromosome");
+                    pos = rs.getInt("position");
+                    ref = rs.getString("allele_ref");
+                    alt = rs.getString("allele_alt");
+
+                    if (vi != null) {
+                        list.add(vi);
+                    }
+                    vi = new VariantInfo(chr, pos, ref, alt);
+                    vs = new VcfVariantStat(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
+                            rs.getDouble("maf"), rs.getDouble("mgf"), rs.getString("allele_maf"), rs.getString("genotype_maf"), rs.getInt("miss_allele"),
+                            rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
+                            rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
+                    vs.setId(rs.getString("id"));
+
+                    vi.addStats(vs);
+                }
+                ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
+                        rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
+                        rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),
+                        rs.getString("snp_id"), rs.getString("ancestral"), rs.getString("alternative"), rs.getString("gene_id"), rs.getString("transcript_id"),
+                        rs.getString("gene_name"), rs.getString("consequence_type"), rs.getString("consequence_type_obo"), rs.getString("consequence_type_desc"),
+                        rs.getString("consequence_type_type"), rs.getInt("aa_position"), rs.getString("aminoacid_change"), rs.getString("codon_change"));
+                vi.addEffect(ve);
+
+            }
+            if(vi != null){
                 list.add(vi);
             }
 
