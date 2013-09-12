@@ -64,7 +64,7 @@ public class VariantEffect {
                          @JsonProperty("aaPosition") int aaPosition,
                          @JsonProperty("aminoacidChange") String aminoacidChange,
                          @JsonProperty("codonChange") String codonChange
-                             ) {
+    ) {
         this.chromosome = chromosome;
         this.position = position;
         this.referenceAllele = referenceAllele;
@@ -91,8 +91,6 @@ public class VariantEffect {
         this.aminoacidChange = aminoacidChange;
         this.codonChange = codonChange;
     }
-
-
 
 
     public String getChromosome() {
@@ -324,5 +322,81 @@ public class VariantEffect {
                 ", aminoacidChange='" + aminoacidChange + '\'' +
                 ", codonChange=" + codonChange +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VariantEffect)) return false;
+
+        VariantEffect that = (VariantEffect) o;
+
+        if (aaPosition != that.aaPosition) return false;
+        if (featureEnd != that.featureEnd) return false;
+        if (featureStart != that.featureStart) return false;
+        if (position != that.position) return false;
+        if (alternative != null ? !alternative.equals(that.alternative) : that.alternative != null) return false;
+        if (alternativeAllele != null ? !alternativeAllele.equals(that.alternativeAllele) : that.alternativeAllele != null)
+            return false;
+        if (aminoacidChange != null ? !aminoacidChange.equals(that.aminoacidChange) : that.aminoacidChange != null)
+            return false;
+        if (ancestral != null ? !ancestral.equals(that.ancestral) : that.ancestral != null) return false;
+        if (chromosome != null ? !chromosome.equals(that.chromosome) : that.chromosome != null) return false;
+        if (codonChange != null ? !codonChange.equals(that.codonChange) : that.codonChange != null) return false;
+        if (consequenceType != null ? !consequenceType.equals(that.consequenceType) : that.consequenceType != null)
+            return false;
+        if (consequenceTypeDesc != null ? !consequenceTypeDesc.equals(that.consequenceTypeDesc) : that.consequenceTypeDesc != null)
+            return false;
+        if (consequenceTypeObo != null ? !consequenceTypeObo.equals(that.consequenceTypeObo) : that.consequenceTypeObo != null)
+            return false;
+        if (consequenceTypeType != null ? !consequenceTypeType.equals(that.consequenceTypeType) : that.consequenceTypeType != null)
+            return false;
+        if (featureBiotype != null ? !featureBiotype.equals(that.featureBiotype) : that.featureBiotype != null)
+            return false;
+        if (featureChromosome != null ? !featureChromosome.equals(that.featureChromosome) : that.featureChromosome != null)
+            return false;
+        if (featureId != null ? !featureId.equals(that.featureId) : that.featureId != null) return false;
+        if (featureName != null ? !featureName.equals(that.featureName) : that.featureName != null) return false;
+        if (featureStrand != null ? !featureStrand.equals(that.featureStrand) : that.featureStrand != null)
+            return false;
+        if (featureType != null ? !featureType.equals(that.featureType) : that.featureType != null) return false;
+        if (geneId != null ? !geneId.equals(that.geneId) : that.geneId != null) return false;
+        if (geneName != null ? !geneName.equals(that.geneName) : that.geneName != null) return false;
+        if (referenceAllele != null ? !referenceAllele.equals(that.referenceAllele) : that.referenceAllele != null)
+            return false;
+        if (snpId != null ? !snpId.equals(that.snpId) : that.snpId != null) return false;
+        if (transcriptId != null ? !transcriptId.equals(that.transcriptId) : that.transcriptId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = chromosome != null ? chromosome.hashCode() : 0;
+        result = 31 * result + position;
+        result = 31 * result + (referenceAllele != null ? referenceAllele.hashCode() : 0);
+        result = 31 * result + (alternativeAllele != null ? alternativeAllele.hashCode() : 0);
+        result = 31 * result + (featureId != null ? featureId.hashCode() : 0);
+        result = 31 * result + (featureName != null ? featureName.hashCode() : 0);
+        result = 31 * result + (featureType != null ? featureType.hashCode() : 0);
+        result = 31 * result + (featureBiotype != null ? featureBiotype.hashCode() : 0);
+        result = 31 * result + (featureChromosome != null ? featureChromosome.hashCode() : 0);
+        result = 31 * result + featureStart;
+        result = 31 * result + featureEnd;
+        result = 31 * result + (featureStrand != null ? featureStrand.hashCode() : 0);
+        result = 31 * result + (snpId != null ? snpId.hashCode() : 0);
+        result = 31 * result + (ancestral != null ? ancestral.hashCode() : 0);
+        result = 31 * result + (alternative != null ? alternative.hashCode() : 0);
+        result = 31 * result + (geneId != null ? geneId.hashCode() : 0);
+        result = 31 * result + (transcriptId != null ? transcriptId.hashCode() : 0);
+        result = 31 * result + (geneName != null ? geneName.hashCode() : 0);
+        result = 31 * result + (consequenceType != null ? consequenceType.hashCode() : 0);
+        result = 31 * result + (consequenceTypeObo != null ? consequenceTypeObo.hashCode() : 0);
+        result = 31 * result + (consequenceTypeDesc != null ? consequenceTypeDesc.hashCode() : 0);
+        result = 31 * result + (consequenceTypeType != null ? consequenceTypeType.hashCode() : 0);
+        result = 31 * result + aaPosition;
+        result = 31 * result + (aminoacidChange != null ? aminoacidChange.hashCode() : 0);
+        result = 31 * result + (codonChange != null ? codonChange.hashCode() : 0);
+        return result;
     }
 }

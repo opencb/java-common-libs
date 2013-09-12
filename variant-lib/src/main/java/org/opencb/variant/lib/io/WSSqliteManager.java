@@ -39,9 +39,9 @@ public class WSSqliteManager {
                 int start = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[0]);
                 int end = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[1]);
 
-                whereClauses.add("chromosome='" + chrPos + "'");
-                whereClauses.add("position>=" + start);
-                whereClauses.add("position<=" + end);
+                whereClauses.add("variant_stats.chromosome='" + chrPos + "'");
+                whereClauses.add("variant_stats.position>=" + start);
+                whereClauses.add("variant_stats.position<=" + end);
 
             }
 
@@ -49,108 +49,68 @@ public class WSSqliteManager {
             if (options.containsKey("mend_error") && !options.get("mend_error").equals("")) {
                 String val = options.get("mend_error");
                 String opt = options.get("option_mend_error");
-                whereClauses.add("mendel_err " + opt + " " + val);
+                whereClauses.add("variant_stats.mendel_err " + opt + " " + val);
 
             }
 
             if (options.containsKey("is_indel") && options.get("is_indel").equalsIgnoreCase("on")) {
-                whereClauses.add("is_indel=1");
+                whereClauses.add("variant_stats.is_indel=1");
             }
 
             if (options.containsKey("maf") && !options.get("maf").equals("")) {
                 String val = options.get("maf");
                 String opt = options.get("option_maf");
-                whereClauses.add("maf " + opt + " " + val);
+                whereClauses.add("variant_stats.maf " + opt + " " + val);
 
             }
 
             if (options.containsKey("mgf") && !options.get("mgf").equals("")) {
                 String val = options.get("mgf");
                 String opt = options.get("option_mgf");
-                whereClauses.add("mgf " + opt + " " + val);
+                whereClauses.add("variant_stats.mgf " + opt + " " + val);
 
             }
 
             if (options.containsKey("miss_allele") && !options.get("miss_allele").equals("")) {
                 String val = options.get("miss_allele");
                 String opt = options.get("option_miss_allele");
-                whereClauses.add("miss_allele " + opt + " " + val);
+                whereClauses.add("variant_stats.miss_allele " + opt + " " + val);
             }
             if (options.containsKey("miss_gt") && !options.get("miss_gt").equals("")) {
                 String val = options.get("miss_gt");
                 String opt = options.get("option_miss_gt");
-                whereClauses.add("miss_gt " + opt + " " + val);
+                whereClauses.add("variant_stats.miss_gt " + opt + " " + val);
 
             }
             if (options.containsKey("cases_percent_dominant") && !options.get("cases_percent_dominant").equals("")) {
                 String val = options.get("cases_percent_dominant");
                 String opt = options.get("option_cases_dom");
-                whereClauses.add("cases_percent_dominant " + opt + " " + val);
+                whereClauses.add("variant_stats.cases_percent_dominant " + opt + " " + val);
             }
 
             if (options.containsKey("controls_percent_dominant") && !options.get("controls_percent_dominant").equals("")) {
                 String val = options.get("controls_percent_dominant");
                 String opt = options.get("option_controls_dom");
-                whereClauses.add("controls_percent_dominant " + opt + " " + val);
+                whereClauses.add("variant_stats.controls_percent_dominant " + opt + " " + val);
             }
 
             if (options.containsKey("cases_percent_recessive") && !options.get("cases_percent_recessive").equals("")) {
                 String val = options.get("cases_percent_recessive");
                 String opt = options.get("option_cases_rec");
-                whereClauses.add("cases_percent_recessive " + opt + " " + val);
+                whereClauses.add("variant_stats.cases_percent_recessive " + opt + " " + val);
             }
 
             if (options.containsKey("controls_percent_recessive") && !options.get("controls_percent_recessive").equals("")) {
                 String val = options.get("controls_percent_recessive");
                 String opt = options.get("option_controls_rec");
-                whereClauses.add("controls_percent_recessive " + opt + " " + val);
+                whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
 
-            String sql = "SELECT " +
-                    "variant_stats.chromosome , " +
-                    "variant_stats.position , " +
-                    "variant_stats.allele_ref , " +
-                    "variant_stats.allele_alt , " +
-                    "variant_stats.id , " +
-                    "variant_stats.maf , " +
-                    "variant_stats.mgf ," +
-                    "variant_stats.allele_maf , " +
-                    "variant_stats.genotype_maf , " +
-                    "variant_stats.miss_allele , " +
-                    "variant_stats.miss_gt , " +
-                    "variant_stats.mendel_err , " +
-                    "variant_stats.is_indel , " +
-                    "variant_stats.cases_percent_dominant , " +
-                    "variant_stats.controls_percent_dominant , " +
-                    "variant_stats.cases_percent_recessive , " +
-                    "variant_stats.controls_percent_recessive, " +
-                    "variant_effect.feature_id , " +
-                    "variant_effect.feature_name , " +
-                    "variant_effect.feature_type , " +
-                    "variant_effect.feature_biotype , " +
-                    "variant_effect.feature_chromosome , " +
-                    "variant_effect.feature_start , " +
-                    "variant_effect.feature_end , " +
-                    "variant_effect.feature_strand , " +
-                    "variant_effect.snp_id , " +
-                    "variant_effect.ancestral , " +
-                    "variant_effect.alternative , " +
-                    "variant_effect.gene_id , " +
-                    "variant_effect.transcript_id , " +
-                    "variant_effect.gene_name , " +
-                    "variant_effect.consequence_type , " +
-                    "variant_effect.consequence_type_obo , " +
-                    "variant_effect.consequence_type_desc , " +
-                    "variant_effect.consequence_type_type , " +
-                    "variant_effect.aa_position, " +
-                    "variant_effect.aminoacid_change , " +
-                    "variant_effect.codon_change " +
-                    " FROM variant_stats INNER JOIN " +
-                    "variant_effect ON variant_stats.chromosome=variant_effect.chromosome " +
-                    "AND variant_stats.position=variant_effect.position " +
-                    "AND variant_stats.allele_ref=variant_effect.reference_allele " +
-                    "AND variant_stats.allele_alt =variant_effect.alternative_allele ";
+            String sql = "SELECT distinct variant.id_variant, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome , variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf ,variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err , variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive, variant_effect.feature_id , variant_effect.feature_name , variant_effect.feature_type , variant_effect.feature_biotype , variant_effect.feature_chromosome , variant_effect.feature_start , variant_effect.feature_end , variant_effect.feature_strand , variant_effect.snp_id , variant_effect.ancestral , variant_effect.alternative , variant_effect.gene_id , variant_effect.transcript_id , variant_effect.gene_name , variant_effect.consequence_type , variant_effect.consequence_type_obo , variant_effect.consequence_type_desc , variant_effect.consequence_type_type , variant_effect.aa_position, variant_effect.aminoacid_change , variant_effect.codon_change  FROM variant_stats \n" +
+                    "INNER JOIN variant_effect ON variant_stats.chromosome=variant_effect.chromosome AND variant_stats.position=variant_effect.position AND variant_stats.allele_ref=variant_effect.reference_allele AND variant_stats.allele_alt =variant_effect.alternative_allele  \n" +
+                    "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt \n" +
+                    "inner join sample_info on variant.id_variant=sample_info.id_variant";
 
             System.out.println(sql);
 
@@ -175,7 +135,7 @@ public class WSSqliteManager {
 
             stmt = con.createStatement();
             PreparedStatement pstmt;
-            HashMap<String,String> genotypes;
+            HashMap<String, String> genotypes;
             ResultSet rs = stmt.executeQuery(sql);
             ResultSet rsG;
 
@@ -195,30 +155,11 @@ public class WSSqliteManager {
                         !rs.getString("allele_alt").equals(alt)) {
 
 
-
                     chr = rs.getString("chromosome");
                     pos = rs.getInt("position");
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
 
-                    genotypes = new LinkedHashMap<>();
-                    pstmt = con.prepareStatement(sql_genotypes);
-
-                    pstmt.setString(1, chr);
-                    pstmt.setInt(2, pos);
-                    pstmt.setString(3, ref);
-                    pstmt.setString(4, alt);
-
-                    rsG = pstmt.executeQuery();
-
-                    while(rsG.next()){
-                        String aux = rsG.getString("allele_1") + "/" + rsG.getString("allele_2");
-                        genotypes.put(rsG.getString("sample_name"), aux);
-
-                    }
-                    pstmt.close();
-
-                    System.out.println(genotypes);
 
                     if (vi != null) {
                         list.add(vi);
@@ -231,10 +172,13 @@ public class WSSqliteManager {
                     vs.setId(rs.getString("id"));
 
                     vi.addStats(vs);
-                    vi.setGenotypes(genotypes);
-
-
                 }
+
+                String sample = rs.getString("sample_name");
+                String gt = rs.getInt("allele_1") + "/" + rs.getInt("allele_2");
+
+                vi.addSammpleGenotype(sample, gt);
+
                 ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
                         rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
                         rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),

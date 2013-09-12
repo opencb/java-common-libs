@@ -2,9 +2,7 @@ package org.opencb.variant.lib.core.formats;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,7 +50,7 @@ public class VariantInfo {
     private String stats_id_snp;
 
     @JsonProperty
-    private List<VariantEffect> effect;
+    private Set<VariantEffect> effect;
 
     @JsonProperty
     private HashMap<String,String> genotypes;
@@ -64,7 +62,8 @@ public class VariantInfo {
         this.ref = ref;
         this.alt = alt;
 
-        this.effect = new ArrayList<>();
+        this.effect = new HashSet<>();
+        genotypes = new LinkedHashMap<>();
 
     }
 
@@ -93,11 +92,11 @@ public class VariantInfo {
         this.stats_id_snp = stat.getId();
     }
 
-    public List<VariantEffect> getEffect() {
+    public Set<VariantEffect> getEffect() {
         return effect;
     }
 
-    public void setEffect(List<VariantEffect> effect) {
+    public void setEffect(Set<VariantEffect> effect) {
         this.effect = effect;
     }
 
@@ -175,7 +174,7 @@ public class VariantInfo {
         return stats_miss_allele;
     }
 
-    public void setStats_miss_allele(int stats_miss_allele) {
+    public void setStats_miss_allele(int Liststats_miss_allele) {
         this.stats_miss_allele = stats_miss_allele;
     }
 
@@ -241,5 +240,9 @@ public class VariantInfo {
 
     public void setGenotypes(HashMap<String, String> genotypes) {
         this.genotypes = genotypes;
+    }
+
+    public void addSammpleGenotype(String sample, String gt){
+        this.genotypes.put(sample, gt);
     }
 }
