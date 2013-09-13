@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.opencb.variant.lib.io.VariantRunner;
+import org.opencb.variant.lib.io.VariantStatsRunner;
 import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
 
 /**
@@ -50,40 +50,11 @@ public class CalculateStatsTest {
 
     }
 
-
-//    @Test
-//    public void testCalculateStatsRegionFilter() throws Exception {
-//
-//        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "regionFilter.db", pedFileName);
-//
-//        List<VcfFilter> filterList = new VcfFilterList(1);
-//        filterList.add(new VcfRegionFilter("1", 0, 100000));
-//
-//        vr.filter(filterList).run();
-//
-//
-//    }
-//
-//    @Test
-//    public void testCalculateStatsSnpFilter() throws Exception {
-//
-//        VariantRunner vr = new VariantRunner(vcfFileName, pathStats + "snpFilter.db", pedFileName);
-//
-//        List<VcfFilter> filterList = new VcfFilterList(1);
-//        filterList.add(new VcfSnpFilter());
-//
-//        vr.filter(filterList).run();
-//
-//
-//    }
-
-
-
     @Test
     public void testCalculateStatsList() throws Exception {
 
 
-        VariantRunner vr = new VariantRunner(vcfFileName, dbFilename, pedFileName);
+        VariantStatsRunner vr = new VariantStatsRunner(vcfFileName, dbFilename, pedFileName);
 
         vr.writer(new VcfFileDataWriter(pathStats));
         vr.setEffect(true);

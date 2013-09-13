@@ -6,12 +6,10 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.cli.*;
 import org.opencb.variant.cli.servlets.GetFoldersServlet;
 import org.opencb.variant.cli.servlets.HelloServlet;
-import org.opencb.variant.lib.io.VariantRunner;
-import org.opencb.variant.lib.io.variant.readers.VcfFileDataReader;
+import org.opencb.variant.lib.io.VariantStatsRunner;
 import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -62,7 +60,7 @@ public class VariantMain {
         }
         String command = args[0];
 
-        VariantRunner vr;
+        VariantStatsRunner vr;
 
         parse(args, false);
 
@@ -86,7 +84,7 @@ public class VariantMain {
 
             case "stats":
                 System.out.println("===== STATS =====");
-                vr = new VariantRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/stastCli.db", commandLine.getOptionValue("ped-file"));
+                vr = new VariantStatsRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/stastCli.db", commandLine.getOptionValue("ped-file"));
 
                 if (commandLine.hasOption("out-file")) {
                     vr.writer(new VcfFileDataWriter(commandLine.getOptionValue("outdir")));

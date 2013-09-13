@@ -1,9 +1,5 @@
 package org.opencb.variant.lib.io;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.variant.lib.core.formats.*;
 import org.opencb.variant.lib.filters.customfilters.VcfFilter;
 import org.opencb.variant.lib.filters.VcfRecordFilters;
@@ -16,8 +12,6 @@ import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
 import org.opencb.variant.lib.io.variant.writers.VcfSqliteDataWriter;
 import org.opencb.variant.lib.stats.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +23,7 @@ import java.util.List;
  * Time: 6:09 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantRunner {
+public class VariantStatsRunner {
 
     private List<VcfFilter> filters;
     private int numThreads;
@@ -42,7 +36,7 @@ public class VariantRunner {
     private boolean index;
 
 
-    public VariantRunner() {
+    public VariantStatsRunner() {
         this.filters = null;
         this.numThreads = 1;
         this.stats = true;
@@ -50,7 +44,7 @@ public class VariantRunner {
         this.effect = true;
     }
 
-    public VariantRunner(String vcfFilePath, String sqliteFileName, String pedFilePath) {
+    public VariantStatsRunner(String vcfFilePath, String sqliteFileName, String pedFilePath) {
         this();
         vcfReader = new VcfFileDataReader(vcfFilePath);
         vcfWriter = new VcfSqliteDataWriter(sqliteFileName);
@@ -61,45 +55,45 @@ public class VariantRunner {
 
     }
 
-    public VariantRunner stats() {
+    public VariantStatsRunner stats() {
         this.stats = true;
         return this;
     }
 
-    public VariantRunner effect() {
+    public VariantStatsRunner effect() {
         this.effect = true;
         return this;
     }
 
-    public VariantRunner index() {
+    public VariantStatsRunner index() {
         this.index = true;
         return this;
     }
 
-    public VariantRunner reader(VcfDataReader reader) {
+    public VariantStatsRunner reader(VcfDataReader reader) {
         this.vcfReader = reader;
         return this;
     }
 
-    public VariantRunner writer(VcfDataWriter writer) {
+    public VariantStatsRunner writer(VcfDataWriter writer) {
         this.vcfWriter = writer;
         return this;
     }
 
 
-    public VariantRunner(VcfDataReader vcfReader, VcfDataWriter vcfWriter) {
+    public VariantStatsRunner(VcfDataReader vcfReader, VcfDataWriter vcfWriter) {
         this();
         this.vcfReader = vcfReader;
         this.vcfWriter = vcfWriter;
     }
 
-    public VariantRunner filter(List<VcfFilter> filterList) {
+    public VariantStatsRunner filter(List<VcfFilter> filterList) {
         this.filters = filterList;
         return this;
     }
 
 
-    public VariantRunner parallel(int numThreads) {
+    public VariantStatsRunner parallel(int numThreads) {
         this.numThreads = numThreads;
         return this;
     }
