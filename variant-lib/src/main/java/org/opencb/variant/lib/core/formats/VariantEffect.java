@@ -12,31 +12,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VariantEffect {
 
-    private String chromosome;
-    private int position;
-    private String referenceAllele;
-    private String alternativeAllele;
-    private String featureId;
-    private String featureName;
-    private String featureType;
-    private String featureBiotype;
-    private String featureChromosome;
-    private int featureStart;
-    private int featureEnd;
-    private String featureStrand;
-    private String snpId;
-    private String ancestral;
-    private String alternative;
-    private String geneId;
-    private String transcriptId;
-    private String geneName;
-    private String consequenceType;
-    private String consequenceTypeObo;
-    private String consequenceTypeDesc;
-    private String consequenceTypeType;
-    private int aaPosition;
-    private String aminoacidChange;
-    private String codonChange;
+    @JsonProperty private String chromosome;
+    @JsonProperty private int position;
+    @JsonProperty private String referenceAllele;
+    @JsonProperty private String alternativeAllele;
+    @JsonProperty private String featureId;
+    @JsonProperty private String featureName;
+    @JsonProperty private String featureType;
+    @JsonProperty private String featureBiotype;
+    @JsonProperty private String featureChromosome;
+    @JsonProperty private int featureStart;
+    @JsonProperty private int featureEnd;
+    @JsonProperty private String featureStrand;
+    @JsonProperty private String snpId;
+    @JsonProperty private String ancestral;
+    @JsonProperty private String alternative;
+    @JsonProperty private String geneId;
+    @JsonProperty private String transcriptId;
+    @JsonProperty private String geneName;
+    @JsonProperty private String consequenceType;
+    @JsonProperty private String consequenceTypeObo;
+    @JsonProperty private String consequenceTypeDesc;
+    @JsonProperty private String consequenceTypeType;
+    @JsonProperty private int aaPosition;
+    @JsonProperty private String aminoacidChange;
+    @JsonProperty private String codonChange;
 
     @JsonCreator
     public VariantEffect(@JsonProperty("chromosome") String chromosome,

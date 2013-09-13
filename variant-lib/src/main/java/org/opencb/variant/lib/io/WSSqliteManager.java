@@ -22,7 +22,7 @@ public class WSSqliteManager {
 
     public static List<VariantInfo> getRecords(HashMap<String, String> options) {
 
-        Connection con = null;
+        Connection con;
         Statement stmt;
         List<VariantInfo> list = new ArrayList<>(100);
 
@@ -106,19 +106,14 @@ public class WSSqliteManager {
                 whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
-
-            String sql = "SELECT distinct variant.id_variant, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome , variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf ,variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err , variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive, variant_effect.feature_id , variant_effect.feature_name , variant_effect.feature_type , variant_effect.feature_biotype , variant_effect.feature_chromosome , variant_effect.feature_start , variant_effect.feature_end , variant_effect.feature_strand , variant_effect.snp_id , variant_effect.ancestral , variant_effect.alternative , variant_effect.gene_id , variant_effect.transcript_id , variant_effect.gene_name , variant_effect.consequence_type , variant_effect.consequence_type_obo , variant_effect.consequence_type_desc , variant_effect.consequence_type_type , variant_effect.aa_position, variant_effect.aminoacid_change , variant_effect.codon_change  FROM variant_stats \n" +
-                    "INNER JOIN variant_effect ON variant_stats.chromosome=variant_effect.chromosome AND variant_stats.position=variant_effect.position AND variant_stats.allele_ref=variant_effect.reference_allele AND variant_stats.allele_alt =variant_effect.alternative_allele  \n" +
-                    "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt \n" +
+            String sql = "SELECT distinct variant.id_variant, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome , " +
+                    "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf ," +
+                    "variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err , " +
+                    "variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive " +
+                    " FROM variant_stats " +
+                    "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt " +
                     "inner join sample_info on variant.id_variant=sample_info.id_variant";
 
-            System.out.println(sql);
-
-            String sql_genotypes = "select sample_info.sample_name," +
-                    " sample_info.allele_1, sample_info.allele_2 from variant " +
-                    "inner join sample_info on sample_info.id_variant = variant.id_variant " +
-                    "where variant.chromosome=? AND variant.position=? AND variant.ref=? AND variant.alt=?;";
-            // sqlite> select * from variant inner join sample_info on sample_info.variant_id = variant.id_variant where chromosome='1' AND position=14653;
 
             if (whereClauses.size() > 0) {
                 StringBuilder where = new StringBuilder(" where ");
@@ -133,15 +128,14 @@ public class WSSqliteManager {
                 sql += where.toString() + " ;";
             }
 
+            System.out.println(sql);
+
             stmt = con.createStatement();
-            PreparedStatement pstmt;
-            HashMap<String, String> genotypes;
             ResultSet rs = stmt.executeQuery(sql);
-            ResultSet rsG;
 
             VcfVariantStat vs;
             VariantInfo vi = null;
-            VariantEffect ve;
+//            VariantEffect ve;
 
             String chr = "";
             int pos = 0;
@@ -154,7 +148,6 @@ public class WSSqliteManager {
                         !rs.getString("allele_ref").equals(ref) ||
                         !rs.getString("allele_alt").equals(alt)) {
 
-
                     chr = rs.getString("chromosome");
                     pos = rs.getInt("position");
                     ref = rs.getString("allele_ref");
@@ -165,7 +158,7 @@ public class WSSqliteManager {
                         list.add(vi);
                     }
                     vi = new VariantInfo(chr, pos, ref, alt);
-                    vs = new VcfVariantStat(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
+                    vs = new VcfVariantStat(chr, pos, ref, alt,
                             rs.getDouble("maf"), rs.getDouble("mgf"), rs.getString("allele_maf"), rs.getString("genotype_maf"), rs.getInt("miss_allele"),
                             rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
                             rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
@@ -179,28 +172,93 @@ public class WSSqliteManager {
 
                 vi.addSammpleGenotype(sample, gt);
 
-                ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
-                        rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
-                        rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),
-                        rs.getString("snp_id"), rs.getString("ancestral"), rs.getString("alternative"), rs.getString("gene_id"), rs.getString("transcript_id"),
-                        rs.getString("gene_name"), rs.getString("consequence_type"), rs.getString("consequence_type_obo"), rs.getString("consequence_type_desc"),
-                        rs.getString("consequence_type_type"), rs.getInt("aa_position"), rs.getString("aminoacid_change"), rs.getString("codon_change"));
-                vi.addEffect(ve);
+//                ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
+//                        rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
+//                        rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),
+//                        rs.getString("snp_id"), rs.getString("ancestral"), rs.getString("alternative"), rs.getString("gene_id"), rs.getString("transcript_id"),
+//                        rs.getString("gene_name"), rs.getString("consequence_type"), rs.getString("consequence_type_obo"), rs.getString("consequence_type_desc"),
+//                        rs.getString("consequence_type_type"), rs.getInt("aa_position"), rs.getString("aminoacid_change"), rs.getString("codon_change"));
+                // vi.addEffect(ve);
 
             }
             if (vi != null) {
                 list.add(vi);
             }
 
-
-            con.close();
             stmt.close();
+            con.close();
 
         } catch (ClassNotFoundException | SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("STATS: " + e.getClass().getName() + ": " + e.getMessage());
+        }
+
+        return list;
+    }
+
+    public static List<VariantEffect> getEffect(HashMap<String, String> options) {
+
+        Connection con;
+        Statement stmt;
+        List<VariantEffect> list = new ArrayList<>(100);
+
+        String dbName = options.get("db_name");
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+
+//            List<String> whereClauses = new ArrayList<>(10);
+
+            String chr = options.get("chr");
+            int pos = Integer.valueOf(options.get("pos"));
+            String ref = options.get("ref");
+            String alt = options.get("alt");
+
+
+            String sql = "SELECT * FROM variant_effect WHERE chromosome='" + chr + "' AND position=" + pos + " AND reference_allele='" + ref + "' AND alternative_allele='" + alt + "';";
+
+
+//            if (whereClauses.size() > 0) {
+//                StringBuilder where = new StringBuilder(" where ");
+//
+//                for (int i = 0; i < whereClauses.size(); i++) {
+//                    where.append(whereClauses.get(i));
+//                    if (i < whereClauses.size() - 1) {
+//                        where.append(" AND ");
+//                    }
+//                }
+//
+//                sql += where.toString() + " ;";
+//            }
+
+            System.out.println(sql);
+
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            VariantEffect ve;
+
+
+            while (rs.next()) {
+                ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("reference_allele"), rs.getString("alternative_allele"),
+                        rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
+                        rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),
+                        rs.getString("snp_id"), rs.getString("ancestral"), rs.getString("alternative"), rs.getString("gene_id"), rs.getString("transcript_id"),
+                        rs.getString("gene_name"), rs.getString("consequence_type"), rs.getString("consequence_type_obo"), rs.getString("consequence_type_desc"),
+                        rs.getString("consequence_type_type"), rs.getInt("aa_position"), rs.getString("aminoacid_change"), rs.getString("codon_change"));
+                list.add(ve);
+
+            }
+
+            stmt.close();
+            con.close();
+
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println("EFFECT: " + e.getClass().getName() + ": " + e.getMessage());
         }
 
 
         return list;
     }
+
 }
