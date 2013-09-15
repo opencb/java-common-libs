@@ -104,14 +104,10 @@ public class VcfControlAnnotator implements VcfAnnotator {
             System.out.println("record.getChromosome() = " + record.getChromosome());
             if(this.tabix == null && controlList != null){
                 currentTabix = controlList.get(record.getChromosome());
-                System.out.println("controlList");
             }else{
                 currentTabix = this.tabix;
-                System.out.println("normal");
 
             }
-
-
 
             TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
             String line;
