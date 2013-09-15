@@ -5,6 +5,7 @@ import org.broad.tribble.readers.TabixReader;
 import org.opencb.variant.lib.core.formats.VcfRecord;
 import org.opencb.variant.lib.core.formats.VcfVariantStat;
 import org.opencb.variant.lib.stats.CalculateStats;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -22,7 +23,6 @@ public class VcfControlAnnotator implements VcfAnnotator {
     private HashMap<String, Integer> samplesMap;
     private HashMap<String, TabixReader> controlList;
     private String prefix;
-
 
     public VcfControlAnnotator(String infoPrefix, String control) throws IOException {
 
@@ -42,8 +42,6 @@ public class VcfControlAnnotator implements VcfAnnotator {
             samplesMap.put(fields[i], j);
 
         }
-
-
     }
 
     public VcfControlAnnotator(String infoPrefix, HashMap<String, String> controlList) {
@@ -79,7 +77,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
     }
@@ -92,48 +90,53 @@ public class VcfControlAnnotator implements VcfAnnotator {
         TabixReader currentTabix;
 
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
-        List<VcfVariantStat> statsBatch = null;
+        List<VcfVariantStat> statsBatch;
+        HashMap<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+
+
+        int cont = 0;
 
         for (VcfRecord record : batch) {
 
-            if(this.tabix == null && controlList != null){
+            if (this.tabix == null && controlList != null) {
                 currentTabix = controlList.get(record.getChromosome());
-            }else{
+            } else {
                 currentTabix = this.tabix;
-
             }
 
-            TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
-            String line;
-            try {
-                while (it != null && (line = it.next()) != null) {
+            if (currentTabix != null) {
 
-                    String[] fields = line.split("\t");
-                    tabixRecord = new VcfRecord(fields);
-                    tabixRecord.setSampleIndex(this.samplesMap);
-                    controlBatch.add(tabixRecord);
+                TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
+                String line;
+                try {
+                    while (it != null && (line = it.next()) != null) {
+
+                        String[] fields = line.split("\t");
+                        tabixRecord = new VcfRecord(fields);
+                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+                            tabixRecord.setSampleIndex(this.samplesMap);
+                            controlBatch.add(tabixRecord);
+                            map.put(record, cont);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-
-            } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
+            cont++;
         }
 
         statsBatch = CalculateStats.variantStats(controlBatch, this.samples, null);
 
-        VcfRecord record;
         VcfVariantStat statRecord;
 
+        for (VcfRecord record: batch) {
 
-        for (int i = 0; i < batch.size(); i++) {
-            record = batch.get(i);
-            statRecord = statsBatch.get(i);
-            record.addInfoField(this.prefix + "=" + StringUtil.join(",", statRecord.getGenotypes()));
+            if (map.containsKey(record)) {
+                statRecord = statsBatch.get(map.get(record));
+                record.addInfoField(this.prefix + "=" + StringUtil.join(",", statRecord.getGenotypes()));
+            }
         }
-
-
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
