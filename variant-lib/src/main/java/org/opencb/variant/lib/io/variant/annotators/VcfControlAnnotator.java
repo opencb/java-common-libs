@@ -76,17 +76,12 @@ public class VcfControlAnnotator implements VcfAnnotator {
                         samplesMap.put(fields[i], j);
 
                     }
-
-
                 }
-
             }
-
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
-        System.out.println(this.controlList);
     }
 
     @Override
@@ -101,7 +96,6 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         for (VcfRecord record : batch) {
 
-            System.out.println("record.getChromosome() = " + record.getChromosome());
             if(this.tabix == null && controlList != null){
                 currentTabix = controlList.get(record.getChromosome());
             }else{
