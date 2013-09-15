@@ -14,12 +14,12 @@ import java.util.List;
 public class Vcf1000gAnnotator implements VcfAnnotator {
 
     @Override
-    public List<String> annot(List<VcfRecord> batch) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public void annot(List<VcfRecord> batch) {
+
     }
 
     @Override
-    public String annot(VcfRecord elem) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public void annot(VcfRecord elem) {
+
     }
 }

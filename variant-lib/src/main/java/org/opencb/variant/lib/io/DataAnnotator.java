@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface DataAnnotator<T> {
 
-    public List<String> annot(List<T> batch);
+    public void annot(List<T> batch);
 
-    public String annot(T elem);
+    public void annot(T elem);
 }

@@ -6,10 +6,10 @@ import org.opencb.variant.lib.filters.VcfRecordFilters;
 import org.opencb.variant.lib.io.ped.readers.PedDataReader;
 import org.opencb.variant.lib.io.ped.readers.PedFileDataReader;
 import org.opencb.variant.lib.io.ped.writers.PedDataWriter;
-import org.opencb.variant.lib.io.variant.readers.VcfDataReader;
-import org.opencb.variant.lib.io.variant.readers.VcfFileDataReader;
-import org.opencb.variant.lib.io.variant.writers.VcfDataWriter;
-import org.opencb.variant.lib.io.variant.writers.VcfSqliteDataWriter;
+import org.opencb.variant.lib.io.variant.readers.VariantDataReader;
+import org.opencb.variant.lib.io.variant.readers.VariantVcfDataReader;
+import org.opencb.variant.lib.io.variant.writers.VariantStatsDataWriter;
+import org.opencb.variant.lib.io.variant.writers.VariantStatsSqliteDataWriter;
 import org.opencb.variant.lib.stats.*;
 
 import java.io.IOException;
@@ -27,8 +27,8 @@ public class VariantStatsRunner {
 
     private List<VcfFilter> filters;
     private int numThreads;
-    private VcfDataReader vcfReader;
-    private VcfDataWriter vcfWriter;
+    private VariantDataReader vcfReader;
+    private VariantStatsDataWriter vcfWriter;
     private PedDataReader pedReader;
     private PedDataWriter pedWriter;
     private boolean effect;
@@ -46,8 +46,8 @@ public class VariantStatsRunner {
 
     public VariantStatsRunner(String vcfFilePath, String sqliteFileName, String pedFilePath) {
         this();
-        vcfReader = new VcfFileDataReader(vcfFilePath);
-        vcfWriter = new VcfSqliteDataWriter(sqliteFileName);
+        vcfReader = new VariantVcfDataReader(vcfFilePath);
+        vcfWriter = new VariantStatsSqliteDataWriter(sqliteFileName);
 
         if (pedFilePath != null) {
             pedReader = new PedFileDataReader(pedFilePath);
@@ -70,18 +70,18 @@ public class VariantStatsRunner {
         return this;
     }
 
-    public VariantStatsRunner reader(VcfDataReader reader) {
+    public VariantStatsRunner reader(VariantDataReader reader) {
         this.vcfReader = reader;
         return this;
     }
 
-    public VariantStatsRunner writer(VcfDataWriter writer) {
+    public VariantStatsRunner writer(VariantStatsDataWriter writer) {
         this.vcfWriter = writer;
         return this;
     }
 
 
-    public VariantStatsRunner(VcfDataReader vcfReader, VcfDataWriter vcfWriter) {
+    public VariantStatsRunner(VariantDataReader vcfReader, VariantStatsDataWriter vcfWriter) {
         this();
         this.vcfReader = vcfReader;
         this.vcfWriter = vcfWriter;

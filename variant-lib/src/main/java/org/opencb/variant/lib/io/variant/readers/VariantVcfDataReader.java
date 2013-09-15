@@ -2,6 +2,7 @@ package org.opencb.variant.lib.io.variant.readers;
 
 import com.google.common.base.Predicate;
 import org.bioinfo.commons.io.utils.FileUtils;
+import org.bioinfo.commons.utils.ListUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 import org.opencb.variant.lib.core.formats.*;
@@ -12,7 +13,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +24,7 @@ import java.util.List;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFileDataReader implements VcfDataReader {
+public class VariantVcfDataReader implements VariantDataReader {
 
     private static final int DEFAULT_NUMBER_RECORDS = 40000;
     private Vcf4 vcf4;
@@ -31,7 +34,7 @@ public class VcfFileDataReader implements VcfDataReader {
     private File file;
     private String filename;
 
-    public VcfFileDataReader(String filename) {
+    public VariantVcfDataReader(String filename) {
         this.filename = filename;
     }
 
@@ -142,6 +145,41 @@ public class VcfFileDataReader implements VcfDataReader {
         return this.vcf4.getSampleNames();
     }
 
+    @Override
+    public String getHeader() {
+        StringBuilder header = new StringBuilder();
+        header.append("##fileformat=" + vcf4.getFileFormat() + "\n");
+
+        Iterator<String> iter = vcf4.getMetaInformation().keySet().iterator();
+        String headerKey;
+        while (iter.hasNext()) {
+            headerKey = iter.next();
+            header.append("##").append(headerKey).append("=").append(vcf4.getMetaInformation().get(headerKey)).append("\n");
+        }
+
+        for (VcfAlternate vcfAlternate : vcf4.getAlternate().values()) {
+            header.append(vcfAlternate.toString()).append("\n");
+        }
+
+        for (VcfFilter vcfFilter : vcf4.getFilter().values()) {
+            header.append(vcfFilter.toString()).append("\n");
+        }
+
+        for (VcfInfo vcfInfo : vcf4.getInfo().values()) {
+            header.append(vcfInfo.toString()).append("\n");
+        }
+
+        for (VcfFormat vcfFormat : vcf4.getFormat().values()) {
+            header.append(vcfFormat.toString()).append("\n");
+        }
+
+        header.append("#").append(ListUtils.toString(vcf4.getHeaderLine(), "\t")).append("\n");
+
+
+
+        return header.toString();
+    }
+
 
     private void processHeader() throws IOException, FileFormatException {
         VcfInfo vcfInfo;
@@ -189,4 +227,6 @@ public class VcfFileDataReader implements VcfDataReader {
         }
         localBufferedReader.close();
     }
+
+
 }

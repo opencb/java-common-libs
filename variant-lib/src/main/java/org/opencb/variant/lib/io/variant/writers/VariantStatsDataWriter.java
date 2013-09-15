@@ -13,7 +13,7 @@ import java.util.List;
  * Time: 5:13 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface VcfDataWriter extends DataWriter {
+public interface VariantStatsDataWriter extends DataWriter {
 
     boolean writeVariantStats(List<VcfVariantStat> data);
 

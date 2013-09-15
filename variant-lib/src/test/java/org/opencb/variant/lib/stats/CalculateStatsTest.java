@@ -6,7 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.variant.lib.io.VariantStatsRunner;
-import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
+import org.opencb.variant.lib.io.variant.writers.VariantStatsFileDataWriter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,7 +56,7 @@ public class CalculateStatsTest {
 
         VariantStatsRunner vr = new VariantStatsRunner(vcfFileName, dbFilename, pedFileName);
 
-        vr.writer(new VcfFileDataWriter(pathStats));
+        vr.writer(new VariantStatsFileDataWriter(pathStats));
         vr.setEffect(true);
 
         vr.run();

@@ -6,10 +6,17 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.cli.*;
 import org.opencb.variant.cli.servlets.GetFoldersServlet;
 import org.opencb.variant.cli.servlets.HelloServlet;
+import org.opencb.variant.lib.io.VariantAnnotRunner;
 import org.opencb.variant.lib.io.VariantStatsRunner;
-import org.opencb.variant.lib.io.variant.writers.VcfFileDataWriter;
+import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
+import org.opencb.variant.lib.io.variant.annotators.VcfControlAnnotator;
+import org.opencb.variant.lib.io.variant.writers.VariantStatsFileDataWriter;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -47,6 +54,8 @@ public class VariantMain {
         options.addOption(OptionFactory.createOption("outdir", "o", "Output dir", true, true));
         options.addOption(OptionFactory.createOption("out-file", "File output", false, false));
         options.addOption(OptionFactory.createOption("ped-file", "Ped file", false, true));
+        options.addOption(OptionFactory.createOption("control", "Control filename", false, true));
+        options.addOption(OptionFactory.createOption("control-list", "Control filename", false, true));
 
     }
 
@@ -61,6 +70,7 @@ public class VariantMain {
         String command = args[0];
 
         VariantStatsRunner vr;
+        VariantAnnotRunner var = null;
 
         parse(args, false);
 
@@ -87,7 +97,7 @@ public class VariantMain {
                 vr = new VariantStatsRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/stastCli.db", commandLine.getOptionValue("ped-file"));
 
                 if (commandLine.hasOption("out-file")) {
-                    vr.writer(new VcfFileDataWriter(commandLine.getOptionValue("outdir")));
+                    vr.writer(new VariantStatsFileDataWriter(commandLine.getOptionValue("outdir")));
                 }
                 vr.run();
                 break;
@@ -95,6 +105,33 @@ public class VariantMain {
             case "filter":
                 System.out.println("===== STATS =====");
                 System.out.println("Under construction");
+                break;
+
+            case "annot":
+                System.out.println("===== ANNOT =====");
+
+                List<VcfAnnotator> listAnnots = new ArrayList<>();
+                VcfAnnotator control = null;
+                String infoPrefix = "CONTROL";
+
+                var = new VariantAnnotRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/" + "annot.vcf");
+
+                if (commandLine.hasOption("control-list")) {
+                    HashMap<String, String> controlList = getControlList(commandLine.getOptionValue("control-list"));
+                    control = new VcfControlAnnotator(infoPrefix, controlList);
+
+                } else if (commandLine.hasOption("control")) {
+                    control = new VcfControlAnnotator(infoPrefix, commandLine.getOptionValue("control"));
+
+                }
+
+
+                listAnnots.add(control);
+
+                var.annotations(listAnnots);
+                var.run();
+
+
                 break;
 
             case "server":
@@ -114,8 +151,6 @@ public class VariantMain {
                 ctx.addServletMapping("/getdirs", "getdirs");
 
 
-
-
                 try {
                     tomcat.start();
                     tomcat.getServer().await();
@@ -133,8 +168,30 @@ public class VariantMain {
         }
     }
 
+    private static HashMap<String, String> getControlList(String filename) {
+        String line;
+        HashMap<String, String> map = new LinkedHashMap<>();
+        try {
+
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split("\t");
+                map.put(fields[0], fields[1]);
+
+            }
+            reader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return map;
+    }
+
     private static boolean checkCommand(String command) {
-        return command.equalsIgnoreCase("stats") || command.equalsIgnoreCase("filter") || command.equalsIgnoreCase("index");
+        return command.equalsIgnoreCase("stats") || command.equalsIgnoreCase("filter") || command.equalsIgnoreCase("index") || command.equalsIgnoreCase("annot");
     }
 
     private static void parse(String[] args, boolean stopAtNoOption) {

@@ -14,7 +14,7 @@ import java.util.Map;
  * Time: 1:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSqliteDataWriter implements VcfDataWriter {
+public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
     private String dbName;
     private Connection con;
@@ -23,7 +23,7 @@ public class VcfSqliteDataWriter implements VcfDataWriter {
     private boolean createdSampleTable;
 
 
-    public VcfSqliteDataWriter(String dbName) {
+    public VariantStatsSqliteDataWriter(String dbName) {
         this.dbName = dbName;
         stmt = null;
         pstmt = null;

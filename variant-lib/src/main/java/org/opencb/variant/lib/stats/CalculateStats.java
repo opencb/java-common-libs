@@ -476,7 +476,7 @@ public class CalculateStats {
             batchEffect = mapper.readValue(response, new TypeReference<List<VariantEffect>>(){});
         } catch (IOException e) {
             System.err.println(chunkVcfRecords.toString());
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
 

@@ -20,7 +20,7 @@ import java.util.Map;
  * Time: 12:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFileDataWriter implements VcfDataWriter {
+public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
     private PrintWriter variantPw;
     private PrintWriter globalPw;
@@ -33,7 +33,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
     private String pathGroup;
 
 
-    public VcfFileDataWriter(String path) {
+    public VariantStatsFileDataWriter(String path) {
         if (path.charAt(path.length() - 1) != '/') {
             path += "/";
         }
@@ -58,7 +58,7 @@ public class VcfFileDataWriter implements VcfDataWriter {
             dir = Files.createDirectories(dirPath);
             this.pathGroup = dir.toString() + "/";
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
 

@@ -1,5 +1,10 @@
 package org.opencb.variant.lib.annot;
 
+import org.opencb.variant.lib.core.formats.VcfRecord;
+import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
+
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aaleman
@@ -8,4 +13,13 @@ package org.opencb.variant.lib.annot;
  * To change this template use File | Settings | File Templates.
  */
 public class Annot {
+
+
+    public static void applyAnnotations(List<VcfRecord> batch, List<VcfAnnotator> annotations){
+
+        for(VcfAnnotator annot: annotations){
+            annot.annot(batch);
+        }
+
+    }
 }
