@@ -121,6 +121,12 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 "data TEXT, " +
                 "FOREIGN KEY(id_variant) REFERENCES variant(id_variant)," +
                 "FOREIGN KEY(sample_name) REFERENCES sample(name));";
+        String variantInfoTable = "CREATE TABLE IF NOT EXISTS variant_info(" +
+                "id_variant_info INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "id_variant INTEGER, " +
+                "key TEXT, " +
+                "value TEXT, " +
+                "FOREIGN KEY(id_variant) REFERENCES variant(id_variant));";
 
         String variantEffectTable = "CREATE TABLE IF NOT EXISTS variant_effect(" +
                 "id_variant_effect INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -157,6 +163,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
             stmt.execute(variant_stats);
             stmt.execute(sample_stats);
             stmt.execute(variantTable);
+            stmt.execute(variantInfoTable);
             stmt.execute(sampleTable);
             stmt.execute(sampleInfoTable);
             stmt.execute(variantEffectTable);
@@ -184,6 +191,8 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
             stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
             stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
             stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
+            stmt.execute("CREATE INDEX sample_info_id_variant_idx ON sample_info (id_variant);");
+            stmt.execute("CREATE INDEX variant_info_id_variant_key_idx ON variant_info (id_variant, key);");
             stmt.close();
             con.commit();
 
@@ -336,8 +345,8 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
     @Override
     public boolean writeVariantIndex(List<VcfRecord> data) {
-        String sql, sqlAux;
-        PreparedStatement pstmt_aux;
+        String sql, sqlSampleInfo, sqlInfo;
+        PreparedStatement pstmtSample, pstmtInfo;
         String sampleName;
         String sampleData;
         int allele_1, allele_2;
@@ -354,7 +363,6 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 for (Map.Entry<String, Integer> entry : v.getSampleIndex().entrySet()) {
                     pstmt.setString(1, entry.getKey());
                     pstmt.execute();
-
                 }
 
                 pstmt.close();
@@ -367,11 +375,14 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         }
 
         sql = "INSERT INTO variant (chromosome, position, id, ref, alt, qual, filter, info, format) VALUES(?,?,?,?,?,?,?,?,?);";
-        sqlAux = "INSERT INTO sample_info(id_variant, sample_name, allele_1, allele_2, data) VALUES (?,?,?,?,?);";
+        sqlSampleInfo = "INSERT INTO sample_info(id_variant, sample_name, allele_1, allele_2, data) VALUES (?,?,?,?,?);";
+        sqlInfo = "INSERT INTO variant_info(id_variant, key, value) VALUES (?,?,?);";
+
         try {
 
             pstmt = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-            pstmt_aux = con.prepareStatement(sqlAux);
+            pstmtSample = con.prepareStatement(sqlSampleInfo);
+            pstmtInfo = con.prepareStatement(sqlInfo);
 
             for (VcfRecord v : data) {
 
@@ -397,25 +408,35 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                         allele_1 = (g.getAllele1() == null) ? -1 : g.getAllele1();
                         allele_2 = (g.getAllele2() == null) ? -1 : g.getAllele2();
 
-                        pstmt_aux.setInt(1, id);
-                        pstmt_aux.setString(2, sampleName);
-                        pstmt_aux.setInt(3, allele_1);
-                        pstmt_aux.setInt(4, allele_2);
-                        pstmt_aux.setString(5, sampleData);
-                        pstmt_aux.execute();
+                        pstmtSample.setInt(1, id);
+                        pstmtSample.setString(2, sampleName);
+                        pstmtSample.setInt(3, allele_1);
+                        pstmtSample.setInt(4, allele_2);
+                        pstmtSample.setString(5, sampleData);
+                        pstmtSample.execute();
 
                     }
 
+                    if (!v.getInfo().equals(".")) {
+                        String[] infoFields = v.getInfo().split(";");
+                        for (String elem : infoFields) {
+                            String[] fields = elem.split("=");
+                            pstmtInfo.setInt(1, id);
+                            pstmtInfo.setString(2, fields[0]);
+                            pstmtInfo.setString(3, fields[1]);
+                            pstmtInfo.execute();
+                        }
+                    }
                 } else {
                     res = false;
                 }
-
-
             }
-            pstmt.close();
-            pstmt_aux.close();
 
+            pstmt.close();
+            pstmtSample.close();
+            pstmtInfo.close();
             con.commit();
+
         } catch (SQLException e) {
             System.err.println("VARIANT/SAMPLE_INFO: " + e.getClass().getName() + ": " + e.getMessage());
             res = false;
@@ -426,7 +447,6 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
     @Override
     public boolean writeVariantEffect(List<VariantEffect> batchEffect) {
-
 
         String sql = "INSERT INTO variant_effect(chromosome	, position , reference_allele , alternative_allele , " +
                 "feature_id , feature_name , feature_type , feature_biotype , feature_chromosome , feature_start , " +
@@ -439,7 +459,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         try {
             pstmt = con.prepareStatement(sql);
 
-            for(VariantEffect v: batchEffect){
+            for (VariantEffect v : batchEffect) {
                 pstmt.setString(1, v.getChromosome());
                 pstmt.setInt(2, v.getPosition());
                 pstmt.setString(3, v.getReferenceAllele());
@@ -477,5 +497,4 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         }
         return res;
     }
-
 }

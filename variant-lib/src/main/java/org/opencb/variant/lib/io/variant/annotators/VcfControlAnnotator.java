@@ -113,28 +113,31 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
                         String[] fields = line.split("\t");
                         tabixRecord = new VcfRecord(fields);
+
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+
                             tabixRecord.setSampleIndex(this.samplesMap);
                             controlBatch.add(tabixRecord);
-                            map.put(record, cont);
+                            map.put(record, cont++);
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            cont++;
         }
 
         statsBatch = CalculateStats.variantStats(controlBatch, this.samples, null);
 
         VcfVariantStat statRecord;
 
-        for (VcfRecord record: batch) {
+        for (VcfRecord record : batch) {
 
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
-                record.addInfoField(this.prefix + "=" + StringUtil.join(",", statRecord.getGenotypes()));
+                record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.2f", statRecord.getMaf()));
+                record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
             }
         }
     }

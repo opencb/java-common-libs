@@ -22,7 +22,7 @@ public class Genotype {
             this.allele2 = null;
             this.code = AllelesCode.ALL_ALLELES_MISSING;
         } else {
-            String[] auxAlleles = genotype.split("/");
+            String[] auxAlleles = genotype.split("/|\\|");
             if (auxAlleles[0].equals(".")) {
                 this.allele1 = null;
                 this.code = AllelesCode.FIRST_ALLELE_MISSING;

@@ -1,6 +1,7 @@
 package org.opencb.variant.lib.io;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.opencb.variant.lib.core.formats.VariantEffect;
 import org.opencb.variant.lib.core.formats.VariantInfo;
 import org.opencb.variant.lib.core.formats.VcfVariantStat;
@@ -106,14 +107,20 @@ public class WSSqliteManager {
                 whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
-            String sql = "SELECT distinct variant.id_variant, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome , " +
-                    "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf ," +
-                    "variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err , " +
+            String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
+
+            if (options.containsKey("exc_1000g_controls") && options.get("exc_1000g_controls").equalsIgnoreCase("on")) {
+                whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
+            }
+
+            String sql = "SELECT distinct variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
+                    "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf, " +
+                    "variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err ," +
                     "variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive " +
                     " FROM variant_stats " +
                     "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt " +
-                    "inner join sample_info on variant.id_variant=sample_info.id_variant";
-
+                    "inner join sample_info on variant.id_variant=sample_info.id_variant " +
+                    innerJoinVariantSQL;
 
             if (whereClauses.size() > 0) {
                 StringBuilder where = new StringBuilder(" where ");
@@ -135,12 +142,13 @@ public class WSSqliteManager {
 
             VcfVariantStat vs;
             VariantInfo vi = null;
-//            VariantEffect ve;
+
 
             String chr = "";
             int pos = 0;
             String ref = "", alt = "";
 
+            System.out.println("Processing");
             while (rs.next()) {
 
                 if (!rs.getString("chromosome").equals(chr) ||
@@ -164,23 +172,25 @@ public class WSSqliteManager {
                             rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
                     vs.setId(rs.getString("id"));
 
+
                     vi.addStats(vs);
                 }
+
+                if (rs.getString("key") != null && rs.getString("value") != null) {
+
+                    vi.addControl(rs.getString("key"), rs.getString("value"));
+                }
+
 
                 String sample = rs.getString("sample_name");
                 String gt = rs.getInt("allele_1") + "/" + rs.getInt("allele_2");
 
                 vi.addSammpleGenotype(sample, gt);
 
-//                ve = new VariantEffect(rs.getString("chromosome"), rs.getInt("position"), rs.getString("allele_ref"), rs.getString("allele_alt"),
-//                        rs.getString("feature_id"), rs.getString("feature_name"), rs.getString("feature_type"), rs.getString("feature_biotype"),
-//                        rs.getString("feature_chromosome"), rs.getInt("feature_start"), rs.getInt("feature_end"), rs.getString("feature_strand"),
-//                        rs.getString("snp_id"), rs.getString("ancestral"), rs.getString("alternative"), rs.getString("gene_id"), rs.getString("transcript_id"),
-//                        rs.getString("gene_name"), rs.getString("consequence_type"), rs.getString("consequence_type_obo"), rs.getString("consequence_type_desc"),
-//                        rs.getString("consequence_type_type"), rs.getInt("aa_position"), rs.getString("aminoacid_change"), rs.getString("codon_change"));
-                // vi.addEffect(ve);
 
             }
+
+            System.out.println("End processing");
             if (vi != null) {
                 list.add(vi);
             }

@@ -34,17 +34,16 @@ public class VariantAnnotRunner {
         vcfReader = new VariantVcfDataReader(vcfFileName);
         vcfWriter = new VariantVcfDataWriter(vcfOutFilename);
 
-
     }
 
     public void run() {
 
         int batchSize = 1000;
+        int cont = 1;
         List<VcfRecord> batch;
 
         vcfReader.open();
         vcfWriter.open();
-
 
         vcfReader.pre();
         vcfReader.post();
@@ -53,10 +52,9 @@ public class VariantAnnotRunner {
 
         vcfWriter.writeVcfHeader(vcfReader.getHeader());
 
-
-
         while (!batch.isEmpty()) {
 
+            System.out.println("Batch: " + cont++);
 
             Annot.applyAnnotations(batch, this.annots);
 
@@ -66,15 +64,11 @@ public class VariantAnnotRunner {
 
         }
 
-
         vcfReader.post();
         vcfWriter.post();
 
         vcfReader.close();
         vcfWriter.close();
-
-
-
 
     }
 

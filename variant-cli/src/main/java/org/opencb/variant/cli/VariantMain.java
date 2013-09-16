@@ -55,7 +55,8 @@ public class VariantMain {
         options.addOption(OptionFactory.createOption("out-file", "File output", false, false));
         options.addOption(OptionFactory.createOption("ped-file", "Ped file", false, true));
         options.addOption(OptionFactory.createOption("control", "Control filename", false, true));
-        options.addOption(OptionFactory.createOption("control-list", "Control filename", false, true));
+        options.addOption(OptionFactory.createOption("control-list", "Control filename list", false, true));
+        options.addOption(OptionFactory.createOption("control-prefix", "Control prefix", false, true));
 
     }
 
@@ -103,7 +104,7 @@ public class VariantMain {
                 break;
 
             case "filter":
-                System.out.println("===== STATS =====");
+                System.out.println("===== FILTER =====");
                 System.out.println("Under construction");
                 break;
 
@@ -112,7 +113,7 @@ public class VariantMain {
 
                 List<VcfAnnotator> listAnnots = new ArrayList<>();
                 VcfAnnotator control = null;
-                String infoPrefix = "CONTROL";
+                String infoPrefix = commandLine.hasOption("control-prefix") ? commandLine.getOptionValue("control-prefix") : "CONTROL";
 
                 var = new VariantAnnotRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/" + "annot.vcf");
 

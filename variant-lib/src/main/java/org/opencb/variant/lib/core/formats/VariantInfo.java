@@ -50,10 +50,13 @@ public class VariantInfo {
     private String stats_id_snp;
 
     @JsonProperty
+    HashMap<String, VariantControl> controls;
+
+    @JsonProperty
     private Set<VariantEffect> effect;
 
     @JsonProperty
-    private HashMap<String,String> genotypes;
+    private HashMap<String, String> genotypes;
 
 
     public VariantInfo(String chromosome, int position, String ref, String alt) {
@@ -64,13 +67,13 @@ public class VariantInfo {
 
         this.effect = new HashSet<>();
         genotypes = new LinkedHashMap<>();
+        this.controls = new LinkedHashMap<>();
 
     }
 
     public VariantInfo(String chromosome, int position, String ref, String alt, VcfVariantStat stats) {
         this(chromosome, position, ref, alt);
         this.addStats(stats);
-
 
 
     }
@@ -242,7 +245,73 @@ public class VariantInfo {
         this.genotypes = genotypes;
     }
 
-    public void addSammpleGenotype(String sample, String gt){
+    public void addSammpleGenotype(String sample, String gt) {
         this.genotypes.put(sample, gt);
     }
+
+    public void addControl(String key, String value) {
+
+        String[] fields = key.split("_");
+        String controlName = fields[0];
+        String controlType = fields[1];
+        VariantControl vc;
+
+        if (!controls.containsKey(controlName)) {
+            vc = new VariantControl();
+            controls.put(controlName, vc);
+
+        } else {
+
+            vc = controls.get(controlName);
+
+        }
+
+        switch (controlType) {
+            case "maf":
+                vc.setMaf(Float.parseFloat(value));
+                break;
+            case "amaf":
+                vc.setAllele(value);
+                break;
+        }
+
+
+    }
+
+
+    class VariantControl {
+
+        @JsonProperty
+        private float maf;
+
+        @JsonProperty
+        private String allele;
+
+        VariantControl(float maf, String allele) {
+            this.maf = maf;
+            this.allele = allele;
+        }
+
+        public VariantControl() {
+            this.maf = -1;
+            this.allele = "";
+        }
+
+        float getMaf() {
+            return maf;
+        }
+
+        void setMaf(float maf) {
+            this.maf = maf;
+        }
+
+        String getAllele() {
+            return allele;
+        }
+
+        void setAllele(String allele) {
+            this.allele = allele;
+        }
+    }
+
 }
