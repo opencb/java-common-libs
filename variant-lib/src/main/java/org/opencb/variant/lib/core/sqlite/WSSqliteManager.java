@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.io;
+package org.opencb.variant.lib.core.sqlite;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
