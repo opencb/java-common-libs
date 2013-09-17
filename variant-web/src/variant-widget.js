@@ -580,6 +580,11 @@ VariantWidget.prototype = {
     },
     _getResult: function () {
         var _this = this;
+
+        // Remove all elements from gridEffect
+        _this.gridEffect.getStore().removeAll();
+
+
         var values = this.form.getForm().getValues();
         var formParams = {}
         for (var param in values) {
@@ -673,10 +678,10 @@ VariantWidget.prototype = {
         });
     },
     _getRegionList: function () {
-        var position = Ext.create('Ext.form.field.TextArea', {
-            id: "chrpos",
-            name: "chrpos",
-            fieldLabel: 'Chromosomic position',
+        var regionList = Ext.create('Ext.form.field.TextArea', {
+            id: "region_list",
+            name: "region_list",
+            fieldLabel: 'Region list',
             margin: '0 0 0 5',
             value: "1:1-1000000",
             allowBlank: false
@@ -690,7 +695,7 @@ VariantWidget.prototype = {
             width: "100%",
             buttonAlign: 'center',
             layout: 'vbox',
-            items: [position]
+            items: [regionList]
         });
     },
     _getGenes: function () {

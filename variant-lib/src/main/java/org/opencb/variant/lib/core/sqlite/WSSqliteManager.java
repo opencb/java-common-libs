@@ -9,6 +9,8 @@ import org.opencb.variant.lib.core.formats.VcfVariantStat;
 import java.sql.*;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,14 +38,37 @@ public class WSSqliteManager {
             List<String> whereClauses = new ArrayList<>(10);
             boolean innerJoinEffect = false;
 
-            if (options.containsKey("chrpos") && !options.get("chrpos").equals("")) {
-                String chrPos = options.get("chrpos").split(":")[0];
-                int start = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[0]);
-                int end = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[1]);
+            if (options.containsKey("region_list") && !options.get("region_list").equals("")) {
 
-                whereClauses.add("variant_stats.chromosome='" + chrPos + "'");
-                whereClauses.add("variant_stats.position>=" + start);
-                whereClauses.add("variant_stats.position<=" + end);
+                StringBuilder regionClauses = new StringBuilder("(");
+                String[] regions = options.get("region_list").split(",");
+                Pattern pattern = Pattern.compile("(\\w+):(\\d+)-(\\d+)");
+                Matcher matcher;
+
+
+                for (int i = 0; i < regions.length; i++) {
+                    String region = regions[i];
+                    matcher = pattern.matcher(region);
+                    if (matcher.find()) {
+                        String chr = matcher.group(1);
+                        int start = Integer.valueOf(matcher.group(2));
+                        int end = Integer.valueOf(matcher.group(3));
+
+                        regionClauses.append("( variant_stats.chromosome='" + chr + "'").append(" AND ");
+                        regionClauses.append("variant_stats.position>=" + start + "").append(" AND ");
+                        regionClauses.append("variant_stats.position<=" + end + " )");
+
+
+                        if (i < (regions.length - 1)) {
+                            regionClauses.append(" OR ");
+
+                        }
+
+                    }
+                }
+                regionClauses.append(" ) ");
+                System.out.println(regionClauses.toString());
+                whereClauses.add(regionClauses.toString());
 
             }
 
