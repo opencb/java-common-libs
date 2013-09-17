@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Bierapp</title>
+
+    <link rel="stylesheet" type="text/css" href="http://cdn.sencha.io/ext/gpl/4.2.1/resources/css/ext-all.css">
+
+    <!-- CSS from vendors -->
+    <!-- build:style vendor -->
+    <link type="text/css" rel="stylesheet" href="../vendor/jquery.qtip.min.css"/>
+    <!-- /build -->
+
+    <!-- CSS from Styles -->
+    <!-- build:style css -->
+    <link type="text/css" rel="stylesheet" href="../styles/css/style.css"/>
+    <!-- /build -->
+
+
+    <!-- Sencha Ext -->
+    <script type="text/javascript" src="http://cdn.sencha.io/ext/gpl/4.2.1/ext-all.js"></script>
+    <script type="text/javascript" src="http://cdn.sencha.io/ext/gpl/4.2.1/examples/shared/examples.js"></script>
+
+
+    <!-- Workers directory -->
+    <script type="text/javascript">
+        WORKERS_PATH = "vendor/";
+    </script>
+
+    <!-- JS from vendors -->
+    <!-- build:script vendor -->
+    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
+    <script type="text/javascript" src="../vendor/backbone-min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.qtip.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.sha1.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.cookie.js"></script>
+    <script type="text/javascript" src="../vendor/purl.min.js"></script>
+
+
+    <script type="text/javascript" src="../vendor/utils-1.0.0.js"></script>
+    <script type="text/javascript" src="../vendor/opencga-1.0.0.js"></script>
+    <script type="text/javascript">
+        WORKERS_PATH = "../vendor/";
+    </script>
+    <!-- /build -->
+
+
+    <!-- JS from Pathiways -->
+    <!-- build:script js -->
+    <script type="text/javascript" src="./ba-config.js"></script>
+    <script type="text/javascript" src="./bierapp.js"></script>
+    <script type="text/javascript" src="./variant-widget.js"></script>
+    <!-- /build -->
+
+
+    <script>
+        Ext.Loader.setConfig({enabled: true});
+        Ext.Loader.setPath('Ext.ux', 'http://cdn.sencha.io/ext/gpl/4.2.1/examples/ux');
+        Ext.QuickTips.init();
+        Ext.require([
+            'Ext.ux.grid.FiltersFeature',
+            'Ext.grid.plugin.BufferedRenderer'
+//	    'Ext.grid.PagingScroller',
+//	    'Ext.ux.data.PagingMemoryProxy'
+        ]);
+
+        var bierapp;
+        Ext.onReady(function run() {
+            CheckBrowser("pathiways");
+            bierapp = new Bierapp({
+                targetId: 'application',
+                autoRender: true,
+                east: true
+            });
+            bierapp.draw();
+        });
+    </script>
+
+    <STYLE type="text/css">
+        html {
+            /*overflow-y: scroll;*/
+            /*overflow-x: hidden;*/
+            height: 100%;
+        }
+        body {
+            background-color: #f5f5f5;
+            padding: 4px;
+            height: 100%;
+        }
+        #application {
+            height: 100%;
+        }
+    </STYLE>
+</head>
+<body style="overflow: hidden">
+<div id="checkBrowser"></div>
+<div id="application"></div>
+</body>
+</html>
