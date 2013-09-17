@@ -160,31 +160,32 @@ VariantWidget.prototype = {
     _createForm: function () {
         var _this = this;
 
-        var accordion = Ext.create('Ext.form.Panel',{
+        var accordion = Ext.create('Ext.form.Panel', {
             //title: 'FORM',
             border: false,
             flex: 1,
             height: "100%",
-            title:"Filters",
-            width:"100%",
-            layout:{
+            title: "Filters",
+            width: "100%",
+            layout: {
                 type: 'accordion',
-            fill:false
+                fill: false
             }
 
         });
 
         var regionItems = [
             this._getSelectDataPanel(),
+            this._getChrStartEnd(),
             this._getRegionList(),
             this._getGenes(),
             this._getBioTypes()
-            ];
+        ];
 
-        var region = Ext.create('Ext.panel.Panel',{
-            title:"Region",
+        var region = Ext.create('Ext.panel.Panel', {
+            title: "Region",
             items: regionItems
-        
+
         });
 
         var statsItems = [
@@ -195,33 +196,33 @@ VariantWidget.prototype = {
             this._getInheritance()
         ];
 
-        var stats = Ext.create('Ext.panel.Panel',{
-            title:"Stats",
+        var stats = Ext.create('Ext.panel.Panel', {
+            title: "Stats",
             items: statsItems
-        
+
         });
-        
+
         var controlsItems = [
             this._getControls()
         ];
 
-        var controls = Ext.create('Ext.panel.Panel',{
-            title:"Controls",
+        var controls = Ext.create('Ext.panel.Panel', {
+            title: "Controls",
             items: controlsItems
-        
+
         });
 
         var effectItems = [
             this._getConsequenceType()
-            ];
+        ];
 
-        var effect = Ext.create('Ext.panel.Panel',{
-            title:"Effect",
+        var effect = Ext.create('Ext.panel.Panel', {
+            title: "Effect",
             items: effectItems
-        
+
         });
 
-        var searchItems =[
+        var searchItems = [
             {
                 xtype: 'button',
                 text: 'Search',
@@ -230,29 +231,19 @@ VariantWidget.prototype = {
                     _this._getResult();
                 }
             }
-            ];
+        ];
 
-        var search = Ext.create('Ext.panel.Panel',{
-            title:"Search",
+        var search = Ext.create('Ext.panel.Panel', {
+            title: "Search",
             items: searchItems
-        
+
         });
 
-        //var form = Ext.create('Ext.form.Panel', {
-            ////title: 'FORM',
-            //border: false,
-            //// bodyPadding: '5',
-            //layout: 'vbox',
-            //flex: 1,
-            //height: "100%",
-////            overflowY: 'scroll',
-        //});
-
-       accordion.add(region);
-       accordion.add(stats);
-       accordion.add(controls);
-       accordion.add(effect);
-       accordion.add(search);
+        accordion.add(region);
+        accordion.add(stats);
+        accordion.add(controls);
+        accordion.add(effect);
+        accordion.add(search);
 
         return accordion;
     },
@@ -318,7 +309,7 @@ VariantWidget.prototype = {
                     text: "Consequence Type",
                     dataIndex: "consequenceType",
                     xtype: "templatecolumn",
-                    tpl: "{consequenceTypeObo} ({consequenceType})",
+                    tpl: '{consequenceTypeObo} (<a href="http://www.sequenceontology.org/browser/current_svn/term/{consequenceType}" target="_blank">{consequenceType}</a>)',
                     flex: 1
                 },
                 {
@@ -385,9 +376,12 @@ VariantWidget.prototype = {
 
     _createGrid: function () {
 
+        var groupingFeature = Ext.create('Ext.grid.feature.Grouping', {
+            groupHeaderTpl: '{groupField}: {groupValue} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})'
+        });
 
         this.st = Ext.create('Ext.data.Store', {
-//            groupField: 'stats_id_snp',
+            groupField: 'gene_name',
             fields: [
                 {name: "chromosome", type: "String"},
                 {name: "position", type: "int"},
@@ -406,6 +400,7 @@ VariantWidget.prototype = {
                 {name: 'stats_controls_percent_dominant', type: 'double'},
                 {name: 'stats_cases_percent_recessive', type: 'double'},
                 {name: 'stats_controls_percent_recessive', type: 'double'},
+                {name: 'gene_name', type: 'string'},
                 {name: "genotypes", type: 'auto'},
                 {name: "effect", type: 'auto'},
                 {name: "controls", type: 'auto'}
@@ -418,7 +413,8 @@ VariantWidget.prototype = {
 
         });
         var groupingFeature = Ext.create('Ext.grid.feature.Grouping', {
-            groupHeaderTpl: '{groupField}: {groupValue} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})'
+            groupHeaderTpl: '{groupField}: {groupValue} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})',
+            enableGroupingMenu: false
         });
 
         var grid = Ext.create('Ext.grid.Panel', {
@@ -431,7 +427,8 @@ VariantWidget.prototype = {
             titleCollapse: true,
 //            features: [groupingFeature],
             columns: [
-                {xtype: 'rownumberer'},
+                new Ext.grid.RowNumberer({width: 30}),
+
                 {
                     text: "Variant Pos",
                     dataIndex: 'chromosome',
@@ -439,6 +436,10 @@ VariantWidget.prototype = {
                     renderer: function (val, meta, record) {
                         return record.data.chromosome + ":" + record.data.position;
                     }
+                }, {
+                    text: "Gene",
+                    dataIndex: 'gene_name',
+                    flex: 1
                 },
                 {
                     text: "ID",
@@ -518,6 +519,7 @@ VariantWidget.prototype = {
                 {
                     flex: 1,
                     text: "Inheritance",
+//                    hidden: true,
                     columns: [
                         {
                             text: "% Cases dominant",
@@ -574,7 +576,9 @@ VariantWidget.prototype = {
                     ]
                 }
             ],
-            plugins: 'bufferedrenderer', loadMask: true
+            plugins: 'bufferedrenderer',
+            loadMask: true,
+            features: [groupingFeature]
         });
         return grid;
     },
@@ -675,6 +679,45 @@ VariantWidget.prototype = {
             buttonAlign: 'center',
             layout: 'vbox',
             items: [data_opt]
+        });
+    },
+    _getChrStartEnd: function () {
+
+        var chr_pos = Ext.create('Ext.form.field.Text', {
+            fieldLabel: "Chromosome",
+            id: "chr_pos",
+            name: "chr_pos",
+            margin: '5 0 0 5',
+            width: "20%",
+            allowBlank: false
+        });
+
+        var start_pos = Ext.create('Ext.form.field.Text', {
+            fieldLabel: 'Start',
+            id: 'start_pos',
+            name: 'start_pos',
+            margin: '5 0 0 5',
+            width: '20%',
+            allowBlank: false
+        });
+        var end_pos = Ext.create('Ext.form.field.Text', {
+            fieldLabel: 'End',
+            id: "end_pos",
+            name: "end_pos",
+            margin: '5 0 0 5',
+            width: "20%",
+            allowBlank: false
+        });
+
+        return Ext.create('Ext.form.Panel', {
+//            title: 'Inheritance',
+            border: true,
+            bodyPadding: "5",
+            margin: "0 0 5 0",
+            width: "100%",
+            buttonAlign: 'center',
+            type: 'vbox',
+            items: [chr_pos, start_pos, end_pos]
         });
     },
     _getRegionList: function () {
@@ -791,14 +834,14 @@ VariantWidget.prototype = {
                     fieldLabel: 'Missing Alleles',
                     layout: 'hbox',
                     border: false,
-                    items: [alleles_text, alleles_opt] },
+                    items: [alleles_opt, alleles_text] },
 
                 {
                     xtype: 'fieldcontainer',
                     fieldLabel: 'Missing Genotypes',
                     layout: 'hbox',
                     border: false,
-                    items: [gt_text, gt_opt]}
+                    items: [gt_opt, gt_text]}
             ]
         });
     },
@@ -838,14 +881,14 @@ VariantWidget.prototype = {
                     fieldLabel: 'MAF',
                     layout: 'hbox',
                     border: false,
-                    items: [maf_text, maf_opt] },
+                    items: [maf_opt, maf_text] },
 
                 {
                     xtype: 'fieldcontainer',
                     fieldLabel: 'MGF',
                     layout: 'hbox',
                     border: false,
-                    items: [mgf_text, mgf_opt]}
+                    items: [ mgf_opt, mgf_text]}
             ]
         });
     },
@@ -875,7 +918,7 @@ VariantWidget.prototype = {
                     fieldLabel: 'Mendel. Errors',
                     layout: 'hbox',
                     border: false,
-                    items: [mendel_text, mendel_opt]
+                    items: [mendel_opt, mendel_text]
                 }
             ]
 
@@ -962,28 +1005,28 @@ VariantWidget.prototype = {
                     fieldLabel: '% Cases Dominant',
                     layout: 'hbox',
                     border: false,
-                    items: [cases_d, cases_d_opt]
+                    items: [cases_d_opt, cases_d]
                 },
                 {
                     xtype: 'fieldcontainer',
                     fieldLabel: '% Controls Dominant',
                     layout: 'hbox',
                     border: false,
-                    items: [controls_d, controls_d_opt]
+                    items: [controls_d_opt, controls_d]
                 },
                 {
                     xtype: 'fieldcontainer',
                     fieldLabel: '% Cases recessive',
                     layout: 'hbox',
                     border: false,
-                    items: [cases_r, cases_r_opt]
+                    items: [cases_r_opt, cases_r]
                 },
                 {
                     xtype: 'fieldcontainer',
                     fieldLabel: '% Controls recessive',
                     layout: 'hbox',
                     border: false,
-                    items: [controls_r, controls_r_opt]
+                    items: [controls_r_opt, controls_r]
                 }
             ]
         });

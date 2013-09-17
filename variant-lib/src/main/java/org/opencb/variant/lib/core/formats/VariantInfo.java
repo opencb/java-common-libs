@@ -23,6 +23,9 @@ public class VariantInfo {
     private String alt;
 
     @JsonProperty
+    private String gene_name;
+
+    @JsonProperty
     private double stats_maf;
     @JsonProperty
     private double stats_mgf;
@@ -59,11 +62,12 @@ public class VariantInfo {
     private HashMap<String, String> genotypes;
 
 
-    public VariantInfo(String chromosome, int position, String ref, String alt) {
+    public VariantInfo(String chromosome, int position, String ref, String alt, String gene_name) {
         this.chromosome = chromosome;
         this.position = position;
         this.ref = ref;
         this.alt = alt;
+        this.gene_name = gene_name;
 
         this.effect = new HashSet<>();
         genotypes = new LinkedHashMap<>();
@@ -71,8 +75,8 @@ public class VariantInfo {
 
     }
 
-    public VariantInfo(String chromosome, int position, String ref, String alt, VcfVariantStat stats) {
-        this(chromosome, position, ref, alt);
+    public VariantInfo(String chromosome, int position, String ref, String alt, String gene_name, VcfVariantStat stats) {
+        this(chromosome, position, ref, alt, gene_name);
         this.addStats(stats);
 
 
