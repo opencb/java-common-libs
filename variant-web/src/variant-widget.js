@@ -177,7 +177,8 @@ VariantWidget.prototype = {
         var regionItems = [
             this._getSelectDataPanel(),
             this._getRegionList(),
-            this._getGenes()
+            this._getGenes(),
+            this._getBioTypes()
             ];
 
         var region = Ext.create('Ext.panel.Panel',{
@@ -191,13 +192,22 @@ VariantWidget.prototype = {
             this._getMissing(),
             this._getMendelError(),
             this._getIsIndel(),
-            this._getInheritance(),
-            this._getControls()
+            this._getInheritance()
         ];
 
         var stats = Ext.create('Ext.panel.Panel',{
             title:"Stats",
             items: statsItems
+        
+        });
+        
+        var controlsItems = [
+            this._getControls()
+        ];
+
+        var controls = Ext.create('Ext.panel.Panel',{
+            title:"Controls",
+            items: controlsItems
         
         });
 
@@ -240,6 +250,7 @@ VariantWidget.prototype = {
 
        accordion.add(region);
        accordion.add(stats);
+       accordion.add(controls);
        accordion.add(effect);
        accordion.add(search);
 
@@ -701,6 +712,25 @@ VariantWidget.prototype = {
             items: [geneList]
         });
     },
+    _getBioTypes: function () {
+        var bt = Ext.create('Ext.form.field.TextArea', {
+            id: "biotype",
+            name: "biotype",
+            fieldLabel: 'Biotypes',
+            margin: '0 0 0 5',
+            allowBlank: false
+        });
+
+        return Ext.create('Ext.form.Panel', {
+            border: true,
+            bodyPadding: "5",
+            margin: "0 0 5 0",
+            width: "100%",
+            buttonAlign: 'center',
+            layout: 'vbox',
+            items: [bt]
+        });
+    },
     _getConsequenceType: function () {
         var ct = Ext.create('Ext.form.field.Text', {
             id: "conseq_type",
@@ -967,8 +997,8 @@ VariantWidget.prototype = {
                     xtype: 'checkboxfield',
                     fieldLabel: 'Exclude 1000G Controls',
                     //anchor: '100%',
-                    name: 'exc_1000g_controls',
-                    checked: true
+                    name: 'exc_1000g_controls'
+//                    checked: true
 
                 }
             ]

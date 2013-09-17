@@ -34,6 +34,7 @@ public class WSSqliteManager {
             con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
 
             List<String> whereClauses = new ArrayList<>(10);
+            boolean innerJoinEffect = false;
 
             if (options.containsKey("chrpos") && !options.get("chrpos").equals("")) {
                 String chrPos = options.get("chrpos").split(":")[0];
@@ -107,7 +108,20 @@ public class WSSqliteManager {
                 whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
+            if (options.containsKey("conseq_type") && !options.get("conseq_type").equals("")) {
+                innerJoinEffect = true;
+                String val = options.get("conseq_type");
+                whereClauses.add("variant_effect.consequence_type_obo LIKE '%" + val + "%' ");
+            }
+
+
             String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
+            String innerJoinEffectSQL = "";
+
+            if (innerJoinEffect) {
+                innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
+            }
+
 
             if (options.containsKey("exc_1000g_controls") && options.get("exc_1000g_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
@@ -119,6 +133,7 @@ public class WSSqliteManager {
                     "variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive " +
                     " FROM variant_stats " +
                     "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt " +
+                    innerJoinEffectSQL +
                     "inner join sample_info on variant.id_variant=sample_info.id_variant " +
                     innerJoinVariantSQL;
 
