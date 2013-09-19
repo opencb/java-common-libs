@@ -46,7 +46,7 @@ public class VariantAnnotRunner {
         vcfWriter.open();
 
         vcfReader.pre();
-        vcfReader.post();
+        vcfWriter.pre();
 
         batch = vcfReader.read(batchSize);
 

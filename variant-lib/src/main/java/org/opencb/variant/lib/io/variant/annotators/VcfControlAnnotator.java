@@ -136,7 +136,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
                 record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.2f", statRecord.getMaf()));
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", statRecord.getMaf()));
                 record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
             }
         }

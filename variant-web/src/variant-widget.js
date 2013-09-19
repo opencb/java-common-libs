@@ -285,7 +285,7 @@ VariantWidget.prototype = {
         });
 
         var gridEffect = Ext.create('Ext.grid.Panel', {
-            flex: 1,
+            flex: 0.3,
             width: '100%',
             store: this.stEffect,
             loadMask: true,
@@ -376,10 +376,6 @@ VariantWidget.prototype = {
 
     _createGrid: function () {
 
-        var groupingFeature = Ext.create('Ext.grid.feature.Grouping', {
-            groupHeaderTpl: '{groupField}: {groupValue} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})'
-        });
-
         this.st = Ext.create('Ext.data.Store', {
             groupField: 'gene_name',
             fields: [
@@ -401,6 +397,7 @@ VariantWidget.prototype = {
                 {name: 'stats_cases_percent_recessive', type: 'double'},
                 {name: 'stats_controls_percent_recessive', type: 'double'},
                 {name: 'gene_name', type: 'string'},
+                {name: 'ct', type: 'string'},
                 {name: "genotypes", type: 'auto'},
                 {name: "effect", type: 'auto'},
                 {name: "controls", type: 'auto'}
@@ -419,7 +416,7 @@ VariantWidget.prototype = {
 
         var grid = Ext.create('Ext.grid.Panel', {
 
-            flex: 1,
+            flex: 0.3,
             width: '100%',
             store: this.st,
             loadMask: true,
@@ -430,130 +427,23 @@ VariantWidget.prototype = {
                 new Ext.grid.RowNumberer({width: 30}),
 
                 {
-                    text: "Variant Pos",
+                    text: "Variant",
                     dataIndex: 'chromosome',
-                    flex: 1.5,
-                    renderer: function (val, meta, record) {
-                        return record.data.chromosome + ":" + record.data.position;
-                    }
-                }, {
-                    text: "Gene",
-                    dataIndex: 'gene_name',
-                    flex: 1
+                    flex: 1,
+                    xtype: "templatecolumn",
+                    tpl: "{chromosome}:{position}"
                 },
                 {
-                    text: "ID",
+                    text: "Alleles",
+                    flex: 0.5,
+                    xtype: "templatecolumn",
+                    tpl: "{ref}>{alt}"
+                },
+                {
+                    text: "SNP id",
                     dataIndex: 'stats_id_snp.',
                     flex: 1,
                     sortable: true
-
-                },
-                {
-                    text: "Alleles & Genotypes",
-                    columns: [
-                        {
-
-                            text: "Allele Ref",
-                            dataIndex: 'ref',
-                            flex: 0.2,
-                            sortable: true
-                        },
-                        {
-                            text: "Allele Alt",
-                            dataIndex: 'alt',
-                            flex: 0.2,
-                            sortable: true
-                        },
-
-                        {
-                            header: "MAF",
-                            dataIndex: 'stats_maf',
-                            xtype: "templatecolumn",
-                            tpl: "{stats_maf} ({stats_allele_maf})",
-                            flex: 0.2,
-                            sortable: true
-                        },
-                        {
-                            text: "MGF",
-                            dataIndex: 'stats_mgf',
-                            xtype: "templatecolumn",
-                            tpl: "{stats_mgf} ({stats_genotype_maf})",
-                            flex: 0.2,
-                            sortable: true
-                        }
-                    ]
-                },
-
-                {
-                    text: "Missing Alleles/Genotypes",
-                    columns: [
-                        {
-                            text: "Alleles",
-                            dataIndex: 'stats_miss_allele',
-                            flex: 0.1,
-                            sortable: true
-                        },
-                        {
-                            text: "Genotypes",
-                            dataIndex: 'stats_miss_gt',
-                            flex: 0.1,
-                            sortable: true
-                        }
-                    ]
-                },
-                {
-                    flex: 1,
-                    text: "Mendelian Errors",
-                    dataIndex: 'stats_mendel_err',
-                    sortable: true
-                },
-                {
-                    flex: 1,
-                    text: "Is indel?",
-                    xtype: 'booleancolumn',
-                    trueText: 'Yes',
-                    falseText: 'No',
-                    dataIndex: 'stats_is_indel',
-                    sortable: true
-                },
-                {
-                    flex: 1,
-                    text: "Inheritance",
-//                    hidden: true,
-                    columns: [
-                        {
-                            text: "% Cases dominant",
-                            dataIndex: 'stats_cases_percent_dominant',
-                            renderer: function (value) {
-                                return value.toFixed(2);
-                            },
-                            sortable: true
-                        },
-                        {
-                            text: "% Controls dominant",
-                            dataIndex: 'stats_controls_percent_dominant',
-                            renderer: function (value) {
-                                return value.toFixed(2) + "%";
-                            },
-                            sortable: true
-                        },
-                        {
-                            text: "% Cases recessive",
-                            dataIndex: 'stats_cases_percent_recessive',
-                            renderer: function (value) {
-                                return value.toFixed(2) + "%";
-                            },
-                            sortable: true
-                        },
-                        {
-                            text: "% Controls recessive",
-                            dataIndex: 'stats_controls_percent_recessive',
-                            renderer: function (value) {
-                                return value.toFixed(2) + "%";
-                            },
-                            sortable: true
-                        }
-                    ]
                 },
                 {
                     flex: 1,
@@ -568,11 +458,146 @@ VariantWidget.prototype = {
                                 } else {
                                     return ".";
                                 }
-
                             }
+                        },
+                        {
+                            text: 'ESP'
                         }
+                    ]
+                },
+                {
+                    text: "Gene",
+                    dataIndex: 'gene_name',
+                    hidden: true,
+                    flex: 1
+                },
+                {
+                    text: "Consq. Type",
+                    dataIndex: "ct",
+                    flex: 1,
+                    sortable: true
+                },
+                {text: 'Polyphen', flex: 1},
+                {text: 'Sift', flex: 1},
+                {text: 'Conservation', flex: 1},
+                {
+                    text: "Alleles & Genotypes",
+                    hidden: true,
+                    columns: [
+                        {
 
+                            text: "Allele Ref",
+                            dataIndex: 'ref',
+                            flex: 0.2,
+                            hidden: true,
+                            sortable: true
+                        },
+                        {
+                            text: "Allele Alt",
+                            dataIndex: 'alt',
+                            flex: 0.2,
+                            hidden: true,
+                            sortable: true
+                        },
 
+                        {
+                            header: "MAF",
+                            dataIndex: 'stats_maf',
+                            xtype: "templatecolumn",
+                            tpl: "{stats_maf} ({stats_allele_maf})",
+                            flex: 0.2,
+                            hidden: true,
+                            sortable: true
+                        },
+                        {
+                            text: "MGF",
+                            dataIndex: 'stats_mgf',
+                            xtype: "templatecolumn",
+                            tpl: "{stats_mgf} ({stats_genotype_maf})",
+                            flex: 0.2,
+                            hidden: true,
+                            sortable: true
+                        }
+                    ]
+                },
+                {
+                    text: "Missing Alleles/Genotypes",
+                    hidden: true,
+                    columns: [
+                        {
+                            text: "Alleles",
+                            dataIndex: 'stats_miss_allele',
+                            flex: 0.1,
+                            hidden: true,
+                            sortable: true
+                        },
+                        {
+                            text: "Genotypes",
+                            dataIndex: 'stats_miss_gt',
+                            flex: 0.1,
+                            hidden: true,
+                            sortable: true
+                        }
+                    ]
+                },
+                {
+                    text: "Mendelian Errors",
+                    flex: 1,
+                    dataIndex: 'stats_mendel_err',
+                    sortable: true,
+                    hidden: true
+                },
+                {
+                    text: "Is indel?",
+                    flex: 1,
+                    xtype: 'booleancolumn',
+                    trueText: 'Yes',
+                    falseText: 'No',
+                    dataIndex: 'stats_is_indel',
+                    sortable: true,
+                    hidden: true
+                },
+                {
+                    text: "Inheritance",
+                    flex: 1,
+                    hidden: true,
+                    columns: [
+                        {
+                            text: "% Cases dominant",
+                            dataIndex: 'stats_cases_percent_dominant',
+                            hidden: true,
+                            renderer: function (value) {
+                                return value.toFixed(2);
+                            },
+                            sortable: true
+                        },
+                        {
+                            text: "% Controls dominant",
+                            dataIndex: 'stats_controls_percent_dominant',
+                            hidden: true,
+                            renderer: function (value) {
+                                return value.toFixed(2) + "%";
+                            },
+                            sortable: true
+                        },
+                        {
+                            text: "% Cases recessive",
+                            dataIndex: 'stats_cases_percent_recessive',
+                            hidden: true,
+                            renderer: function (value) {
+                                return value.toFixed(2) + "%";
+                            },
+                            sortable: true
+                        },
+                        {
+                            text: "% Controls recessive",
+                            dataIndex: 'stats_controls_percent_recessive',
+                            hidden: true,
+                            renderer: function (value) {
+                                return value.toFixed(2) + "%";
+                            },
+                            sortable: true
+                        }
                     ]
                 }
             ],
@@ -581,6 +606,38 @@ VariantWidget.prototype = {
             features: [groupingFeature]
         });
         return grid;
+    },
+    _prepareData: function (data) {
+
+        var finalData = [];
+        for (var i = 0; i < data.length; i++) {
+            var v = data[i];
+            if (v.genes.length <= 1) {
+
+                continue;
+            } else {
+//                v.genes = v.genes.filter(function (e) {
+//                    return e
+//                });
+                delete v.genes[''];
+            }
+
+            for (var key in v.genes) {
+                var copy = {};
+                _.extend(copy, v);
+
+                copy.gene_name = key;
+                copy.ct = v.genes[key];
+                delete copy.genes;
+                finalData.push(copy);
+
+
+            }
+        }
+
+        console.log(data);
+
+        return finalData;
     },
     _getResult: function () {
         var _this = this;
@@ -603,8 +660,10 @@ VariantWidget.prototype = {
             data: formParams,
             dataType: 'json',
             success: function (response, textStatus, jqXHR) {
-                console.log(response)
-                _this.st.loadData(response);
+                console.log(response);
+                var data = _this._prepareData(response);
+
+                _this.st.loadData(data);
 
 
                 //                console.log(_this.grid.columns.length)
@@ -635,7 +694,7 @@ VariantWidget.prototype = {
                         columns: sample_cols
                     });
 
-                    _this.grid.headerCt.insert(_this.grid.columns.length, sample_col);
+                    _this.grid.headerCt.insert(3, sample_col);
                     //_this.grid.reconfigure(store, columns[])
 
 

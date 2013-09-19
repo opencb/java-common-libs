@@ -181,7 +181,7 @@ public class WSSqliteManager {
                 whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
             }
 
-            String sql = "SELECT distinct variant_effect.gene_name, variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
+            String sql = "SELECT distinct variant_effect.gene_name,variant_effect.consequence_type_obo, variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
                     "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf, " +
                     "variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err ," +
                     "variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive " +
@@ -201,7 +201,7 @@ public class WSSqliteManager {
                     }
                 }
 
-                sql += where.toString() + " ;";
+                sql += where.toString() + " ORDER BY variant_stats.chromosome , variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt ;";
             }
 
             System.out.println(sql);
@@ -216,7 +216,6 @@ public class WSSqliteManager {
             String chr = "";
             int pos = 0;
             String ref = "", alt = "";
-            String geneName = "";
 
             System.out.println("Processing");
 
@@ -224,26 +223,23 @@ public class WSSqliteManager {
                 if (!rs.getString("chromosome").equals(chr) ||
                         rs.getInt("position") != pos ||
                         !rs.getString("allele_ref").equals(ref) ||
-                        !rs.getString("allele_alt").equals(alt) ||
-                        !rs.getString("gene_name").equals(geneName)) {
+                        !rs.getString("allele_alt").equals(alt)) {
+
 
                     chr = rs.getString("chromosome");
                     pos = rs.getInt("position");
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
-                    geneName = rs.getString("gene_name");
-
 
                     if (vi != null) {
                         list.add(vi);
                     }
-                    vi = new VariantInfo(chr, pos, ref, alt, geneName);
+                    vi = new VariantInfo(chr, pos, ref, alt);
                     vs = new VcfVariantStat(chr, pos, ref, alt,
                             rs.getDouble("maf"), rs.getDouble("mgf"), rs.getString("allele_maf"), rs.getString("genotype_maf"), rs.getInt("miss_allele"),
                             rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
                             rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
                     vs.setId(rs.getString("id"));
-
 
                     vi.addStats(vs);
                 }
@@ -258,6 +254,7 @@ public class WSSqliteManager {
                 String gt = rs.getInt("allele_1") + "/" + rs.getInt("allele_2");
 
                 vi.addSammpleGenotype(sample, gt);
+                vi.addGeneAndConsequenceType(rs.getString("gene_name"), rs.getString("consequence_type_obo"));
 
 
             }
