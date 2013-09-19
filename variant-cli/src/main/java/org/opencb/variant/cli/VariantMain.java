@@ -99,7 +99,9 @@ public class VariantMain {
 
                 if (commandLine.hasOption("out-file")) {
                     vr.writer(new VariantStatsFileDataWriter(commandLine.getOptionValue("outdir")));
+
                 }
+
                 vr.run();
                 break;
 

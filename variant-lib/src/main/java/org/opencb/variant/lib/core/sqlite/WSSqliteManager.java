@@ -9,6 +9,8 @@ import org.opencb.variant.lib.core.formats.VcfVariantStat;
 import java.sql.*;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,16 +36,50 @@ public class WSSqliteManager {
             con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
 
             List<String> whereClauses = new ArrayList<>(10);
+            boolean innerJoinEffect = false;
 
-            if (options.containsKey("chrpos") && !options.get("chrpos").equals("")) {
-                String chrPos = options.get("chrpos").split(":")[0];
-                int start = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[0]);
-                int end = Integer.parseInt(options.get("chrpos").split(":")[1].split("-")[1]);
+            if (options.containsKey("region_list") && !options.get("region_list").equals("")) {
 
-                whereClauses.add("variant_stats.chromosome='" + chrPos + "'");
-                whereClauses.add("variant_stats.position>=" + start);
-                whereClauses.add("variant_stats.position<=" + end);
+                StringBuilder regionClauses = new StringBuilder("(");
+                String[] regions = options.get("region_list").split(",");
+                Pattern pattern = Pattern.compile("(\\w+):(\\d+)-(\\d+)");
+                Matcher matcher;
 
+
+                for (int i = 0; i < regions.length; i++) {
+                    String region = regions[i];
+                    matcher = pattern.matcher(region);
+                    if (matcher.find()) {
+                        String chr = matcher.group(1);
+                        int start = Integer.valueOf(matcher.group(2));
+                        int end = Integer.valueOf(matcher.group(3));
+
+                        regionClauses.append("( variant_stats.chromosome='" + chr + "'").append(" AND ");
+                        regionClauses.append("variant_stats.position>=" + start + "").append(" AND ");
+                        regionClauses.append("variant_stats.position<=" + end + " )");
+
+
+                        if (i < (regions.length - 1)) {
+                            regionClauses.append(" OR ");
+
+                        }
+
+                    }
+                }
+                regionClauses.append(" ) ");
+                whereClauses.add(regionClauses.toString());
+            }
+
+            if (options.containsKey("chr_pos") && !options.get("chr_pos").equals("")) {
+
+                whereClauses.add("variant_stats.chromosome='" + options.get("chr_pos") + "'");
+                if (options.containsKey("start_pos") && !options.get("start_pos").equals("")) {
+                    whereClauses.add("variant_stats.position>=" + options.get("start_pos"));
+                }
+
+                if (options.containsKey("end_pos") && !options.get("end_pos").equals("")) {
+                    whereClauses.add("variant_stats.position<=" + options.get("end_pos"));
+                }
             }
 
 
@@ -107,18 +143,51 @@ public class WSSqliteManager {
                 whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
+            if (options.containsKey("conseq_type") && !options.get("conseq_type").equals("")) {
+                innerJoinEffect = true;
+                String val = options.get("conseq_type");
+                whereClauses.add("variant_effect.consequence_type_obo LIKE '%" + val + "%' ");
+            }
+
+            if (options.containsKey("biotype") && !options.get("biotype").equals("")) {
+                innerJoinEffect = true;
+                String[] biotypes = options.get("biotype").split(",");
+
+                StringBuilder biotypesClauses = new StringBuilder(" ( ");
+
+                for (int i = 0; i < biotypes.length; i++) {
+                    biotypesClauses.append("variant_effect.feature_biotype LIKE '%" + biotypes[i] + "%'");
+
+                    if (i < (biotypes.length - 1)) {
+                        biotypesClauses.append(" OR ");
+                    }
+                }
+
+                biotypesClauses.append(" ) ");
+                whereClauses.add(biotypesClauses.toString());
+
+
+            }
+
             String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
+            String innerJoinEffectSQL = "";
+
+            //if (innerJoinEffect) {
+            innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
+            //}
+
 
             if (options.containsKey("exc_1000g_controls") && options.get("exc_1000g_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
             }
 
-            String sql = "SELECT distinct variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
+            String sql = "SELECT distinct variant_effect.gene_name,variant_effect.consequence_type_obo, variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
                     "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf, " +
                     "variant_stats.allele_maf , variant_stats.genotype_maf , variant_stats.miss_allele , variant_stats.miss_gt , variant_stats.mendel_err ," +
                     "variant_stats.is_indel , variant_stats.cases_percent_dominant , variant_stats.controls_percent_dominant , variant_stats.cases_percent_recessive , variant_stats.controls_percent_recessive " +
                     " FROM variant_stats " +
                     "inner join variant on variant_stats.chromosome=variant.chromosome AND variant_stats.position=variant.position AND variant_stats.allele_ref=variant.ref AND variant_stats.allele_alt=variant.alt " +
+                    innerJoinEffectSQL +
                     "inner join sample_info on variant.id_variant=sample_info.id_variant " +
                     innerJoinVariantSQL;
 
@@ -132,7 +201,7 @@ public class WSSqliteManager {
                     }
                 }
 
-                sql += where.toString() + " ;";
+                sql += where.toString() + " ORDER BY variant_stats.chromosome , variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt ;";
             }
 
             System.out.println(sql);
@@ -149,18 +218,18 @@ public class WSSqliteManager {
             String ref = "", alt = "";
 
             System.out.println("Processing");
-            while (rs.next()) {
 
+            while (rs.next()) {
                 if (!rs.getString("chromosome").equals(chr) ||
                         rs.getInt("position") != pos ||
                         !rs.getString("allele_ref").equals(ref) ||
                         !rs.getString("allele_alt").equals(alt)) {
 
+
                     chr = rs.getString("chromosome");
                     pos = rs.getInt("position");
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
-
 
                     if (vi != null) {
                         list.add(vi);
@@ -171,7 +240,6 @@ public class WSSqliteManager {
                             rs.getInt("miss_gt"), rs.getInt("mendel_err"), rs.getInt("is_indel"), rs.getDouble("cases_percent_dominant"), rs.getDouble("controls_percent_dominant"),
                             rs.getDouble("cases_percent_recessive"), rs.getDouble("controls_percent_recessive"));
                     vs.setId(rs.getString("id"));
-
 
                     vi.addStats(vs);
                 }
@@ -186,6 +254,7 @@ public class WSSqliteManager {
                 String gt = rs.getInt("allele_1") + "/" + rs.getInt("allele_2");
 
                 vi.addSammpleGenotype(sample, gt);
+                vi.addGeneAndConsequenceType(rs.getString("gene_name"), rs.getString("consequence_type_obo"));
 
 
             }
@@ -217,8 +286,6 @@ public class WSSqliteManager {
             Class.forName("org.sqlite.JDBC");
             con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
 
-//            List<String> whereClauses = new ArrayList<>(10);
-
             String chr = options.get("chr");
             int pos = Integer.valueOf(options.get("pos"));
             String ref = options.get("ref");
@@ -226,20 +293,6 @@ public class WSSqliteManager {
 
 
             String sql = "SELECT * FROM variant_effect WHERE chromosome='" + chr + "' AND position=" + pos + " AND reference_allele='" + ref + "' AND alternative_allele='" + alt + "';";
-
-
-//            if (whereClauses.size() > 0) {
-//                StringBuilder where = new StringBuilder(" where ");
-//
-//                for (int i = 0; i < whereClauses.size(); i++) {
-//                    where.append(whereClauses.get(i));
-//                    if (i < whereClauses.size() - 1) {
-//                        where.append(" AND ");
-//                    }
-//                }
-//
-//                sql += where.toString() + " ;";
-//            }
 
             System.out.println(sql);
 

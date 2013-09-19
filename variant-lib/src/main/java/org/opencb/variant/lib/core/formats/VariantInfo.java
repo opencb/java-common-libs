@@ -23,6 +23,9 @@ public class VariantInfo {
     private String alt;
 
     @JsonProperty
+    private String gene_name;
+
+    @JsonProperty
     private double stats_maf;
     @JsonProperty
     private double stats_mgf;
@@ -50,6 +53,10 @@ public class VariantInfo {
     private String stats_id_snp;
 
     @JsonProperty
+    private HashMap<String, String> genes;
+
+
+    @JsonProperty
     HashMap<String, VariantControl> controls;
 
     @JsonProperty
@@ -64,10 +71,13 @@ public class VariantInfo {
         this.position = position;
         this.ref = ref;
         this.alt = alt;
+        this.gene_name = gene_name;
 
         this.effect = new HashSet<>();
-        genotypes = new LinkedHashMap<>();
+        this.genes = new LinkedHashMap<>();
+        this.genotypes = new LinkedHashMap<>();
         this.controls = new LinkedHashMap<>();
+
 
     }
 
@@ -276,6 +286,16 @@ public class VariantInfo {
         }
 
 
+    }
+
+    public void addGeneAndConsequenceType(String gene_name, String ct) {
+
+        if (this.genes.containsKey(gene_name)) {
+            if (!this.genes.get(gene_name).contains(ct))
+                this.genes.put(gene_name, this.genes.get(gene_name) + ", " + ct);
+        } else {
+            this.genes.put(gene_name, ct);
+        }
     }
 
 
