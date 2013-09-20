@@ -68,7 +68,7 @@ public class VariantVcfDataWriter implements VariantDataWriter {
     public void writeBatch(List<VcfRecord> batch) {
 
         for(VcfRecord record: batch){
-            printer.append(record.toString() + "\n");
+            printer.append(record.toString()).append("\n");
         }
     }
 }

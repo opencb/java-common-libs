@@ -74,7 +74,7 @@ public class VcfRecord {
     public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info, String format, String... sampleList) {
         this(chromosome, position, id, reference, alternate, quality, filter, info, format);
 
-        samples = new ArrayList<String>();
+        samples = new ArrayList<>();
         for (String sample : sampleList) {
             samples.add(sample);
         }
@@ -84,7 +84,7 @@ public class VcfRecord {
 //		this(chromosome, position, id, reference, alternate, quality, filter, info, format);
         this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
 
-        samples = new ArrayList<String>(fields.length - 9);
+        samples = new ArrayList<>(fields.length - 9);
         for (int i = 9; i < fields.length; i++) {
             samples.add(fields[i]);
         }

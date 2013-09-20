@@ -43,8 +43,8 @@ public class Individual implements Comparable<Individual> {
         StringBuilder sb = new StringBuilder();
 
         sb.append("{");
-        sb.append("id=" + id);
-        sb.append(", family=" + family);
+        sb.append("id=").append(id);
+        sb.append(", family=").append(family);
         sb.append(", father=");
         if (father != null)
             sb.append(father.getId());
@@ -57,14 +57,14 @@ public class Individual implements Comparable<Individual> {
         else
             sb.append("0");
 
-        sb.append(", sex=" + sex);
-        sb.append(" phenotype=" + phenotype);
+        sb.append(", sex=").append(sex);
+        sb.append(" phenotype=").append(phenotype);
         if (fields != null && fields.length > 0)
-            sb.append(", fields=" + Arrays.toString(fields));
+            sb.append(", fields=").append(Arrays.toString(fields));
         if (children.size() > 0) {
             sb.append(", children=[");
             for (Individual ind : children) {
-                sb.append(ind.getId() + " ");
+                sb.append(ind.getId()).append(" ");
             }
             sb.append("]");
         }

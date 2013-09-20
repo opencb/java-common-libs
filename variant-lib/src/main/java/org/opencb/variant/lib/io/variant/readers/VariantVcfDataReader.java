@@ -148,7 +148,7 @@ public class VariantVcfDataReader implements VariantDataReader {
     @Override
     public String getHeader() {
         StringBuilder header = new StringBuilder();
-        header.append("##fileformat=" + vcf4.getFileFormat() + "\n");
+        header.append("##fileformat=").append(vcf4.getFileFormat()).append("\n");
 
         Iterator<String> iter = vcf4.getMetaInformation().keySet().iterator();
         String headerKey;

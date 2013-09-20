@@ -25,7 +25,6 @@ public class VcfSampleGroupStat {
         this();
 
 
-        String val;
         VcfSampleStat sampleStatAux;
         SampleStat sampleStat;
 

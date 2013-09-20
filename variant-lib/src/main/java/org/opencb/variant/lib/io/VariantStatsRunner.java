@@ -103,11 +103,8 @@ public class VariantStatsRunner {
 
         Pedigree ped = null;
 
-        VcfFilter andFilter;
-
         VcfGlobalStat globalStat;
         VcfSampleStat vcfSampleStat;
-        StringBuilder chunkVcfRecords;
 
         List<VcfRecord> batch;
         List<VariantEffect> batchEffect;
@@ -131,7 +128,7 @@ public class VariantStatsRunner {
         vcfWriter.pre();
 
 
-        VcfSampleGroupStat vcfSampleGroupStatPhen = new VcfSampleGroupStat();
+        VcfSampleGroupStat vcfSampleGroupStatPhen;
         VcfSampleGroupStat vcfSampleGroupStatFam;
 
 

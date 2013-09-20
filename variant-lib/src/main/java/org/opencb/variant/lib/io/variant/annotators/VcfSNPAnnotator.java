@@ -36,8 +36,8 @@ public class VcfSNPAnnotator implements VcfAnnotator {
 
         List<SnpJson> snpList;
         StringBuilder positions = new StringBuilder();
-        for (int i = 0; i < batch.size(); i++) {
-            positions.append(batch.get(i).getChromosome()).append(":").append(batch.get(i).getPosition()).append(",");
+        for (VcfRecord record : batch) {
+            positions.append(record.getChromosome()).append(":").append(record.getPosition()).append(",");
 
         }
         System.out.println(positions.toString());

@@ -71,7 +71,7 @@ public class VariantMain {
         String command = args[0];
 
         VariantStatsRunner vr;
-        VariantAnnotRunner var = null;
+        VariantAnnotRunner var;
 
         parse(args, false);
 
@@ -184,8 +184,6 @@ public class VariantMain {
 
             }
             reader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

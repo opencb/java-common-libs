@@ -27,50 +27,50 @@ public class Vcf4 {
 
     public Vcf4(String fileformat) {
         this.fileFormat = fileformat;
-        metaInformation = new LinkedHashMap<String, String>();
+        metaInformation = new LinkedHashMap<>();
 
-        alternate = new LinkedHashMap<String, VcfAlternate>();
-        filter = new LinkedHashMap<String, VcfFilter>();
-        info = new LinkedHashMap<String, VcfInfo>();
-        format = new LinkedHashMap<String, VcfFormat>();
+        alternate = new LinkedHashMap<>();
+        filter = new LinkedHashMap<>();
+        info = new LinkedHashMap<>();
+        format = new LinkedHashMap<>();
 
-        headerLine = new ArrayList<String>(1);
-        records = new ArrayList<VcfRecord>();
+        headerLine = new ArrayList<>(1);
+        records = new ArrayList<>();
         samples = new LinkedHashMap<>(100);
         sampleNames = new ArrayList<>(100);
     }
 
     public void addMetaInfo(String key, String value) {
         if (metaInformation == null) {
-            metaInformation = new HashMap<String, String>();
+            metaInformation = new HashMap<>();
         }
         metaInformation.put(key, value);
     }
 
     public void addAlternate(String id, String description) {
         if (alternate == null) {
-            alternate = new LinkedHashMap<String, VcfAlternate>();
+            alternate = new LinkedHashMap<>();
         }
         alternate.put(id, new VcfAlternate(id, description));
     }
 
     public void addFilter(String id, String description) {
         if (filter == null) {
-            filter = new LinkedHashMap<String, VcfFilter>();
+            filter = new LinkedHashMap<>();
         }
         filter.put(id, new VcfFilter(id, description));
     }
 
     public void addInfo(String id, String number, String type, String description) {
         if (info == null) {
-            info = new LinkedHashMap<String, VcfInfo>();
+            info = new LinkedHashMap<>();
         }
         info.put(id, new VcfInfo(id, number, type, description));
     }
 
     public void addFormat(String id, String number, String type, String description) {
         if (format == null) {
-            format = new LinkedHashMap<String, VcfFormat>();
+            format = new LinkedHashMap<>();
         }
         format.put(id, new VcfFormat(id, number, type, description));
     }

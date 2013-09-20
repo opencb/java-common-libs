@@ -93,7 +93,7 @@ public class VcfVariantStat {
         this.missingAlleles = miss_allele;
         this.missingGenotypes = miss_gt;
         this.mendelinanErrors = mendel_err;
-        this.isIndel = (is_indel == 1)? true:false;
+        this.isIndel = (is_indel == 1);
         this.casesPercentDominant = (float) cases_percent_dominant;
         this.controlsPercentDominant = (float) controls_percent_dominant;
         this.casesPercentRecessive = (float) cases_percent_recessive;

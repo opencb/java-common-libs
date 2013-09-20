@@ -36,7 +36,6 @@ public class WSSqliteManager {
             con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
 
             List<String> whereClauses = new ArrayList<>(10);
-            boolean innerJoinEffect = false;
 
             if (options.containsKey("region_list") && !options.get("region_list").equals("")) {
 
@@ -54,9 +53,9 @@ public class WSSqliteManager {
                         int start = Integer.valueOf(matcher.group(2));
                         int end = Integer.valueOf(matcher.group(3));
 
-                        regionClauses.append("( variant_stats.chromosome='" + chr + "'").append(" AND ");
-                        regionClauses.append("variant_stats.position>=" + start + "").append(" AND ");
-                        regionClauses.append("variant_stats.position<=" + end + " )");
+                        regionClauses.append("( variant_stats.chromosome='").append(chr).append("' AND ");
+                        regionClauses.append("variant_stats.position>=").append(start).append(" AND ");
+                        regionClauses.append("variant_stats.position<=").append(end).append(" )");
 
 
                         if (i < (regions.length - 1)) {
@@ -144,19 +143,17 @@ public class WSSqliteManager {
             }
 
             if (options.containsKey("conseq_type") && !options.get("conseq_type").equals("")) {
-                innerJoinEffect = true;
                 String val = options.get("conseq_type");
                 whereClauses.add("variant_effect.consequence_type_obo LIKE '%" + val + "%' ");
             }
 
             if (options.containsKey("biotype") && !options.get("biotype").equals("")) {
-                innerJoinEffect = true;
                 String[] biotypes = options.get("biotype").split(",");
 
                 StringBuilder biotypesClauses = new StringBuilder(" ( ");
 
                 for (int i = 0; i < biotypes.length; i++) {
-                    biotypesClauses.append("variant_effect.feature_biotype LIKE '%" + biotypes[i] + "%'");
+                    biotypesClauses.append("variant_effect.feature_biotype LIKE '%").append(biotypes[i]).append("%'");
 
                     if (i < (biotypes.length - 1)) {
                         biotypesClauses.append(" OR ");
@@ -175,7 +172,6 @@ public class WSSqliteManager {
 
             String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
             String innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
-
 
 
             String sql = "SELECT distinct variant_effect.gene_name,variant_effect.consequence_type_obo, variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +

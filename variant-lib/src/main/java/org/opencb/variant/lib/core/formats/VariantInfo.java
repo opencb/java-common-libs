@@ -71,8 +71,6 @@ public class VariantInfo {
         this.position = position;
         this.ref = ref;
         this.alt = alt;
-        this.gene_name = gene_name;
-
         this.effect = new HashSet<>();
         this.genes = new LinkedHashMap<>();
         this.genotypes = new LinkedHashMap<>();
@@ -187,7 +185,7 @@ public class VariantInfo {
         return stats_miss_allele;
     }
 
-    public void setStats_miss_allele(int Liststats_miss_allele) {
+    public void setStats_miss_allele(int stats_miss_allele) {
         this.stats_miss_allele = stats_miss_allele;
     }
 
