@@ -86,10 +86,10 @@ public class Individual implements Comparable<Individual> {
 
     public void setPhenotype(String phenotype) {
         this.phenotype = phenotype;
-        if(phenotype == null || phenotype.equals("")){
+        if (phenotype == null || phenotype.equals("")) {
             condition = Condition.MISSING_CONDITION;
-        }else{
-            switch (phenotype){
+        } else {
+            switch (phenotype) {
                 case "1":
                     condition = Condition.UNAFFECTED;
                     break;
@@ -101,7 +101,8 @@ public class Individual implements Comparable<Individual> {
 
             }
 
-        }    }
+        }
+    }
 
     public String getSex() {
         return sex;
@@ -157,12 +158,16 @@ public class Individual implements Comparable<Individual> {
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + phenotype.hashCode();
-        result = 31 * result + sex.hashCode();
-        result = 31 * result + father.hashCode();
-        result = 31 * result + mother.hashCode();
-        result = 31 * result + fields.hashCode();
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (family != null ? family.hashCode() : 0);
+        result = 31 * result + (father != null ? father.hashCode() : 0);
+        result = 31 * result + (fatherId != null ? fatherId.hashCode() : 0);
+        result = 31 * result + (mother != null ? mother.hashCode() : 0);
+        result = 31 * result + (motherId != null ? motherId.hashCode() : 0);
+        result = 31 * result + (sex != null ? sex.hashCode() : 0);
+        result = 31 * result + (sexCode != null ? sexCode.hashCode() : 0);
+        result = 31 * result + (phenotype != null ? phenotype.hashCode() : 0);
+        result = 31 * result + (condition != null ? condition.hashCode() : 0);
         return result;
     }
 
