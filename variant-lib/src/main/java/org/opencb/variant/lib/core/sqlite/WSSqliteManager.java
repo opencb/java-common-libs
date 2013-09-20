@@ -169,17 +169,14 @@ public class WSSqliteManager {
 
             }
 
-            String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
-            String innerJoinEffectSQL = "";
-
-            //if (innerJoinEffect) {
-            innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
-            //}
-
-
             if (options.containsKey("exc_1000g_controls") && options.get("exc_1000g_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
             }
+
+            String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
+            String innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
+
+
 
             String sql = "SELECT distinct variant_effect.gene_name,variant_effect.consequence_type_obo, variant.id_variant, variant_info.key, variant_info.value, sample_info.sample_name, sample_info.allele_1, sample_info.allele_2, variant_stats.chromosome ," +
                     "variant_stats.position , variant_stats.allele_ref , variant_stats.allele_alt , variant_stats.id , variant_stats.maf , variant_stats.mgf, " +

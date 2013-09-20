@@ -93,7 +93,7 @@ VariantWidget.prototype = {
                 formParams['ref'] = ref;
                 formParams['alt'] = alt;
 
-                var url = "http://aaleman:8080/bierapp/rest/effect";
+                var url = "http://aaleman:8080/variant/rest/effect";
                 console.log(url);
 
 
@@ -285,6 +285,7 @@ VariantWidget.prototype = {
         });
 
         var gridEffect = Ext.create('Ext.grid.Panel', {
+            title:"Effect",
             flex: 0.3,
             width: '100%',
             store: this.stEffect,
@@ -415,8 +416,8 @@ VariantWidget.prototype = {
         });
 
         var grid = Ext.create('Ext.grid.Panel', {
-
-            flex: 0.3,
+            title:"Variant Info",
+            flex: 0.25,
             width: '100%',
             store: this.st,
             loadMask: true,
@@ -651,7 +652,7 @@ VariantWidget.prototype = {
         for (var param in values) {
             formParams[param] = values[param];
         }
-        var url = "http://aaleman:8080/bierapp/rest/post";
+        var url = "http://aaleman:8080/variant/rest/post";
         console.log(url);
         _this.grid.setLoading(true);
         $.ajax({
