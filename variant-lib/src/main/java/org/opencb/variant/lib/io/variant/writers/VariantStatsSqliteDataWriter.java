@@ -211,7 +211,6 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, id, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
         boolean res = true;
 
-
         try {
             pstmt = con.prepareStatement(sql);
 

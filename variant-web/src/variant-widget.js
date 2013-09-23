@@ -137,7 +137,7 @@ VariantWidget.prototype = {
     _createPanel: function (targetId) {
 
         var panel = Ext.create('Ext.panel.Panel', {
-            title: 'Variant Widget',
+//            title: 'Variant Widget',
             renderTo: targetId,
             width: '100%',
             height: '100%',
@@ -151,7 +151,6 @@ VariantWidget.prototype = {
                     height: '98%',
                     xtype: 'panel',
                     layout: 'vbox'
-
                 }
             ]
         });
@@ -161,7 +160,6 @@ VariantWidget.prototype = {
         var _this = this;
 
         var accordion = Ext.create('Ext.form.Panel', {
-            //title: 'FORM',
             border: false,
             flex: 1,
             height: "100%",
@@ -171,7 +169,6 @@ VariantWidget.prototype = {
                 type: 'accordion',
                 fill: false
             }
-
         });
 
         var regionItems = [
@@ -185,7 +182,6 @@ VariantWidget.prototype = {
         var region = Ext.create('Ext.panel.Panel', {
             title: "Region",
             items: regionItems
-
         });
 
         var statsItems = [
@@ -199,7 +195,6 @@ VariantWidget.prototype = {
         var stats = Ext.create('Ext.panel.Panel', {
             title: "Stats",
             items: statsItems
-
         });
 
         var controlsItems = [
@@ -209,7 +204,6 @@ VariantWidget.prototype = {
         var controls = Ext.create('Ext.panel.Panel', {
             title: "Controls",
             items: controlsItems
-
         });
 
         var effectItems = [
@@ -219,7 +213,6 @@ VariantWidget.prototype = {
         var effect = Ext.create('Ext.panel.Panel', {
             title: "Effect",
             items: effectItems
-
         });
 
         var searchItems = [
@@ -666,8 +659,6 @@ VariantWidget.prototype = {
 
                 _this.st.loadData(data);
 
-
-                //                console.log(_this.grid.columns.length)
                 if (response.length > 0 && !_this.firstTime) {
 
                     var sample_cols = [];
@@ -695,9 +686,9 @@ VariantWidget.prototype = {
                         columns: sample_cols
                     });
 
-                    _this.grid.headerCt.insert(3, sample_col);
-                    //_this.grid.reconfigure(store, columns[])
 
+
+                    _this.grid.headerCt.insert(3, sample_col);
 
                 }
                 _this.grid.getView().refresh();
@@ -731,8 +722,6 @@ VariantWidget.prototype = {
         var data_opt = this._createCombobox("db_name", "Data Base", dataBases, 0, 100, '5 0 5 5');
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Data',
-            //border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
             width: "100%",
@@ -791,7 +780,6 @@ VariantWidget.prototype = {
         });
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Chromosomic position',
             border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
@@ -882,7 +870,6 @@ VariantWidget.prototype = {
         gt_opt.width = "20%";
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Missing Alleles & Genotypes',
             border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
@@ -929,7 +916,6 @@ VariantWidget.prototype = {
         mgf_opt.width = "20%";
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'MAF & MGF',
             border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
@@ -965,8 +951,6 @@ VariantWidget.prototype = {
         mendel_opt.width = "20%";
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Mendelian Errors',
-            //border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
             width: "100%",
@@ -986,8 +970,6 @@ VariantWidget.prototype = {
     },
     _getIsIndel: function () {
         return Ext.create('Ext.form.Panel', {
-//            title: 'Is indel?',
-            //border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
             width: "99%",
@@ -1052,7 +1034,6 @@ VariantWidget.prototype = {
         controls_r_opt.width = "20%";
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Inheritance',
             border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
