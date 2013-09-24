@@ -285,6 +285,7 @@ VariantWidget.prototype = {
             loadMask: true,
             border: 0,
             titleCollapse: true,
+            collapsible: true,
             columns: [
                 {xtype: 'rownumberer'},
                 {
@@ -416,6 +417,7 @@ VariantWidget.prototype = {
             loadMask: true,
             border: 0,
             titleCollapse: true,
+            collapsible:true, 
 //            features: [groupingFeature],
             columns: [
                 new Ext.grid.RowNumberer({width: 30}),
@@ -449,6 +451,17 @@ VariantWidget.prototype = {
                                 if (record.data.controls["1000G"]) {
 
                                     return record.data.controls["1000G"].maf + " (" + record.data.controls["1000G"].allele + ")";
+                                } else {
+                                    return ".";
+                                }
+                            }
+                        },
+                        {
+                            text: "BIER",
+                            renderer: function (val, meta, record) {
+                                if (record.data.controls["BIER"]) {
+
+                                    return record.data.controls["BIER"].maf + " (" + record.data.controls["BIER"].allele + ")";
                                 } else {
                                     return ".";
                                 }
@@ -1085,9 +1098,12 @@ VariantWidget.prototype = {
                 {
                     xtype: 'checkboxfield',
                     fieldLabel: 'Exclude 1000G Controls',
-                    //anchor: '100%',
                     name: 'exc_1000g_controls'
-//                    checked: true
+                },
+                {
+                    xtype: 'checkboxfield',
+                    fieldLabel: 'Exclude BIER Controls',
+                    name: 'exc_bier_controls'
 
                 }
             ]
