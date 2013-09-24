@@ -63,6 +63,7 @@ VariantWidget.prototype = {
         this.form = this._createForm();
         this.grid = this._createGrid();
         this.gridEffect = this._createEffectGrid();
+        this.panelGV = this._createGenomeViewer();
         var _stEffect = this.stEffect;
 
 
@@ -72,6 +73,8 @@ VariantWidget.prototype = {
         Ext.getCmp(this.id + 'rightpanel').add(this.grid);
 
         Ext.getCmp(this.id + 'rightpanel').add(this.gridEffect);
+
+        Ext.getCmp(this.id + 'rightpanel').add(this.panelGV);
 
         this.grid.getSelectionModel().on('selectionchange', function (sm, selectedRecord) {
 
@@ -114,6 +117,14 @@ VariantWidget.prototype = {
 //                            _this.stEffect.loadData(response);
                             _this.gridEffect.getStore().loadData(response);
 
+                            var region = new Region({
+                                chromosome: chr,
+                                start: pos,
+                                end: pos
+                            });
+
+                            _this.gv.setRegion(region);
+
 
                         } else {
                             _this.gridEffect.getStore().removeAll();
@@ -136,6 +147,7 @@ VariantWidget.prototype = {
     },
     _createPanel: function (targetId) {
 
+
         var panel = Ext.create('Ext.panel.Panel', {
 //            title: 'Variant Widget',
             renderTo: targetId,
@@ -155,6 +167,155 @@ VariantWidget.prototype = {
             ]
         });
         return panel;
+    },
+    _createGenomeViewer: function (targetId) {
+        var _this = this;
+        var genomeViewer;
+
+        var panel = Ext.create('Ext.panel.Panel', {
+            title: 'Genome Viewer',
+            flex: 0.3,
+            width: '100%',
+            border: 0,
+            html: "<div id='genomeViewer' style='width:800px;height:100%;position:relative;'></div>",
+            titleCollapse: true,
+            collapsible: true,
+            listeners: {
+                afterRender: function () {
+
+                    var w = this.getWidth();
+                    $("#genomeViewer").width(w);
+                    console.log($("genomeViewer").width());
+
+                    var region = new Region({
+                        chromosome: "13",
+                        start: 32889611,
+                        end: 32889611
+                    });
+
+                    genomeViewer = new GenomeViewer({
+                        sidePanel: false,
+                        targetId: "genomeViewer",
+                        autoRender: true,
+                        border: true,
+                        resizable: true,
+                        region: region,
+                        trackListTitle: '',
+                        drawNavigationBar: false,
+                        drawKaryotypePanel: false,
+                        drawChromosomePanel: false,
+                        drawRegionOverviewPanel: false
+                    }); //the div must exist
+
+                    genomeViewer.draw();
+
+                    this.sequence = new SequenceTrack({
+                        targetId: null,
+                        id: 1,
+                        title: 'Sequence',
+                        histogramZoom: 20,
+                        transcriptZoom: 50,
+                        height: 30,
+                        visibleRange: {
+                            start: 99,
+                            end: 100
+                        },
+                        featureTypes: FEATURE_TYPES,
+
+                        renderer: new SequenceRenderer(),
+
+                        dataAdapter: new SequenceAdapter({
+                            category: "genomic",
+                            subCategory: "region",
+                            resource: "sequence",
+                            species: genomeViewer.species,
+                            featureCache: {
+                                gzip: true,
+                                chunkSize: 1000
+                            }
+                        })
+                    });
+
+                    genomeViewer.addTrack(this.sequence);
+
+                    this.gene = new GeneTrack({
+                        targetId: null,
+                        id: 2,
+                        title: 'Gene',
+                        histogramZoom: 20,
+                        transcriptZoom: 50,
+                        height: 140,
+                        visibleRange: {
+                            start: 0,
+                            end: 100
+                        },
+                        featureTypes: FEATURE_TYPES,
+
+                        renderer: new GeneRenderer(),
+
+                        dataAdapter: new CellBaseAdapter({
+                            category: "genomic",
+                            subCategory: "region",
+                            resource: "gene",
+                            species: genomeViewer.species,
+                            featureCache: {
+                                gzip: true,
+                                chunkSize: 50000
+                            },
+                            filters: {},
+                            options: {},
+                            featureConfig: FEATURE_CONFIG.gene
+                        })
+                    });
+
+                    genomeViewer.addTrack(this.gene);
+
+                    this.snp = new FeatureTrack({
+                        targetId: null,
+                        id: 4,
+                        title: 'SNP',
+                        histogramZoom: 70,
+                        labelZoom: 80,
+                        height: 100,
+                        visibleRange: {
+                            start: 0,
+                            end: 100
+                        },
+                        featureTypes: FEATURE_TYPES,
+
+                        renderer: new FeatureRenderer('snp'),
+
+                        dataAdapter: new CellBaseAdapter({
+                            category: "genomic",
+                            subCategory: "region",
+                            resource: "snp",
+                            params: {
+                                exclude: 'transcriptVariations,xrefs,samples'
+                            },
+                            species: genomeViewer.species,
+                            featureCache: {
+                                gzip: true,
+                                chunkSize: 10000
+                            },
+                            filters: {},
+                            options: {},
+                            featureConfig: FEATURE_CONFIG.snp
+                        })
+                    });
+
+                    genomeViewer.addTrack(this.snp);
+
+
+                    _this.gv = genomeViewer;
+
+
+                }
+            }
+        });
+
+
+        return panel;
+
     },
     _createForm: function () {
         var _this = this;
@@ -278,7 +439,7 @@ VariantWidget.prototype = {
         });
 
         var gridEffect = Ext.create('Ext.grid.Panel', {
-            title:"Effect",
+            title: "Effect",
             flex: 0.3,
             width: '100%',
             store: this.stEffect,
@@ -410,14 +571,14 @@ VariantWidget.prototype = {
         });
 
         var grid = Ext.create('Ext.grid.Panel', {
-            title:"Variant Info",
+            title: "Variant Info",
             flex: 0.25,
             width: '100%',
             store: this.st,
             loadMask: true,
             border: 0,
             titleCollapse: true,
-            collapsible:true, 
+            collapsible: true,
 //            features: [groupingFeature],
             columns: [
                 new Ext.grid.RowNumberer({width: 30}),
@@ -698,7 +859,6 @@ VariantWidget.prototype = {
                         header: "Samples",
                         columns: sample_cols
                     });
-
 
 
                     _this.grid.headerCt.insert(3, sample_col);
