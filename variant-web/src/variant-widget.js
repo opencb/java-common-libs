@@ -68,7 +68,6 @@ VariantWidget.prototype = {
 
 
         this.panel.insert(0, this.form);
-        //        this.panel.add(this.grid);
 
         Ext.getCmp(this.id + 'rightpanel').add(this.grid);
 
@@ -401,7 +400,6 @@ VariantWidget.prototype = {
 
         return accordion;
     },
-
     _createEffectGrid: function () {
 
         var groupingFeature = Ext.create('Ext.grid.feature.Grouping', {
@@ -529,7 +527,6 @@ VariantWidget.prototype = {
         });
         return gridEffect
     },
-
     _createGrid: function () {
 
         this.st = Ext.create('Ext.data.Store', {
@@ -888,7 +885,8 @@ VariantWidget.prototype = {
             fields: ['value', 'name'],
             data: [
                 {"value": "s4.db", "name": "s4"},
-                {"value": "s5500.db", "name": "s5500"}
+                {"value": "s5500.db", "name": "s5500"},
+                {"value": "fpoletta.db", "name": "fpoletta"}
             ]
         });
 

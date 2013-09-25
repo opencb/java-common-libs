@@ -106,9 +106,10 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
             if (currentTabix != null) {
 
-                TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
-                String line;
+
                 try {
+                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
+                    String line;
                     while (it != null && (line = it.next()) != null) {
 
                         String[] fields = line.split("\t");
@@ -123,6 +124,8 @@ public class VcfControlAnnotator implements VcfAnnotator {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (ArrayIndexOutOfBoundsException e) { // If the Chr does not exist in Controls... TabixReader throws ArrayIndexOut...
+                    continue;
                 }
             }
         }
