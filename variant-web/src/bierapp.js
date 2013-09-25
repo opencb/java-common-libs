@@ -63,7 +63,7 @@ Bierapp.prototype = {
         this.height = ($(this.div).height());
 
         if (this.border) {
-            var border = (Utils.isString(this.border)) ? this.border : '1px solid lightgray';
+            var border = (_.isString(this.border)) ? this.border : '1px solid lightgray';
             $(this.div).css({border: border});
         }
 
