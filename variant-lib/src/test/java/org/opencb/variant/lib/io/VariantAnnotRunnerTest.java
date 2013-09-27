@@ -4,7 +4,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
+import org.opencb.variant.lib.io.variant.annotators.VcfConsequenceTypeAnnotator;
 import org.opencb.variant.lib.io.variant.annotators.VcfControlAnnotator;
+import org.opencb.variant.lib.io.variant.annotators.VcfGeneNameAnnotator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -39,28 +41,28 @@ public class VariantAnnotRunnerTest {
 
     }
 
-//    @Test
-//    public void annot() {
-//
-//        VariantAnnotRunner vr = new VariantAnnotRunner(fileIn, fileOut);
-//
-//        List<VcfAnnotator> list = new ArrayList<>();
-//
-//        try {
-//            list.add(new VcfControlAnnotator("BIER", controlBIER));
-//
-//
-//            HashMap<String, String> controlList = getControlList(control1000GList);
-//
-//            list.add(new VcfControlAnnotator("1000G", controlList));
-//
-//            vr.annotations(list);
-//            vr.run();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
+    @Test
+    public void annot() {
+
+        VariantAnnotRunner vr = new VariantAnnotRunner(fileIn, fileOut);
+
+        List<VcfAnnotator> list = new ArrayList<>();
+
+        try {
+            list.add(new VcfControlAnnotator("BIER", controlBIER));
+
+
+            HashMap<String, String> controlList = getControlList(control1000GList);
+
+            list.add(new VcfControlAnnotator("1000G", controlList));
+
+            vr.annotations(list);
+            vr.run();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     @Test
     public void annots4() {
@@ -113,6 +115,24 @@ public class VariantAnnotRunnerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Test
+    public void annotCT(){
+        fileIn = "/home/javi/tmp/prueba.vcf";
+        fileOut = "/home/javi/tmp/small_out.vcf";
+
+        VariantAnnotRunner vr = new VariantAnnotRunner(fileIn, fileOut);
+        List<VcfAnnotator> list = new ArrayList<>();
+
+        list.add(new VcfConsequenceTypeAnnotator());
+        list.add(new VcfGeneNameAnnotator());
+
+        vr.annotations(list);
+
+        vr.run();
+
 
     }
 

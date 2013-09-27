@@ -58,6 +58,7 @@ public class VariantMain {
         options.addOption(OptionFactory.createOption("control-list", "Control filename list", false, true));
         options.addOption(OptionFactory.createOption("control-prefix", "Control prefix", false, true));
 
+
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
