@@ -47,5 +47,5 @@ local.properties
 # PDT-specific
 .buildpath
 
-variant-web/**/build/
-variant-web/**/node_modules/
+*/**/build/
+*/**/node_modules/
