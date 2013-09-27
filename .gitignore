@@ -49,3 +49,4 @@ local.properties
 
 variant-web/build/
 variant-web/node_modules/
+variant-web/lib
