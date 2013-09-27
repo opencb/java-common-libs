@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Variant</title>
+
+	<!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="http://jsapi.bioinfo.cipf.es/ext-libs/sencha/ext-4.0.7/resources/css/ext-all.css">
+    <link rel="stylesheet" type="text/css" href="http://jsapi.bioinfo.cipf.es/libs/resources/css/style.css">  
+	<!--<link rel="stylesheet" type="text/css" href="../../opencga/resources/css/style.css"> -->
+	<link rel="stylesheet" type="text/css" href="http://jsapi.bioinfo.cipf.es/ext-libs/ChemDoodleWeb/install/ChemDoodleWeb.css">
+  
+	<!-- EXT-LIBS -->
+
+	<!-- Ext-js -->
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/sencha/ext-4.0.7/ext-all.js"></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/sencha/ext-4.0.7/examples/shared/examples.js"></script>
+	
+
+	<!-- jQuery -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/jquery-plugins/jquery.sha1.js"></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/jquery-plugins/jquery.cookie.js"></script>  
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/jquery-plugins/jqXMLUtils.js"></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/jquery-plugins/jquery.smartresize.js"></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/jquery-mousewheel-3.0.6/jquery.mousewheel.min.js"></script>
+	
+	
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/xml2json.js"  ></script>
+	
+	<!-- Canvas to SVG converters -->
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/svg/base64.js"  ></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/svg/canvas2image.js"  ></script>
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/svg/canvg.js"></script> 
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/svg/rgbcolor.js"></script> 
+	
+	
+	<!-- CHEMDOODLE -->
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/ChemDoodleWeb/install/ChemDoodleWeb-libs.js"></script> 
+	<script type="text/javascript" src="http://jsapi.bioinfo.cipf.es/ext-libs/ChemDoodleWeb/install/ChemDoodleWeb.js"></script> 
+	
+	<script type="text/javascript" src="cx-variant-filter-widget.js"></script>
+	<script type="text/javascript" src="data-adapter.min.js"></script>
+	<script type="text/javascript" src="dataset.min.js"></script>
+
+<script>
+Ext.Loader.setConfig({enabled: true});
+Ext.Loader.setPath('Ext.ux', 'http://jsapi.bioinfo.cipf.es/ext-libs/sencha/ext-4.0.7/examples/ux');
+Ext.QuickTips.init();
+Ext.require([
+    'Ext.ux.grid.FiltersFeature',
+    'Ext.form.*',
+    'Ext.layout.container.Column',
+    'Ext.window.MessageBox',
+    'Ext.fx.target.Element'
+]);
+
+Ext.onReady(function(){
+	var species = Ext.create('Ext.data.Store', {
+				    fields: ['code', 'name'],
+				    data : [{"code":"hsa", "name":"Homo sapiens"},
+				        	{"code":"mmu", "name":"Mus musculus"},
+				        	{"code":"dre", "name":"Danio rerio"}
+				    	   ]
+	});
+	
+	var chromosomes = Ext.create('Ext.data.Store', {
+    fields: ['code', 'name'],
+	data: []
+	});
+	
+	var chr = {};
+	chr['hsa'] = [
+				{"code":"1", "name":"1"},
+				{"code":"2", "name":"2"},
+				{"code":"3", "name":"3"},
+				{"code":"4", "name":"4"},
+				{"code":"5", "name":"5"},
+				{"code":"6", "name":"6"},
+				{"code":"7", "name":"7"},
+				{"code":"8", "name":"8"},
+				{"code":"9", "name":"9"},
+				{"code":"10", "name":"10"},
+				{"code":"11", "name":"11"},
+				{"code":"12", "name":"12"},
+				{"code":"13", "name":"13"},
+				{"code":"14", "name":"14"},
+				{"code":"15", "name":"15"},
+				{"code":"16", "name":"16"},
+				{"code":"17", "name":"17"},
+				{"code":"18", "name":"18"},
+				{"code":"19", "name":"19"},
+				{"code":"20", "name":"20"},
+				{"code":"21", "name":"21"},
+				{"code":"22", "name":"22"},
+				{"code":"Y", "name":"Y"},
+				{"code":"X", "name":"X"}];
+				
+	chr['mmu'] = [
+				{"code":"1", "name":"1"},
+				{"code":"2", "name":"2"},
+				{"code":"3", "name":"3"},
+				{"code":"4", "name":"4"},
+				{"code":"5", "name":"5"},
+				{"code":"6", "name":"6"},
+				{"code":"7", "name":"7"},
+				{"code":"8", "name":"8"},
+				{"code":"9", "name":"9"},
+				{"code":"10", "name":"10"},
+				{"code":"11", "name":"11"},
+				{"code":"12", "name":"12"},
+				{"code":"13", "name":"13"},
+				{"code":"14", "name":"14"},
+				{"code":"15", "name":"15"},
+				{"code":"16", "name":"16"},
+				{"code":"17", "name":"17"},
+				{"code":"18", "name":"18"},
+				{"code":"19", "name":"19"},
+				{"code":"Y", "name":"Y"},
+				{"code":"X", "name":"X"}];
+				
+	chr['dre'] = [
+				{"code":"1", "name":"1"},
+				{"code":"2", "name":"2"},
+				{"code":"3", "name":"3"},
+				{"code":"4", "name":"4"},
+				{"code":"5", "name":"5"},
+				{"code":"6", "name":"6"},
+				{"code":"7", "name":"7"},
+				{"code":"8", "name":"8"},
+				{"code":"9", "name":"9"},
+				{"code":"10", "name":"10"},
+				{"code":"11", "name":"11"},
+				{"code":"12", "name":"12"},
+				{"code":"13", "name":"13"},
+				{"code":"14", "name":"14"},
+				{"code":"15", "name":"15"},
+				{"code":"16", "name":"16"},
+				{"code":"17", "name":"17"},
+				{"code":"18", "name":"18"},
+				{"code":"19", "name":"19"},
+				{"code":"20", "name":"20"},
+				{"code":"21", "name":"21"},
+				{"code":"22", "name":"22"},
+				{"code":"23", "name":"23"},
+				{"code":"24", "name":"24"},
+				{"code":"25", "name":"25"},
+				{"code":"MT", "name":"MT"}];
+	
+	var variants = Ext.create('Ext.data.Store', {
+		    fields: ['code', 'name'],
+		    data : [{"code":"A", "name":"A"},
+		        	{"code":"C", "name":"C"},
+		        	{"code":"G", "name":"G"},
+					{"code":"T", "name":"T"}
+		    	   ]
+	});
+	
+    var form = {
+        xtype: 'container',
+        layout: 'anchor',
+        items: [{
+            xtype: 'fieldset',
+            flex: 1,
+            title: 'Search params',
+            defaultType: 'textfield',
+            layout: 'hbox',
+            defaults: {
+                hideEmptyLabel: true
+            },
+            items: [{
+				xtype: 'combobox',
+                fieldLabel: 'Species',
+                id: 'species',
+				labelWidth: '50',
+				allowBlank: false,
+				margin: '0 10 0 10',
+				store: species,
+				queryMode: 'local',
+				displayField: 'name',
+    			valueField: 'code',
+				listeners : { change: {fn: function(){ chromosomes.loadData(chr[this.value]); }}
+				}
+            }, {
+				xtype: 'combobox',
+                fieldLabel: 'Chromosome',
+                id: 'chr',
+				labelWidth: '80',
+				allowBlank: false,
+				margin: '0 10 0 0',
+				size: '2',
+				store: chromosomes,
+				queryMode: 'local',
+				displayField: 'name',
+    			valueField: 'code'
+            }, {
+				xtype: 'numberfield',
+				fieldLabel: 'Position',
+				id: 'position',
+				labelWidth: '50',
+				allowBlank: false,
+				margin: '0 10 0 0',
+				size: '10',
+				minValue: 0
+			}, {
+				fieldLabel: 'Variant',
+				id: 'variant',
+				labelWidth: '45',
+				allowBlank: false,
+				size: '2',
+				listeners : { change: {fn: function(){ var variant = this.value.toUpperCase();
+													   var lastChar = variant.charAt(variant.length-1);
+													   if(lastChar!='A' && lastChar!='C' && lastChar!='G' && lastChar!='T') this.setValue(variant.substring(0,variant.length-1));
+													   else this.setValue(variant);
+													 }}
+				}
+			}]
+        }]
+    };
+
+    // creating form
+    var fp = Ext.create('Ext.FormPanel', {
+        title: 'Variant Chrome Extension',
+        id: 'form1',
+        frame: true,
+        fieldDefaults: {
+            labelWidth: 130
+        },
+        //width: 600,
+        renderTo:'form-ct',
+        bodyPadding: 10,
+        items: [
+            form
+        ],
+        buttons: [{
+            text: 'Search',
+            handler: function(){
+               if(fp.getForm().isValid()){
+                    //http://ws.bioinfo.cipf.es/celldb/rest/v1/hsa/genomic/variant/1:11113574:A/consequence_type
+					$("#filter-ct").html('');
+					var species = Ext.getCmp('species').value;
+					var chr = Ext.getCmp('chr').value;
+					var position = Ext.getCmp('position').value;
+					var variant = Ext.getCmp('variant').value;
+					var url = "http://ws.bioinfo.cipf.es/cellbase/rest/latest/"+species+"/genomic/variant/"+chr+":"+position+":"+variant+"/consequence_type";
+					
+					fp.setLoading();
+					$.get(url,function(data) {
+						var variantFilterWidget = new CxVariantFilterWidget({width:800});
+						variantFilterWidget.getPanel("filter-ct");
+						variantFilterWidget.parseData(data);
+						fp.setLoading(false);
+					});
+                }
+            }
+        }]
+    });
+});
+</script>
+
+<style>
+body {
+  min-width:800px;
+  min-height:auto;
+  overflow-x:auto;
+}
+</style>
+</head>
+
+<body>
+	<div class="container" id="form-ct"></div>
+	<div class="container" id="filter-ct"></div>
+</body>
+</html>
