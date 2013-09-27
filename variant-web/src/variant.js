@@ -1,39 +1,32 @@
 function Variant (args){
-
     _.extend(this, Backbone.Events);
 
     var _this = this;
     this.id = Utils.genId("Variant");
 
+    //set default args
 	this.suiteId = 6;
-	this.tools = ["hpg-variant.effect"];
 	this.title = '<span class="emph">Vari</span>ant <span class="emph">an</span>alysis <span class="emph">t</span>ool';
     this.description = '';
     this.version = '1.1.0';
-
-    this.border= true;
-	
-	this.width =  $(window).width();
-	this.height = $(window).height();
-	this.targetId=document.body;
-
+	this.tools = ["hpg-variant.effect"];
+    this.border = true;
+    this.targetId;
+    this.width;
+    this.height;
 
 
-	//RESIZE EVENT
-	$(window).resize(function(a){
-		_this.setSize($(window).width(),$(window).height());
-	});
-
-
+    //set instantiation args, must be last
     _.extend(this, args);
 
     this.accountData = null;
+
+    this.resizing = false;
 
     this.rendered = false;
     if (this.autoRender) {
         this.render();
     }
-	
 }
 
 
@@ -45,53 +38,78 @@ Variant.prototype = {
             console.log('targetId not found in DOM');
             return;
         }
+
         console.log("Initializing Variant");
         this.targetDiv = $('#' + this.targetId)[0];
-        this.div = $('<div id="genome-maps"></div>')[0];
+        this.div = $('<div id="variant" style="height:100%;position:relative;"></div>')[0];
         $(this.targetDiv).append(this.div);
 
-        $(this.div).append('<div id="va-header-widget"></div>');
-        $(this.div).append('<div id="va-variant"></div>');
+        this.headerWidgetDiv = $('<div id="header-widget"></div>')[0];
+        $(this.div).append(this.headerWidgetDiv);
+        this.menuDiv = $('<div id="menu"></div>')[0];
+        $(this.div).append(this.menuDiv);
+        this.wrapDiv = $('<div id="wrap" style="height:100%;position:relative;"></div>')[0];
+        $(this.div).append(this.wrapDiv);
+
+
+        this.sidePanelDiv = $('<div id="right-side-panel" style="position:absolute; z-index:50;right:0px;"></div>')[0];
+        $(this.wrapDiv).append(this.sidePanelDiv);
+
+        this.contentDiv = $('<div id="content" style="height: 100%;"></div>')[0];
+        $(this.wrapDiv).append(this.contentDiv);
 
         this.width = ($(this.div).width());
+        this.height = ($(this.div).height());
 
         if (this.border) {
-            var border = (Utils.isString(this.border)) ? this.border : '1px solid lightgray';
+            var border = (_.isString(this.border)) ? this.border : '1px solid lightgray';
             $(this.div).css({border: border});
         }
 
-
-        this.eastPanelId = this.id + "_eastPanelID";
-        this.centerPanelId = this.id + "_centerPanelID";
-
-        //SAVE CONFIG IN COOKIE
-        $(window).unload(function () {
-            var value = {
-                species: {
-                    name: _this.genomeViewer.speciesName,
-                    species: _this.genomeViewer.species,
-                    chromosome: _this.genomeViewer.chromosome,
-                    position: _this.genomeViewer.position}
-            };
-            $.cookie("gm_settings", JSON.stringify(value), {expires: 365});
+        $(window).resize(function (event) {
+            if (event.target == window) {
+                if (!_this.resizing) {//avoid multiple resize events
+                    _this.resizing = true;
+                    _this.setSize($(_this.div).width(), $(_this.div).height());
+                    setTimeout(function () {
+                        _this.resizing = false;
+                    }, 400);
+                }
+            }
         });
 
         this.rendered = true;
     },
     draw: function () {
+        var _this = this;
         if (!this.rendered) {
             console.info('Variant is not rendered yet');
             return;
         }
-        var _this = this;
 
-//      /* Header Widget */
-        this.headerWidget = this._createHeaderWidget('va-header-widget');
-        this.mainPanel = this._createMainPanel('va-variant');
-        this.jobListWidget = this._createJobListWidget(this.eastPanelId);
+        /* Header Widget */
+        this.headerWidget = this._createHeaderWidget($(this.headerWidgetDiv).attr('id'));
+
+        /* Header Widget */
+        this.menu = this._createMenu($(this.menuDiv).attr('id'));
+
+        /* check height */
+        var topOffset = $(this.headerWidgetDiv).height() + $(this.menuDiv).height();
+        $(this.wrapDiv).css({height: 'calc(100% - ' + topOffset + 'px)'});
+
+        /* Wrap Panel */
+        this.panel = this._createPanel($(this.contentDiv).attr('id'));
+
+        /* Job List Widget */
+        this.jobListWidget = this._createJobListWidget($(this.sidePanelDiv).attr('id'));
 
 
-        //check login
+        this.variantEffectForm = new VariantEffectForm(this);
+        this.variantEffectForm.draw({title: "Effect", tabpanel: this.panel});
+//        this.pathipredForm = new PathipredForm(this);
+//        this.pathipredForm.draw({title: "PATHiPRED", tabpanel: this.panel});
+
+        /*check login*/
         if ($.cookie('bioinfo_sid') != null) {
             this.sessionInitiated();
         } else {
@@ -105,307 +123,234 @@ Variant.prototype = {
             autoRender: true,
             appname: this.title,
             description: this.description,
-//            version: this.version,
+            version: this.version,
             suiteId: this.suiteId,
-            accountData: this.accountData
-        });
-        /**Atach events i listen**/
-        headerWidget.onLogin.addEventListener(function (sender) {
-            Ext.example.msg('Welcome', 'You logged in');
-            _this.sessionInitiated();
-        });
+            accountData: this.accountData,
+            handlers: {
+                'login': function (event) {
+                    Ext.example.msg('Welcome', 'You logged in');
+                    _this.sessionInitiated();
+                },
+                'logout': function (event) {
+                    Ext.example.msg('Good bye', 'You logged out');
+                    _this.sessionFinished();
 
-        headerWidget.onLogout.addEventListener(function (sender) {
-            Ext.example.msg('Good bye', 'You logged out');
-            _this.sessionFinished();
-        });
+                },
+                'account:change': function (event) {
+                    _this.setAccountData(event.response);
 
-        headerWidget.onGetAccountInfo.addEventListener(function (evt, response) {
-            _this.setAccountData(response);
+                }
+            }
         });
         headerWidget.draw();
 
         return headerWidget;
     },
+    _createMenu: function (targetId) {
+        var _this = this;
+        var toolbar = Ext.create('Ext.toolbar.Toolbar', {
+            id: this.id + "navToolbar",
+            renderTo: targetId,
+            cls: 'gm-navigation-bar',
+            region: "north",
+            width: '100%',
+            border: false,
+            items: [
+//                {
+//                    id: this.id + "btnVCFTools",
+////                    disabled: true,
+//                    text: 'Variant Effect',
+//                    handler: function () {
+////                        _this.showPathiwaysForm();
+//                    }
+//                },
+//                {
+//                    id: this.id + "btnGWAS",
+////                    disabled: true,
+//                    text: 'Variant Effect',
+//                    handler: function () {
+////                        _this.showPathiwaysForm();
+//                    }
+//                },
+                {
+                    id: this.id + "btnEffect",
+//                    disabled: true,
+                    text: 'Variant Effect',
+                    handler: function () {
+                        _this.showEffectForm();
+                    }
+                },
+                '->'
+                ,
+                {
+                    id: this.id + 'jobsButton',
+                    tooltip: 'Show Jobs',
+                    text: '<span class="emph"> Hide jobs </span>',
+                    enableToggle: true,
+                    pressed: true,
+                    toggleHandler: function () {
+                        if (this.pressed) {
+                            this.setText('<span class="emph"> Hide jobs </span>');
+                            _this.jobListWidget.show();
+                        } else {
+                            this.setText('<span class="emph"> Show jobs </span>');
+                            _this.jobListWidget.hide();
+                        }
+                    }
+                }
+            ]
+        });
+        return toolbar;
+    },
+    _createPanel: function (targetId) {
+        var _this = this;
+
+        homePanel = Ext.create('Ext.panel.Panel', {
+//            padding: 30,
+//            margin: "10 0 0 0",
+            title: 'Home',
+//            html: suiteInfo,
+            border: 0,
+//			layout: {
+//		        type: 'vbox',
+//		        align: 'stretch'
+//		    },
+            items: [
+                {
+                    xtype: 'panel',
+//                    title:'Home',
+                    padding: 30,
+                    border: false,
+                    autoScroll: true,
+                    html: SUITE_INFO,
+                    bodyPadding: 30,
+                    flex: 1
+                },
+            ]
+        });
+        var panel = Ext.create('Ext.tab.Panel', {
+            renderTo: targetId,
+            width: '100%',
+            height: '100%',
+            border: 0,
+            cls: 'ocb-border-top-lightgrey',
+            activeTab: 0,
+            items: [homePanel]
+        });
+        return panel;
+    },
+
+
     _createJobListWidget: function (targetId) {
         var _this = this;
+
         var jobListWidget = new JobListWidget({
-            "timeout":4000,
-            "suiteId":this.suiteId,
-            "tools":this.tools,
-            "pagedViewList":{
-                "title": 'Jobs',
-                "pageSize": 7,
-                "targetId": targetId,
-                "order" : 0,
-                "width": 280,
-                "height": 650,
-                "mode":"view"
+            'timeout': 4000,
+            'suiteId': this.suiteId,
+            'tools': this.tools,
+            'pagedViewList': {
+                'title': 'Jobs',
+                'pageSize': 7,
+                'targetId': targetId,
+                'order': 0,
+                'width': 280,
+                'height': 625,
+                border: true,
+                'mode': 'view'
             }
         });
-        //this.dataListWidget = new DataListWidget({
-        //"timeout":4000,
-        //"suiteId":this.suiteId,
-        //"pagedViewList":{
-        //"title": 'Data',
-        //"pageSize": 7,
-        //"targetId": this.eastPanelId,
-        //"order" : 1,
-        //"width": 280,
-        //"height": 650,
-        //"mode":"view"  //allowed grid | view
-        //}
-        //});
-
 
         /**Atach events i listen**/
-        jobListWidget.pagedListViewWidget.onItemClick.addEventListener(function (sender, record){
-            _this.jobItemClick(record);
+        jobListWidget.pagedListViewWidget.on('item:click',function (data) {
+            _this.jobItemClick(data.item);
         });
+        jobListWidget.draw();
 
-        //this.dataListWidget.pagedListViewWidget.onItemClick.addEventListener(function (sender, record){
-        //_this.dataItemClick(record);
-        //});
-        /***************************************/
-        /***************************************/
-        /***************************************/
         return jobListWidget;
-    },
-    _createMainPanel: function (targetId) {
-            var suiteInfo =  '<div style=" width: 800px;">'
-                +'<h2>Overview</h2><span align="justify">VARIANT (VARIant ANalysis Tool) can report the functional properties of any variant in all the human, mouse or rat genes (and soon new model organisms will be added) and the corresponding neighborhoods. Also other non-coding extra-genic regions, such as miRNAs are included in the analysis.<br><br>	VARIANT not only reports the obvious functional effects in the coding regions but also analyzes noncoding SNVs situated both within the gene and in the neighborhood that could affect different regulatory motifs, splicing signals, and other structural elements. These include: Jaspar regulatory motifs, miRNA targets, splice sites, exonic splicing silencers, calculations of selective pressures on the particular polymorphic positions, etc.</span>'
-                +'<br><br><br>'
-                +'<p align="justify"><h2>Note</h2>This web application makes an intensive use of new web technologies and standards like HTML5, so browsers that are fully supported for this site are: Chrome 14+, Firefox 7+, Safari 5+ and Opera 11+. Older browser like Chrome13-, Firefox 5- or Internet Explorer 9 may rise some errors. Internet Explorer 6 and 7 are no supported at all.</p>'
-                +'</div>';
-
-            var loginInfo='<br><br><h2>Sign in</h2><p style=" width: 800px;">You must be logged in to use this Web application, you can <b><i>register</i></b> or use a <b><i>anonymous user</i></b> as shown in the following image by clicking on the <b><i>"Sign in"</i></b> button on the top bar</p><br><div style="float:left;"><img src="http://jsapi.bioinfo.cipf.es/libs/resources/img/loginhelpbutton.png"></div><img src="http://jsapi.bioinfo.cipf.es/libs/resources/img/loginhelp.png">';
-            var homeLeft = Ext.create('Ext.panel.Panel', {
-                //		title:'Home',
-                padding : 30,
-                border:false,
-                autoScroll:true,
-                html: suiteInfo+loginInfo,
-                bodyPadding:30,
-                flex:1
-            });
-            var homepanel = Ext.create('Ext.panel.Panel', {
-                //		padding : 30,
-//			margin:"10 0 0 0",
-                title:'Home',
-                //		html: suiteInfo,
-                border:0,
-                layout: {
-                    type: 'vbox',
-                    align: 'stretch'
-                },
-                items: [homeLeft]
-            });
-            var centerPanel = Ext.create('Ext.tab.Panel', {
-                id: this.centerPanelId,
-                region: 'center',
-                border:false,
-                plain: true,
-                activeTab: 0,
-                items : homepanel
-            });
-
-            var mainPanel = Ext.create('Ext.panel.Panel', {
-                layout: 'border',
-                border:false,
-                bodyStyle: 'background:ghostwhite;',
-//                flex:1,
-                height:this.height-this.headerWidget.height-15,
-                renderTo:targetId,
-                items:[centerPanel,this.getMenu(),
-                    {
-                        xtype:'panel',
-                        id: this.eastPanelId,
-                        region: 'east',
-                        style : 'border: 0',
-                        //title: 'Jobs & Data list',
-                        title: 'Jobs',
-                        collapsible : true,
-                        titleCollapse: true,
-                        animCollapse : false,
-                        width:280,
-                        collapseDirection:'top',
-                        activeTab:0
-                    }]
-            });
-        return mainPanel;
     }
+
 }
-
-Variant.prototype.sessionInitiated = function(){
-	/*action buttons*/
-	Ext.getCmp(this.id+"btnVariantEffect").enable();
-	Ext.getCmp(this.id+"btnVcfViewer").enable();
-	Ext.getCmp(this.id+"btnVCFTools").enable();
-	
-	Ext.getCmp(this.eastPanelId).expand();//se expande primero ya que si se hide() estando collapsed peta.
-	Ext.getCmp(this.eastPanelId).show();
-
-//	this.jobListWidget.draw();
-	//this.dataListWidget.draw();
-	
+Variant.prototype.sessionInitiated = function () {
+    Ext.getCmp(this.id + 'jobsButton').enable();
+    Ext.getCmp(this.id + 'jobsButton').toggle(true);
+    //this.jobListWidget.draw();
+    //this.dataListWidget.draw();
 };
 
-Variant.prototype.sessionFinished = function(){
-	/*action buttons*/
-	Ext.getCmp(this.id+"btnVariantEffect").disable();
-	Ext.getCmp(this.id+"btnVcfViewer").disable();
-    Ext.getCmp(this.id+"btnVCFTools").disable();
-	
-	Ext.getCmp(this.eastPanelId).expand(); //se expande primero ya que si se hide() estando collapsed peta.
-	Ext.getCmp(this.eastPanelId).hide();
-	this.jobListWidget.clean();
-	//this.dataListWidget.clean();
-	
-	while(Ext.getCmp(this.centerPanelId).items.items.length>1){
-		Ext.getCmp(this.centerPanelId).remove(Ext.getCmp(this.centerPanelId).items.items[Ext.getCmp(this.centerPanelId).items.items.length-1]);
-	}
+Variant.prototype.sessionFinished = function () {
+    Ext.getCmp(this.id + 'jobsButton').disable();
+    Ext.getCmp(this.id + 'jobsButton').toggle(false);
 
-//	console.log(this.centerPanel.items.items)
-//	this.centerPanel.removeChildEls(function(o) { return o.title != 'Home'; });
+    this.jobListWidget.clean();
+    this.accountData = null;
+
+    this.panel.items.each(function (child) {
+        if (child.title != 'Home') {
+            child.destroy();
+        }
+    })
 };
+
+
 
 Variant.prototype.setAccountData = function(response) {
     this.accountData = response;
     this.jobListWidget.setAccountData(this.accountData);
 };
 
-Variant.prototype.setSize = function(width,height){
-	if(width<500){width=500;}
-	if(width>2400){width=2400;}//if bigger does not work TODO why?
-	
-	this.width=width;
-	this.height=height;
-	
-	this._wrapPanel.setSize(width,height);
-	
-	this.getPanel().setSize(width,height-this.headerWidget.height);
-	if(this.genomeViewer!=null){
-		this.genomeViewer.setSize(Ext.getCmp(this.id+"_vcfViewer").getWidth(),Ext.getCmp(this.id+"_vcfViewer").getHeight());
-	}
-	
-	this.headerWidget.setWidth(width);
-	
-	if(Ext.getCmp(this.jobListWidget.pagedListViewWidget.id+"view")!=null){
-		Ext.getCmp(this.jobListWidget.pagedListViewWidget.id+"view").setSize(null,height-200);
-		Ext.getCmp(this.dataListWidget.pagedListViewWidget.id+"view").setSize(null,height-200);
-	}
+Variant.prototype.setSize = function (width, height) {
+    this.width = width;
+    this.height = height;
+
+    this.headerWidget.setWidth(width);
+    this.menu.setWidth($(this.menuDiv).width());
+    this.panel.setWidth($(this.contentDiv).width());
 };
 
-///** appInterface **/
-//Variant.prototype.draw = function(){
-//
-//	if(this._wrapPanel==null){
-//		this._wrapPanel = Ext.create('Ext.panel.Panel', {
-//			renderTo:this.targetId,
-////			renderTo:Ext.getBody(),
-////			layout: {type:'vbox', align:'strech'},
-//			border:0,
-//			width:this.width,
-//			height:this.height,
-//			items: [this.headerWidget.getPanel(),this.getPanel()]
-//		});
-//	}
-//	if($.cookie('bioinfo_sid') != null){
-//		this.sessionInitiated();
-//	}else{
-//		this.sessionFinished();
-//	}
-//};
+Variant.prototype.jobItemClick = function (record) {
+    var _this = this;
+    this.jobId = record.data.id;
+    if (record.data.visites >= 0) {
+
+        Ext.getCmp(this.id + 'jobsButton').toggle(false);
+
+        var button = Ext.create('Ext.button.Button');
+
+        var resultWidget = new ResultWidget({
+            targetId: this.panel.getId(),
+            application: 'pathiway',
+            app: this,
+            extItems: [button]
+        });
+        resultWidget.draw($.cookie('bioinfo_sid'), record);
 
 
+        console.log(this.jobId)
+        console.log(record.raw);
 
-/*****/
-Variant.prototype.getMenu = function(){
-	var _this=this;
-   var menuBarItems = [
-		{
-			id:this.id+"btnVCFTools",
-			text: 'VCF Tools',
-			disabled:true,
-			handler: function(){
-				_this.showVCFtools();
-			}
-		},
-		{
-			id:this.id+"btnGWAS",
-			text: 'GWAS',
-			disabled:true,
-			hidden:true,
-			handler: function(){
-				
-			}
-		},
-		{
-			id:this.id+"btnVariantEffect",
-			text: 'Variant effect',
-			disabled:true,
-			handler: function(){
-				_this.showVariantEffect();
-			}
-		},
-		{
-			id:this.id+"btnVcfViewer",
-		    text: 'VCF Viewer',
-			disabled:true,
-			handler: function(){
-				_this.showVCFviewer();
-		    }
-		}
-    ];
-	var menubar = new Ext.create('Ext.toolbar.Toolbar', {
-		dock: 'top',
-        cls: 'gm-navigation-bar',
-        border:false,
-		height:27,
-		region:'north',
-		minHeight:27,
-		maxHeight:27,
-		items:menuBarItems
-	});
-	return menubar;
+        /* result widget parses the commandLine on record and adds the command key */
+        var command = resultWidget.job.command.data;
+    }
 };
 
 
-Variant.prototype.jobItemClick = function (record){
-	this.jobId = record.data.id;
-	var _this=this;
-	if(record.data.visites >= 0 ){
-		
-		if(!Ext.getCmp(this.eastPanelId).isHidden() || Ext.getCmp(this.eastPanelId).collapsed){
-			Ext.getCmp(this.eastPanelId).collapse();
-		}
-		
-		resultWidget = new ResultWidget({targetId:this.centerPanelId,application:'variant',app:this});
-//		resultWidget.onRendered.addEventListener(function (sender, targetId){
-//			_this.createGenomeMaps(targetId);
-//		});
-		resultWidget.draw($.cookie('bioinfo_sid'),record);
-		//TODO: borrar
-		this.resultWiget = resultWidget;
-		
-//		this.resultWidget.draw($.cookie('bioinfo_sid'),record);
-	}
+Variant.prototype.showEffectForm= function (){
+    var _this = this;
+    var showForm = function () {
+        if (!_this.panel.contains(_this.variantEffectForm.panel)) {
+            _this.panel.add(_this.variantEffectForm.panel);
+        }
+        _this.panel.setActiveTab(_this.variantEffectForm.panel);
+    };
+    this._checkLogin(showForm);
 };
+
 Variant.prototype.dataItemClick = function (record){
 //	console.log(record.data.name);
-//	_this.adapter.-------(record.data.DATAID, "js", $.cookie('bioinfo_sid'));	
+//	_this.adapter.-------(record.data.DATAID, "js", $.cookie('bioinfo_sid'));
 };
 
 
-Variant.prototype.showVariantEffect= function (){
-	var _this=this;
-	var variantEffectForm = new VariantEffectForm(_this);
-	if(Ext.getCmp(variantEffectForm.panelId)==null){
-		var pan = variantEffectForm.draw({title:"Variant effect"});
-		Ext.getCmp(this.centerPanelId).add(pan);
-	}
-	Ext.getCmp(this.centerPanelId).setActiveTab(Ext.getCmp(variantEffectForm.panelId));
-};
 
 Variant.prototype.showVCFtools= function (){
 	var _this=this;
