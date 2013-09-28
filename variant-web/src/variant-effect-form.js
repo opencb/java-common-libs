@@ -106,11 +106,11 @@ VariantEffectForm.prototype.getPanels = function (){
 	             ];
 
 	var form = Ext.create('Ext.panel.Panel', {
-		margin:"15 0 0 0",
+		margin:"15 0 5 0",
 		border:false,
 //		layout:{type:'vbox', align: 'stretch'},
 		buttonAlign:'center',
-		width:"100%",
+		width:"99%",
 		//height:900,
 		//width: "600",
 		items:items
@@ -124,25 +124,25 @@ VariantEffectForm.prototype._getSpeciesForm = function (){
 	var checkFlags = function(value){
 		var outputOptions = Ext.getCmp('outputOptions'+_this.id);
 		if(value!="hsa"){
-			outputOptions.getChildByElement("TF_binding_site_variant").setValue(false).disable();
-			outputOptions.getChildByElement("miRNA_target_site").setValue(false).disable();
-			outputOptions.getChildByElement("other_regulatory").setValue(false).disable();
-			
-			outputOptions.getChildByElement("SNP").setValue(false).disable();
-			outputOptions.getChildByElement("uniprot_natural_variants").setValue(false).disable();
-			
-			outputOptions.getChildByElement("phenotypic_annotated_SNPs").setValue(false).disable();
-			outputOptions.getChildByElement("disease_mutations").setValue(false).disable();
+            outputOptions.child('checkboxfield[inputValue=TF_binding_site_variant').setValue(false).disable();
+            outputOptions.child('checkboxfield[inputValue=miRNA_target_site').setValue(false).disable();
+            outputOptions.child('checkboxfield[id=other_regulatory').setValue(false).disable();
+
+            outputOptions.child('checkboxfield[inputValue=SNP').setValue(false).disable();
+            outputOptions.child('checkboxfield[id=uniprot_natural_variants').setValue(false).disable();
+
+            outputOptions.child('checkboxfield[id=phenotypic_annotated_SNPs').setValue(false).disable();
+            outputOptions.child('checkboxfield[id=disease_mutations').setValue(false).disable();
 		}else{
-			outputOptions.getChildByElement("TF_binding_site_variant").setValue(false).enable();
-			outputOptions.getChildByElement("miRNA_target_site").setValue(false).enable();
-			outputOptions.getChildByElement("other_regulatory").setValue(false).enable();
-			
-			outputOptions.getChildByElement("SNP").setValue(false).enable();
-			outputOptions.getChildByElement("uniprot_natural_variants").setValue(false).enable();
-			
-			outputOptions.getChildByElement("phenotypic_annotated_SNPs").setValue(false).enable();
-			outputOptions.getChildByElement("disease_mutations").setValue(false).enable();
+            outputOptions.child('checkboxfield[inputValue=TF_binding_site_variant]').setValue(false).enable();
+            outputOptions.child('checkboxfield[inputValue=miRNA_target_site]').setValue(false).enable();
+            outputOptions.child('checkboxfield[id=other_regulatory]').setValue(false).enable();
+
+            outputOptions.child('checkboxfield[inputValue=SNP]').setValue(false).enable();
+            outputOptions.child('checkboxfield[id=uniprot_natural_variants]').setValue(false).enable();
+
+            outputOptions.child('checkboxfield[id=phenotypic_annotated_SNPs]').setValue(false).enable();
+            outputOptions.child('checkboxfield[id=disease_mutations]').setValue(false).enable();
 		}
 	};
 
@@ -207,6 +207,7 @@ VariantEffectForm.prototype._getBrowseForm = function (){
         items: [note1,this.createOpencgaBrowserCmp({
             fieldLabel: 'Input VCF file:',
             dataParamName: 'vcf-file',
+            id: this.id + 'vcf-file',
             mode: 'fileSelection',
             allowedTypes: ['vcf'],
             allowBlank:false
@@ -428,12 +429,13 @@ VariantEffectForm.prototype._getOutputForm = function (){
 
 
 VariantEffectForm.prototype.loadExample1 = function (){
-    Ext.getCmp('jobname').setValue("Example vcf 3500");
 
-    Ext.getCmp('vcf-file').setText('<span class="emph">Example 1</span>', false);
-    Ext.getCmp('vcf-file'+'hidden').setValue('example1');
+    Ext.getCmp(this.id + 'vcf-file').setText('<span class="emph">Example 1</span>', false);
+    Ext.getCmp(this.id + 'vcf-file' + 'hidden').setValue('example1');
 
 
+    Ext.getCmp(this.id + 'jobname').setValue("Example vcf 3500");
+    Ext.getCmp(this.id + 'jobdescription').setValue("VCF file with ~3500 variants");
 
 
 //
@@ -468,10 +470,15 @@ VariantEffectForm.prototype.loadExample1 = function (){
 
 };
 VariantEffectForm.prototype.loadExample2 = function (){
-    Ext.getCmp('jobname').setValue("Example vcf 5000");
 
-    Ext.getCmp('vcf-file').setText('<span class="emph">Example 2</span>', false);
-    Ext.getCmp('vcf-file'+'hidden').setValue('example_1000genomes_5000_variants.vcf');
+
+    Ext.getCmp(this.id + 'vcf-file').setText('<span class="emph">Example 2</span>', false);
+    Ext.getCmp(this.id + 'vcf-file' + 'hidden').setValue('example_1000genomes_5000_variants.vcf');
+
+
+    Ext.getCmp(this.id + 'jobname').setValue("Example vcf 5000");
+    Ext.getCmp(this.id + 'jobdescription').setValue("VCF file with ~5000 variants");
+
 
 //	this.paramsWS["vcf-file-fileid"] = "example2";
 //

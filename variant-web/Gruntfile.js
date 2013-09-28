@@ -45,29 +45,16 @@ module.exports = function (grunt) {
                 dest: 'build/<%= meta.version %>/variant-<%= meta.version %>.min.js'
             }
         },
-        watch: {
-            gruntfile: {
-                files: '<%= jshint.gruntfile.src %>',
-                tasks: ['jshint:gruntfile']
-            },
-            lib_test: {
-                files: '<%= jshint.lib_test.src %>',
-                tasks: ['jshint:lib_test', 'qunit']
-            }
-        },
-
         copy: {
-            copy: {
-                build: {
-                    files: [
-                        {   expand: true, cwd: './src', src: ['va-config.js'], dest: 'build/<%= meta.version %>/' },
-                        {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['vendor/**'], dest: 'build/<%= meta.version %>/' },
-                        {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['styles/**'], dest: 'build/<%= meta.version %>/' }, // includes files in path and its subdirs
-                        {   expand: true, cwd: './<%= meta.jsorolla.genomeviewer.dir %>', src: ['genome-viewer*.js', 'gv-config.js'], dest: 'build/<%= meta.version %>/' },
-                        {   expand: true, cwd: './<%= meta.jsorolla.opencga.dir %>', src: ['opencga*.js', 'worker*'], dest: 'build/<%= meta.version %>/' }
-                    ]
-                }
-            },
+            build: {
+                files: [
+                    {   expand: true, cwd: './src', src: ['va-config.js'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['vendor/**'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['styles/**'], dest: 'build/<%= meta.version %>/' }, // includes files in path and its subdirs
+                    {   expand: true, cwd: './<%= meta.jsorolla.genomeviewer.dir %>', src: ['genome-viewer*.js', 'gv-config.js'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.opencga.dir %>', src: ['opencga*.js', 'worker*'], dest: 'build/<%= meta.version %>/' }
+                ]
+            }
         },
         clean: {
             build: ["build/<%= meta.version %>/"]
@@ -77,12 +64,12 @@ module.exports = function (grunt) {
         stylesPath: 'build/<%= meta.version %>/styles',
         htmlbuild: {
             build: {
-                src: 'src/pathiways.html',
+                src: 'src/variant.html',
                 dest: 'build/<%= meta.version %>/',
                 options: {
                     beautify: true,
                     scripts: {
-                        'js': 'build/<%= meta.version %>/genome-maps-<%= meta.version %>.min.js',
+                        'js': 'build/<%= meta.version %>/variant-<%= meta.version %>.min.js',
                         'vendor': [
                             'build/<%= meta.version %>/vendor/jquery.min.js',
                             'build/<%= meta.version %>/vendor/underscore*.js',
@@ -133,6 +120,7 @@ module.exports = function (grunt) {
 
     });
 
+    // These plugins provide necessary tasks.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
@@ -143,7 +131,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-curl');
     grunt.loadNpmTasks('grunt-hub');
 
+    grunt.registerTask('log-deploy', 'Deploy path info', function (version) {
+        grunt.log.writeln("DEPLOY COMMAND: scp -r build/{version} cafetero@mem16:/httpd/bioinfo/www-apps/variant/");
+    });
+
     // Default task.
-    grunt.registerTask('default', ['clean', 'concat', 'uglify', 'hub:all', 'copy', 'htmlbuild', 'rename:html']);
+    grunt.registerTask('default', ['clean', 'concat', 'uglify', 'hub:all', 'copy', 'htmlbuild', 'rename:html', 'log-deploy']);
 
 };

@@ -225,7 +225,7 @@ Variant.prototype = {
                     html: SUITE_INFO,
                     bodyPadding: 30,
                     flex: 1
-                },
+                }
             ]
         });
         var panel = Ext.create('Ext.tab.Panel', {
@@ -301,7 +301,6 @@ Variant.prototype.setAccountData = function(response) {
 Variant.prototype.setSize = function (width, height) {
     this.width = width;
     this.height = height;
-
     this.headerWidget.setWidth(width);
     this.menu.setWidth($(this.menuDiv).width());
     this.panel.setWidth($(this.contentDiv).width());
@@ -333,8 +332,18 @@ Variant.prototype.jobItemClick = function (record) {
     }
 };
 
+Variant.prototype._checkLogin = function (showForm) {
+    if (!$.cookie('bioinfo_sid')) {
+        this.headerWidget.on('login', function (event) {
+            showForm();
+        });
+        this.headerWidget.loginWidget.anonymousSign();
+    } else {
+        showForm();
+    }
+};
 
-Variant.prototype.showEffectForm= function (){
+Variant.prototype.showEffectForm = function (){
     var _this = this;
     var showForm = function () {
         if (!_this.panel.contains(_this.variantEffectForm.panel)) {
