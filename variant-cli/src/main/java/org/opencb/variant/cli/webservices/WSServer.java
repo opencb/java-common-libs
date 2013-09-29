@@ -4,6 +4,8 @@ package org.opencb.variant.cli.webservices;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.commons.lang.StringUtils;
+import org.opencb.variant.lib.core.formats.VariantAnalysisInfo;
 import org.opencb.variant.lib.core.formats.VariantEffect;
 import org.opencb.variant.lib.core.formats.VariantInfo;
 import org.opencb.variant.lib.core.sqlite.WSSqliteManager;
@@ -44,7 +46,7 @@ public class WSServer {
     }
 
     @POST
-    @Path("/post")
+    @Path("/variants")
     // @Consumes(MediaType.MULTIPART_FORM_DATA)
     // @Produces(MediaType.APPLICATION_JSON)
     public Response getVariantInfo(MultivaluedMap<String, String> postParams) {
@@ -54,9 +56,10 @@ public class WSServer {
 
 
         for (Map.Entry<String, List<String>> entry : postParams.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().get(0));
+            map.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }
 
+        System.out.println(map);
         List<VariantInfo> list = WSSqliteManager.getRecords(map);
 
         jsonObjectMapper = new ObjectMapper();
@@ -100,6 +103,34 @@ public class WSServer {
 
         return createOkResponse(res);
 
+    }
+
+    @POST
+    @Path("/info")
+    public Response getAnalysisInfo(MultivaluedMap<String, String> postParams) {
+
+        HashMap<String, String> map = new LinkedHashMap<>();
+
+
+        for (Map.Entry<String, List<String>> entry : postParams.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().get(0));
+        }
+
+        VariantAnalysisInfo vi= WSSqliteManager.getAnalysisInfo(map);
+
+        jsonObjectMapper = new ObjectMapper();
+        jsonObjectWriter = jsonObjectMapper.writer();
+
+
+        String res = null;
+        try {
+            res = jsonObjectMapper.writeValueAsString(vi);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return createOkResponse(res);
     }
 
     protected Response createErrorResponse(Object o) {
