@@ -180,7 +180,7 @@ public class WSSqliteManager {
 
             System.out.println("sampleGenotypes = " + sampleGenotypes);
 
-            String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
+            String innerJoinVariantSQL = " left join variant_info on variant.id_variant=variant_info.id_variant ";
             String innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
 
 
@@ -453,6 +453,22 @@ public class WSSqliteManager {
             }
 
             vi.setSamples(samples);
+            stmt.close();
+
+            sql = "select distinct consequence_type_obo from variant_effect";
+            stmt = con.createStatement();
+             rs = stmt.executeQuery(sql);
+
+            List<String> cts = new ArrayList<>(10);
+
+
+            while (rs.next()) {
+
+                cts.add(rs.getString("consequence_type_obo"));
+
+            }
+
+            vi.setConsequenceTypes(cts);
             stmt.close();
             con.close();
 

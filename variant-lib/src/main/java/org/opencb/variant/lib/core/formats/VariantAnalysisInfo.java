@@ -15,6 +15,8 @@ public class VariantAnalysisInfo {
 
     @JsonProperty
     List<String> samples;
+    @JsonProperty
+    List<String> consequenceTypes;
 
     public VariantAnalysisInfo() {
 
@@ -26,5 +28,13 @@ public class VariantAnalysisInfo {
 
     public void setSamples(List<String> samples) {
         this.samples = samples;
+    }
+
+    public List<String> getConsequenceTypes() {
+        return consequenceTypes;
+    }
+
+    public void setConsequenceTypes(List<String> consequenceTypes) {
+        this.consequenceTypes = consequenceTypes;
     }
 }
