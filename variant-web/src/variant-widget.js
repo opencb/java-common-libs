@@ -95,7 +95,7 @@ VariantWidget.prototype = {
                 formParams['ref'] = ref;
                 formParams['alt'] = alt;
 
-                var url = "http://aaleman:8080/variant/rest/effect";
+                var url = "http://localhost:8080/variant/rest/effect";
                 console.log(url);
 
 
@@ -140,6 +140,86 @@ VariantWidget.prototype = {
                 });
 
 
+            }
+        });
+
+
+        // Analysis info
+
+        this.sampleNames=[];
+
+        var formParams = {}
+        formParams["db_name"] = "s4.db";
+
+        var url = "http://localhost:8080/variant/rest/info";
+
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: formParams,
+            dataType: 'json',
+            success: function (response, textStatus, jqXHR) {
+
+                var fcItems = [];
+
+                for (var i in response.samples) {
+                    var sName = response.samples[i];
+                    _this.sampleNames.push(sName);
+                    var fc = {
+                        xtype: 'fieldcontainer',
+                        fieldLabel: sName,
+                        // defaultType: 'checkboxfield',
+                        // layout: 'hbox',
+                        //columns:3,
+
+                        // width: "100%",
+                        items: [
+                            {
+                                xtype: 'checkboxgroup',
+                                columns: 3,
+                                items:[
+                                    {
+                                        boxLabel: '0/0',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '0/0'
+                                    },
+                                    {
+                                        boxLabel: '0/1',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '0/1'
+                                    },
+                                    {
+                                        boxLabel: '1/1',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '1/1'
+                                    }
+                                ]
+
+                            }
+                        ]
+                    };
+                    fcItems.push(fc);
+                }
+
+                /*for(var i in _this.form.items.items){
+                    if(_this.form.items.items[i].title == "Samples"){
+                        console.log("entra");
+                        // _this.form.items.items[i].items.items = _this.sampleNames;
+                         _this.form.items.items[i].items.items =fcItems;
+
+                    }
+                }*/
+
+                var samples = Ext.getCmp("samples_form_panel");
+                samples.add(fcItems);
+                // debugger
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('no va');
             }
         });
 
@@ -357,6 +437,14 @@ VariantWidget.prototype = {
             items: statsItems
         });
 
+        var samplesInfo = [];
+
+        var samples = Ext.create('Ext.panel.Panel',{
+            title: 'Samples',
+            items: samplesInfo,
+            id: "samples_form_panel"
+        })
+
         var controlsItems = [
             this._getControls()
         ];
@@ -394,6 +482,7 @@ VariantWidget.prototype = {
 
         accordion.add(region);
         accordion.add(stats);
+        accordion.add(samples);
         accordion.add(controls);
         accordion.add(effect);
         accordion.add(search);
@@ -811,12 +900,25 @@ VariantWidget.prototype = {
         _this.gridEffect.getStore().removeAll();
 
 
+
+
         var values = this.form.getForm().getValues();
+
+        console.log(values);
+
         var formParams = {}
         for (var param in values) {
-            formParams[param] = values[param];
+            if(formParams[param]){
+                var aux = [];
+                aux.push(formParams[param]);
+                aux.push(values[param]);
+                formParams[param] = aux;
+            }else{
+                formParams[param] = values[param];
+            }
         }
-        var url = "http://aaleman:8080/variant/rest/post";
+
+        var url = "http://localhost:8080/variant/rest/variants";
         console.log(url);
         _this.grid.setLoading(true);
         $.ajax({

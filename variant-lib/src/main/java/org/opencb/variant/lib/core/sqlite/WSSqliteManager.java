@@ -2,9 +2,8 @@ package org.opencb.variant.lib.core.sqlite;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opencb.variant.lib.core.formats.VariantEffect;
-import org.opencb.variant.lib.core.formats.VariantInfo;
-import org.opencb.variant.lib.core.formats.VcfVariantStat;
+import org.apache.commons.lang.StringUtils;
+import org.opencb.variant.lib.core.formats.*;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -36,6 +35,8 @@ public class WSSqliteManager {
             con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
 
             List<String> whereClauses = new ArrayList<>(10);
+
+            HashMap<String, List<String>> sampleGenotypes;
 
             if (options.containsKey("region_list") && !options.get("region_list").equals("")) {
 
@@ -175,6 +176,10 @@ public class WSSqliteManager {
                 whereClauses.add("(key NOT LIKE 'BIER%' OR key is null)");
             }
 
+            sampleGenotypes = processSamplesGT(options);
+
+            System.out.println("sampleGenotypes = " + sampleGenotypes);
+
             String innerJoinVariantSQL = "left join variant_info on variant.id_variant=variant_info.id_variant";
             String innerJoinEffectSQL = " inner join variant_effect on variant_effect.chromosome=variant.chromosome AND variant_effect.position=variant.position AND variant_effect.reference_allele=variant.ref AND variant_effect.alternative_allele = variant.alt ";
 
@@ -229,7 +234,7 @@ public class WSSqliteManager {
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
 
-                    if (vi != null) {
+                    if (vi != null && filterGenotypes(vi, sampleGenotypes)) {
                         list.add(vi);
                     }
                     vi = new VariantInfo(chr, pos, ref, alt);
@@ -258,7 +263,7 @@ public class WSSqliteManager {
             }
 
             System.out.println("End processing");
-            if (vi != null) {
+            if (vi != null && filterGenotypes(vi, sampleGenotypes)) {
                 list.add(vi);
             }
 
@@ -272,10 +277,108 @@ public class WSSqliteManager {
         return list;
     }
 
+    private static boolean filterGenotypes(VariantInfo variantInfo, HashMap<String, List<String>> sampleGenotypes) {
+
+        boolean res = true;
+
+        Iterator<String> it = sampleGenotypes.keySet().iterator();
+
+        while(it.hasNext() && res){
+
+            String sampleName = it.next();
+            if(!sampleGenotypes.get(sampleName).contains(variantInfo.getGenotypes().get(sampleName))){
+                res = false;
+            }
+
+        }
+        return res;
+
+    }
+
+    private static HashMap<String, List<String>> processSamplesGT(HashMap<String, String> options) {
+
+
+        HashMap<String, List<String>> samplesGenotypes = new LinkedHashMap<>(10);
+        List<String> genotypesList;
+
+
+        String key, val;
+        for(Map.Entry<String, String> entry: options.entrySet()){
+            key = entry.getKey();
+            val = entry.getValue();
+
+            if(key.startsWith("sampleGT_")){
+                String sampleName = key.replace("sampleGT_", "").replace("[]","");
+                String[] genotypes = val.split(",");
+
+                if(samplesGenotypes.containsKey(sampleName)){
+                    genotypesList = samplesGenotypes.get(sampleName);
+                }else{
+
+                    genotypesList = new ArrayList<>();
+                    samplesGenotypes.put(sampleName, genotypesList);
+                }
+
+
+                for(int i = 0; i< genotypes.length; i++){
+
+                    genotypesList.add(genotypes[i]);
+                }
+
+            }
+
+        }
+        return samplesGenotypes;
+    }
+
+    private static void processSamplesGT(HashMap<String, String> options, List<String> whereClauses) {
+
+        String key, val;
+
+        List<String> auxClauses = new ArrayList<>();
+        for(Map.Entry<String, String> entry: options.entrySet()){
+            key = entry.getKey();
+            val = entry.getValue();
+
+            if(key.startsWith("sampleGT_")){
+                String sampleName = key.replace("sampleGT_", "").replace("[]","");
+                String[] genotypes = val.split(",");
+                StringBuilder sb = new StringBuilder("(");
+
+
+                for(int i = 0; i< genotypes.length; i++){
+                    String[] gt = genotypes[i].split("_");
+
+                    sb.append("(");
+                    sb.append("sample_info.sample_name='"+ sampleName +"'");
+                    sb.append(" AND sample_info.allele_1=" + gt[0] );
+                    sb.append(" AND sample_info.allele_2=" + gt[1] );
+
+                    sb.append(")");
+
+                    if(i < genotypes.length - 1){
+                        sb.append(" OR ");
+                    }
+                }
+                sb.append(")");
+                auxClauses.add(sb.toString());
+            }
+
+        }
+
+        if(auxClauses.size() > 0){
+            String finalSampleWhere = StringUtils.join(auxClauses, " AND ");
+
+            whereClauses.add(finalSampleWhere);
+
+        }
+
+    }
+
     public static List<VariantEffect> getEffect(HashMap<String, String> options) {
 
-        Connection con;
         Statement stmt;
+        Connection con;
         List<VariantEffect> list = new ArrayList<>(100);
 
         String dbName = options.get("db_name");
@@ -322,4 +425,42 @@ public class WSSqliteManager {
         return list;
     }
 
+    public static VariantAnalysisInfo getAnalysisInfo(HashMap<String,String> options) {
+
+        Statement stmt;
+        Connection con;
+        VariantAnalysisInfo vi = new VariantAnalysisInfo();
+
+
+        String dbName = options.get("db_name");
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+
+            String sql = "SELECT * FROM sample ;";
+
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            List<String> samples = new ArrayList<>(10);
+
+
+            while (rs.next()) {
+
+                samples.add(rs.getString("name"));
+
+            }
+
+            vi.setSamples(samples);
+            stmt.close();
+            con.close();
+
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println("ANALYSIS INFO: " + e.getClass().getName() + ": " + e.getMessage());
+        }
+
+
+        return vi;
+    }
 }
