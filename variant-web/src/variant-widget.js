@@ -150,11 +150,12 @@ VariantWidget.prototype = {
 
     },
 
-    _updateInfo: function(db)
-    {
+    _updateInfo: function (db) {
         var _this = this;
 
-        _this.sampleNames=[];
+        _this.form.setLoading(true);
+
+        _this.sampleNames = [];
 
         var formParams = {}
         formParams["db_name"] = db;
@@ -187,7 +188,7 @@ VariantWidget.prototype = {
                             {
                                 xtype: 'checkboxgroup',
                                 columns: 3,
-                                items:[
+                                items: [
                                     {
                                         boxLabel: '0/0',
                                         name: "sampleGT_" + sName,
@@ -217,7 +218,7 @@ VariantWidget.prototype = {
                 var ctData = [];
 
 
-                for(var i in response.consequenceTypes){
+                for (var i in response.consequenceTypes) {
 
                     var ct = response.consequenceTypes[i];
                     var ctElem = {
@@ -230,16 +231,21 @@ VariantWidget.prototype = {
                 }
 
                 var ctForm = Ext.getCmp("conseq_type_panel");
+                ctForm.removeAll();
                 ctForm.add(_this._createComboboxEffect(ctData));
 
 
-
                 var samples = Ext.getCmp("samples_form_panel");
+                samples.removeAll();
                 samples.add(fcItems);
-                // debugger
+
+                _this.form.setLoading(false);
+
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log('no va');
+                _this.form.setLoading(false);
+
             }
         });
 
@@ -459,7 +465,7 @@ VariantWidget.prototype = {
 
         var samplesInfo = [];
 
-        var samples = Ext.create('Ext.panel.Panel',{
+        var samples = Ext.create('Ext.panel.Panel', {
             title: 'Samples',
             items: samplesInfo,
             id: "samples_form_panel"
@@ -920,20 +926,18 @@ VariantWidget.prototype = {
         _this.gridEffect.getStore().removeAll();
 
 
-
-
         var values = this.form.getForm().getValues();
 
         console.log(values);
 
         var formParams = {}
         for (var param in values) {
-            if(formParams[param]){
+            if (formParams[param]) {
                 var aux = [];
                 aux.push(formParams[param]);
                 aux.push(values[param]);
                 formParams[param] = aux;
-            }else{
+            } else {
                 formParams[param] = values[param];
             }
         }
@@ -1413,18 +1417,18 @@ VariantWidget.prototype = {
         var _this = this;
 
         return Ext.create('Ext.form.field.ComboBox', {
-           // id: name,
+            // id: name,
             name: "conseq_type",
-           // fieldLabel: label,
+            // fieldLabel: label,
             store: data,
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
-            multiSelect:true,
-            delimiter:",",
+            multiSelect: true,
+            delimiter: ",",
             // value: data.getAt(0).get('value'),
-          //  labelWidth: labelWidth,
-          //  margin: margin,
+            //  labelWidth: labelWidth,
+            //  margin: margin,
             editable: false,
             allowBlank: false
         });
@@ -1445,96 +1449,9 @@ VariantWidget.prototype = {
             margin: margin,
             editable: false,
             allowBlank: false,
-            listeners:{
-                change: function(field, newValue, oldValue){
-                    console.log("cambio " + oldValue + " por " + newValue);
-
-
-                    // Analysis info
-                    // _this.grid.headerCt.removeAll();
-                    _this.grid.getView().refresh();
-
-                    _this.sampleNames=[];
-
-                    var samples = Ext.getCmp("samples_form_panel");
-                    samples.removeAll();
-
-                    var formParams = {}
-                    formParams["db_name"] = newValue;
-
-                    var url = "http://localhost:8080/variant/rest/info";
-
-
-                    $.ajax({
-                        type: "POST",
-                        url: url,
-                        data: formParams,
-                        dataType: 'json',
-                        success: function (response, textStatus, jqXHR) {
-
-                            var fcItems = [];
-
-                            for (var i in response.samples) {
-                                var sName = response.samples[i];
-                                _this.sampleNames.push(sName);
-                                var fc = {
-                                    xtype: 'fieldcontainer',
-                                    fieldLabel: sName,
-                                    // defaultType: 'checkboxfield',
-                                    // layout: 'hbox',
-                                    //columns:3,
-
-                                    // width: "100%",
-                                    items: [
-                                        {
-                                            xtype: 'checkboxgroup',
-                                            columns: 3,
-                                            items:[
-                                                {
-                                                    boxLabel: '0/0',
-                                                    name: "sampleGT_" + sName,
-                                                    // checked:true,
-                                                    inputValue: '0/0'
-                                                },
-                                                {
-                                                    boxLabel: '0/1',
-                                                    name: "sampleGT_" + sName,
-                                                    // checked:true,
-                                                    inputValue: '0/1'
-                                                },
-                                                {
-                                                    boxLabel: '1/1',
-                                                    name: "sampleGT_" + sName,
-                                                    // checked:true,
-                                                    inputValue: '1/1'
-                                                }
-                                            ]
-
-                                        }
-                                    ]
-                                };
-                                fcItems.push(fc);
-                            }
-
-                            /*for(var i in _this.form.items.items){
-                             if(_this.form.items.items[i].title == "Samples"){
-                             console.log("entra");
-                             // _this.form.items.items[i].items.items = _this.sampleNames;
-                             _this.form.items.items[i].items.items =fcItems;
-
-                             }
-                             }*/
-
-                            var samples = Ext.getCmp("samples_form_panel");
-                            samples.add(fcItems);
-                            // debugger
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            console.log('no va');
-                        }
-                    });
-
-
+            listeners: {
+                change: function (field, newValue, oldValue) {
+                    _this._updateInfo(newValue);
                 }
             }
         });
