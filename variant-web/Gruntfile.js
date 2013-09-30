@@ -5,13 +5,18 @@ module.exports = function (grunt) {
     grunt.initConfig({
         // Metadata.
         meta: {
-            version: '1.0.1',
-            commons: {
-                dir: '../js-common-libs/',
+            version: '1.1.0',
+            jsorolla: {
+                dir: '/lib/jsorolla/',
                 //genome viewer contains cellbse and utils
+                'genomeviewer': {
+                    version: '1.0.2',
+                    dir: '<%= meta.jsorolla.dir %>build/genome-viewer/<%= meta.jsorolla.genomeviewer.version %>/'
+                },
+                //opencga does not contains utils
                 opencga: {
                     version: '1.0.0',
-                    dir: '<%= meta.commons.dir %>build/opencga/<%= meta.commons.opencga.version %>/'
+                    dir: '<%= meta.jsorolla.dir %>build/opencga/<%= meta.jsorolla.opencga.version %>/'
                 }
             }
         },
@@ -27,8 +32,8 @@ module.exports = function (grunt) {
                 stripBanners: true
             },
             build: {
-                src: ['src/ba-config.js','src/bierapp.js', 'src/variant-widget.js'],
-                dest: 'build/<%= meta.version %>/bierapp-<%= meta.version %>.js'
+                src: ['src/variant.js', 'src/variant-filter-widget.js'],
+                dest: 'build/<%= meta.version %>/variant-<%= meta.version %>.js'
             }
         },
         uglify: {
@@ -37,59 +42,17 @@ module.exports = function (grunt) {
             },
             build: {
                 src: '<%= concat.build.dest %>',
-                dest: 'build/<%= meta.version %>/bierapp-<%= meta.version %>.min.js'
+                dest: 'build/<%= meta.version %>/variant-<%= meta.version %>.min.js'
             }
         },
-        jshint: {
-            options: {
-                curly: true,
-                eqeqeq: true,
-                immed: true,
-                latedef: true,
-                newcap: true,
-                noarg: true,
-                sub: true,
-                undef: true,
-                unused: true,
-                boss: true,
-                eqnull: true,
-                browser: true,
-                globals: {
-                    jQuery: true
-                }
-            },
-            gruntfile: {
-                src: 'Gruntfile.js'
-            },
-            lib_test: {
-                src: ['lib/**/*.js', 'test/**/*.js']
-            }
-        },
-        qunit: {
-            files: ['test/**/*.html']
-        },
-
         copy: {
             build: {
                 files: [
-                    {   expand: true, cwd: './', src: ['vendor/**'], dest: 'build/<%= meta.version %>/' },
-                    {   expand: true, cwd: './', src: ['styles/**'], dest: 'build/<%= meta.version %>/' } // includes files in path and its subdirs
-                ]
-            },
-            opencga: {
-                files: [
-                    {   expand: true, cwd: '<%= meta.commons.opencga.dir %>', src: ['opencga*.js','worker*'], dest: 'vendor' }
-                ]
-            },
-            styles: {
-                files: [
-                    {   expand: true, cwd: '<%= meta.commons.dir %>styles/', src: ['**'], dest: 'styles' }
-                ]
-            },
-            map: {
-                files: [
-                    {   expand: true, cwd: '<%= meta.commons.dir %>vendor/', src: ['jquery.min.map'], dest: 'vendor' },
-                    {   expand: true, cwd: '<%= meta.commons.dir %>vendor/', src: ['backbone-min.map'], dest: 'vendor' }
+                    {   expand: true, cwd: './src', src: ['va-config.js'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['vendor/**'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.dir %>', src: ['styles/**'], dest: 'build/<%= meta.version %>/' }, // includes files in path and its subdirs
+                    {   expand: true, cwd: './<%= meta.jsorolla.genomeviewer.dir %>', src: ['genome-viewer*.js', 'gv-config.js'], dest: 'build/<%= meta.version %>/' },
+                    {   expand: true, cwd: './<%= meta.jsorolla.opencga.dir %>', src: ['opencga*.js', 'worker*'], dest: 'build/<%= meta.version %>/' }
                 ]
             }
         },
@@ -101,28 +64,41 @@ module.exports = function (grunt) {
         stylesPath: 'build/<%= meta.version %>/styles',
         htmlbuild: {
             build: {
-                src: 'src/bierapp.html',
+                src: 'src/variant.html',
                 dest: 'build/<%= meta.version %>/',
                 options: {
                     beautify: true,
                     scripts: {
-                        'js': 'build/<%= meta.version %>/bierapp-<%= meta.version %>.min.js',
+                        'js': 'build/<%= meta.version %>/variant-<%= meta.version %>.min.js',
                         'vendor': [
+                            'build/<%= meta.version %>/vendor/jquery.min.js',
                             'build/<%= meta.version %>/vendor/underscore*.js',
                             'build/<%= meta.version %>/vendor/backbone*.js',
-                            'build/<%= meta.version %>/vendor/jquery.min.js',
-                            'build/<%= meta.version %>/vendor/jquery.qtip*.js',
-                            'build/<%= meta.version %>/vendor/jquery.sha1*.js',
+                            'build/<%= meta.version %>/vendor/jquery.mousewheel*.js',
+                            'build/<%= meta.version %>/vendor/gl-matrix-min*.js',
+                            'build/<%= meta.version %>/vendor/ChemDoodleWeb*.js',
                             'build/<%= meta.version %>/vendor/jquery.cookie*.js',
                             'build/<%= meta.version %>/vendor/purl*.js',
-                            'build/<%= meta.version %>/vendor/utils*.min.js',
-                            'build/<%= meta.version %>/vendor/opencga*.min.js'
+                            'build/<%= meta.version %>/vendor/jquery.sha1*.js',
+                            'build/<%= meta.version %>/vendor/jquery.qtip*.js',
+                            'build/<%= meta.version %>/vendor/rawdeflate*.js',
+                            'build/<%= meta.version %>/vendor/jquery-ui-1.10.3*/js/jquery-ui*min.js'
+
+                        ],
+                        gv: [
+                            'build/<%= meta.version %>/opencga*.min.js',
+                            'build/<%= meta.version %>/genome-viewer*.min.js'
+                        ],
+                        gvconfig: [
+                            'build/<%= meta.version %>/gv-config.js'
                         ]
                     },
                     styles: {
                         'css': ['<%= stylesPath %>/css/style.css'],
                         'vendor': [
-                            'build/<%= meta.version %>/vendor/jquery.qtip*.css'
+                            'build/<%= meta.version %>/vendor/ChemDoodleWeb*.css',
+                            'build/<%= meta.version %>/vendor/jquery.qtip*.css',
+                            'build/<%= meta.version %>/vendor/jquery-ui-1.10.3*/css/**/jquery-ui*min.css'
                         ]
                     }
                 }
@@ -131,34 +107,14 @@ module.exports = function (grunt) {
         rename: {
             html: {
                 files: [
-                    {src: ['build/<%= meta.version %>/bierapp.html'], dest: 'build/<%= meta.version %>/index.html'}
+                    {src: ['build/<%= meta.version %>/variant.html'], dest: 'build/<%= meta.version %>/index.html'}
                 ]
             }
         },
-
-        'curl-dir': {
-            long: {
-                src: [
-                    'http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js',
-                    'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js',
-                    'http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js',
-                    'http://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.3.1/jquery.cookie.js',
-                    'http://cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.2.1/purl.min.js',
-                    'http://jsapi.bioinfo.cipf.es/ext-libs/jquery-plugins/jquery.sha1.js',
-                    'http://jsapi.bioinfo.cipf.es/ext-libs/qtip2/jquery.qtip.min.js',
-                    'http://jsapi.bioinfo.cipf.es/ext-libs/qtip2/jquery.qtip.min.css'
-                ],
-                dest: 'vendor'
-            }
-        },
-
-        watch: {
-            commons: {
-                files: ['<%= meta.commons.opencga.dir %>**'],
-                tasks: ['commons'],
-                options: {
-                    spawn: false
-                }
+        hub: {
+            all: {
+                src: ['lib/jsorolla/Gruntfile.js'],
+                tasks: ['opencga', 'gv']
             }
         }
 
@@ -167,21 +123,19 @@ module.exports = function (grunt) {
     // These plugins provide necessary tasks.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-//    grunt.loadNpmTasks('grunt-contrib-qunit');
-//    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-rename');
     grunt.loadNpmTasks('grunt-html-build');
     grunt.loadNpmTasks('grunt-curl');
+    grunt.loadNpmTasks('grunt-hub');
+
+    grunt.registerTask('log-deploy', 'Deploy path info', function (version) {
+        grunt.log.writeln("DEPLOY COMMAND: scp -r build/{version} cafetero@mem16:/httpd/bioinfo/www-apps/variant/");
+    });
 
     // Default task.
-    grunt.registerTask('default', ['clean', 'concat', 'uglify', 'copy:build', 'htmlbuild', 'rename:html']);
-    grunt.registerTask('vendor', ['curl-dir']);
-
-    // dependencies from js-common-libs
-    grunt.registerTask('commons', ['copy:opencga', 'copy:styles']);
-    grunt.registerTask('deploy', ['scp']);
+    grunt.registerTask('default', ['clean', 'concat', 'uglify', 'hub:all', 'copy', 'htmlbuild', 'rename:html', 'log-deploy']);
 
 };

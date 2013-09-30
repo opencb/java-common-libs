@@ -1,0 +1,9 @@
+{
+  "name": "Variant",
+  "version": "1.0",
+  "description": "Variant",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "popup": "popup.html"
+  }
+}
