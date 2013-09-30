@@ -1420,11 +1420,13 @@ VariantWidget.prototype = {
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
+            multiSelect:true,
+            delimiter:",",
             // value: data.getAt(0).get('value'),
           //  labelWidth: labelWidth,
           //  margin: margin,
             editable: false,
-            allowBlank: false,
+            allowBlank: false
         });
     },
     _createComboboxDB: function (name, label, data, defaultValue, labelWidth, margin) {
