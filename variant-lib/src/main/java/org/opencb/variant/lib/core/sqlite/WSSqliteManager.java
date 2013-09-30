@@ -287,7 +287,7 @@ public class WSSqliteManager {
         String[] cts = conseqType.split(",");
 
         for (String ct : cts) {
-            clauses.add("(variant_effect.consequence_type_obo LIKE '%" + ct + "%' )");
+            clauses.add("(variant_effect.consequence_type_obo LIKE '" + ct + "' )");
         }
 
         String res = "";
@@ -491,6 +491,22 @@ public class WSSqliteManager {
             }
 
             vi.setConsequenceTypes(cts);
+            stmt.close();
+
+
+            sql = "select distinct feature_biotype from variant_effect";
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            List<String> biotypes = new ArrayList<>(10);
+
+            while (rs.next()) {
+
+                biotypes.add(rs.getString("feature_biotype"));
+
+            }
+
+            vi.setBiotypes(biotypes);
             stmt.close();
             con.close();
 

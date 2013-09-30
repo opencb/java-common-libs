@@ -149,7 +149,6 @@ VariantWidget.prototype = {
 
 
     },
-
     _updateInfo: function (db) {
         var _this = this;
 
@@ -161,7 +160,6 @@ VariantWidget.prototype = {
         formParams["db_name"] = db;
 
         var url = "http://localhost:8080/variant/rest/info";
-
 
         $.ajax({
             type: "POST",
@@ -215,24 +213,13 @@ VariantWidget.prototype = {
                     fcItems.push(fc);
                 }
 
-                var ctData = [];
-
-
-                for (var i in response.consequenceTypes) {
-
-                    var ct = response.consequenceTypes[i];
-                    var ctElem = {
-                        value: ct,
-                        name: ct
-                    }
-
-                    ctData.push(ct);
-
-                }
-
                 var ctForm = Ext.getCmp("conseq_type_panel");
                 ctForm.removeAll();
-                ctForm.add(_this._createComboboxEffect(ctData));
+                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes));
+
+                var biotypeForm = Ext.getCmp("biotype_panel");
+                biotypeForm.removeAll();
+                biotypeForm.add(_this._createDynCombobox("biotype","Btiotype",  response.biotypes));
 
 
                 var samples = Ext.getCmp("samples_form_panel");
@@ -248,6 +235,7 @@ VariantWidget.prototype = {
 
             }
         });
+
 
     },
     _createPanel: function (targetId) {
@@ -1106,14 +1094,6 @@ VariantWidget.prototype = {
         });
     },
     _getBioTypes: function () {
-        var bt = Ext.create('Ext.form.field.TextArea', {
-            id: "biotype",
-            name: "biotype",
-            fieldLabel: 'Biotypes',
-            margin: '0 0 0 5',
-            allowBlank: false
-        });
-
         return Ext.create('Ext.form.Panel', {
             border: true,
             bodyPadding: "5",
@@ -1121,17 +1101,11 @@ VariantWidget.prototype = {
             width: "100%",
             buttonAlign: 'center',
             layout: 'vbox',
-            items: [bt]
+            id: 'biotype_panel',
+            items: []
         });
     },
     _getConsequenceType: function () {
-        var ct = Ext.create('Ext.form.field.Text', {
-            id: "conseq_type",
-            name: "conseq_type",
-            fieldLabel: 'Consequence Type',
-            margin: '0 0 0 5',
-            allowBlank: false
-        });
 
         return Ext.create('Ext.form.Panel', {
             border: true,
@@ -1413,22 +1387,18 @@ VariantWidget.prototype = {
         });
     },
 
-    _createComboboxEffect: function (data) {
+    _createDynCombobox: function (name,label, data) {
         var _this = this;
 
         return Ext.create('Ext.form.field.ComboBox', {
-            // id: name,
-            name: "conseq_type",
-            // fieldLabel: label,
+            name: name,
+            fieldLabel: label,
             store: data,
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
             multiSelect: true,
             delimiter: ",",
-            // value: data.getAt(0).get('value'),
-            //  labelWidth: labelWidth,
-            //  margin: margin,
             editable: false,
             allowBlank: false
         });
