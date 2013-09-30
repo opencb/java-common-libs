@@ -95,7 +95,7 @@ VariantWidget.prototype = {
                 formParams['ref'] = ref;
                 formParams['alt'] = alt;
 
-                var url = "http://aaleman:8080/variant/rest/effect";
+                var url = "http://localhost:8080/variant/rest/effect";
                 console.log(url);
 
 
@@ -139,6 +139,112 @@ VariantWidget.prototype = {
                     }
                 });
 
+
+            }
+        });
+
+
+        // Analysis info
+        _this._updateInfo("s4.db");
+
+
+    },
+
+    _updateInfo: function (db) {
+        var _this = this;
+
+        _this.form.setLoading(true);
+
+        _this.sampleNames = [];
+
+        var formParams = {}
+        formParams["db_name"] = db;
+
+        var url = "http://localhost:8080/variant/rest/info";
+
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: formParams,
+            dataType: 'json',
+            success: function (response, textStatus, jqXHR) {
+
+                console.log(response);
+                var fcItems = [];
+
+                for (var i in response.samples) {
+                    var sName = response.samples[i];
+                    _this.sampleNames.push(sName);
+                    var fc = {
+                        xtype: 'fieldcontainer',
+                        fieldLabel: sName,
+                        // defaultType: 'checkboxfield',
+                        // layout: 'hbox',
+                        //columns:3,
+
+                        // width: "100%",
+                        items: [
+                            {
+                                xtype: 'checkboxgroup',
+                                columns: 3,
+                                items: [
+                                    {
+                                        boxLabel: '0/0',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '0/0'
+                                    },
+                                    {
+                                        boxLabel: '0/1',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '0/1'
+                                    },
+                                    {
+                                        boxLabel: '1/1',
+                                        name: "sampleGT_" + sName,
+                                        // checked:true,
+                                        inputValue: '1/1'
+                                    }
+                                ]
+
+                            }
+                        ]
+                    };
+                    fcItems.push(fc);
+                }
+
+                var ctData = [];
+
+
+                for (var i in response.consequenceTypes) {
+
+                    var ct = response.consequenceTypes[i];
+                    var ctElem = {
+                        value: ct,
+                        name: ct
+                    }
+
+                    ctData.push(ct);
+
+                }
+
+                var ctForm = Ext.getCmp("conseq_type_panel");
+                ctForm.removeAll();
+                ctForm.add(_this._createComboboxEffect(ctData));
+
+
+                var samples = Ext.getCmp("samples_form_panel");
+                samples.removeAll();
+                samples.add(fcItems);
+
+                _this.form.setLoading(false);
+
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log('no va');
+                _this.form.setLoading(false);
 
             }
         });
@@ -357,6 +463,14 @@ VariantWidget.prototype = {
             items: statsItems
         });
 
+        var samplesInfo = [];
+
+        var samples = Ext.create('Ext.panel.Panel', {
+            title: 'Samples',
+            items: samplesInfo,
+            id: "samples_form_panel"
+        })
+
         var controlsItems = [
             this._getControls()
         ];
@@ -394,6 +508,7 @@ VariantWidget.prototype = {
 
         accordion.add(region);
         accordion.add(stats);
+        accordion.add(samples);
         accordion.add(controls);
         accordion.add(effect);
         accordion.add(search);
@@ -812,11 +927,22 @@ VariantWidget.prototype = {
 
 
         var values = this.form.getForm().getValues();
+
+        console.log(values);
+
         var formParams = {}
         for (var param in values) {
-            formParams[param] = values[param];
+            if (formParams[param]) {
+                var aux = [];
+                aux.push(formParams[param]);
+                aux.push(values[param]);
+                formParams[param] = aux;
+            } else {
+                formParams[param] = values[param];
+            }
         }
-        var url = "http://aaleman:8080/variant/rest/post";
+
+        var url = "http://localhost:8080/variant/rest/variants";
         console.log(url);
         _this.grid.setLoading(true);
         $.ajax({
@@ -890,7 +1016,7 @@ VariantWidget.prototype = {
             ]
         });
 
-        var data_opt = this._createCombobox("db_name", "Data Base", dataBases, 0, 100, '5 0 5 5');
+        var data_opt = this._createComboboxDB("db_name", "Data Base", dataBases, 0, 100, '5 0 5 5');
 
         return Ext.create('Ext.form.Panel', {
             bodyPadding: "5",
@@ -1014,7 +1140,8 @@ VariantWidget.prototype = {
             width: "100%",
             buttonAlign: 'center',
             layout: 'vbox',
-            items: [ct]
+            id: "conseq_type_panel",
+            items: []
         });
     },
     _getMissing: function () {
@@ -1268,6 +1395,8 @@ VariantWidget.prototype = {
         });
     },
     _createCombobox: function (name, label, data, defaultValue, labelWidth, margin) {
+        var _this = this;
+
         return Ext.create('Ext.form.field.ComboBox', {
             id: name,
             name: name,
@@ -1280,7 +1409,51 @@ VariantWidget.prototype = {
             labelWidth: labelWidth,
             margin: margin,
             editable: false,
+            allowBlank: false,
+        });
+    },
+
+    _createComboboxEffect: function (data) {
+        var _this = this;
+
+        return Ext.create('Ext.form.field.ComboBox', {
+            // id: name,
+            name: "conseq_type",
+            // fieldLabel: label,
+            store: data,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'value',
+            multiSelect: true,
+            delimiter: ",",
+            // value: data.getAt(0).get('value'),
+            //  labelWidth: labelWidth,
+            //  margin: margin,
+            editable: false,
             allowBlank: false
+        });
+    },
+    _createComboboxDB: function (name, label, data, defaultValue, labelWidth, margin) {
+        var _this = this;
+
+        return Ext.create('Ext.form.field.ComboBox', {
+            id: name,
+            name: name,
+            fieldLabel: label,
+            store: data,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'value',
+            value: data.getAt(defaultValue).get('value'),
+            labelWidth: labelWidth,
+            margin: margin,
+            editable: false,
+            allowBlank: false,
+            listeners: {
+                change: function (field, newValue, oldValue) {
+                    _this._updateInfo(newValue);
+                }
+            }
         });
     }
 }
