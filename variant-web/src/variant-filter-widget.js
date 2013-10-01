@@ -114,7 +114,7 @@ VariantFilterWidget.prototype._render = function (mode, targetId) {
             listeners: {viewready: function (comp, eOpts) {
                 var selModel = comp.getSelectionModel();
                 if (selModel.getStore().getTotalCount() > 0) {
-                    selModel.selectRange(0, 0);
+//                    selModel.selectRange(0, 0);
                 }
             }},
             cls: 'list',
@@ -203,7 +203,7 @@ VariantFilterWidget.prototype._render = function (mode, targetId) {
                 height: this.height,
                 width: this.width,
                 collapsible: true,
-                margin: '0 0 15 0',
+                margin: '0 0 10 0',
                 layout: { type: 'hbox', align: 'stretch'},
                 items: [panTab]
             });
@@ -507,14 +507,14 @@ VariantFilterWidget.prototype.doGrid = function (columns, fields, modelName, gro
         border: false,
         cls: 'ocb-border-left-lightgrey',
         flex: 3,
-        dockedItems: [
-            {xtype: 'pagingtoolbar', store: store, dock: 'top', displayInfo: true,
-                items: ['-', { text: 'Clear Grouping',
-                    handler: function () {
-                        groupFeature.disable();
-                    }}]
-            }
-        ],
+//        dockedItems: [
+//            {xtype: 'pagingtoolbar', store: store, dock: 'top', displayInfo: true,
+//                items: ['-', { text: 'Clear Grouping',
+//                    handler: function () {
+//                        groupFeature.disable();
+//                    }}]
+//            }
+//        ],
         featuresSvgNode: [groupFeature, filters],
         columns: columns,
         plugins: 'bufferedrenderer', loadMask: true,
