@@ -62,6 +62,9 @@ VariantWidget.prototype = {
 
         this.form = this._createForm();
         this.grid = this._createGrid();
+
+        //this._addColorPicker();
+
         this.gridEffect = this._createEffectGrid();
         this.panelGV = this._createGenomeViewer();
         var _stEffect = this.stEffect;
@@ -111,9 +114,9 @@ VariantWidget.prototype = {
 
                         if (response.length > 0) {
 
-//                            _stEffect.removeAll();
+                            //                            _stEffect.removeAll();
 
-//                            _this.stEffect.loadData(response);
+                            //                            _this.stEffect.loadData(response);
                             _this.gridEffect.getStore().loadData(response);
 
                             var region = new Region({
@@ -215,11 +218,12 @@ VariantWidget.prototype = {
 
                 var ctForm = Ext.getCmp("conseq_type_panel");
                 ctForm.removeAll();
-                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes,"non_synonymous_codon"));
+                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes, "non_synonymous_codon"));
+//                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes, null));
 
                 var biotypeForm = Ext.getCmp("biotype_panel");
                 biotypeForm.removeAll();
-                biotypeForm.add(_this._createDynCombobox("biotype","Btiotype",  response.biotypes,null));
+                biotypeForm.add(_this._createDynCombobox("biotype", "Btiotype", response.biotypes, null));
 
 
                 var samples = Ext.getCmp("samples_form_panel");
@@ -242,7 +246,7 @@ VariantWidget.prototype = {
 
 
         var panel = Ext.create('Ext.panel.Panel', {
-//            title: 'Variant Widget',
+            //            title: 'Variant Widget',
             renderTo: targetId,
             width: '100%',
             height: '100%',
@@ -679,7 +683,7 @@ VariantWidget.prototype = {
             border: 0,
             titleCollapse: true,
             collapsible: true,
-//            features: [groupingFeature],
+            //            features: [groupingFeature],
             columns: [
                 new Ext.grid.RowNumberer({width: 30}),
 
@@ -873,7 +877,9 @@ VariantWidget.prototype = {
             loadMask: true,
             features: [groupingFeature]
 
+
         });
+
         return grid;
     },
     _prepareData: function (data) {
@@ -885,9 +891,9 @@ VariantWidget.prototype = {
 
                 continue;
             } else {
-//                v.genes = v.genes.filter(function (e) {
-//                    return e
-//                });
+                //                v.genes = v.genes.filter(function (e) {
+                //                    return e
+                //                });
                 delete v.genes[''];
             }
 
@@ -975,6 +981,8 @@ VariantWidget.prototype = {
 
                     _this.grid.headerCt.insert(3, sample_col);
 
+                    _this._addColorPicker();
+
                 }
                 _this.grid.getView().refresh();
                 _this.grid.setLoading(false);
@@ -985,6 +993,27 @@ VariantWidget.prototype = {
                 _this.grid.setLoading(false);
             }
         });
+
+    },
+    _addColorPicker: function () {
+
+        var _this = this;
+
+        var menu = _this.grid.headerCt.getMenu();
+        menu.add([
+            {
+                text: 'Choose color',
+                menu: {
+                    xtype: 'colormenu',
+                    value: '000000',
+                    handler: function (obj, rgb) {
+                        console.log(this);
+                        console.log(obj);
+                        Ext.Msg.alert('background-color: ' + rgb.toString());
+                    } // handler
+                } // menu
+            }
+        ]);
 
     },
 
@@ -1046,7 +1075,7 @@ VariantWidget.prototype = {
         });
 
         return Ext.create('Ext.form.Panel', {
-//            title: 'Inheritance',
+            //            title: 'Inheritance',
             border: true,
             bodyPadding: "5",
             margin: "0 0 5 0",
@@ -1138,7 +1167,7 @@ VariantWidget.prototype = {
             margin: '0 0 0 5',
             allowBlank: false,
             width: "20%",
-            value:0
+            value: 0
 
         });
 
@@ -1354,20 +1383,53 @@ VariantWidget.prototype = {
         return Ext.create('Ext.form.Panel', {
             bodyPadding: "5",
             margin: "0 0 5 0",
-            width: "99%",
+            width: "100%",
             buttonAlign: 'center',
             layout: 'vbox',
             items: [
                 {
-                    xtype: 'checkboxfield',
-                    fieldLabel: 'Exclude 1000G Controls',
-                    name: 'exc_1000g_controls'
+                    xtype: 'fieldcontainer',
+                    layout: 'hbox',
+                    border: false,
+                    width: "100%",
+                    items: [
+                        {
+                            xtype: 'checkboxfield',
+                            fieldLabel: 'Exclude 1000G Controls',
+                            name: 'exc_1000g_controls',
+                            value:'0.1'
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'or MAF',
+                            name: 'maf_1000g_controls',
+                            margin: '0 0 0 5',
+                            labelWidth: '50%',
+                            width: "50%",
+                        }
+                    ]
                 },
                 {
-                    xtype: 'checkboxfield',
-                    fieldLabel: 'Exclude BIER Controls',
-                    name: 'exc_bier_controls'
-
+                    xtype: 'fieldcontainer',
+                    //fieldLabel: '% Controls recessive',
+                    layout: 'hbox',
+                    border: false,
+                    width: "100%",
+                    items: [
+                        {
+                            xtype: 'checkboxfield',
+                            fieldLabel: 'Exclude BIER Controls',
+                            name: 'exc_bierg_controls'
+                        },
+                        {
+                            xtype: 'textfield',
+                            fieldLabel: 'or MAF',
+                            name: 'maf_bier_controls',
+                            margin: '0 0 0 5',
+                            labelWidth: '50%',
+                            width: "50%",
+                        }
+                    ]
                 }
             ]
         });
@@ -1391,7 +1453,7 @@ VariantWidget.prototype = {
         });
     },
 
-    _createDynCombobox: function (name,label, data, defaultValue) {
+    _createDynCombobox: function (name, label, data, defaultValue) {
         var _this = this;
 
         return Ext.create('Ext.form.field.ComboBox', {

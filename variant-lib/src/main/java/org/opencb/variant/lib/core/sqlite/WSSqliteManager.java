@@ -1,7 +1,6 @@
 package org.opencb.variant.lib.core.sqlite;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.StringUtils;
 import org.opencb.variant.lib.core.formats.*;
 
@@ -37,6 +36,7 @@ public class WSSqliteManager {
             List<String> whereClauses = new ArrayList<>(10);
 
             HashMap<String, List<String>> sampleGenotypes;
+            HashMap<String, String> controlsMAFs = new LinkedHashMap<>();
 
             if (options.containsKey("region_list") && !options.get("region_list").equals("")) {
 
@@ -159,17 +159,19 @@ public class WSSqliteManager {
 
                 biotypesClauses.append(" ) ");
                 whereClauses.add(biotypesClauses.toString());
-
-
             }
 
             if (options.containsKey("exc_1000g_controls") && options.get("exc_1000g_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE '1000G%' OR key is null)");
+            } else if (options.containsKey("maf_1000g_controls") && !options.get("maf_1000g_controls").equals("")) {
+                controlsMAFs.put("1000G", options.get("maf_1000g_controls"));
             }
 
 
             if (options.containsKey("exc_bier_controls") && options.get("exc_bier_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE 'BIER%' OR key is null)");
+            } else if (options.containsKey("maf_bier_controls") && !options.get("maf_bier_controls").equals("")) {
+                controlsMAFs.put("BIER", options.get("maf_bier_controls"));
             }
 
 
@@ -178,6 +180,8 @@ public class WSSqliteManager {
                 whereClauses.add(processConseqType(options.get("conseq_type[]")));
             }
 
+
+            System.out.println("controlsMAFs = " + controlsMAFs);
 
             sampleGenotypes = processSamplesGT(options);
 
@@ -237,7 +241,7 @@ public class WSSqliteManager {
                     ref = rs.getString("allele_ref");
                     alt = rs.getString("allele_alt");
 
-                    if (vi != null && filterGenotypes(vi, sampleGenotypes)) {
+                    if (vi != null && filterGenotypes(vi, sampleGenotypes) && filterControls(vi, controlsMAFs)) {
                         list.add(vi);
                     }
                     vi = new VariantInfo(chr, pos, ref, alt);
@@ -266,7 +270,7 @@ public class WSSqliteManager {
             }
 
             System.out.println("End processing");
-            if (vi != null && filterGenotypes(vi, sampleGenotypes)) {
+            if (vi != null && filterGenotypes(vi, sampleGenotypes) && filterControls(vi, controlsMAFs)) {
                 list.add(vi);
             }
 
@@ -278,6 +282,29 @@ public class WSSqliteManager {
         }
 
         return list;
+    }
+
+    private static boolean filterControls(VariantInfo vi, HashMap<String, String> controlsMAFs) {
+        boolean res = true;
+
+        String key;
+        VariantControl vc;
+        float controlMAF;
+
+        for (Map.Entry<String, VariantControl> entry : vi.getControls().entrySet()) {
+
+            key = entry.getKey();
+            vc = entry.getValue();
+
+            if (controlsMAFs.containsKey(key)) {
+                controlMAF = Float.valueOf(controlsMAFs.get(key));
+                if (vc.getMaf() > controlMAF) {
+                    return false;
+                }
+
+            }
+        }
+        return res;
     }
 
     private static String processConseqType(String conseqType) {
