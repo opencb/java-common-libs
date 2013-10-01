@@ -11,8 +11,8 @@
 
     <artifactId>variant-cli</artifactId>
 
-    <!--<packaging>war</packaging>-->
-    <name>bierapp</name>
+    <packaging>war</packaging>
+    <name>variant-cli</name>
 
 
     <dependencies>
