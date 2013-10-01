@@ -296,40 +296,13 @@ public class VariantInfo {
         }
     }
 
-
-    class VariantControl {
-
-        @JsonProperty
-        private float maf;
-
-        @JsonProperty
-        private String allele;
-
-        VariantControl(float maf, String allele) {
-            this.maf = maf;
-            this.allele = allele;
-        }
-
-        public VariantControl() {
-            this.maf = -1;
-            this.allele = "";
-        }
-
-        float getMaf() {
-            return maf;
-        }
-
-        void setMaf(float maf) {
-            this.maf = maf;
-        }
-
-        String getAllele() {
-            return allele;
-        }
-
-        void setAllele(String allele) {
-            this.allele = allele;
-        }
+    public HashMap<String, VariantControl> getControls() {
+        return controls;
     }
+
+    public void setControls(HashMap<String, VariantControl> controls) {
+        this.controls = controls;
+    }
+
 
 }
