@@ -158,7 +158,6 @@ VariantEffectForm.prototype._getSpeciesForm = function (){
 	
 	$.ajax({url:CELLBASE_HOST+"/latest/species?of=json",success:function(data, textStatus, jqXHR){
 		// Create the combo box, attached to the states data store
-        debugger
 		var objdata = JSON.parse(data);
 		for ( var i = 0; i < objdata.length; i++) {
 			objdata[i].sciAsembly = objdata[i].scientific+" ("+objdata[i].assembly+")";
@@ -248,7 +247,7 @@ VariantEffectForm.prototype._getExampleForm = function (){
 	
 	var exampleForm = Ext.create('Ext.container.Container', {
 		bodyPadding:10,
-		items: [this.note1,example1,example2],
+		items: [this.note1,example1/*,example2*/],
 		defaults:{margin:'5 0 0 5'}
 	});
 	
