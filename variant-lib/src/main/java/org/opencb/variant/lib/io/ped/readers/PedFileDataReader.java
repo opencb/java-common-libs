@@ -90,86 +90,46 @@ public class PedFileDataReader implements PedDataReader {
                         ped.addFamily(familyId, family);
                     }
 
-
-                    if (fatherId.equals("0") && motherId.equals("0")) {
-                        ind = new Individual(sampleId, familyId, null, null, sex, phenotype, auxFields);
-                        ped.addIndividual(ind);
-                        family.add(ind);
-                    } else {
-                        ind = new Individual(sampleId, familyId, null, null, sex, phenotype, auxFields);
-                        ind.setFatherId(fatherId);
-                        ind.setMotherId(motherId);
-                        queue.offer(ind);
-                    }
+                    ind = new Individual(sampleId, familyId, null, null, sex, phenotype, auxFields);
+                    ind.setFatherId(fatherId);
+                    ind.setMotherId(motherId);
+                    ped.addIndividual(ind);
+                    family.add(ind);
 
 
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
-        while (!queue.isEmpty()) {
-            ind = queue.poll();
-            fatherId = ind.getFatherId();
-            motherId = ind.getMotherId();
+        for (Map.Entry<String, Individual> entry : ped.getIndividuals().entrySet()) {
 
-            if (!fatherId.equals("0") && !motherId.equals("0")) { // Existen padre y Madre (hay ID)
-                father = ped.getIndividual(fatherId);
-                mother = ped.getIndividual(motherId);
-                if (father == null || mother == null) {  // Existen pero aún no se han metido en la HASH
-                    queue.offer(ind);
-                } else { // Tenemos el padre y la madre y están en la HASH
-                    ind.setFather(father);
-                    ind.setMother(mother);
-                    ped.addIndividual(ind);
+            ind = entry.getValue();
+            father = ped.getIndividual(ind.getFatherId());
+            mother = ped.getIndividual(ind.getMotherId());
 
-                    // Añadimos "ind" como hijo a los padres
-                    father.addChild(ind);
-                    mother.addChild(ind);
+            ind.setFather(father);
+            ind.setMother(mother);
 
-                    ped.addIndividualToFamily(ind.getFamily(), ind);
-
-                }
-            } else if (!fatherId.equals("0") && motherId.equals("0")) { // No existe la madre
-                father = ped.getIndividual(fatherId);
-                mother = null;
-                if (father == null) { // Existe el padre pero aún no se ha metido en la hash
-                    queue.offer(ind);
-                } else {
-                    ind.setFather(father);
-                    ind.setMother(mother);
-                    ped.addIndividual(ind);
-
-                    // Añadimos "ind" como hijo al padre
-                    father.addChild(ind);
-                    ped.addIndividualToFamily(ind.getFamily(), ind);
-
-                }
-            } else if (fatherId.equals("0") && !motherId.equals("0")) { // No existe el padre
-                father = null;
-                mother = ped.getIndividual(motherId);
-                if (mother == null) { // Existe la madre pero aún no se ha metido en la hash
-                    queue.offer(ind);
-                } else {
-                    ind.setFather(father);
-                    ind.setMother(mother);
-                    ped.addIndividual(ind);
-
-                    // Añadimos "ind" como hijo a la madre
-                    mother.addChild(ind);
-
-                    ped.addIndividualToFamily(ind.getFamily(), ind);
-
-                }
+            if (mother != null) {
+                mother.addChild(ind);
             }
+            if (father != null) {
+                father.addChild(ind);
+
+            }
+
+
         }
+
+
         return ped;
     }
 
     @Override
     public List<Pedigree> read(int batchSize) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     private void parseHeader(String lineHeader) {
