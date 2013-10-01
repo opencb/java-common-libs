@@ -143,10 +143,6 @@ public class WSSqliteManager {
                 whereClauses.add("variant_stats.controls_percent_recessive " + opt + " " + val);
             }
 
-            if (options.containsKey("conseq_type") && !options.get("conseq_type").equals("")) {
-                String val = options.get("conseq_type");
-                whereClauses.add("variant_effect.consequence_type_obo LIKE '%" + val + "%' ");
-            }
 
             if (options.containsKey("biotype") && !options.get("biotype").equals("")) {
                 String[] biotypes = options.get("biotype").split(",");
@@ -175,6 +171,13 @@ public class WSSqliteManager {
             if (options.containsKey("exc_bier_controls") && options.get("exc_bier_controls").equalsIgnoreCase("on")) {
                 whereClauses.add("(key NOT LIKE 'BIER%' OR key is null)");
             }
+
+
+            if (options.containsKey("conseq_type[]") && !options.get("conseq_type[]").equals("")) {
+                System.out.println("ENTRA");
+                whereClauses.add(processConseqType(options.get("conseq_type[]")));
+            }
+
 
             sampleGenotypes = processSamplesGT(options);
 
@@ -277,16 +280,35 @@ public class WSSqliteManager {
         return list;
     }
 
+    private static String processConseqType(String conseqType) {
+
+        List<String> clauses = new ArrayList<>(10);
+
+        String[] cts = conseqType.split(",");
+
+        for (String ct : cts) {
+            clauses.add("(variant_effect.consequence_type_obo LIKE '" + ct + "' )");
+        }
+
+        String res = "";
+        if (clauses.size() > 0) {
+            res = "(" + StringUtils.join(clauses, " OR ") + ")";
+        }
+
+
+        return res;
+    }
+
     private static boolean filterGenotypes(VariantInfo variantInfo, HashMap<String, List<String>> sampleGenotypes) {
 
         boolean res = true;
 
         Iterator<String> it = sampleGenotypes.keySet().iterator();
 
-        while(it.hasNext() && res){
+        while (it.hasNext() && res) {
 
             String sampleName = it.next();
-            if(!sampleGenotypes.get(sampleName).contains(variantInfo.getGenotypes().get(sampleName))){
+            if (!sampleGenotypes.get(sampleName).contains(variantInfo.getGenotypes().get(sampleName))) {
                 res = false;
             }
 
@@ -303,24 +325,24 @@ public class WSSqliteManager {
 
 
         String key, val;
-        for(Map.Entry<String, String> entry: options.entrySet()){
+        for (Map.Entry<String, String> entry : options.entrySet()) {
             key = entry.getKey();
             val = entry.getValue();
 
-            if(key.startsWith("sampleGT_")){
-                String sampleName = key.replace("sampleGT_", "").replace("[]","");
+            if (key.startsWith("sampleGT_")) {
+                String sampleName = key.replace("sampleGT_", "").replace("[]", "");
                 String[] genotypes = val.split(",");
 
-                if(samplesGenotypes.containsKey(sampleName)){
+                if (samplesGenotypes.containsKey(sampleName)) {
                     genotypesList = samplesGenotypes.get(sampleName);
-                }else{
+                } else {
 
                     genotypesList = new ArrayList<>();
                     samplesGenotypes.put(sampleName, genotypesList);
                 }
 
 
-                for(int i = 0; i< genotypes.length; i++){
+                for (int i = 0; i < genotypes.length; i++) {
 
                     genotypesList.add(genotypes[i]);
                 }
@@ -336,27 +358,27 @@ public class WSSqliteManager {
         String key, val;
 
         List<String> auxClauses = new ArrayList<>();
-        for(Map.Entry<String, String> entry: options.entrySet()){
+        for (Map.Entry<String, String> entry : options.entrySet()) {
             key = entry.getKey();
             val = entry.getValue();
 
-            if(key.startsWith("sampleGT_")){
-                String sampleName = key.replace("sampleGT_", "").replace("[]","");
+            if (key.startsWith("sampleGT_")) {
+                String sampleName = key.replace("sampleGT_", "").replace("[]", "");
                 String[] genotypes = val.split(",");
                 StringBuilder sb = new StringBuilder("(");
 
 
-                for(int i = 0; i< genotypes.length; i++){
+                for (int i = 0; i < genotypes.length; i++) {
                     String[] gt = genotypes[i].split("_");
 
                     sb.append("(");
-                    sb.append("sample_info.sample_name='"+ sampleName +"'");
-                    sb.append(" AND sample_info.allele_1=" + gt[0] );
-                    sb.append(" AND sample_info.allele_2=" + gt[1] );
+                    sb.append("sample_info.sample_name='" + sampleName + "'");
+                    sb.append(" AND sample_info.allele_1=" + gt[0]);
+                    sb.append(" AND sample_info.allele_2=" + gt[1]);
 
                     sb.append(")");
 
-                    if(i < genotypes.length - 1){
+                    if (i < genotypes.length - 1) {
                         sb.append(" OR ");
                     }
                 }
@@ -366,7 +388,7 @@ public class WSSqliteManager {
 
         }
 
-        if(auxClauses.size() > 0){
+        if (auxClauses.size() > 0) {
             String finalSampleWhere = StringUtils.join(auxClauses, " AND ");
 
             whereClauses.add(finalSampleWhere);
@@ -425,7 +447,7 @@ public class WSSqliteManager {
         return list;
     }
 
-    public static VariantAnalysisInfo getAnalysisInfo(HashMap<String,String> options) {
+    public static VariantAnalysisInfo getAnalysisInfo(HashMap<String, String> options) {
 
         Statement stmt;
         Connection con;
@@ -457,7 +479,7 @@ public class WSSqliteManager {
 
             sql = "select distinct consequence_type_obo from variant_effect";
             stmt = con.createStatement();
-             rs = stmt.executeQuery(sql);
+            rs = stmt.executeQuery(sql);
 
             List<String> cts = new ArrayList<>(10);
 
@@ -469,6 +491,22 @@ public class WSSqliteManager {
             }
 
             vi.setConsequenceTypes(cts);
+            stmt.close();
+
+
+            sql = "select distinct feature_biotype from variant_effect";
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            List<String> biotypes = new ArrayList<>(10);
+
+            while (rs.next()) {
+
+                biotypes.add(rs.getString("feature_biotype"));
+
+            }
+
+            vi.setBiotypes(biotypes);
             stmt.close();
             con.close();
 

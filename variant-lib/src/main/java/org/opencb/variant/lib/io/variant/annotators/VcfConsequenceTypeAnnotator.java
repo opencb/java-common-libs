@@ -2,11 +2,10 @@ package org.opencb.variant.lib.io.variant.annotators;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.deploy.util.StringUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import net.sf.samtools.util.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.opencb.variant.lib.core.formats.VariantEffect;
 import org.opencb.variant.lib.core.formats.VcfRecord;
 

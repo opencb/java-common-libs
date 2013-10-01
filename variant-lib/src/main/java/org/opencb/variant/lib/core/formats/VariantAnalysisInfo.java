@@ -17,6 +17,8 @@ public class VariantAnalysisInfo {
     List<String> samples;
     @JsonProperty
     List<String> consequenceTypes;
+    @JsonProperty
+    List<String> biotypes;
 
     public VariantAnalysisInfo() {
 
@@ -37,4 +39,13 @@ public class VariantAnalysisInfo {
     public void setConsequenceTypes(List<String> consequenceTypes) {
         this.consequenceTypes = consequenceTypes;
     }
+
+    public List<String> getBiotypes() {
+        return biotypes;
+    }
+
+    public void setBiotypes(List<String> biotypes) {
+        this.biotypes = biotypes;
+    }
+
 }
