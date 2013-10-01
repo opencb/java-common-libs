@@ -116,6 +116,7 @@ module.exports = function (grunt) {
                             'build/<%= meta.version %>/vendor/jquery.cookie*.js',
                             'build/<%= meta.version %>/vendor/purl*.js',
                             'build/<%= meta.version %>/vendor/utils*.min.js',
+                            'build/<%= meta.version %>/vendor/genome-viewer*.min.js',
                             'build/<%= meta.version %>/vendor/opencga*.min.js'
                         ]
                     },
