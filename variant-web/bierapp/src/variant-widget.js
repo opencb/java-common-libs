@@ -1396,8 +1396,7 @@ VariantWidget.prototype = {
                         {
                             xtype: 'checkboxfield',
                             fieldLabel: 'Exclude 1000G Controls',
-                            name: 'exc_1000g_controls',
-                            value:'0.1'
+                            name: 'exc_1000g_controls'
                         },
                         {
                             xtype: 'textfield',
@@ -1406,6 +1405,7 @@ VariantWidget.prototype = {
                             margin: '0 0 0 5',
                             labelWidth: '50%',
                             width: "50%",
+                            value:'0.1'
                         }
                     ]
                 },
