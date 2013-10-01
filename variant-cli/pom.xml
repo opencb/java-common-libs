@@ -11,7 +11,7 @@
 
     <artifactId>variant-cli</artifactId>
 
-    <packaging>war</packaging>
+    <!--<packaging>war</packaging>-->
     <name>bierapp</name>
 
 
@@ -49,6 +49,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>appassembler-maven-plugin</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -87,8 +92,8 @@
                         <configuration>
                             <target>
                                 <exec executable="cp">
-                                    <arg value="target/bierapp.war" />
-                                    <arg value="target/bierapp-${project.version}.war" />
+                                    <arg value="target/bierapp.war"/>
+                                    <arg value="target/bierapp-${project.version}.war"/>
                                 </exec>
                             </target>
                         </configuration>
@@ -112,6 +117,21 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <programs>
+                        <program>
+                            <mainClass>org.opencb.variant.cli.VariantMain</mainClass>
+                            <name>variant.sh</name>
+                        </program>
+                    </programs>
+                </configuration>
+            </plugin>
+
         </plugins>
         <extensions>
             <extension>
