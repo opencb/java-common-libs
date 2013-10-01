@@ -32,7 +32,11 @@ module.exports = function (grunt) {
                 stripBanners: true
             },
             build: {
-                src: ['src/variant.js', 'src/variant-filter-widget.js'],
+                src: [
+                    'src/variant-filter-widget.js',
+                    'src/variant-effect-form.js',
+                    'src/variant.js'
+                ],
                 dest: 'build/<%= meta.version %>/variant-<%= meta.version %>.js'
             }
         },

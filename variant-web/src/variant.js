@@ -7,7 +7,7 @@ function Variant (args){
     //set default args
 	this.suiteId = 6;
 	this.title = '<span class="emph">Vari</span>ant <span class="emph">an</span>alysis <span class="emph">t</span>ool';
-    this.description = '';
+    this.description = 'beta';
     this.version = '1.1.0';
 	this.tools = ["hpg-variant.effect"];
     this.border = true;
@@ -313,13 +313,12 @@ Variant.prototype.jobItemClick = function (record) {
 
         Ext.getCmp(this.id + 'jobsButton').toggle(false);
 
-        var button = Ext.create('Ext.button.Button');
 
         var resultWidget = new ResultWidget({
             targetId: this.panel.getId(),
-            application: 'pathiway',
+            application: 'variant',
             app: this,
-            extItems: [button]
+            layoutName : record.raw.toolName
         });
         resultWidget.draw($.cookie('bioinfo_sid'), record);
 
