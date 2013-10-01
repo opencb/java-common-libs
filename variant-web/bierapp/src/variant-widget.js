@@ -95,7 +95,7 @@ VariantWidget.prototype = {
                 formParams['ref'] = ref;
                 formParams['alt'] = alt;
 
-                var url = "http://localhost:8080/variant/rest/effect";
+                var url = "http://aaleman:8080/variant/rest/effect";
                 console.log(url);
 
 
@@ -145,7 +145,7 @@ VariantWidget.prototype = {
 
 
         // Analysis info
-        _this._updateInfo("s4.db");
+        _this._updateInfo("pruebas.db");
 
 
     },
@@ -159,7 +159,7 @@ VariantWidget.prototype = {
         var formParams = {}
         formParams["db_name"] = db;
 
-        var url = "http://localhost:8080/variant/rest/info";
+        var url = "http://aaleman:8080/variant/rest/info";
 
         $.ajax({
             type: "POST",
@@ -197,7 +197,7 @@ VariantWidget.prototype = {
                                         boxLabel: '0/1',
                                         name: "sampleGT_" + sName,
                                         // checked:true,
-                                        inputValue: '0/1'
+                                        inputValue: '0/1,1/0'
                                     },
                                     {
                                         boxLabel: '1/1',
@@ -215,11 +215,11 @@ VariantWidget.prototype = {
 
                 var ctForm = Ext.getCmp("conseq_type_panel");
                 ctForm.removeAll();
-                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes));
+                ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes,"non_synonymous_codon"));
 
                 var biotypeForm = Ext.getCmp("biotype_panel");
                 biotypeForm.removeAll();
-                biotypeForm.add(_this._createDynCombobox("biotype","Btiotype",  response.biotypes));
+                biotypeForm.add(_this._createDynCombobox("biotype","Btiotype",  response.biotypes,null));
 
 
                 var samples = Ext.getCmp("samples_form_panel");
@@ -872,6 +872,7 @@ VariantWidget.prototype = {
             plugins: 'bufferedrenderer',
             loadMask: true,
             features: [groupingFeature]
+
         });
         return grid;
     },
@@ -930,7 +931,7 @@ VariantWidget.prototype = {
             }
         }
 
-        var url = "http://localhost:8080/variant/rest/variants";
+        var url = "http://aaleman:8080/variant/rest/variants";
         console.log(url);
         _this.grid.setLoading(true);
         $.ajax({
@@ -998,6 +999,7 @@ VariantWidget.prototype = {
         var dataBases = Ext.create('Ext.data.Store', {
             fields: ['value', 'name'],
             data: [
+                {"value": "pruebas.db", "name": "pruebas"},
                 {"value": "s4.db", "name": "s4"},
                 {"value": "s5500.db", "name": "s5500"},
                 {"value": "fpoletta.db", "name": "fpoletta"}
@@ -1135,10 +1137,12 @@ VariantWidget.prototype = {
             name: "miss_gt",
             margin: '0 0 0 5',
             allowBlank: false,
-            width: "20%"
+            width: "20%",
+            value:0
+
         });
 
-        var gt_opt = this._createCombobox("option_miss_gt", "", this.optValues, 0, 10, '0 0 0 5');
+        var gt_opt = this._createCombobox("option_miss_gt", "", this.optValues, 4, 10, '0 0 0 5');
         gt_opt.width = "20%";
 
         return Ext.create('Ext.form.Panel', {
@@ -1387,7 +1391,7 @@ VariantWidget.prototype = {
         });
     },
 
-    _createDynCombobox: function (name,label, data) {
+    _createDynCombobox: function (name,label, data, defaultValue) {
         var _this = this;
 
         return Ext.create('Ext.form.field.ComboBox', {
@@ -1400,7 +1404,8 @@ VariantWidget.prototype = {
             multiSelect: true,
             delimiter: ",",
             editable: false,
-            allowBlank: false
+            allowBlank: false,
+            value: defaultValue
         });
     },
     _createComboboxDB: function (name, label, data, defaultValue, labelWidth, margin) {
