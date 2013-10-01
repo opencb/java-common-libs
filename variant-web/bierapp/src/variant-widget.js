@@ -98,7 +98,7 @@ VariantWidget.prototype = {
                 formParams['ref'] = ref;
                 formParams['alt'] = alt;
 
-                var url = "http://aaleman:8080/variant/rest/effect";
+                var url = "http://localhost:8080/variant/rest/effect";
                 console.log(url);
 
 
@@ -155,6 +155,8 @@ VariantWidget.prototype = {
     _updateInfo: function (db) {
         var _this = this;
 
+
+
         _this.form.setLoading(true);
 
         _this.sampleNames = [];
@@ -162,7 +164,7 @@ VariantWidget.prototype = {
         var formParams = {}
         formParams["db_name"] = db;
 
-        var url = "http://aaleman:8080/variant/rest/info";
+        var url = "http://localhost:8080/variant/rest/info";
 
         $.ajax({
             type: "POST",
@@ -174,9 +176,27 @@ VariantWidget.prototype = {
                 console.log(response);
                 var fcItems = [];
 
+                var sample_cols = [];
+
                 for (var i in response.samples) {
                     var sName = response.samples[i];
+
                     _this.sampleNames.push(sName);
+
+                    Variant.prototype.fields.add(new Ext.data.Field({
+                        name: sName,
+                        type: 'string'
+                    }));
+
+                    var col = Ext.create("Ext.grid.column.Column", {
+                        header: sName,
+                        dataIndex: sName,
+                        sortable: true,
+                        flex: 0.1
+                    });
+
+                    sample_cols.push(col);
+
                     var fc = {
                         xtype: 'fieldcontainer',
                         fieldLabel: sName,
@@ -213,8 +233,16 @@ VariantWidget.prototype = {
                             }
                         ]
                     };
+
+
                     fcItems.push(fc);
                 }
+
+                //_this.grid.getView().bindStore(_this.st);
+                _this.grid.headerCt.insert(3, sample_cols)
+                //_this.grid.reconfigure(_this.st, sample_cols);
+                _this.grid.getView().refresh();
+
 
                 var ctForm = Ext.getCmp("conseq_type_panel");
                 ctForm.removeAll();
@@ -636,33 +664,39 @@ VariantWidget.prototype = {
     },
     _createGrid: function () {
 
+        this.model = Ext.define('Variant',{
+            extend: 'Ext.data.Model',
+           fields:[
+               {name: "chromosome", type: "String"},
+               {name: "position", type: "int"},
+               {name: "alt", type: "String"},
+               {name: "ref", type: "String"},
+               {name: 'stats_id_snp', type: 'string'},
+               {name: 'stats_maf', type: 'float'},
+               {name: 'stats_mgf', type: 'double'},
+               {name: 'stats_allele_maf', type: 'string'},
+               {name: 'stats_genotype_maf', type: 'string'},
+               {name: 'stats_miss_allele', type: 'int'},
+               {name: 'stats_miss_gt', type: 'int'},
+               {name: 'stats_mendel_err', type: 'int'},
+               {name: 'stats_is_indel', type: 'boolean'},
+               {name: 'stats_cases_percent_dominant', type: 'double'},
+               {name: 'stats_controls_percent_dominant', type: 'double'},
+               {name: 'stats_cases_percent_recessive', type: 'double'},
+               {name: 'stats_controls_percent_recessive', type: 'double'},
+               {name: 'gene_name', type: 'string'},
+               {name: 'ct', type: 'string'},
+               {name: "genotypes", type: 'auto'},
+               {name: "effect", type: 'auto'},
+               {name: "controls", type: 'auto'}
+           ]
+
+        });
+
+
         this.st = Ext.create('Ext.data.Store', {
             groupField: 'gene_name',
-            fields: [
-                {name: "chromosome", type: "String"},
-                {name: "position", type: "int"},
-                {name: "alt", type: "String"},
-                {name: "ref", type: "String"},
-                {name: 'stats_id_snp', type: 'string'},
-                {name: 'stats_maf', type: 'float'},
-                {name: 'stats_mgf', type: 'double'},
-                {name: 'stats_allele_maf', type: 'string'},
-                {name: 'stats_genotype_maf', type: 'string'},
-                {name: 'stats_miss_allele', type: 'int'},
-                {name: 'stats_miss_gt', type: 'int'},
-                {name: 'stats_mendel_err', type: 'int'},
-                {name: 'stats_is_indel', type: 'boolean'},
-                {name: 'stats_cases_percent_dominant', type: 'double'},
-                {name: 'stats_controls_percent_dominant', type: 'double'},
-                {name: 'stats_cases_percent_recessive', type: 'double'},
-                {name: 'stats_controls_percent_recessive', type: 'double'},
-                {name: 'gene_name', type: 'string'},
-                {name: 'ct', type: 'string'},
-                {name: "genotypes", type: 'auto'},
-                {name: "effect", type: 'auto'},
-                {name: "controls", type: 'auto'}
-
-            ],
+            model: 'Variant',
             data: [],
             autoLoad: false,
             proxy: {type: 'memory'},
@@ -887,6 +921,12 @@ VariantWidget.prototype = {
         var finalData = [];
         for (var i = 0; i < data.length; i++) {
             var v = data[i];
+
+            for(var key in v.genotypes){
+                v[key] = v.genotypes[key];
+            }
+            delete v.genotypes;
+
             if (v.genes.length <= 1) {
 
                 continue;
@@ -908,10 +948,9 @@ VariantWidget.prototype = {
 
 
             }
+
+
         }
-
-        console.log(data);
-
         return finalData;
     },
     _getResult: function () {
@@ -937,7 +976,7 @@ VariantWidget.prototype = {
             }
         }
 
-        var url = "http://aaleman:8080/variant/rest/variants";
+        var url = "http://localhost:8080/variant/rest/variants";
         console.log(url);
         _this.grid.setLoading(true);
         $.ajax({
@@ -951,40 +990,8 @@ VariantWidget.prototype = {
 
                 _this.st.loadData(data);
 
-                if (response.length > 0 && !_this.firstTime) {
-
-                    var sample_cols = [];
-
-                    _this.firstTime = true;
-                    samples_names = []
-
-                    samples_genotypes = response[0].genotypes;
-                    for (var key in samples_genotypes) {
-                        //                        console.log(key);
-                        var col = Ext.create("Ext.grid.column.Column", {
-                            header: key,
-                            sortable: true,
-                            flex: 0.1,
-                            //                            flex: 1,
-                            renderer: function (val, meta, record) {
-                                var val = record.data.genotypes[meta.column.text];
-                                return val.replace(/-1/g, ".");
-                            }
-                        });
-                        sample_cols.push(col);
-                    }
-                    var sample_col = Ext.create("Ext.grid.column.Column", {
-                        header: "Samples",
-                        columns: sample_cols
-                    });
-
-
-                    _this.grid.headerCt.insert(3, sample_col);
-
-                    _this._addColorPicker();
-
-                }
                 _this.grid.getView().refresh();
+
                 _this.grid.setLoading(false);
 
             },
