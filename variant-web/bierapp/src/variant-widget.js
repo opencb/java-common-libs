@@ -1168,7 +1168,7 @@ VariantWidget.prototype = {
                     line += data.stats_mendel_err;
                     break;
                 case "Is indel?":
-                    line += " data.stats_is_indel";
+                    line += data.stats_is_indel;
                     break;
 
                 case "% Controls dominant":
