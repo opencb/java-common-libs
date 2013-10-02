@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         // Metadata.
         meta: {
-            version: '0.0.3',
+            version: '0.0.4',
             commons: {
                 dir: '../js-common-libs/',
                 //genome viewer contains cellbse and utils

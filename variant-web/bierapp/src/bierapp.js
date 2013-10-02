@@ -7,8 +7,8 @@ function Bierapp(args) {
     //set default args
     this.suiteId = 22;
     this.title = 'BIERapp';
-    this.description = '';
-    this.version = '1.0.1';
+    this.description = 'beta';
+    this.version = '0.0.4';
     this.tools = ["pathiways"];
     this.border = true;
     this.targetId;
