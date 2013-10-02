@@ -1,9 +1,16 @@
 package org.opencb.variant.lib.core.sqlite;
 
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import org.apache.commons.lang.StringUtils;
 import org.opencb.variant.lib.core.formats.*;
 
+import java.io.IOException;
 import java.sql.*;
 import java.sql.ResultSet;
 import java.util.*;
@@ -180,6 +187,11 @@ public class WSSqliteManager {
                 whereClauses.add(processConseqType(options.get("conseq_type[]")));
             }
 
+            if (options.containsKey("genes") && !options.get("genes").equals("")) {
+                whereClauses.add(processGeneList(options.get("genes")));
+//                processGeneList(options.get("genes"));
+            }
+
 
             System.out.println("controlsMAFs = " + controlsMAFs);
 
@@ -282,6 +294,58 @@ public class WSSqliteManager {
         }
 
         return list;
+    }
+
+    private static String processGeneList(String genes) {
+
+        System.out.println("genes = " + genes);
+        List<String> list = new ArrayList<>();
+
+        Client wsRestClient = Client.create();
+        WebResource webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String response = webResource.path(genes).path("info").queryParam("of", "json").get(String.class);
+
+
+        try {
+            JsonNode actualObj = mapper.readTree(response);
+            Iterator<JsonNode> it = actualObj.iterator();
+            Iterator<JsonNode> aux;
+            StringBuilder sb;
+
+            while (it.hasNext()) {
+                JsonNode node = it.next();
+                if (node.isArray()) {
+
+                    aux = node.iterator();
+                    while (aux.hasNext()) {
+                        JsonNode auxNode = aux.next();
+                        sb = new StringBuilder("(");
+
+                        System.out.println("auxNode.get(\"chromosome\").asText() = " + auxNode.get("chromosome").asText());
+
+                        sb.append("variant_stats.chromosome='").append(auxNode.get("chromosome").asText()).append("' AND ");
+                        sb.append("variant_stats.position>=").append(auxNode.get("start")).append(" AND ");
+                        sb.append("variant_stats.position<=").append(auxNode.get("end")).append(" )");
+
+                        list.add(sb.toString());
+                    }
+
+                }
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        String res = "(" + StringUtils.join(list, " OR ") + ")";
+
+        return res;
+
     }
 
     private static boolean filterControls(VariantInfo vi, HashMap<String, String> controlsMAFs) {
