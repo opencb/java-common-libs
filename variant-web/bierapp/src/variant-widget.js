@@ -114,7 +114,7 @@ VariantWidget.prototype = {
 
                         if (response.length > 0) {
 
-                          _this.gridEffect.getStore().loadData(response);
+                            _this.gridEffect.getStore().loadData(response);
 
                             var region = new Region({
                                 chromosome: chr,
@@ -740,9 +740,9 @@ VariantWidget.prototype = {
     },
     _createGrid: function () {
 
-        this.columnsGrid = [
+        var _this = this;
+        _this.columnsGrid = [
 //            new Ext.grid.RowNumberer({width: 30}),
-
             {
                 text: "Variant",
                 dataIndex: 'chromosome',
@@ -834,7 +834,7 @@ VariantWidget.prototype = {
                     },
 
                     {
-                        header: "MAF",
+                        text: "MAF",
                         dataIndex: 'stats_maf',
                         xtype: "templatecolumn",
                         tpl: "{stats_maf} ({stats_allele_maf})",
@@ -858,14 +858,14 @@ VariantWidget.prototype = {
                 hidden: true,
                 columns: [
                     {
-                        text: "Alleles",
+                        text: "Miss. Alleles",
                         dataIndex: 'stats_miss_allele',
                         flex: 0.1,
                         hidden: true,
                         sortable: true
                     },
                     {
-                        text: "Genotypes",
+                        text: "Miss. Genotypes",
                         dataIndex: 'stats_miss_gt',
                         flex: 0.1,
                         hidden: true,
@@ -934,7 +934,7 @@ VariantWidget.prototype = {
                 ]
             }
         ];
-        this.attributes = [
+        _this.attributes = [
             {name: "chromosome", type: "String"},
             {name: "position", type: "int"},
             {name: "alt", type: "String"},
@@ -959,14 +959,14 @@ VariantWidget.prototype = {
             {name: "controls", type: 'auto'}
         ];
 
-        this.model = Ext.define('Variant', {
+        _this.model = Ext.define('Variant', {
             extend: 'Ext.data.Model',
-            fields: this.attributes
+            fields: _this.attributes
         });
 
 
-        this.st = Ext.create('Ext.data.Store', {
-            model: this.model,
+        _this.st = Ext.create('Ext.data.Store', {
+            model: _this.model,
             groupField: 'gene_name',
             data: [],
             autoLoad: false,
@@ -982,24 +982,302 @@ VariantWidget.prototype = {
         });
 
         var grid = Ext.create('Ext.grid.Panel', {
-            title: "Variant Info",
-            flex: 0.25,
-            width: '100%',
-            store: this.st,
-            loadMask: true,
-            border: 0,
-            titleCollapse: true,
-            collapsible: true,
-            //            features: [groupingFeature],
-            columns: this.columnsGrid,
-            plugins: 'bufferedrenderer',
-            loadMask: true,
-            features: [groupingFeature]
+                    title: "Variant Info",
+                    flex: 0.25,
+                    width: '100%',
+                    store: _this.st,
+                    loadMask: true,
+                    border: 0,
+                    titleCollapse: true,
+                    collapsible: true,
+                    //            features: [groupingFeature],
+                    columns: this.columnsGrid,
+                    plugins: 'bufferedrenderer',
+                    loadMask: true,
+                    features: [groupingFeature],
+                    dockedItems: [
+                        {
+                            xtype: 'toolbar',
+                            dock: 'bottom',
+                            items: [
+                                {
+                                    xtype: 'tbtext',
+                                    id: this.id + "numRowsLabel"
+                                },
+                                '->',
+                                {
+                                    xtype: 'button',
+                                    text: 'Export',
+                                    handler: function () {
+                                        if (!Ext.getCmp("exportWindow")) {
+                                            var cbgItems = [];
+                                            var attrList = _this._getColumnNames();
+
+                                            cbgItems.push({
+                                                boxLabel: attrList[0],
+                                                name: 'attr',
+                                                inputValue: attrList[0],
+                                                checked: true,
+                                                disabled: true
+                                            });
+
+                                            for (var i = 1; i < attrList.length; i++) {
+                                                cbgItems.push({
+                                                    boxLabel: attrList[i],
+                                                    name: 'attr',
+                                                    inputValue: attrList[i],
+                                                    checked: true
+                                                });
+                                            }
+
+                                            Ext.create('Ext.window.Window', {
+                                                id: "exportWindow",
+                                                title: "Export attributes",
+                                                height: 250,
+                                                maxHeight: 250,
+                                                width: 400,
+                                                autoScroll: true,
+                                                layout: "vbox",
+                                                modal: true,
+                                                items: [
+                                                    {
+                                                        xtype: 'checkboxgroup',
+                                                        id: _this.id + "cbgAttributes",
+                                                        layout: 'vbox',
+//		            	        				        	   width: 380,
+//		            	        				        	   height: 200,
+//		            	        				        	   maxHeight: 200,
+//		            	        				        	   autoScroll: true,
+//		            	        				        	   defaultType: 'checkboxfield',
+//		            	        				        	   columns: 2,
+//		            	        				        	   vertical: true,
+                                                        items: cbgItems
+                                                    }
+                                                ],
+                                                buttons: [
+                                                    {
+                                                        xtype: 'textfield',
+                                                        id: _this.id + "fileName",
+                                                        emptyText: "enter file name",
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        text: 'Download',
+                                                        href: "none",
+                                                        handler: function () {
+                                                            var fileName = Ext.getCmp(_this.id + "fileName").getValue();
+                                                            if (fileName == "") {
+                                                                fileName = "variants";
+                                                            }
+                                                            var columns = Ext.getCmp(_this.id + "cbgAttributes").getChecked();
+
+                                                            var content = _this._exportToTab(columns);
+                                                            console.log(content);
+
+                                                            this.getEl().set({
+                                                                href: 'data:text/csv,' + encodeURIComponent(content),
+                                                                download: fileName + ".txt"
+                                                            });
+                                                        }
+                                                    }
+                                                ]
+                                            }).show();
+                                        }
+                                    }
+                                }
 
 
-        });
+                            ]
+                        }
+                    ]
+
+
+                }
+            )
+            ;
 
         return grid;
+    },
+
+    _getSubColumn: function (colName) {
+        var _this = this;
+        var subCols = [];
+
+        for (var i = 0; i < _this.columnsGrid.length; i++) {
+            var col = _this.columnsGrid[i];
+
+            if (col["text"] == colName && col["columns"] != null && col["columns"].length > 0) {
+                var sub = col["columns"];
+                for (var j = 0; j < sub.length; j++) {
+                    var elem = sub[j];
+                    subCols.push(elem["text"]);
+                }
+            }
+        }
+        return subCols;
+
+    },
+
+    _exportToTab: function (columns) {
+
+        var _this = this;
+        var colNames = [];
+
+        var headerLine = "", typeLine = "", defValLine = "";
+        for (var i = 0; i < columns.length; i++) {
+            var col = columns[i];
+
+            var subCols = _this._getSubColumn(col["boxLabel"]);
+            console.log(subCols);
+            if (subCols.length > 0) {
+                for (var j = 0; j < subCols.length; j++) {
+                    headerLine += subCols[j] + "\t";
+                    colNames.push(subCols[j]);
+
+                }
+            } else {
+                headerLine += col["boxLabel"] + "\t";
+                colNames.push(col["boxLabel"]);
+            }
+            subCols.splice(0, subCols.length);
+
+        }
+
+        var output = "";
+//        output += "#" + typeLine + "\n";
+//        output += "#" + defValLine + "\n";
+        output += "#" + headerLine + "\n";
+
+        var lines = _this.st.getRange();
+        for (var j = 0; j < lines.length; j++) {
+            output += _this._processFileLine(lines[j].getData(), colNames);
+            output += "\n";
+        }
+
+
+        return output;
+
+
+    },
+
+    _processFileLine: function (data, columns) {
+
+        var line = "";
+        for (var i = 0; i < columns.length; i++) {
+            var col = columns[i];
+            switch (col) {
+                case "Variant":
+                    line += data.chromosome + ":" + data.position;
+                    break
+                case "Alleles":
+                    line += data.ref + ">" + data.alt;
+                    break;
+                case "SNP id":
+                    line += data.stats_id_snp;
+                    break;
+                case "1000G":
+                    if (data.controls["1000G"]) {
+                        line += data.controls["1000G"].maf + "(" + data.controls["1000G"].allele + ")";
+
+                    } else {
+                        line += ".";
+                    }
+                    break;
+                case "BIER":
+                    if (data.controls["BIER"]) {
+
+                        line += data.controls["BIER"].maf + "(" + data.controls["BIER"].allele + ")";
+                    } else {
+                        line += ".";
+                    }
+                    break;
+                case "ESP":
+                    line += "-";
+                    break;
+
+                case "Gene":
+                    line += data.gene_name;
+                    break;
+                case "Consq. Type":
+                    line += data.ct;
+                    break;
+                case "Polyphen":
+                    line += "-";
+                    break;
+                case "Sift":
+                    line += "-";
+                    break;
+                case "Conservation":
+                    line += "-";
+                    break;
+
+                case "Allele Ref":
+                    line += data.ref;
+                    break;
+                case "Allele Alt":
+                    line += data.alt;
+                    break;
+
+                case "MAF":
+                    line += data.stats_maf;
+                    break;
+                case "MGF":
+                    line += data.stats_mgf;
+                    break;
+
+                case "Miss. Alleles":
+                    line += data.stats_miss_allele;
+                    break;
+                case "Miss. Genotypes":
+                    line += data.stats_miss_gt;
+                    break;
+                case "Mendelian Errors":
+                    line += data.stats_mendel_err;
+                    break;
+                case "Is indel?":
+                    line + " data.stats_is_indel";
+                    break;
+
+                case "% Controls dominant":
+                    line += data.stats_cases_percent_dominant;
+                    break;
+
+                case "% Cases dominant":
+                    line += data.stats_controls_percent_dominant;
+                    break;
+                case "% Cases recessive":
+                    line += data.stats_cases_percent_recessive;
+                    break;
+                case "% Controls recessive":
+                    line += data.stats_controls_percent_recessive;
+                    break;
+
+
+                default:
+                    line += data[col];
+            }
+            line += "\t";
+
+        }
+        return line;
+
+    },
+    _getColumnNames: function () {
+        var _this = this;
+
+        var colNames = [];
+        console.log(_this.columnsGrid);
+        for (var i = 0; i < _this.columnsGrid.length; i++) {
+
+            var col = _this.columnsGrid[i];
+            console.log(col.text)
+
+            colNames.push(col.text);
+
+
+        }
+        return colNames;
+
     },
     _prepareData: function (data) {
 
@@ -1109,11 +1387,11 @@ VariantWidget.prototype = {
 
     },
 
-    ////
-    ////
+////
+////
     /*FORM COMPONENTS*/
-    ////
-    ////
+////
+////
 
     _getSelectDataPanel: function () {
 
