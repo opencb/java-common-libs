@@ -183,7 +183,6 @@ public class WSSqliteManager {
 
 
             if (options.containsKey("conseq_type[]") && !options.get("conseq_type[]").equals("")) {
-                System.out.println("ENTRA");
                 whereClauses.add(processConseqType(options.get("conseq_type[]")));
             }
 
@@ -361,6 +360,7 @@ public class WSSqliteManager {
             vc = entry.getValue();
 
             if (controlsMAFs.containsKey(key)) {
+
                 controlMAF = Float.valueOf(controlsMAFs.get(key));
                 if (vc.getMaf() > controlMAF) {
                     return false;

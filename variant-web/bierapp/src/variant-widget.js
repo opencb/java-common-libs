@@ -1711,7 +1711,7 @@ VariantWidget.prototype = {
                         {
                             xtype: 'checkboxfield',
                             fieldLabel: 'Exclude BIER Controls',
-                            name: 'exc_bierg_controls'
+                            name: 'exc_bier_controls'
                         },
                         {
                             xtype: 'textfield',
