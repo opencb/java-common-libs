@@ -946,7 +946,7 @@ VariantWidget.prototype = {
                 columns: this.columnsGrid,
                 plugins: 'bufferedrenderer',
                 loadMask: true,
-                features: [groupingFeature],
+                features: [groupingFeature,{ftype:'summary'}],
                 dockedItems: [
                     {
                         xtype: 'toolbar',
@@ -1276,6 +1276,8 @@ VariantWidget.prototype = {
                 _this.st.loadData(data);
 
                 _this.grid.getView().refresh();
+
+                Ext.getCmp(_this.id + "numRowsLabel").setText(data.length + " variants");
 
                 _this.grid.setLoading(false);
 
