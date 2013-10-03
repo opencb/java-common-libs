@@ -8,7 +8,7 @@ function Bierapp(args) {
     this.suiteId = 22;
     this.title = 'BIERapp';
     this.description = 'beta';
-    this.version = '0.0.5';
+    this.version = '0.0.6';
     this.tools = ["pathiways"];
     this.border = true;
     this.targetId;

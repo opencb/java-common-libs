@@ -11,10 +11,8 @@ function VariantWidget(args) {
     this.width;
     this.height;
 
-
     //set instantiation args, must be last
     _.extend(this, args);
-
 
     this.rendered = false;
     if (this.autoRender) {
@@ -35,8 +33,6 @@ VariantWidget.prototype = {
         this.targetDiv = $('#' + this.targetId)[0];
         this.div = $('<div id="' + this.id + 'VariantWidget" style="height:100%;position:relative;"></div>')[0];
         $(this.targetDiv).append(this.div);
-
-
     },
     draw: function () {
         var _this = this;
@@ -63,6 +59,7 @@ VariantWidget.prototype = {
         this.form = this._createForm();
         this.grid = this._createGrid();
 
+
         //this._addColorPicker();
 
         this.gridEffect = this._createEffectGrid();
@@ -70,11 +67,13 @@ VariantWidget.prototype = {
 
         this.panel.insert(0, this.form);
 
+        this.tabPanel = this._createTabPanel();
+        this.tabPanel.add(this.gridEffect);
+        this.tabPanel.add(this.panelGV);
+
         Ext.getCmp(this.id + 'rightpanel').add(this.grid);
-
-        Ext.getCmp(this.id + 'rightpanel').add(this.gridEffect);
-
-        Ext.getCmp(this.id + 'rightpanel').add(this.panelGV);
+        Ext.getCmp(this.id + 'rightpanel').add(this.tabPanel);
+        this.tabPanel.setActiveTab(0);
 
         this.grid.getSelectionModel().on('selectionchange', function (sm, selectedRecord) {
 
@@ -136,16 +135,24 @@ VariantWidget.prototype = {
 
                     }
                 });
-
-
             }
         });
-
 
         // Analysis info
         _this._updateInfo("pruebas.db");
 
 
+    },
+    _createTabPanel: function () {
+        var tabPanel = Ext.create('Ext.tab.Panel', {
+            title: 'Additional Info',
+            width: '100%',
+            flex: 1,
+            titleCollapse: true,
+            collapsible: true,
+            items: []
+        });
+        return tabPanel;
     },
     _updateInfo: function (db) {
         var _this = this;
@@ -910,13 +917,10 @@ VariantWidget.prototype = {
             {name: "effect", type: 'auto'},
             {name: "controls", type: 'auto'}
         ];
-
         _this.model = Ext.define('Variant', {
             extend: 'Ext.data.Model',
             fields: _this.attributes
         });
-
-
         _this.st = Ext.create('Ext.data.Store', {
             model: _this.model,
             groupField: 'gene_name',
@@ -926,16 +930,13 @@ VariantWidget.prototype = {
             pageSize: 5
 
         });
-
-
         var groupingFeature = Ext.create('Ext.grid.feature.Grouping', {
             groupHeaderTpl: '{groupField}: {groupValue} ({rows.length} Item{[values.rows.length > 1 ? "s" : ""]})',
             enableGroupingMenu: false
         });
-
         var grid = Ext.create('Ext.grid.Panel', {
                 title: "Variant Info",
-                flex: 0.25,
+                flex: 1,
                 width: '100%',
                 store: _this.st,
                 loadMask: true,
@@ -946,7 +947,7 @@ VariantWidget.prototype = {
                 columns: this.columnsGrid,
                 plugins: 'bufferedrenderer',
                 loadMask: true,
-                features: [groupingFeature,{ftype:'summary'}],
+                features: [groupingFeature, {ftype: 'summary'}],
                 dockedItems: [
                     {
                         xtype: 'toolbar',
@@ -1037,7 +1038,6 @@ VariantWidget.prototype = {
 
         return grid;
     },
-
     _getSubColumn: function (colName) {
         var _this = this;
         var subCols = [];
@@ -1056,7 +1056,6 @@ VariantWidget.prototype = {
         return subCols;
 
     },
-
     _exportToTab: function (columns) {
 
         var _this = this;
@@ -1092,7 +1091,6 @@ VariantWidget.prototype = {
 
         return output;
     },
-
     _processFileLine: function (data, columns) {
 
         var line = "";
