@@ -24,21 +24,14 @@ VariantWidget.prototype = {
     render: function (targetId) {
         var _this = this;
         this.targetId = (targetId) ? targetId : this.targetId;
-        if ($('#' + this.targetId).length < 1) {
-            console.log('targetId not found in DOM');
-            return;
-        }
 
-        console.log("Initializing Variant Widget");
-        this.targetDiv = $('#' + this.targetId)[0];
-        this.div = $('<div id="' + this.id + 'VariantWidget" style="height:100%;position:relative;"></div>')[0];
-        $(this.targetDiv).append(this.div);
+        this.rendered = true;
     },
     draw: function () {
         var _this = this;
 
         /* main panel */
-        this.panel = this._createPanel($(this.div).attr('id'));
+        this.panel = this._createPanel(this.targetId);
 
 
         this.optValues = Ext.create('Ext.data.Store', {
@@ -139,7 +132,7 @@ VariantWidget.prototype = {
         });
 
         // Analysis info
-        _this._updateInfo("pruebas.db");
+        // _this._updateInfo("pruebas.db");
 
 
     },
@@ -306,7 +299,7 @@ VariantWidget.prototype = {
     },
     _createPanel: function (targetId) {
         var panel = Ext.create('Ext.panel.Panel', {
-            renderTo: targetId,
+            title: 'widget',
             width: '100%',
             height: '100%',
             border: 0,
@@ -322,6 +315,8 @@ VariantWidget.prototype = {
                 }
             ]
         });
+        targetId.add(panel);
+        targetId.setActiveTab(panel);
         return panel;
     },
     _createGenomeViewer: function (targetId) {

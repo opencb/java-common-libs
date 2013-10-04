@@ -35,6 +35,8 @@ module.exports = function (grunt) {
                 src: [
                     'src/variant-filter-widget.js',
                     'src/variant-effect-form.js',
+                    'src/variant-index-form.js',
+                    'src/variant-widget.js',
                     'src/variant.js'
                 ],
                 dest: 'build/<%= meta.version %>/variant-<%= meta.version %>.js'
