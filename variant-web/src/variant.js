@@ -1,15 +1,15 @@
-function Variant (args){
+function Variant(args) {
     _.extend(this, Backbone.Events);
 
     var _this = this;
     this.id = Utils.genId("Variant");
 
     //set default args
-	this.suiteId = 6;
-	this.title = '<span class="emph">Vari</span>ant <span class="emph">an</span>alysis <span class="emph">t</span>ool';
+    this.suiteId = 6;
+    this.title = '<span class="emph">Vari</span>ant <span class="emph">an</span>alysis <span class="emph">t</span>ool';
     this.description = 'beta';
     this.version = '2.0.0';
-	this.tools = ["hpg-variant.effect"];
+    this.tools = ["hpg-variant.effect","variant"];
     this.border = true;
     this.targetId;
     this.width;
@@ -106,8 +106,8 @@ Variant.prototype = {
 
         this.variantEffectForm = new VariantEffectForm(this);
         this.variantEffectForm.draw({title: "Effect", tabpanel: this.panel});
-//        this.pathipredForm = new PathipredForm(this);
-//        this.pathipredForm.draw({title: "PATHiPRED", tabpanel: this.panel});
+        this.variantIndexForm = new VariantIndexForm(this);
+        this.variantIndexForm.draw({title: "Index VCF", tabpanel: this.panel});
 
         /*check login*/
         if ($.cookie('bioinfo_sid') != null) {
@@ -115,6 +115,17 @@ Variant.prototype = {
         } else {
             this.sessionFinished();
         }
+
+
+
+        /* test variantWidget */
+        var variantWidget = new VariantWidget({
+            targetId: this.panel,
+//            job:record.raw,
+            autoRender:true
+        });
+        variantWidget.draw();
+        /**/
     },
     _createHeaderWidget: function (targetId) {
         var _this = this;
@@ -178,6 +189,14 @@ Variant.prototype = {
                     text: 'Variant Effect',
                     handler: function () {
                         _this.showEffectForm();
+                    }
+                },
+                {
+                    id: this.id + "btnIndex",
+//                    disabled: true,
+                    text: 'Index VCF',
+                    handler: function () {
+                        _this.showIndexForm();
                     }
                 },
                 '->'
@@ -261,14 +280,13 @@ Variant.prototype = {
         });
 
         /**Atach events i listen**/
-        jobListWidget.pagedListViewWidget.on('item:click',function (data) {
+        jobListWidget.pagedListViewWidget.on('item:click', function (data) {
             _this.jobItemClick(data.item);
         });
         jobListWidget.draw();
 
         return jobListWidget;
-    }
-
+    },
 }
 Variant.prototype.sessionInitiated = function () {
     Ext.getCmp(this.id + 'jobsButton').enable();
@@ -292,8 +310,7 @@ Variant.prototype.sessionFinished = function () {
 };
 
 
-
-Variant.prototype.setAccountData = function(response) {
+Variant.prototype.setAccountData = function (response) {
     this.accountData = response;
     this.jobListWidget.setAccountData(this.accountData);
 };
@@ -313,21 +330,31 @@ Variant.prototype.jobItemClick = function (record) {
 
         Ext.getCmp(this.id + 'jobsButton').toggle(false);
 
+        var toolName = record.raw.toolName;
+        if(toolName == 'variant'){
+            record.raw.command = Utils.parseJobCommand(record.raw);
+            var variantWidget = new VariantWidget({
+                targetId: this.panel,
+                job:record.raw,
+                autoRender:true
+            });
+            variantWidget.draw();
+        }else{
+            var resultWidget = new ResultWidget({
+                targetId: this.panel.getId(),
+                application: 'variant',
+                app: this,
+                layoutName: record.raw.toolName
+            });
+            resultWidget.draw($.cookie('bioinfo_sid'), record);
 
-        var resultWidget = new ResultWidget({
-            targetId: this.panel.getId(),
-            application: 'variant',
-            app: this,
-            layoutName : record.raw.toolName
-        });
-        resultWidget.draw($.cookie('bioinfo_sid'), record);
+            console.log(this.jobId)
+            console.log(record.raw);
 
+            /* result widget parses the commandLine on record and adds the command key */
+            var command = resultWidget.job.command.data;
+        }
 
-        console.log(this.jobId)
-        console.log(record.raw);
-
-        /* result widget parses the commandLine on record and adds the command key */
-        var command = resultWidget.job.command.data;
     }
 };
 
@@ -342,7 +369,7 @@ Variant.prototype._checkLogin = function (showForm) {
     }
 };
 
-Variant.prototype.showEffectForm = function (){
+Variant.prototype.showEffectForm = function () {
     var _this = this;
     var showForm = function () {
         if (!_this.panel.contains(_this.variantEffectForm.panel)) {
@@ -352,258 +379,270 @@ Variant.prototype.showEffectForm = function (){
     };
     this._checkLogin(showForm);
 };
+Variant.prototype.showIndexForm = function () {
+    var _this = this;
+    var showForm = function () {
+        if (!_this.panel.contains(_this.variantIndexForm.panel)) {
+            _this.panel.add(_this.variantIndexForm.panel);
+        }
+        _this.panel.setActiveTab(_this.variantIndexForm.panel);
+    };
+    this._checkLogin(showForm);
+};
 
-Variant.prototype.dataItemClick = function (record){
+Variant.prototype.dataItemClick = function (record) {
 //	console.log(record.data.name);
 //	_this.adapter.-------(record.data.DATAID, "js", $.cookie('bioinfo_sid'));
 };
 
 
-
-Variant.prototype.showVCFtools= function (){
-	var _this=this;
-	vcfToolsJobFormPanel = new VCFToolsJobFormPanel({suiteId:this.suiteId});
-	if(Ext.getCmp(vcfToolsJobFormPanel.panelId)==null){
-		vcfToolsJobFormPanel.draw();
-		Ext.getCmp(this.centerPanelId).add(vcfToolsJobFormPanel.panel);
-		vcfToolsJobFormPanel.onRun.addEventListener(function(sender,data){
-			Ext.getCmp(_this.eastPanelId).expand();
-		});
-	}
-	Ext.getCmp(this.centerPanelId).setActiveTab(Ext.getCmp(vcfToolsJobFormPanel.panelId));
+Variant.prototype.showVCFtools = function () {
+    var _this = this;
+    vcfToolsJobFormPanel = new VCFToolsJobFormPanel({suiteId: this.suiteId});
+    if (Ext.getCmp(vcfToolsJobFormPanel.panelId) == null) {
+        vcfToolsJobFormPanel.draw();
+        Ext.getCmp(this.centerPanelId).add(vcfToolsJobFormPanel.panel);
+        vcfToolsJobFormPanel.onRun.addEventListener(function (sender, data) {
+            Ext.getCmp(_this.eastPanelId).expand();
+        });
+    }
+    Ext.getCmp(this.centerPanelId).setActiveTab(Ext.getCmp(vcfToolsJobFormPanel.panelId));
 };
 
-Variant.prototype.showVCFviewer = function (){
-	var _this=this;
-	this.vcfViewer = Ext.getCmp(this.id+"_vcfViewer");
-	if(this.vcfViewer==null){
-		//Collapse to calculate width for genomeMaps
-		pan = 26;
-		if(!Ext.getCmp(this.eastPanelId).isHidden() || Ext.getCmp(this.eastPanelId).collapsed){
-			Ext.getCmp(this.eastPanelId).collapse();
-			pan=0;
-		}
-		var genomeMapsContainer = Ext.create('Ext.container.Container', {
-			id:this.id+'contVCFViewer'
-		});
-		
-		this.vcfViewer = Ext.create('Ext.panel.Panel', {
-			id:this.id+"_vcfViewer",
-			border: false,
-		    title: "VCF Viewer",
-		    closable:true,
-		    items: genomeMapsContainer
-//		    autoScroll:true
-		});
-		
-		Ext.getCmp(this.centerPanelId).add(this.vcfViewer);
+Variant.prototype.showVCFviewer = function () {
+    var _this = this;
+    this.vcfViewer = Ext.getCmp(this.id + "_vcfViewer");
+    if (this.vcfViewer == null) {
+        //Collapse to calculate width for genomeMaps
+        pan = 26;
+        if (!Ext.getCmp(this.eastPanelId).isHidden() || Ext.getCmp(this.eastPanelId).collapsed) {
+            Ext.getCmp(this.eastPanelId).collapse();
+            pan = 0;
+        }
+        var genomeMapsContainer = Ext.create('Ext.container.Container', {
+            id: this.id + 'contVCFViewer'
+        });
 
-		//Once actived, the div element is visible, and genomeMaps can be rendered
-		Ext.getCmp(this.centerPanelId).setActiveTab(this.vcfViewer);
+        this.vcfViewer = Ext.create('Ext.panel.Panel', {
+            id: this.id + "_vcfViewer",
+            border: false,
+            title: "VCF Viewer",
+            closable: true,
+            items: genomeMapsContainer
+//		    autoScroll:true
+        });
+
+        Ext.getCmp(this.centerPanelId).add(this.vcfViewer);
+
+        //Once actived, the div element is visible, and genomeMaps can be rendered
+        Ext.getCmp(this.centerPanelId).setActiveTab(this.vcfViewer);
 //				
 //		console.log(this.vcfViewer.getWidth());
 //		console.log(this.vcfViewer.getHeight());
-		
 
-		//Parse query params to get location.... Also in AVAILABLE_SPECIES, an example location is set.
-		var url = $.url();
-		var location = url.param('location');
-		if(location != null) {
-			var position = location.split(":")[1];
-			var chromosome = location.split(":")[0];
-		}
 
-		this.genomeViewer = new GenomeViewer(this.id+"contVCFViewer", DEFAULT_SPECIES,{
+        //Parse query params to get location.... Also in AVAILABLE_SPECIES, an example location is set.
+        var url = $.url();
+        var location = url.param('location');
+        if (location != null) {
+            var position = location.split(":")[1];
+            var chromosome = location.split(":")[0];
+        }
+
+        this.genomeViewer = new GenomeViewer(this.id + "contVCFViewer", DEFAULT_SPECIES, {
             availableSpecies: AVAILABLE_SPECIES,
-            sidePanelCollapsed:true,
-			width:this.vcfViewer.getWidth(),
-			height:this.vcfViewer.getHeight()
-		});
-		
-		//var toolbarMenu = Ext.create('Ext.toolbar.Toolbar', {
-			//cls:'bio-menubar',
-			//height:27,
-			//padding:'0 0 0 10',
-			//margins : '0 0 0 5',
-			//items : [
-		 		//{
-					//text : 'Add track from VCF file',
-					//handler : function() {
-						//var vcfFileWidget = new VCFFileWidget({viewer:_this.genomeViewer});
-						//vcfFileWidget.draw();
-						//vcfFileWidget.onOk.addEventListener(function(sender, event) {
-							//console.log(event.fileName);
-							//var vcfTrack = new TrackData(event.fileName,{
-								//adapter: event.adapter
-							//});
-							//_this.genomeViewer.addTrack(vcfTrack,{
-								//id:event.fileName,
-								//featuresRender:"MultiFeatureRender",
-									//histogramZoom:80,
-								//height:150,
-								//visibleRange:{start:0,end:100},
-								//featureTypes:FEATURE_TYPES
-							//});
-						//});
-					//}
-				//} 
-			//]
-		//});
-		//this.genomeViewer.setMenuBar(toolbarMenu);
-		//this.genomeViewer.afterRender.addEventListener(function(sender,event){
-			//_this.setTracks(_this.genomeViewer);
-		//});
-		this.genomeViewer.afterRender.addEventListener(function(sender,event){
-			_this.setTracks(_this.genomeViewer);
-			_this.genomeViewer.addSidePanelItems(_this.getGMSidePanelItems());
-		});
-		this.genomeViewer.draw();
-	}else{
-		Ext.getCmp(this.centerPanelId).setActiveTab(this.vcfViewer);
-	}
+            sidePanelCollapsed: true,
+            width: this.vcfViewer.getWidth(),
+            height: this.vcfViewer.getHeight()
+        });
+
+        //var toolbarMenu = Ext.create('Ext.toolbar.Toolbar', {
+        //cls:'bio-menubar',
+        //height:27,
+        //padding:'0 0 0 10',
+        //margins : '0 0 0 5',
+        //items : [
+        //{
+        //text : 'Add track from VCF file',
+        //handler : function() {
+        //var vcfFileWidget = new VCFFileWidget({viewer:_this.genomeViewer});
+        //vcfFileWidget.draw();
+        //vcfFileWidget.onOk.addEventListener(function(sender, event) {
+        //console.log(event.fileName);
+        //var vcfTrack = new TrackData(event.fileName,{
+        //adapter: event.adapter
+        //});
+        //_this.genomeViewer.addTrack(vcfTrack,{
+        //id:event.fileName,
+        //featuresRender:"MultiFeatureRender",
+        //histogramZoom:80,
+        //height:150,
+        //visibleRange:{start:0,end:100},
+        //featureTypes:FEATURE_TYPES
+        //});
+        //});
+        //}
+        //}
+        //]
+        //});
+        //this.genomeViewer.setMenuBar(toolbarMenu);
+        //this.genomeViewer.afterRender.addEventListener(function(sender,event){
+        //_this.setTracks(_this.genomeViewer);
+        //});
+        this.genomeViewer.afterRender.addEventListener(function (sender, event) {
+            _this.setTracks(_this.genomeViewer);
+            _this.genomeViewer.addSidePanelItems(_this.getGMSidePanelItems());
+        });
+        this.genomeViewer.draw();
+    } else {
+        Ext.getCmp(this.centerPanelId).setActiveTab(this.vcfViewer);
+    }
 };
 
-Variant.prototype.setTracks = function(genomeViewer){
-	var geneTrack = new TrackData("gene",{
-		adapter: new CellBaseAdapter({
-			category: "genomic",
-			subCategory: "region",
-			resource: "gene",
-			species: genomeViewer.species,
-			featureCache:{
-				gzip: true,
-				chunkSize:50000
-			}
-		})
-	});
-	genomeViewer.trackSvgLayoutOverview.addTrack(geneTrack,{
-		id:"gene",
-		type:"gene",
-		featuresRender:"MultiFeatureRender",
-		histogramZoom:10,
-		labelZoom:20,
-		height:150,
-		visibleRange:{start:0,end:100},
-		titleVisibility:'hidden',
-		featureTypes:FEATURE_TYPES
-	});
-	//end region track
-	
-	
-	var seqtrack = new TrackData("Sequence",{
-		adapter: new SequenceAdapter({
-			category: "genomic",
-			subCategory: "region",
-			resource: "sequence",
-			species: genomeViewer.species,
-			featureCache:{
-				gzip: true,
-				chunkSize:1000
-			}
-		})
-	});
-	genomeViewer.addTrack(seqtrack,{
-		id:"1",
-		type:"Sequence",
-		title:"Sequenece",
-		featuresRender:"SequenceRender",
-		height:30,
-		visibleRange:{start:100,end:100}
-	});
+Variant.prototype.setTracks = function (genomeViewer) {
+    var geneTrack = new TrackData("gene", {
+        adapter: new CellBaseAdapter({
+            category: "genomic",
+            subCategory: "region",
+            resource: "gene",
+            species: genomeViewer.species,
+            featureCache: {
+                gzip: true,
+                chunkSize: 50000
+            }
+        })
+    });
+    genomeViewer.trackSvgLayoutOverview.addTrack(geneTrack, {
+        id: "gene",
+        type: "gene",
+        featuresRender: "MultiFeatureRender",
+        histogramZoom: 10,
+        labelZoom: 20,
+        height: 150,
+        visibleRange: {start: 0, end: 100},
+        titleVisibility: 'hidden',
+        featureTypes: FEATURE_TYPES
+    });
+    //end region track
 
-	var geneTrack = new TrackData("Gene/Transcript",{
-		adapter: new CellBaseAdapter({
-			category: "genomic",
-			subCategory: "region",
-			resource: "gene",
-			species: genomeViewer.species,
-			featureCache:{
-				gzip: true,
-				chunkSize:50000
-			}
-		})
-	});
-	genomeViewer.addTrack(geneTrack,{
-		id:"2",
-		type:"Gene/Transcript",
-		title:"Gene/Transcript",
-		featuresRender:"GeneTranscriptRender",
-		histogramZoom:20,
-		transcriptZoom:50,
-		height:24,
-		visibleRange:{start:0,end:100},
-		featureTypes:FEATURE_TYPES
-	});
+
+    var seqtrack = new TrackData("Sequence", {
+        adapter: new SequenceAdapter({
+            category: "genomic",
+            subCategory: "region",
+            resource: "sequence",
+            species: genomeViewer.species,
+            featureCache: {
+                gzip: true,
+                chunkSize: 1000
+            }
+        })
+    });
+    genomeViewer.addTrack(seqtrack, {
+        id: "1",
+        type: "Sequence",
+        title: "Sequenece",
+        featuresRender: "SequenceRender",
+        height: 30,
+        visibleRange: {start: 100, end: 100}
+    });
+
+    var geneTrack = new TrackData("Gene/Transcript", {
+        adapter: new CellBaseAdapter({
+            category: "genomic",
+            subCategory: "region",
+            resource: "gene",
+            species: genomeViewer.species,
+            featureCache: {
+                gzip: true,
+                chunkSize: 50000
+            }
+        })
+    });
+    genomeViewer.addTrack(geneTrack, {
+        id: "2",
+        type: "Gene/Transcript",
+        title: "Gene/Transcript",
+        featuresRender: "GeneTranscriptRender",
+        histogramZoom: 20,
+        transcriptZoom: 50,
+        height: 24,
+        visibleRange: {start: 0, end: 100},
+        featureTypes: FEATURE_TYPES
+    });
 };
 
-Variant.prototype.addFileTrack = function(text) {
-	var  _this = this;
-	var fileWidget = null;
-	switch(text){
-		case "VCF":  fileWidget = new VCFFileWidget({viewer:_this.genomeViewer}); break;
-	}
-	if(fileWidget != null){
-		fileWidget.draw();
-		if (_this.wum){
-			_this.headerWidget.onLogin.addEventListener(function (sender){
-				fileWidget.sessionInitiated();
-			});
-			_this.headerWidget.onLogout.addEventListener(function (sender){
-				fileWidget.sessionFinished();
-			});
-		}
-		fileWidget.onOk.addEventListener(function(sender, event) {
-			var fileTrack = new TrackData(event.fileName,{
-				adapter: event.adapter
-			});
+Variant.prototype.addFileTrack = function (text) {
+    var _this = this;
+    var fileWidget = null;
+    switch (text) {
+        case "VCF":
+            fileWidget = new VCFFileWidget({viewer: _this.genomeViewer});
+            break;
+    }
+    if (fileWidget != null) {
+        fileWidget.draw();
+        if (_this.wum) {
+            _this.headerWidget.onLogin.addEventListener(function (sender) {
+                fileWidget.sessionInitiated();
+            });
+            _this.headerWidget.onLogout.addEventListener(function (sender) {
+                fileWidget.sessionFinished();
+            });
+        }
+        fileWidget.onOk.addEventListener(function (sender, event) {
+            var fileTrack = new TrackData(event.fileName, {
+                adapter: event.adapter
+            });
 
-			var id = Math.round(Math.random()*10000);
-			var type = text;
-			
-			_this.genomeViewer.addTrack(fileTrack,{
-				id:id,
-				title:event.fileName,
-				type:type,
-				featuresRender:"MultiFeatureRender",
-	//					histogramZoom:80,
-				height:150,
-				visibleRange:{start:0,end:100},
-				featureTypes:FEATURE_TYPES
-			});
-			
-			var title = event.fileName+'-'+id;
-			//updateActiveTracksPanel(type, title, id, true);
-		});
-	}
+            var id = Math.round(Math.random() * 10000);
+            var type = text;
+
+            _this.genomeViewer.addTrack(fileTrack, {
+                id: id,
+                title: event.fileName,
+                type: type,
+                featuresRender: "MultiFeatureRender",
+                //					histogramZoom:80,
+                height: 150,
+                visibleRange: {start: 0, end: 100},
+                featureTypes: FEATURE_TYPES
+            });
+
+            var title = event.fileName + '-' + id;
+            //updateActiveTracksPanel(type, title, id, true);
+        });
+    }
 };
 
-Variant.prototype.getGMSidePanelItems = function() {
-	var _this = this;
-	var st = Ext.create('Ext.data.TreeStore',{
-	root:{
-		expanded: true,
-		children: [
-			{ text: "VCF", iconCls:"icon-blue-box", leaf:true}
-		]
-	}
-	});
-	return [{
-			xtype:"treepanel",
-			id:this.id+"availableTracksTree",
-			title:"Add VCF track",
-			bodyPadding:"10 0 0 0",
-			useArrows:true,
-			rootVisible: false,
-			hideHeaders:true,
-			store: st,
-			listeners : {
-				itemclick : function (este, record, item, index, e, eOpts){
-					if(record.isLeaf()){
-						_this.addFileTrack("VCF");
-					}
-				}
-			}
-	},
+Variant.prototype.getGMSidePanelItems = function () {
+    var _this = this;
+    var st = Ext.create('Ext.data.TreeStore', {
+        root: {
+            expanded: true,
+            children: [
+                { text: "VCF", iconCls: "icon-blue-box", leaf: true}
+            ]
+        }
+    });
+    return [
+        {
+            xtype: "treepanel",
+            id: this.id + "availableTracksTree",
+            title: "Add VCF track",
+            bodyPadding: "10 0 0 0",
+            useArrows: true,
+            rootVisible: false,
+            hideHeaders: true,
+            store: st,
+            listeners: {
+                itemclick: function (este, record, item, index, e, eOpts) {
+                    if (record.isLeaf()) {
+                        _this.addFileTrack("VCF");
+                    }
+                }
+            }
+        },
 
-	];
+    ];
 }
