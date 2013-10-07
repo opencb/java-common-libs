@@ -110,24 +110,19 @@ VariantWidget.prototype = {
                         console.log(response);
 
                         if (response.length > 0) {
-
                             _this.gridEffect.getStore().loadData(response);
-
                             var region = new Region({
                                 chromosome: chr,
                                 start: pos,
                                 end: pos
                             });
-
+                            console.log(region);
+                            debugger
                             _this.gv.setRegion(region);
-
-
                         } else {
                             _this.gridEffect.getStore().removeAll();
                         }
                         _this.gridEffect.setLoading(false);
-
-
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         console.log('Error loading Effect');
@@ -135,6 +130,7 @@ VariantWidget.prototype = {
 
                     }
                 });
+
             }
         });
 

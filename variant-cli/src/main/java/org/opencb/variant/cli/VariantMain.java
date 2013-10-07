@@ -52,6 +52,7 @@ public class VariantMain {
         options.addOption(OptionFactory.createOption("help", "h", "Print this message", false, false));
         options.addOption(OptionFactory.createOption("vcf-file", "Input VCF file", true, true));
         options.addOption(OptionFactory.createOption("outdir", "o", "Output dir", true, true));
+        options.addOption(OptionFactory.createOption("output-file", "Output filename", false, true));
         options.addOption(OptionFactory.createOption("out-file", "File output", false, false));
         options.addOption(OptionFactory.createOption("ped-file", "Ped file", false, true));
         options.addOption(OptionFactory.createOption("control", "Control filename", false, true));
@@ -75,6 +76,7 @@ public class VariantMain {
         VariantAnnotRunner var;
 
         parse(args, false);
+        String outputFile;
 
         switch (command) {
             case "index":
@@ -96,7 +98,14 @@ public class VariantMain {
 
             case "stats":
                 System.out.println("===== STATS =====");
-                vr = new VariantStatsRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/stastCli.db", commandLine.getOptionValue("ped-file"));
+
+                outputFile = "stats.db";
+
+                if (commandLine.hasOption("output-file")) {
+                    outputFile = commandLine.getOptionValue("output-file");
+                }
+
+                vr = new VariantStatsRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/" + outputFile, commandLine.getOptionValue("ped-file"));
 
                 if (commandLine.hasOption("out-file")) {
                     vr.writer(new VariantStatsFileDataWriter(commandLine.getOptionValue("outdir")));
@@ -114,11 +123,18 @@ public class VariantMain {
             case "annot":
                 System.out.println("===== ANNOT =====");
 
+
+                outputFile = "annot.vcf";
+
+                if (commandLine.hasOption("output-file")) {
+                    outputFile = commandLine.getOptionValue("output-file");
+                }
+
                 List<VcfAnnotator> listAnnots = new ArrayList<>();
                 VcfAnnotator control = null;
                 String infoPrefix = commandLine.hasOption("control-prefix") ? commandLine.getOptionValue("control-prefix") : "CONTROL";
 
-                var = new VariantAnnotRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/" + "annot.vcf");
+                var = new VariantAnnotRunner(commandLine.getOptionValue("vcf-file"), commandLine.getOptionValue("outdir") + "/" + outputFile);
 
                 if (commandLine.hasOption("control-list")) {
                     HashMap<String, String> controlList = getControlList(commandLine.getOptionValue("control-list"));
