@@ -111,9 +111,9 @@ VariantWidget.prototype = {
                                 end: pos
                             });
                             console.log(region);
-//                            if (_this.gv) {
+                            if (!_.isUndefined(_this.gv)) {
                                 _this.gv.setRegion(region);
-//                            }
+                            }
                         } else {
                             _this.gridEffect.getStore().removeAll();
                         }
