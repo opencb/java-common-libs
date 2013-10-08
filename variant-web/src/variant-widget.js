@@ -93,15 +93,16 @@ VariantWidget.prototype = {
 
 
                 _this.gridEffect.setLoading(true);
-
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: formParams,
-                    dataType: 'json',
+                CellBaseManager.get({
+                    host: 'http://ws.bioinfo.cipf.es/cellbase/rest',
+                    version: 'latest',
+                    species: 'hsa', //TODO multiples species
+                    category: 'genomic',
+                    subCategory: 'variant',
+                    query: chr + ':' + pos + ':' + ref + ':' + alt,
+                    resource: 'consequence_type',
                     success: function (response, textStatus, jqXHR) {
                         console.log(response);
-
                         if (response.length > 0) {
                             _this.gridEffect.getStore().loadData(response);
                             var region = new Region({
@@ -110,8 +111,9 @@ VariantWidget.prototype = {
                                 end: pos
                             });
                             console.log(region);
-                            debugger
-                            _this.gv.setRegion(region);
+//                            if (_this.gv) {
+                                _this.gv.setRegion(region);
+//                            }
                         } else {
                             _this.gridEffect.getStore().removeAll();
                         }
@@ -128,7 +130,7 @@ VariantWidget.prototype = {
         });
 
         // Analysis info
-        // _this._updateInfo("pruebas.db");
+        _this._updateInfo();
 
 
     },
@@ -143,7 +145,7 @@ VariantWidget.prototype = {
         });
         return tabPanel;
     },
-    _updateInfo: function (db) {
+    _updateInfo: function () {
         var _this = this;
 
 
@@ -163,16 +165,15 @@ VariantWidget.prototype = {
 
         _this.sampleNames = [];
 
-        var formParams = {};
-        formParams["db_name"] = db;
+        var vcfFile = this.job.command.data['vcf-file'];
+        vcfFile = vcfFile.substring(vcfFile.lastIndexOf('/') + 1);
+        vcfFile = vcfFile.substring(0, vcfFile.lastIndexOf('.')) + '.db';
 
-        var url = "http://aaleman:8080/variant/rest/info";
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: formParams,
-            dataType: 'json',
+        OpencgaManager.variantInfo({
+            accountId: $.cookie("bioinfo_account"),
+            sessionId: $.cookie("bioinfo_sid"),
+            fileName: vcfFile,
+            jobId: this.job.id,
             success: function (response, textStatus, jqXHR) {
                 var fcItems = [];
                 for (var i in response.samples) {
@@ -238,9 +239,10 @@ VariantWidget.prototype = {
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log('WEB SERVICE ERROR: info');
                 _this.form.setLoading(false);
-
             }
         });
+
+
     },
     _addSampleColumn: function (sampleName) {
 
@@ -300,6 +302,7 @@ VariantWidget.prototype = {
             height: '100%',
             border: 0,
             layout: 'hbox',
+            closable: true,
             cls: 'ocb-border-top-lightgrey',
             items: [
                 {
@@ -383,7 +386,6 @@ VariantWidget.prototype = {
                         })
                     });
 
-                    genomeViewer.addTrack(this.sequence);
 
                     this.gene = new GeneTrack({
                         targetId: null,
@@ -414,8 +416,6 @@ VariantWidget.prototype = {
                             featureConfig: FEATURE_CONFIG.gene
                         })
                     });
-
-                    genomeViewer.addTrack(this.gene);
 
                     this.snp = new FeatureTrack({
                         targetId: null,
@@ -450,12 +450,12 @@ VariantWidget.prototype = {
                         })
                     });
 
+
+                    genomeViewer.addTrack(this.sequence);
+                    genomeViewer.addTrack(this.gene);
                     genomeViewer.addTrack(this.snp);
 
-
                     _this.gv = genomeViewer;
-
-
                 }
             }
         });
@@ -480,7 +480,7 @@ VariantWidget.prototype = {
         });
 
         var regionItems = [
-            this._getSelectDataPanel(),
+            //  this._getSelectDataPanel(),
             this._getChrStartEnd(),
             this._getRegionList(),
             this._getGenes(),
@@ -1233,7 +1233,6 @@ VariantWidget.prototype = {
         // Remove all elements from gridEffect
         _this.gridEffect.getStore().removeAll();
 
-
         var values = this.form.getForm().getValues();
 
         console.log(values);
@@ -1250,14 +1249,14 @@ VariantWidget.prototype = {
             }
         }
 
-        var url = "http://aaleman:8080/variant/rest/variants";
-        console.log(url);
         _this.grid.setLoading(true);
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: formParams,
-            dataType: 'json',
+
+        OpencgaManager.variants({
+            accountId: $.cookie("bioinfo_account"),
+            sessionId: $.cookie("bioinfo_sid"),
+            fileName: 'file.db',
+            jobId: this.job.id,
+            formData: formParams,
             success: function (response, textStatus, jqXHR) {
                 console.log(response);
                 var data = _this._prepareData(response);
@@ -1276,6 +1275,7 @@ VariantWidget.prototype = {
                 _this.grid.setLoading(false);
             }
         });
+
 
     },
     _addColorPicker: function () {

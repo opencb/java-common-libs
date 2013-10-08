@@ -118,14 +118,14 @@ Variant.prototype = {
 
 
 
-        /* test variantWidget */
-        var variantWidget = new VariantWidget({
-            targetId: this.panel,
-//            job:record.raw,
-            autoRender:true
-        });
-        variantWidget.draw();
-        /**/
+//        /* test variantWidget */
+//        var variantWidget = new VariantWidget({
+//            targetId: this.panel,
+////            job:record.raw,
+//            autoRender:true
+//        });
+//        variantWidget.draw();
+//        /**/
     },
     _createHeaderWidget: function (targetId) {
         var _this = this;

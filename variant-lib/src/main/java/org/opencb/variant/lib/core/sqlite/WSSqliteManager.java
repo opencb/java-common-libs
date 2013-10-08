@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class WSSqliteManager {
 
-    private static final String pathDB = "/opt/data/data/";
+//    private static final String pathDB = "/opt/data/data/";
 
     public static List<VariantInfo> getRecords(HashMap<String, String> options) {
 
@@ -38,7 +38,8 @@ public class WSSqliteManager {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+//            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+            con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
 
             List<String> whereClauses = new ArrayList<>(10);
 
@@ -498,7 +499,7 @@ public class WSSqliteManager {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+            con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
 
             String chr = options.get("chr");
             int pos = Integer.valueOf(options.get("pos"));
@@ -549,7 +550,7 @@ public class WSSqliteManager {
 
         try {
             Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:" + pathDB + dbName);
+            con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
 
             String sql = "SELECT * FROM sample ;";
 

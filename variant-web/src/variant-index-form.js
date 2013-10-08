@@ -53,9 +53,6 @@ VariantIndexForm.prototype.getPanels = function () {
         items: items
     });
 
-//    Ext.getCmp(this.id + 'jobname').setValue("Example vcf 5000");
-//    Ext.getCmp(this.id + 'jobdescription').setValue("VCF file with ~5000 variants");
-
     return [this._getExampleForm(), form];
 };
 
@@ -65,7 +62,7 @@ VariantIndexForm.prototype._getExampleForm = function () {
 
     var example1 = Ext.create('Ext.Component', {
         width: 275,
-        html: '<span class="u"><span class="emph u">Load example 1.</span> <span class="info s110">VCF file with ~3500 variants</span></span>',
+        html: '<span class="u"><span class="emph u">Load example 1.</span> <span class="info s110">VCF file</span></span>',
         cls: 'dedo',
         listeners: {
             afterrender: function () {
@@ -128,43 +125,13 @@ VariantIndexForm.prototype._getBrowseForm = function () {
 
 
 VariantIndexForm.prototype.loadExample1 = function () {
+    Ext.getCmp(this.id + 'vcf-file').setText('<span class="emph">Example file.vcf</span>', false);
+    Ext.getCmp(this.id + 'vcf-file' + 'hidden').setValue('example_file.vcf');
 
-    Ext.getCmp(this.id + 'vcf-file').setText('<span class="emph">Example 1</span>', false);
-    Ext.getCmp(this.id + 'vcf-file' + 'hidden').setValue('example_CHB.exon.2010_03.sites.fixed.vcf');
+    Ext.getCmp(this.id + 'ped-file').setText('<span class="emph">Example file.ped</span>', false);
+    Ext.getCmp(this.id + 'ped-file' + 'hidden').setValue('example_file.ped');
 
 
-    Ext.getCmp(this.id + 'jobname').setValue("Example vcf 3500");
-    Ext.getCmp(this.id + 'jobdescription').setValue("VCF file with ~3500 variants");
-
-    Ext.getCmp("Only SNPs_" + this.id).setValue(true);
-//
-//
-//
-//	Ext.getCmp("Only SNPs_"+this.id).setValue(true);
-//	this.fileBrowserLabel.setText('<span class="emph">CHB_exon.vcf</span> <span class="info">(server)</span>',false);
-//
-//	Ext.getCmp("Non-synonymous coding_"+this.id).setValue(true);
-//	Ext.getCmp("Synonymous coding_"+this.id).setValue(true);
-//	Ext.getCmp("Splice sites_"+this.id).setValue(true);
-//	Ext.getCmp("Stop gained/lost_"+this.id).setValue(true);
-//	Ext.getCmp("Upstream_"+this.id).setValue(true);
-//	Ext.getCmp("Downstream_"+this.id).setValue(true);
-//	Ext.getCmp("5' UTR_"+this.id).setValue(true);
-//	Ext.getCmp("3' UTR_"+this.id).setValue(false);
-//	Ext.getCmp("Non-coding RNA_"+this.id).setValue(true);
-//	Ext.getCmp("Intergenic_"+this.id).setValue(false);
-//
-//	Ext.getCmp("Jaspar TFBS regions_"+this.id).setValue(true);
-//	Ext.getCmp("miRNA targets_"+this.id).setValue(true);
-//	Ext.getCmp("Other regulatory regions (CTCF, DNaseI, ...)_"+this.id).setValue(false);
-//
-//	Ext.getCmp("SNPs_"+this.id).setValue(true);
-//	Ext.getCmp("Uniprot Natural Variants_"+this.id).setValue(false);
-//
-//	Ext.getCmp("Phenotypic annotated SNPs_"+this.id).setValue(false);
-//	Ext.getCmp("Disease mutations_"+this.id).setValue(false);
-//	Ext.getCmp(this.id+"speciesCombo").select(Ext.getCmp(this.id+"speciesCombo").findRecordByValue("hsa"));
-//	console.log(this.paramsWS);
-////	this.validateRunButton();
-
+    Ext.getCmp(this.id + 'jobname').setValue("VCF example");
+    Ext.getCmp(this.id + 'jobdescription').setValue("VCF example");
 };

@@ -304,5 +304,31 @@ public class VariantInfo {
         this.controls = controls;
     }
 
-
+    @Override
+    public String toString() {
+        return "VariantInfo{" +
+                "chromosome='" + chromosome + '\'' +
+                ", position=" + position +
+                ", ref='" + ref + '\'' +
+                ", alt='" + alt + '\'' +
+                ", gene_name='" + gene_name + '\'' +
+                ", stats_maf=" + stats_maf +
+                ", stats_mgf=" + stats_mgf +
+                ", stats_allele_maf='" + stats_allele_maf + '\'' +
+                ", stats_genotype_maf='" + stats_genotype_maf + '\'' +
+                ", stats_miss_allele=" + stats_miss_allele +
+                ", stats_miss_gt=" + stats_miss_gt +
+                ", stats_mendel_err=" + stats_mendel_err +
+                ", stats_is_indel=" + stats_is_indel +
+                ", stats_cases_percent_dominant=" + stats_cases_percent_dominant +
+                ", stats_controls_percent_dominant=" + stats_controls_percent_dominant +
+                ", stats_cases_percent_recessive=" + stats_cases_percent_recessive +
+                ", stats_controls_percent_recessive=" + stats_controls_percent_recessive +
+                ", stats_id_snp='" + stats_id_snp + '\'' +
+                ", genes=" + genes +
+                ", controls=" + controls +
+                ", effect=" + effect +
+                ", genotypes=" + genotypes +
+                '}';
+    }
 }
