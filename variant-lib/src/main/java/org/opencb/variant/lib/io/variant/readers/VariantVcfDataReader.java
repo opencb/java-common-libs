@@ -8,14 +8,13 @@ import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 import org.opencb.variant.lib.core.formats.*;
 
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -45,10 +44,17 @@ public class VariantVcfDataReader implements VariantDataReader {
         try {
             this.file = new File(this.filename);
             vcf4 = new Vcf4();
-
             FileUtils.checkFile(this.file);
 
-            this.reader = new BufferedReader(new FileReader(this.file));
+            if(Files.probeContentType(file.toPath()).contains("gzip")){
+                this.reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(this.file))));
+            }   else{
+                this.reader = new BufferedReader(new FileReader(this.file));
+            }
+
+
+
+
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -188,7 +194,15 @@ public class VariantVcfDataReader implements VariantDataReader {
         List<String> headerLine;
         String line;
         String[] fields;
-        BufferedReader localBufferedReader = new BufferedReader(new FileReader(file));
+
+        BufferedReader localBufferedReader;
+        if(Files.probeContentType(file.toPath()).contains("gzip")){
+            localBufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(this.file))));
+        }   else{
+            localBufferedReader = new BufferedReader(new FileReader(this.file));
+        }
+
+
         boolean header = false;
         while ((line = localBufferedReader.readLine()) != null && line.startsWith("#")) {
 
