@@ -211,13 +211,16 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
         }
 
-        String jsonName = FilenameUtils.getBaseName(dbName) + ".json";
+
+        String jsonName = FilenameUtils.getFullPath(dbName) + FilenameUtils.getBaseName(dbName) + ".json";
+        System.out.println("jsonName = " + jsonName);
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         ObjectWriter jsonObjectWriter = jsonObjectMapper.writerWithDefaultPrettyPrinter();
 
         try {
             String res = jsonObjectWriter.writeValueAsString(vi);
             PrintWriter out = new PrintWriter(jsonName);
+//            System.out.println(res);
             out.println(res);
             out.close();
         } catch (JsonProcessingException | FileNotFoundException e) {
