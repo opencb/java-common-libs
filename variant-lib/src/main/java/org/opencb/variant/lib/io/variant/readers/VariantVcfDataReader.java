@@ -52,11 +52,8 @@ public class VariantVcfDataReader implements VariantDataReader {
                 this.reader = new BufferedReader(new FileReader(this.file));
             }
 
-
-
-
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
 

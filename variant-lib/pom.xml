@@ -23,6 +23,10 @@
             <artifactId>bioformats</artifactId>
             <version>0.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>commons-lang</groupId>
