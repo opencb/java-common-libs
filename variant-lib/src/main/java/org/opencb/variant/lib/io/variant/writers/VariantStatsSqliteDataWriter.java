@@ -1,8 +1,14 @@
 package org.opencb.variant.lib.io.variant.writers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.commons.io.FilenameUtils;
 import org.bioinfo.commons.utils.StringUtils;
 import org.opencb.variant.lib.core.formats.*;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +27,16 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
     private Statement stmt;
     private PreparedStatement pstmt;
     private boolean createdSampleTable;
+    private VariantAnalysisInfo vi;
 
 
     public VariantStatsSqliteDataWriter(String dbName) {
+
         this.dbName = dbName;
-        stmt = null;
-        pstmt = null;
-        createdSampleTable = false;
+        this.stmt = null;
+        this.pstmt = null;
+        this.createdSampleTable = false;
+        this.vi = new VariantAnalysisInfo();
     }
 
     @Override
@@ -202,6 +211,19 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
         }
 
+        String jsonName = FilenameUtils.getBaseName(dbName) + ".json";
+        ObjectMapper jsonObjectMapper = new ObjectMapper();
+        ObjectWriter jsonObjectWriter = jsonObjectMapper.writerWithDefaultPrettyPrinter();
+
+        try {
+            String res = jsonObjectWriter.writeValueAsString(vi);
+            PrintWriter out = new PrintWriter(jsonName);
+            out.println(res);
+            out.close();
+        } catch (JsonProcessingException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 
@@ -259,25 +281,34 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
             sql = "INSERT INTO global_stats VALUES ('NUM_VARIANTS', 'Number of variants'," + globalStats.getVariantsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_variants", globalStats.getVariantsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_SAMPLES', 'Number of samples'," + globalStats.getSamplesCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_samples", globalStats.getSamplesCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_BIALLELIC', 'Number of biallelic variants'," + globalStats.getBiallelicsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_biallelic", globalStats.getBiallelicsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_MULTIALLELIC', 'Number of multiallelic variants'," + globalStats.getMultiallelicsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_multiallelic", globalStats.getMultiallelicsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_SNPS', 'Number of SNP'," + globalStats.getSnpsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_snps", globalStats.getSnpsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_INDELS', 'Number of indels'," + globalStats.getIndelsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_indels", globalStats.getIndelsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_TRANSITIONS', 'Number of transitions'," + globalStats.getTransitionsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_transitions", globalStats.getTransitionsCount());
             sql = "INSERT INTO global_stats VALUES ('NUM_TRANSVERSSIONS', 'Number of transversions'," + globalStats.getTransversionsCount() + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("num_transversions", globalStats.getTransversionsCount());
             if (globalStats.getTransversionsCount() > 0) {
                 titv = globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount();
             }
             sql = "INSERT INTO global_stats VALUES ('TITV_RATIO', 'Ti/TV ratio'," + titv + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("titv_ratio", titv);
             if (globalStats.getVariantsCount() > 0) {
                 pass = globalStats.getPassCount() / (float) globalStats.getVariantsCount();
                 avg = globalStats.getAccumQuality() / (float) globalStats.getVariantsCount();
@@ -285,12 +316,16 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
             sql = "INSERT INTO global_stats VALUES ('PERCENT_PASS', 'Percentage of PASS'," + (pass * 100) + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("percent_pass", pass * 100);
 
             sql = "INSERT INTO global_stats VALUES ('AVG_QUALITY', 'Average quality'," + avg + ");";
             stmt.executeUpdate(sql);
+            vi.addGlobalStats("avg_quality", avg);
 
             con.commit();
             stmt.close();
+
+            ;
 
         } catch (SQLException e) {
             System.err.println("GLOBAL_STATS: " + e.getClass().getName() + ": " + e.getMessage());
@@ -360,6 +395,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt = con.prepareStatement(sql);
                 VcfRecord v = data.get(0);
                 for (Map.Entry<String, Integer> entry : v.getSampleIndex().entrySet()) {
+                    vi.addSample(entry.getKey());
                     pstmt.setString(1, entry.getKey());
                     pstmt.execute();
                 }
@@ -486,6 +522,9 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt.setString(25, v.getCodonChange());
 
                 pstmt.execute();
+
+                vi.addConsequenceType(v.getConsequenceTypeObo());
+                vi.addBiotype(v.getFeatureBiotype());
 
             }
             con.commit();

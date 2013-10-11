@@ -582,7 +582,7 @@ public class WSSqliteManager {
 
             }
 
-            vi.setConsequenceTypes(cts);
+//            vi.setConsequenceTypes(cts);
             stmt.close();
 
 
@@ -598,7 +598,7 @@ public class WSSqliteManager {
 
             }
 
-            vi.setBiotypes(biotypes);
+//            vi.setBiotypes(biotypes);
             stmt.close();
             con.close();
 
