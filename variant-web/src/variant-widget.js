@@ -28,6 +28,7 @@ VariantWidget.prototype = {
         this.dbName = this.job.command.data['vcf-file'];
         this.dbName = this.dbName.substring(this.dbName.lastIndexOf('/') + 1);
         this.dbName = this.dbName.substring(0, this.dbName.lastIndexOf('.')) + '.db';
+        this.statsName = this.dbName.substring(0, this.dbName.lastIndexOf('.')) + '.json';
 
         this.rendered = true;
     },
@@ -169,12 +170,14 @@ VariantWidget.prototype = {
 
         _this.sampleNames = [];
 
-        OpencgaManager.variantInfo({
+        OpencgaManager.poll({
             accountId: $.cookie("bioinfo_account"),
             sessionId: $.cookie("bioinfo_sid"),
-            fileName: this.dbName,
+            filename: this.statsName,
             jobId: this.job.id,
-            success: function (response, textStatus, jqXHR) {
+            success: function (data, textStatus, jqXHR) {
+                var response = JSON.parse(data);
+                console.log(response);
                 var fcItems = [];
                 for (var i in response.samples) {
                     var sName = response.samples[i];
@@ -224,11 +227,11 @@ VariantWidget.prototype = {
                 var ctForm = Ext.getCmp("conseq_type_panel");
                 ctForm.removeAll();
                 ctForm.add(_this._createDynCombobox("conseq_type", "Consequence Type", response.consequenceTypes, "non_synonymous_codon"));
-
+//
                 var biotypeForm = Ext.getCmp("biotype_panel");
                 biotypeForm.removeAll();
                 biotypeForm.add(_this._createDynCombobox("biotype", "Btiotype", response.biotypes, null));
-
+//
                 var samples = Ext.getCmp("samples_form_panel");
                 samples.removeAll();
                 samples.add(fcItems);
@@ -304,6 +307,12 @@ VariantWidget.prototype = {
             layout: 'hbox',
             closable: true,
             cls: 'ocb-border-top-lightgrey',
+            tbar: {items: [
+                {text: '<span style="color:red">Summary</span>', handler: function () {
+                    //TODO
+                    alert("summary")
+                }}
+            ]},
             items: [
                 {
                     id: this.id + 'rightpanel',
@@ -1736,10 +1745,17 @@ VariantWidget.prototype = {
     _createDynCombobox: function (name, label, data, defaultValue) {
         var _this = this;
 
+        var dataAux = [];
+        for (var key in data) {
+            if (key != '.') {
+                dataAux.push(key);
+            }
+        }
+
         return Ext.create('Ext.form.field.ComboBox', {
             name: name,
             fieldLabel: label,
-            store: data,
+            store: dataAux,
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
