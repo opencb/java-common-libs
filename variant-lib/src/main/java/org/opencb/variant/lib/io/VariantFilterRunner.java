@@ -8,6 +8,7 @@ import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
 import org.opencb.variant.lib.io.variant.readers.VariantDataReader;
 import org.opencb.variant.lib.io.variant.readers.VariantVcfDataReader;
 import org.opencb.variant.lib.io.variant.writers.VariantDataWriter;
+import org.opencb.variant.lib.io.variant.writers.VariantStatsDataWriter;
 import org.opencb.variant.lib.io.variant.writers.VariantVcfDataWriter;
 
 import java.util.List;
@@ -77,5 +78,16 @@ public class VariantFilterRunner {
 
     public void filters(List<VcfFilter> filters) {
         this.filters = filters;
+    }
+
+
+    public VariantFilterRunner reader(VariantDataReader reader) {
+        this.vcfReader = reader;
+        return this;
+    }
+
+    public VariantFilterRunner writer(VariantDataWriter writer) {
+        this.vcfWriter = writer;
+        return this;
     }
 }
