@@ -25,6 +25,10 @@ VariantWidget.prototype = {
         var _this = this;
         this.targetId = (targetId) ? targetId : this.targetId;
 
+        this.dbName = this.job.command.data['vcf-file'];
+        this.dbName = this.dbName.substring(this.dbName.lastIndexOf('/') + 1);
+        this.dbName = this.dbName.substring(0, this.dbName.lastIndexOf('.')) + '.db';
+
         this.rendered = true;
     },
     draw: function () {
@@ -165,14 +169,10 @@ VariantWidget.prototype = {
 
         _this.sampleNames = [];
 
-        var vcfFile = this.job.command.data['vcf-file'];
-        vcfFile = vcfFile.substring(vcfFile.lastIndexOf('/') + 1);
-        vcfFile = vcfFile.substring(0, vcfFile.lastIndexOf('.')) + '.db';
-
         OpencgaManager.variantInfo({
             accountId: $.cookie("bioinfo_account"),
             sessionId: $.cookie("bioinfo_sid"),
-            fileName: vcfFile,
+            fileName: this.dbName,
             jobId: this.job.id,
             success: function (response, textStatus, jqXHR) {
                 var fcItems = [];
@@ -1254,7 +1254,7 @@ VariantWidget.prototype = {
         OpencgaManager.variants({
             accountId: $.cookie("bioinfo_account"),
             sessionId: $.cookie("bioinfo_sid"),
-            fileName: 'file.db',
+            fileName: this.dbName,
             jobId: this.job.id,
             formData: formParams,
             success: function (response, textStatus, jqXHR) {
