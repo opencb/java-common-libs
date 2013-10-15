@@ -6,7 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.opencb.variant.lib.io.VariantStatsRunner;
-import org.opencb.variant.lib.io.variant.writers.VariantStatsFileDataWriter;
+import org.opencb.variant.lib.io.variant.writers.stats.VariantStatsFileDataWriter;
 
 /**
  * Created with IntelliJ IDEA.

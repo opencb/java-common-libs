@@ -1,10 +1,10 @@
-package org.opencb.variant.lib.io.variant.writers;
+package org.opencb.variant.lib.io.variant.writers.vcf;
 
 import org.opencb.variant.lib.core.formats.VcfRecord;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,14 +13,13 @@ import java.util.zip.GZIPOutputStream;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfGzipDataWriter implements VariantDataWriter {
+public class VariantVcfDataWriter implements VariantDataWriter {
 
-    private BufferedWriter printer;
+    private PrintWriter printer;
     private String filename;
 
 
-
-    public VariantVcfGzipDataWriter(String filename) {
+    public VariantVcfDataWriter(String filename) {
         this.filename = filename;
     }
 
@@ -29,8 +28,8 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter {
 
         boolean res = true;
         try {
-            printer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(this.filename))));
-        } catch (IOException e) {
+            printer = new PrintWriter(filename);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             res = false;
         }
@@ -41,11 +40,7 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter {
     @Override
     public boolean close() {
 
-        try {
-            printer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        printer.close();
 
         return true;
     }
@@ -65,11 +60,7 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter {
     @Override
     public void writeVcfHeader(String header) {
 
-        try {
-            printer.append(header).append("\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        printer.append(header);
 
     }
 
@@ -77,11 +68,7 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter {
     public void writeBatch(List<VcfRecord> batch) {
 
         for(VcfRecord record: batch){
-            try {
-                printer.append(record.toString()).append("\n");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            printer.append(record.toString()).append("\n");
         }
     }
 }

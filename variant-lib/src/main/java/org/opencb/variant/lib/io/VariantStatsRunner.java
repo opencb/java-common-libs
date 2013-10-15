@@ -8,8 +8,8 @@ import org.opencb.variant.lib.io.ped.readers.PedFileDataReader;
 import org.opencb.variant.lib.io.ped.writers.PedDataWriter;
 import org.opencb.variant.lib.io.variant.readers.VariantDataReader;
 import org.opencb.variant.lib.io.variant.readers.VariantVcfDataReader;
-import org.opencb.variant.lib.io.variant.writers.VariantStatsDataWriter;
-import org.opencb.variant.lib.io.variant.writers.VariantStatsSqliteDataWriter;
+import org.opencb.variant.lib.io.variant.writers.stats.VariantStatsDataWriter;
+import org.opencb.variant.lib.io.variant.writers.stats.VariantStatsSqliteDataWriter;
 import org.opencb.variant.lib.stats.*;
 
 import java.io.IOException;
@@ -33,14 +33,12 @@ public class VariantStatsRunner {
     private PedDataWriter pedWriter;
     private boolean effect;
     private boolean stats;
-    private boolean index;
 
 
     public VariantStatsRunner() {
         this.filters = null;
         this.numThreads = 1;
         this.stats = true;
-        this.index = true;
         this.effect = true;
     }
 
@@ -62,11 +60,6 @@ public class VariantStatsRunner {
 
     public VariantStatsRunner effect() {
         this.effect = true;
-        return this;
-    }
-
-    public VariantStatsRunner index() {
-        this.index = true;
         return this;
     }
 
@@ -114,11 +107,11 @@ public class VariantStatsRunner {
         List<VcfSampleGroupStat> sampleGroupPhen = new ArrayList<>(100);
         List<VcfSampleGroupStat> sampleGroupFam = new ArrayList<>(100);
 
-         if(pedReader != null){
-             pedReader.open();
-             ped = pedReader.read();
-             pedReader.close();
-         }
+        if (pedReader != null) {
+            pedReader.open();
+            ped = pedReader.read();
+            pedReader.close();
+        }
 
 
         vcfReader.open();
@@ -151,7 +144,7 @@ public class VariantStatsRunner {
                 vcfSampleStat = CalculateStats.sampleStats(batch, vcfReader.getSampleNames(), ped);
                 sampleStats.add(vcfSampleStat);
 
-                if(ped != null){
+                if (ped != null) {
                     groupStatsBatchPhen = CalculateStats.groupStats(batch, ped, "phenotype");
                     groupStatsBatchFam = CalculateStats.groupStats(batch, ped, "family");
 
@@ -166,10 +159,6 @@ public class VariantStatsRunner {
                 vcfWriter.writeVariantStats(statsList);
                 vcfWriter.writeVariantGroupStats(groupStatsBatchPhen);
                 vcfWriter.writeVariantGroupStats(groupStatsBatchFam);
-            }
-
-            if (index) {
-                vcfWriter.writeVariantIndex(batch);
             }
 
             if (effect) {

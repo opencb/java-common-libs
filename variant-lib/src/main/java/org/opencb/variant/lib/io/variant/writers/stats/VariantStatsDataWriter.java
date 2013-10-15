@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.io.variant.writers;
+package org.opencb.variant.lib.io.variant.writers.stats;
 
 import org.opencb.variant.lib.core.formats.*;
 import org.opencb.variant.lib.io.DataWriter;
@@ -24,8 +24,6 @@ public interface VariantStatsDataWriter extends DataWriter {
     boolean writeSampleGroupStats(VcfSampleGroupStat vcfSampleGroupStat) throws IOException;
 
     boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException;
-
-    boolean writeVariantIndex(List<VcfRecord> data);
 
     boolean writeVariantEffect(List<VariantEffect> batchEffect);
 }
