@@ -24,12 +24,15 @@ public class VariantAnalysisInfo {
     HashMap<String, Integer> biotypes;
     @JsonProperty
     HashMap<String, Double> globalStats;
+    @JsonProperty
+    HashMap<String, Integer> chromosomes;
 
     public VariantAnalysisInfo() {
         samples = new ArrayList<>(5);
         consequenceTypes = new LinkedHashMap<>(50);
         biotypes = new LinkedHashMap<>(50);
         globalStats = new LinkedHashMap<>(20);
+        chromosomes = new LinkedHashMap<>(24);
     }
 
     public List<String> getSamples() {
@@ -97,4 +100,16 @@ public class VariantAnalysisInfo {
                 '}';
     }
 
+    public void addConsequenceType(String consequence_type_obo, int count) {
+        consequenceTypes.put(consequence_type_obo, count);
+
+    }
+
+    public void addBiotype(String feature_biotype, int count) {
+        biotypes.put(feature_biotype, count);
+    }
+
+    public void addChromosome(String chr, int numVariants) {
+        chromosomes.put(chr, numVariants);
+    }
 }

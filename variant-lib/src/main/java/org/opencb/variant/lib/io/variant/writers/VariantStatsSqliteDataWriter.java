@@ -197,11 +197,8 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
             stmt.execute("CREATE INDEX variant_stats_chromosome_position_idx ON variant_stats (chromosome, position);");
             stmt.execute("CREATE INDEX variant_chromosome_position_idx ON variant (chromosome, position);");
             stmt.execute("CREATE INDEX variant_effect_chromosome_position_idx ON variant_effect (chromosome, position);");
-            stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
-            stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
-            stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
-            stmt.execute("CREATE INDEX sample_info_id_variant_idx ON sample_info (id_variant);");
-            stmt.execute("CREATE INDEX variant_info_id_variant_key_idx ON variant_info (id_variant, key);");
+            stmt.execute("CREATE INDEX variant_effect_feature_biotype_idx ON variant_effect (feature_biotype);");
+            stmt.execute("CREATE INDEX variant_effect_consequence_type_obo_idx ON variant_effect (consequence_type_obo);");
             stmt.close();
             con.commit();
 

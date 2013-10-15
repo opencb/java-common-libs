@@ -557,55 +557,68 @@ public class WSSqliteManager {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
-            List<String> samples = new ArrayList<>(10);
-
-
             while (rs.next()) {
 
-                samples.add(rs.getString("name"));
+                vi.addSample(rs.getString("name"));
 
             }
 
-            vi.setSamples(samples);
             stmt.close();
 
-            sql = "select distinct consequence_type_obo from variant_effect";
+            sql = "select count(*) as count, consequence_type_obo from variant_effect group by consequence_type_obo";
             stmt = con.createStatement();
             rs = stmt.executeQuery(sql);
 
-            List<String> cts = new ArrayList<>(10);
-
 
             while (rs.next()) {
 
-                cts.add(rs.getString("consequence_type_obo"));
+                vi.addConsequenceType(rs.getString("consequence_type_obo"), rs.getInt("count"));
 
             }
 
-//            vi.setConsequenceTypes(cts);
             stmt.close();
 
 
-            sql = "select distinct feature_biotype from variant_effect";
+            sql = "select count(*) as count, feature_biotype from variant_effect group by feature_biotype;";
             stmt = con.createStatement();
             rs = stmt.executeQuery(sql);
 
-            List<String> biotypes = new ArrayList<>(10);
-
             while (rs.next()) {
 
-                biotypes.add(rs.getString("feature_biotype"));
+                vi.addBiotype(rs.getString("feature_biotype"), rs.getInt("count"));
 
             }
 
-//            vi.setBiotypes(biotypes);
+            stmt.close();
+
+            sql = "select * from global_stats";
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+
+                vi.addGlobalStats(rs.getString("name"), rs.getDouble("value"));
+
+            }
+
+            stmt.close();
+
+            sql = "select count(*) as count, chromosome from variant group by chromosome";
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+
+                vi.addChromosome(rs.getString("chromosome"), rs.getInt("count"));
+
+            }
+
             stmt.close();
             con.close();
 
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println("ANALYSIS INFO: " + e.getClass().getName() + ": " + e.getMessage());
         }
-
 
         return vi;
     }
