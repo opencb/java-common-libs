@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.io.variant.writers;
+package org.opencb.variant.lib.io.variant.writers.vcf;
 
 import org.opencb.variant.lib.core.formats.VcfRecord;
 import org.opencb.variant.lib.io.DataWriter;

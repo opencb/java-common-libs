@@ -1,10 +1,10 @@
-package org.opencb.variant.lib.io.variant.writers;
+package org.opencb.variant.lib.io.variant.writers.vcf;
 
 import org.opencb.variant.lib.core.formats.VcfRecord;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,13 +13,14 @@ import java.util.List;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfDataWriter implements VariantDataWriter {
+public class VariantVcfGzipDataWriter implements VariantDataWriter {
 
-    private PrintWriter printer;
+    private BufferedWriter printer;
     private String filename;
 
 
-    public VariantVcfDataWriter(String filename) {
+
+    public VariantVcfGzipDataWriter(String filename) {
         this.filename = filename;
     }
 
@@ -28,8 +29,8 @@ public class VariantVcfDataWriter implements VariantDataWriter {
 
         boolean res = true;
         try {
-            printer = new PrintWriter(filename);
-        } catch (FileNotFoundException e) {
+            printer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(this.filename))));
+        } catch (IOException e) {
             e.printStackTrace();
             res = false;
         }
@@ -40,7 +41,11 @@ public class VariantVcfDataWriter implements VariantDataWriter {
     @Override
     public boolean close() {
 
-        printer.close();
+        try {
+            printer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return true;
     }
@@ -60,7 +65,11 @@ public class VariantVcfDataWriter implements VariantDataWriter {
     @Override
     public void writeVcfHeader(String header) {
 
-        printer.append(header);
+        try {
+            printer.append(header).append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -68,7 +77,11 @@ public class VariantVcfDataWriter implements VariantDataWriter {
     public void writeBatch(List<VcfRecord> batch) {
 
         for(VcfRecord record: batch){
-            printer.append(record.toString()).append("\n");
+            try {
+                printer.append(record.toString()).append("\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

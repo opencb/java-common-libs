@@ -1,4 +1,4 @@
-package org.opencb.variant.lib.io.variant.writers;
+package org.opencb.variant.lib.io.variant.writers.stats;
 
 import org.opencb.variant.lib.core.formats.*;
 
@@ -189,7 +189,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
         Map<String, PrintWriter> auxMap;
 
-        if(groupStats == null)
+        if (groupStats == null)
             return false;
 
         String group = groupStats.getGroup();
@@ -254,11 +254,6 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
 
         return true;
-    }
-
-    @Override
-    public boolean writeVariantIndex(List<VcfRecord> data) {
-        return false;
     }
 
     @Override

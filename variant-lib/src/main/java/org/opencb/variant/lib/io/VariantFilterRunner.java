@@ -1,15 +1,12 @@
 package org.opencb.variant.lib.io;
 
-import org.opencb.variant.lib.annot.Annot;
 import org.opencb.variant.lib.core.formats.VcfRecord;
 import org.opencb.variant.lib.filters.VcfRecordFilters;
 import org.opencb.variant.lib.filters.customfilters.VcfFilter;
-import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
 import org.opencb.variant.lib.io.variant.readers.VariantDataReader;
 import org.opencb.variant.lib.io.variant.readers.VariantVcfDataReader;
-import org.opencb.variant.lib.io.variant.writers.VariantDataWriter;
-import org.opencb.variant.lib.io.variant.writers.VariantStatsDataWriter;
-import org.opencb.variant.lib.io.variant.writers.VariantVcfDataWriter;
+import org.opencb.variant.lib.io.variant.writers.vcf.VariantDataWriter;
+import org.opencb.variant.lib.io.variant.writers.vcf.VariantVcfDataWriter;
 
 import java.util.List;
 

@@ -7,10 +7,13 @@ import org.apache.commons.cli.*;
 import org.opencb.variant.cli.servlets.GetFoldersServlet;
 import org.opencb.variant.cli.servlets.HelloServlet;
 import org.opencb.variant.lib.io.VariantAnnotRunner;
+import org.opencb.variant.lib.io.VariantIndexRunner;
 import org.opencb.variant.lib.io.VariantStatsRunner;
 import org.opencb.variant.lib.io.variant.annotators.VcfAnnotator;
 import org.opencb.variant.lib.io.variant.annotators.VcfControlAnnotator;
-import org.opencb.variant.lib.io.variant.writers.VariantStatsFileDataWriter;
+import org.opencb.variant.lib.io.variant.readers.VariantVcfDataReader;
+import org.opencb.variant.lib.io.variant.writers.stats.VariantStatsFileDataWriter;
+import org.opencb.variant.lib.io.variant.writers.index.VariantIndexSqliteDataWriter;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -74,6 +77,7 @@ public class VariantMain {
 
         VariantStatsRunner vr;
         VariantAnnotRunner var;
+        VariantIndexRunner vi;
 
         parse(args, false);
         String outputFile;
@@ -81,19 +85,29 @@ public class VariantMain {
         switch (command) {
             case "index":
                 System.out.println("===== INDEX =====");
-                Runtime r = Runtime.getRuntime();
-                Process p;
+//                Runtime r = Runtime.getRuntime();
+//                Process p;
+//
+//                String indexDir = commandLine.getOptionValue("outdir") + "/index";
+//                File indexFileDir = new File(indexDir);
+//                if (!indexFileDir.exists()) {
+//                    indexFileDir.mkdir();
+//                }
+//
+//                String cmd = "python bin/indexerManager.py -t vcf -i " + commandLine.getOptionValue("vcf-file") + " --outdir " + indexDir;
+//
+//                p = r.exec(cmd);
+//                p.waitFor();
 
-                String indexDir = commandLine.getOptionValue("outdir") + "/index";
-                File indexFileDir = new File(indexDir);
-                if (!indexFileDir.exists()) {
-                    indexFileDir.mkdir();
+                outputFile = "index.db";
+                if (commandLine.hasOption("output-file")) {
+                    outputFile = commandLine.getOptionValue("output-file");
                 }
 
-                String cmd = "python bin/indexerManager.py -t vcf -i " + commandLine.getOptionValue("vcf-file") + " --outdir " + indexDir;
+                vi = new VariantIndexRunner(new VariantVcfDataReader(commandLine.getOptionValue("vcf-file")), new VariantIndexSqliteDataWriter(commandLine.getOptionValue("outdir") + "/" + outputFile));
 
-                p = r.exec(cmd);
-                p.waitFor();
+                vi.run();
+
                 break;
 
             case "stats":
