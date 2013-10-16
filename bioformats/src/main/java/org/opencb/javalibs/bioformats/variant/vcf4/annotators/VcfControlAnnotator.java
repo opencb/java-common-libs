@@ -18,19 +18,25 @@ import java.util.*;
  */
 public class VcfControlAnnotator implements VcfAnnotator {
 
-    private TabixReader tabix;
+    // private TabixReader tabix;
+    private String tabixFile;
     private List<String> samples;
     private HashMap<String, Integer> samplesMap;
     private HashMap<String, TabixReader> controlList;
     private String prefix;
 
+    private HashMap<Long, TabixReader> tabix;
+
+
     public VcfControlAnnotator(String infoPrefix, String control) throws IOException {
 
         this.prefix = infoPrefix;
-        this.tabix = new TabixReader(control);
+        this.tabixFile = control;
+        this.tabix = new LinkedHashMap<>();
+        TabixReader tabixReader = new TabixReader(this.tabixFile);
 
         String line;
-        while ((line = tabix.readLine()) != null && !line.startsWith("#CHROM")) {
+        while ((line = tabixReader.readLine()) != null && !line.startsWith("#CHROM")) {
         }
 
         String[] fields = line.split("\t");
@@ -42,6 +48,9 @@ public class VcfControlAnnotator implements VcfAnnotator {
             samplesMap.put(fields[i], j);
 
         }
+
+        tabixReader.close();
+
     }
 
     public VcfControlAnnotator(String infoPrefix, HashMap<String, String> controlList) {
@@ -75,7 +84,9 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
                     }
                 }
+                t.close();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -87,42 +98,50 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         VcfRecord tabixRecord;
 
-        TabixReader currentTabix;
+        long pid = Thread.currentThread().getId();
+        TabixReader currentTabix = null;
+
+
+        if(tabix.containsKey(pid)){
+            currentTabix = tabix.get(pid);
+        }else{
+            try {
+                currentTabix = new TabixReader(this.tabixFile);
+                tabix.put(pid, currentTabix);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
         List<VcfVariantStat> statsBatch;
         HashMap<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
 
-
         int cont = 0;
-
         for (VcfRecord record : batch) {
-
-            if (this.tabix == null && controlList != null) {
-                currentTabix = controlList.get(record.getChromosome());
-            } else {
-                currentTabix = this.tabix;
-            }
 
             if (currentTabix != null) {
 
 
                 try {
+
                     TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
-                    String line;
-                    while (it != null && (line = it.next()) != null) {
+
+                    String line = it.next();
+                    while (it != null && line != null) {
 
                         String[] fields = line.split("\t");
-                        tabixRecord = new VcfRecord(fields);
+                        tabixRecord = new VcfRecord(fields, samples);
 
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
 
-                            tabixRecord.setSampleIndex(this.samplesMap);
                             controlBatch.add(tabixRecord);
                             map.put(record, cont++);
                         }
+                        line = it.next();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 } catch (ArrayIndexOutOfBoundsException e) { // If the Chr does not exist in Controls... TabixReader throws ArrayIndexOut...
                     continue;

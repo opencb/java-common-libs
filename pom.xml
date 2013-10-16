@@ -12,6 +12,7 @@
     <modules>
         <module>bioformats</module>
         <module>math</module>
+        <module>commons</module>
     </modules>
 
     <properties>

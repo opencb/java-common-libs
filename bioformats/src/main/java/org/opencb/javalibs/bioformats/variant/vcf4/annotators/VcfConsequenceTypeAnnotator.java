@@ -52,9 +52,11 @@ public class VcfConsequenceTypeAnnotator implements VcfAnnotator {
 
         }
 
+
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
 
+        System.out.println("WEB");
         String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
 
         try {

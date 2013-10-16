@@ -3,10 +3,7 @@ package org.opencb.javalibs.bioformats.variant.vcf4;
 import org.bioinfo.commons.utils.ListUtils;
 import org.opencb.javalibs.bioformats.feature.Genotype;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VcfRecord {
 
@@ -19,10 +16,9 @@ public class VcfRecord {
     private String filter;
     private String info;
     private String format;
-    private List<String> samples;
-    private List<Map<String, String>> samplesValues; // GT => 0/0  AD:0123
 
-    private Map<String, Integer> sampleIndex;
+    private Map<String, String> sampleRawData;
+    private Map<String, Map<String, String>> sampleData;
 
     /**
      * @param chromosome
@@ -43,6 +39,9 @@ public class VcfRecord {
         this.quality = quality;
         this.filter = filter;
         this.info = info;
+
+        this.sampleRawData = new HashMap<>();
+        this.sampleData = new HashMap<>();
     }
 
     /**
@@ -75,21 +74,16 @@ public class VcfRecord {
     public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info, String format, String... sampleList) {
         this(chromosome, position, id, reference, alternate, quality, filter, info, format);
 
-        samples = new ArrayList<>();
-        for (String sample : sampleList) {
-            samples.add(sample);
-        }
     }
 
-    public VcfRecord(String[] fields) {
-//		this(chromosome, position, id, reference, alternate, quality, filter, info, format);
+    public VcfRecord(String[] fields, List<String> sampleNames) {
         this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
 
-        samples = new ArrayList<>(fields.length - 9);
         for (int i = 9; i < fields.length; i++) {
-            samples.add(fields[i]);
+            sampleRawData.put(sampleNames.get(i - 9), fields[i]);
         }
     }
+
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -108,9 +102,9 @@ public class VcfRecord {
         if (format != null) {
             builder.append("\t").append(format);
         }
-        if (samples != null) {
-            builder.append("\t").append(ListUtils.toString(samples, "\t"));
-        }
+//        if (samples != null) {
+//            builder.append("\t").append(ListUtils.toString(samples, "\t"));
+//        }
         return builder.toString();
     }
 
@@ -241,29 +235,18 @@ public class VcfRecord {
         return format;
     }
 
-
-    public List<String> getSamples() {
-        return samples;
-    }
-
-    public void setSamples(List<String> samples) {
-        this.samples = samples;
-    }
-
     public String[] getAltAlleles() {
         return this.getAlternate().split(",");
     }
 
     public String getValueFormatSample(String sample, String key) {
 
-        if (samplesValues == null) {
+        if (sampleData.size() == 0) {
 
             initializeSamplesValues();
         }
 
-        Map<String, String> keyVals = samplesValues.get(sampleIndex.get(sample));
-
-        return keyVals.get(key);
+        return sampleData.get(sample).get(key);
 
     }
 
@@ -279,46 +262,60 @@ public class VcfRecord {
 
     }
 
-    public Map<String, Integer> getSampleIndex() {
-        return sampleIndex;
+    public Set<String> getSampleNames() {
+        return sampleRawData.keySet();
     }
 
-    public void setSampleIndex(Map<String, Integer> sampleIndex) {
-        this.sampleIndex = sampleIndex;
-    }
 
-    public Map<String, String> getSample(String sampleName) {
-
-
-        if (samplesValues == null) {
-
+    public Map<String, String> getSampleData(String sampleName) {
+        if (sampleData.size() == 0) {
             initializeSamplesValues();
         }
 
-        System.out.println(samplesValues);
-
-        return samplesValues.get(sampleIndex.get(sampleName));
+        return sampleData.get(sampleName);
     }
 
+
+    public Map<String, Map<String, String>> getSampleData() {
+        if (sampleData.size() == 0) {
+            initializeSamplesValues();
+        }
+
+        return sampleData;
+    }
+
+
+    public String getSampleRawData(String sampleName) {
+
+        return sampleRawData.get(sampleName);
+    }
+
+
+    public Map<String, String> getSampleRawData() {
+        return sampleRawData;
+    }
+
+
     private void initializeSamplesValues() {
-        Map<String, String> sampleVal;
+        Map<String, String> sampleValuesMap;
         String[] fields = this.format.split(":");
-        String[] values;
-        String[] samplesName = new String[sampleIndex.size()];
 
-        for (Map.Entry<String, Integer> entry : sampleIndex.entrySet()) {
-            samplesName[entry.getValue()] = entry.getKey();
-        }
+        for (Map.Entry<String, String> entry : sampleRawData.entrySet()) {
+            String sampleName = entry.getKey();
 
-        samplesValues = new ArrayList<>(sampleIndex.size());
-        for (String sample : samplesName) {
-            sampleVal = new LinkedHashMap<>(10);
-            values = samples.get(sampleIndex.get(sample)).split(":");
-            for (int i = 0; i < values.length; i++) {
-                sampleVal.put(fields[i], values[i]);
+            String[] values = entry.getValue().split(":");
+
+            sampleValuesMap = new HashMap<>(fields.length);
+
+            for (int i = 0; i < fields.length; i++) {
+                sampleValuesMap.put(fields[i], values[i]);
+
             }
-            samplesValues.add(sampleVal);
+
+            sampleData.put(sampleName, sampleValuesMap);
         }
+
+
     }
 
     public void addInfoField(String info) {

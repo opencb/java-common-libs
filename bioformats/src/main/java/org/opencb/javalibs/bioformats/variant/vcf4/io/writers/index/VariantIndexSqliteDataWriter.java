@@ -159,8 +159,8 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
                 sql = "INSERT INTO sample (name) VALUES(?);";
                 pstmt = con.prepareStatement(sql);
                 VcfRecord v = data.get(0);
-                for (Map.Entry<String, Integer> entry : v.getSampleIndex().entrySet()) {
-                    pstmt.setString(1, entry.getKey());
+                for (String name : v.getSampleNames()) {
+                    pstmt.setString(1, name);
                     pstmt.execute();
                 }
 
@@ -199,10 +199,14 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
                     id = rs.getInt(1);
-                    for (Map.Entry<String, Integer> entry : v.getSampleIndex().entrySet()) {
+                    for (Map.Entry<String, String> entry : v.getSampleRawData().entrySet()) {
+
+                        System.out.println("entry = " + entry);
                         sampleName = entry.getKey();
-                        sampleData = v.getSamples().get(entry.getValue());
+                        sampleData = entry.getValue();
+
                         g = v.getSampleGenotype(sampleName);
+
 
                         allele_1 = (g.getAllele1() == null) ? -1 : g.getAllele1();
                         allele_2 = (g.getAllele2() == null) ? -1 : g.getAllele2();
