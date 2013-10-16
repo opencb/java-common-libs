@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * A confidence value.
- * 
+ * <p/>
  * <p>Java class for confidenceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="confidenceType">
  *   &lt;complexContent>
@@ -36,13 +36,11 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "confidenceType", propOrder = {
-    "unit",
-    "value"
+        "unit",
+        "value"
 })
 @XmlSeeAlso({
         org.opencb.javalibs.bioformats.network.psi.v253jaxb.ConfidenceListType.Confidence.class
@@ -56,11 +54,9 @@ public class ConfidenceType {
 
     /**
      * Gets the value of the unit property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link OpenCvType }
      */
     public OpenCvType getUnit() {
         return unit;
@@ -68,11 +64,9 @@ public class ConfidenceType {
 
     /**
      * Sets the value of the unit property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link OpenCvType }
      */
     public void setUnit(OpenCvType value) {
         this.unit = value;
@@ -80,11 +74,9 @@ public class ConfidenceType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -92,11 +84,9 @@ public class ConfidenceType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;

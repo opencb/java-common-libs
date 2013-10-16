@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for entrySet complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="entrySet">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "entrySet", propOrder = {
-    "entry"
+        "entry"
 })
 public class EntrySet {
 
@@ -52,25 +50,23 @@ public class EntrySet {
 
     /**
      * Gets the value of the entry property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the entry property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEntry().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Protein }
-     * 
-     * 
      */
     public List<Entry> getEntry() {
         if (entry == null) {
@@ -81,7 +77,6 @@ public class EntrySet {
 
     /**
      * Gets the value of the level property.
-     * 
      */
     public int getLevel() {
         return level;
@@ -89,7 +84,6 @@ public class EntrySet {
 
     /**
      * Sets the value of the level property.
-     * 
      */
     public void setLevel(int value) {
         this.level = value;
@@ -97,7 +91,6 @@ public class EntrySet {
 
     /**
      * Gets the value of the version property.
-     * 
      */
     public int getVersion() {
         return version;
@@ -105,7 +98,6 @@ public class EntrySet {
 
     /**
      * Sets the value of the version property.
-     * 
      */
     public void setVersion(int value) {
         this.version = value;
@@ -113,15 +105,13 @@ public class EntrySet {
 
     /**
      * Gets the value of the minorVersion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public int getMinorVersion() {
         if (minorVersion == null) {
-            return  4;
+            return 4;
         } else {
             return minorVersion;
         }
@@ -129,11 +119,9 @@ public class EntrySet {
 
     /**
      * Sets the value of the minorVersion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setMinorVersion(Integer value) {
         this.minorVersion = value;

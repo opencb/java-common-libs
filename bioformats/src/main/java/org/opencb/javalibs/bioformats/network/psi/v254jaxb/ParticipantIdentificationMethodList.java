@@ -18,13 +18,13 @@ import java.util.List;
 
 /**
  * The method(s) by which this participant has been determined. If this element is present,
- *                 its value supersedes experimentDescription/ participantIdentificationMethod.
- *             
- * 
+ * its value supersedes experimentDescription/ participantIdentificationMethod.
+ * <p/>
+ * <p/>
  * <p>Java class for participantIdentificationMethodList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="participantIdentificationMethodList">
  *   &lt;complexContent>
@@ -36,12 +36,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "participantIdentificationMethodList", propOrder = {
-    "participantIdentificationMethod"
+        "participantIdentificationMethod"
 })
 public class ParticipantIdentificationMethodList {
 
@@ -50,25 +48,23 @@ public class ParticipantIdentificationMethodList {
 
     /**
      * Gets the value of the participantIdentificationMethod property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the participantIdentificationMethod property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParticipantIdentificationMethod().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ParticipantIdentificationMethod }
-     * 
-     * 
      */
     public List<ParticipantIdentificationMethod> getParticipantIdentificationMethod() {
         if (participantIdentificationMethod == null) {

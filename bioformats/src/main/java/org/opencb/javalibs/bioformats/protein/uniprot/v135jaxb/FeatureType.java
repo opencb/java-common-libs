@@ -15,13 +15,13 @@ import java.util.List;
 
 /**
  * Currently there is only one basic feature type, but this will change in future with
- *                 enhancement of the FT line parsers.
- *             
- * 
+ * enhancement of the FT line parsers.
+ * <p/>
+ * <p/>
  * <p>Java class for featureType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="featureType">
  *   &lt;complexContent>
@@ -93,14 +93,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "featureType", propOrder = {
-    "original",
-    "variation",
-    "location"
+        "original",
+        "variation",
+        "location"
 })
 public class FeatureType {
 
@@ -123,11 +121,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the original property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getOriginal() {
         return original;
@@ -135,11 +131,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the original property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setOriginal(String value) {
         this.original = value;
@@ -147,25 +141,23 @@ public class FeatureType {
 
     /**
      * Gets the value of the variation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the variation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getVariation().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
      */
     public List<String> getVariation() {
         if (variation == null) {
@@ -176,11 +168,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the location property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link LocationType }
-     *     
+     *
+     * @return possible object is
+     *         {@link LocationType }
      */
     public LocationType getLocation() {
         return location;
@@ -188,11 +178,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the location property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link LocationType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link LocationType }
      */
     public void setLocation(LocationType value) {
         this.location = value;
@@ -200,11 +188,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -212,11 +198,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
@@ -224,11 +208,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the status property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getStatus() {
         return status;
@@ -236,11 +218,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the status property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setStatus(String value) {
         this.status = value;
@@ -248,11 +228,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getId() {
         return id;
@@ -260,11 +238,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setId(String value) {
         this.id = value;
@@ -272,11 +248,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the description property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDescription() {
         return description;
@@ -284,11 +258,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the description property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDescription(String value) {
         this.description = value;
@@ -296,11 +268,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getEvidence() {
         return evidence;
@@ -308,11 +278,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the evidence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setEvidence(String value) {
         this.evidence = value;
@@ -320,11 +288,9 @@ public class FeatureType {
 
     /**
      * Gets the value of the ref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getRef() {
         return ref;
@@ -332,11 +298,9 @@ public class FeatureType {
 
     /**
      * Sets the value of the ref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setRef(String value) {
         this.ref = value;

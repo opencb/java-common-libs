@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Indicates whether the name of a plasmid is known or unknown.
- * 
+ * <p/>
  * <p>Java class for statusType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="statusType">
  *   &lt;simpleContent>
@@ -34,12 +34,10 @@ import javax.xml.bind.annotation.*;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "statusType", propOrder = {
-    "value"
+        "value"
 })
 public class StatusType {
 
@@ -50,11 +48,9 @@ public class StatusType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -62,11 +58,9 @@ public class StatusType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -74,11 +68,9 @@ public class StatusType {
 
     /**
      * Gets the value of the status property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getStatus() {
         if (status == null) {
@@ -90,11 +82,9 @@ public class StatusType {
 
     /**
      * Sets the value of the status property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setStatus(String value) {
         this.status = value;

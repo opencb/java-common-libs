@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Lists parameters which are relevant for the Interaction, e.g. kinetics.
- * 
+ * <p/>
  * <p>Java class for parameterList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="parameterList">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "parameterList", propOrder = {
-    "parameter"
+        "parameter"
 })
 public class ParameterList {
 
@@ -48,25 +46,23 @@ public class ParameterList {
 
     /**
      * Gets the value of the parameter property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the parameter property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParameter().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Parameter }
-     * 
-     * 
      */
     public List<Parameter> getParameter() {
         if (parameter == null) {

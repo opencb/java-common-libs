@@ -15,14 +15,14 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Experimental method to determine the interactors involved in the interaction. This
- *                 element is controlled by the PSI-MI controlled vocabulary "participant identification method",
- *                 root term id MI:0002.
- *             
- * 
+ * element is controlled by the PSI-MI controlled vocabulary "participant identification method",
+ * root term id MI:0002.
+ * <p/>
+ * <p/>
  * <p>Java class for participantIdentificationMethod complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="participantIdentificationMethod">
  *   &lt;complexContent>
@@ -34,26 +34,21 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "participantIdentificationMethod", propOrder = {
-    "experimentRefList"
+        "experimentRefList"
 })
 public class ParticipantIdentificationMethod
-    extends CvType
-{
+        extends CvType {
 
     protected ExperimentRefList experimentRefList;
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -61,11 +56,9 @@ public class ParticipantIdentificationMethod
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

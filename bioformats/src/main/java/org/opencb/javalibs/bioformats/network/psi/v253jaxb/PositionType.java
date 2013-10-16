@@ -14,9 +14,9 @@ import java.math.BigInteger;
 
 /**
  * <p>Java class for positionType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="positionType">
  *   &lt;complexContent>
@@ -26,8 +26,6 @@ import java.math.BigInteger;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "positionType")
@@ -39,11 +37,9 @@ public class PositionType {
 
     /**
      * Gets the value of the position property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getPosition() {
         return position;
@@ -52,10 +48,8 @@ public class PositionType {
     /**
      * Sets the value of the position property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setPosition(BigInteger value) {
         this.position = value;

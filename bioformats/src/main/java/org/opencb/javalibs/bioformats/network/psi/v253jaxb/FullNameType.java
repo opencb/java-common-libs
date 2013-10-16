@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  * Full, descriptive object name.
- * 
+ * <p/>
  * <p>Java class for fullNameType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="fullNameType">
  *   &lt;simpleContent>
@@ -29,12 +29,10 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "fullNameType", propOrder = {
-    "value"
+        "value"
 })
 public class FullNameType {
 
@@ -43,11 +41,9 @@ public class FullNameType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -55,11 +51,9 @@ public class FullNameType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;

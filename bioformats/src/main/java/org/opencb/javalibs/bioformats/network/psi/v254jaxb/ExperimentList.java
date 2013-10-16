@@ -15,11 +15,11 @@ import java.util.List;
 
 /**
  * List of experiments in which this interaction has been determined.
- * 
+ * <p/>
  * <p>Java class for experimentList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentList">
  *   &lt;complexContent>
@@ -32,43 +32,39 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentList", propOrder = {
-    "experimentRefOrExperimentDescription"
+        "experimentRefOrExperimentDescription"
 })
 public class ExperimentList {
 
     @XmlElements({
-        @XmlElement(name = "experimentRef", type = Integer.class),
-        @XmlElement(name = "experimentDescription", type = ExperimentDescription.class)
+            @XmlElement(name = "experimentRef", type = Integer.class),
+            @XmlElement(name = "experimentDescription", type = ExperimentDescription.class)
     })
     protected List<Object> experimentRefOrExperimentDescription;
 
     /**
      * Gets the value of the experimentRefOrExperimentDescription property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the experimentRefOrExperimentDescription property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExperimentRefOrExperimentDescription().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
      * {@link ExperimentDescription }
-     * 
-     * 
      */
     public List<Object> getExperimentRefOrExperimentDescription() {
         if (experimentRefOrExperimentDescription == null) {

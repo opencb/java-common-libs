@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Refers to a list of experiments within the same entry.
- * 
+ * <p/>
  * <p>Java class for experimentRefListType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentRefListType">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentRefListType", propOrder = {
-    "experimentRef"
+        "experimentRef"
 })
 public class ExperimentRefListType {
 
@@ -48,25 +46,23 @@ public class ExperimentRefListType {
 
     /**
      * Gets the value of the experimentRef property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the experimentRef property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExperimentRef().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
-     * 
-     * 
      */
     public List<Integer> getExperimentRef() {
         if (experimentRef == null) {

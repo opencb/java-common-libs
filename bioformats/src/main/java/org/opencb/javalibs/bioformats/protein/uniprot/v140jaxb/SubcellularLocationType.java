@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Describes the subcellular location and optionally the topology and orientation of a molecule.
- * 
+ * <p/>
  * <p>Java class for subcellularLocationType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="subcellularLocationType">
  *   &lt;complexContent>
@@ -36,14 +36,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "subcellularLocationType", propOrder = {
-    "location",
-    "topology",
-    "orientation"
+        "location",
+        "topology",
+        "orientation"
 })
 public class SubcellularLocationType {
 
@@ -54,25 +52,23 @@ public class SubcellularLocationType {
 
     /**
      * Gets the value of the location property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the location property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLocation().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidencedStringType }
-     * 
-     * 
      */
     public List<EvidencedStringType> getLocation() {
         if (location == null) {
@@ -83,25 +79,23 @@ public class SubcellularLocationType {
 
     /**
      * Gets the value of the topology property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the topology property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getTopology().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidencedStringType }
-     * 
-     * 
      */
     public List<EvidencedStringType> getTopology() {
         if (topology == null) {
@@ -112,25 +106,23 @@ public class SubcellularLocationType {
 
     /**
      * Gets the value of the orientation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the orientation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getOrientation().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidencedStringType }
-     * 
-     * 
      */
     public List<EvidencedStringType> getOrientation() {
         if (orientation == null) {

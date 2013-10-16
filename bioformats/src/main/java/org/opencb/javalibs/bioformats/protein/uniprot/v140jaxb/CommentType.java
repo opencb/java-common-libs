@@ -15,12 +15,12 @@ import java.util.List;
 
 /**
  * Describes different types of general annotations.
- *             Equivalent to the flat file CC-line.
- * 
+ * Equivalent to the flat file CC-line.
+ * <p/>
  * <p>Java class for commentType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="commentType">
  *   &lt;complexContent>
@@ -142,27 +142,25 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "commentType", propOrder = {
-    "absorption",
-    "kinetics",
-    "phDependence",
-    "redoxPotential",
-    "temperatureDependence",
-    "molecule",
-    "subcellularLocation",
-    "conflict",
-    "link",
-    "event",
-    "isoform",
-    "interactant",
-    "organismsDiffer",
-    "experiments",
-    "location",
-    "text"
+        "absorption",
+        "kinetics",
+        "phDependence",
+        "redoxPotential",
+        "temperatureDependence",
+        "molecule",
+        "subcellularLocation",
+        "conflict",
+        "link",
+        "event",
+        "isoform",
+        "interactant",
+        "organismsDiffer",
+        "experiments",
+        "location",
+        "text"
 })
 public class CommentType {
 
@@ -201,10 +199,8 @@ public class CommentType {
     /**
      * Gets the value of the absorption property.
      *
-     * @return
-     *     possible object is
-     *     {@link CommentType.Absorption }
-     *
+     * @return possible object is
+     *         {@link CommentType.Absorption }
      */
     public CommentType.Absorption getAbsorption() {
         return absorption;
@@ -213,10 +209,8 @@ public class CommentType {
     /**
      * Sets the value of the absorption property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CommentType.Absorption }
-     *
+     * @param value allowed object is
+     *              {@link CommentType.Absorption }
      */
     public void setAbsorption(CommentType.Absorption value) {
         this.absorption = value;
@@ -225,10 +219,8 @@ public class CommentType {
     /**
      * Gets the value of the kinetics property.
      *
-     * @return
-     *     possible object is
-     *     {@link CommentType.Kinetics }
-     *
+     * @return possible object is
+     *         {@link CommentType.Kinetics }
      */
     public CommentType.Kinetics getKinetics() {
         return kinetics;
@@ -237,10 +229,8 @@ public class CommentType {
     /**
      * Sets the value of the kinetics property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CommentType.Kinetics }
-     *
+     * @param value allowed object is
+     *              {@link CommentType.Kinetics }
      */
     public void setKinetics(CommentType.Kinetics value) {
         this.kinetics = value;
@@ -249,10 +239,8 @@ public class CommentType {
     /**
      * Gets the value of the phDependence property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getPhDependence() {
         return phDependence;
@@ -261,10 +249,8 @@ public class CommentType {
     /**
      * Sets the value of the phDependence property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setPhDependence(EvidencedStringType value) {
         this.phDependence = value;
@@ -273,10 +259,8 @@ public class CommentType {
     /**
      * Gets the value of the redoxPotential property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getRedoxPotential() {
         return redoxPotential;
@@ -285,10 +269,8 @@ public class CommentType {
     /**
      * Sets the value of the redoxPotential property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setRedoxPotential(EvidencedStringType value) {
         this.redoxPotential = value;
@@ -297,10 +279,8 @@ public class CommentType {
     /**
      * Gets the value of the temperatureDependence property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getTemperatureDependence() {
         return temperatureDependence;
@@ -309,10 +289,8 @@ public class CommentType {
     /**
      * Sets the value of the temperatureDependence property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setTemperatureDependence(EvidencedStringType value) {
         this.temperatureDependence = value;
@@ -321,10 +299,8 @@ public class CommentType {
     /**
      * Gets the value of the molecule property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getMolecule() {
         return molecule;
@@ -333,10 +309,8 @@ public class CommentType {
     /**
      * Sets the value of the molecule property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMolecule(String value) {
         this.molecule = value;
@@ -344,25 +318,23 @@ public class CommentType {
 
     /**
      * Gets the value of the subcellularLocation property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the subcellularLocation property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSubcellularLocation().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link SubcellularLocationType }
-     *
-     *
      */
     public List<SubcellularLocationType> getSubcellularLocation() {
         if (subcellularLocation == null) {
@@ -374,10 +346,8 @@ public class CommentType {
     /**
      * Gets the value of the conflict property.
      *
-     * @return
-     *     possible object is
-     *     {@link CommentType.Conflict }
-     *
+     * @return possible object is
+     *         {@link CommentType.Conflict }
      */
     public CommentType.Conflict getConflict() {
         return conflict;
@@ -386,10 +356,8 @@ public class CommentType {
     /**
      * Sets the value of the conflict property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CommentType.Conflict }
-     *
+     * @param value allowed object is
+     *              {@link CommentType.Conflict }
      */
     public void setConflict(CommentType.Conflict value) {
         this.conflict = value;
@@ -397,25 +365,23 @@ public class CommentType {
 
     /**
      * Gets the value of the link property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the link property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLink().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link CommentType.Link }
-     *
-     *
      */
     public List<Link> getLink() {
         if (link == null) {
@@ -426,25 +392,23 @@ public class CommentType {
 
     /**
      * Gets the value of the event property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the event property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEvent().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EventType }
-     *
-     *
      */
     public List<EventType> getEvent() {
         if (event == null) {
@@ -455,25 +419,23 @@ public class CommentType {
 
     /**
      * Gets the value of the isoform property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the isoform property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getIsoform().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link IsoformType }
-     *
-     *
      */
     public List<IsoformType> getIsoform() {
         if (isoform == null) {
@@ -484,25 +446,23 @@ public class CommentType {
 
     /**
      * Gets the value of the interactant property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the interactant property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInteractant().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link InteractantType }
-     *
-     *
      */
     public List<InteractantType> getInteractant() {
         if (interactant == null) {
@@ -514,10 +474,8 @@ public class CommentType {
     /**
      * Gets the value of the organismsDiffer property.
      *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isOrganismsDiffer() {
         return organismsDiffer;
@@ -526,10 +484,8 @@ public class CommentType {
     /**
      * Sets the value of the organismsDiffer property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setOrganismsDiffer(Boolean value) {
         this.organismsDiffer = value;
@@ -538,10 +494,8 @@ public class CommentType {
     /**
      * Gets the value of the experiments property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getExperiments() {
         return experiments;
@@ -550,10 +504,8 @@ public class CommentType {
     /**
      * Sets the value of the experiments property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setExperiments(Integer value) {
         this.experiments = value;
@@ -561,25 +513,23 @@ public class CommentType {
 
     /**
      * Gets the value of the location property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the location property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLocation().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link LocationType }
-     *
-     *
      */
     public List<LocationType> getLocation() {
         if (location == null) {
@@ -591,10 +541,8 @@ public class CommentType {
     /**
      * Gets the value of the text property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getText() {
         return text;
@@ -603,10 +551,8 @@ public class CommentType {
     /**
      * Sets the value of the text property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setText(EvidencedStringType value) {
         this.text = value;
@@ -615,10 +561,8 @@ public class CommentType {
     /**
      * Gets the value of the type property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -627,10 +571,8 @@ public class CommentType {
     /**
      * Sets the value of the type property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
@@ -639,10 +581,8 @@ public class CommentType {
     /**
      * Gets the value of the locationType property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getLocationType() {
         return locationType;
@@ -651,10 +591,8 @@ public class CommentType {
     /**
      * Sets the value of the locationType property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLocationType(String value) {
         this.locationType = value;
@@ -663,10 +601,8 @@ public class CommentType {
     /**
      * Gets the value of the name property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getName() {
         return name;
@@ -675,10 +611,8 @@ public class CommentType {
     /**
      * Sets the value of the name property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -687,10 +621,8 @@ public class CommentType {
     /**
      * Gets the value of the mass property.
      *
-     * @return
-     *     possible object is
-     *     {@link Float }
-     *
+     * @return possible object is
+     *         {@link Float }
      */
     public Float getMass() {
         return mass;
@@ -699,10 +631,8 @@ public class CommentType {
     /**
      * Sets the value of the mass property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Float }
-     *
+     * @param value allowed object is
+     *              {@link Float }
      */
     public void setMass(Float value) {
         this.mass = value;
@@ -711,10 +641,8 @@ public class CommentType {
     /**
      * Gets the value of the error property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getError() {
         return error;
@@ -723,10 +651,8 @@ public class CommentType {
     /**
      * Sets the value of the error property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setError(String value) {
         this.error = value;
@@ -735,10 +661,8 @@ public class CommentType {
     /**
      * Gets the value of the method property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getMethod() {
         return method;
@@ -747,10 +671,8 @@ public class CommentType {
     /**
      * Sets the value of the method property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setMethod(String value) {
         this.method = value;
@@ -758,25 +680,23 @@ public class CommentType {
 
     /**
      * Gets the value of the evidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the evidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEvidence().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
-     *
-     *
      */
     public List<Integer> getEvidence() {
         if (evidence == null) {
@@ -788,9 +708,9 @@ public class CommentType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -803,13 +723,11 @@ public class CommentType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "max",
-        "text"
+            "max",
+            "text"
     })
     public static class Absorption {
 
@@ -819,10 +737,8 @@ public class CommentType {
         /**
          * Gets the value of the max property.
          *
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getMax() {
             return max;
@@ -831,10 +747,8 @@ public class CommentType {
         /**
          * Sets the value of the max property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setMax(EvidencedStringType value) {
             this.max = value;
@@ -843,10 +757,8 @@ public class CommentType {
         /**
          * Gets the value of the text property.
          *
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getText() {
             return text;
@@ -855,10 +767,8 @@ public class CommentType {
         /**
          * Sets the value of the text property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setText(EvidencedStringType value) {
             this.text = value;
@@ -869,9 +779,9 @@ public class CommentType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -913,12 +823,10 @@ public class CommentType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "sequence"
+            "sequence"
     })
     public static class Conflict {
 
@@ -931,10 +839,8 @@ public class CommentType {
         /**
          * Gets the value of the sequence property.
          *
-         * @return
-         *     possible object is
-         *     {@link CommentType.Conflict.Sequence }
-         *
+         * @return possible object is
+         *         {@link CommentType.Conflict.Sequence }
          */
         public CommentType.Conflict.Sequence getSequence() {
             return sequence;
@@ -943,10 +849,8 @@ public class CommentType {
         /**
          * Sets the value of the sequence property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link CommentType.Conflict.Sequence }
-         *
+         * @param value allowed object is
+         *              {@link CommentType.Conflict.Sequence }
          */
         public void setSequence(CommentType.Conflict.Sequence value) {
             this.sequence = value;
@@ -954,11 +858,9 @@ public class CommentType {
 
         /**
          * Gets the value of the type property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getType() {
             return type;
@@ -966,11 +868,9 @@ public class CommentType {
 
         /**
          * Sets the value of the type property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setType(String value) {
             this.type = value;
@@ -978,11 +878,9 @@ public class CommentType {
 
         /**
          * Gets the value of the ref property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getRef() {
             return ref;
@@ -990,11 +888,9 @@ public class CommentType {
 
         /**
          * Sets the value of the ref property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setRef(String value) {
             this.ref = value;
@@ -1003,9 +899,9 @@ public class CommentType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1024,8 +920,6 @@ public class CommentType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "")
@@ -1040,11 +934,9 @@ public class CommentType {
 
             /**
              * Gets the value of the resource property.
-             * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             *
+             * @return possible object is
+             *         {@link String }
              */
             public String getResource() {
                 return resource;
@@ -1052,11 +944,9 @@ public class CommentType {
 
             /**
              * Sets the value of the resource property.
-             * 
-             * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *
+             * @param value allowed object is
+             *              {@link String }
              */
             public void setResource(String value) {
                 this.resource = value;
@@ -1064,11 +954,9 @@ public class CommentType {
 
             /**
              * Gets the value of the id property.
-             * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             *
+             * @return possible object is
+             *         {@link String }
              */
             public String getId() {
                 return id;
@@ -1076,11 +964,9 @@ public class CommentType {
 
             /**
              * Sets the value of the id property.
-             * 
-             * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *
+             * @param value allowed object is
+             *              {@link String }
              */
             public void setId(String value) {
                 this.id = value;
@@ -1088,11 +974,9 @@ public class CommentType {
 
             /**
              * Gets the value of the version property.
-             * 
-             * @return
-             *     possible object is
-             *     {@link Integer }
-             *     
+             *
+             * @return possible object is
+             *         {@link Integer }
              */
             public Integer getVersion() {
                 return version;
@@ -1100,11 +984,9 @@ public class CommentType {
 
             /**
              * Sets the value of the version property.
-             * 
-             * @param value
-             *     allowed object is
-             *     {@link Integer }
-             *     
+             *
+             * @param value allowed object is
+             *              {@link Integer }
              */
             public void setVersion(Integer value) {
                 this.version = value;
@@ -1117,9 +999,9 @@ public class CommentType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1133,14 +1015,12 @@ public class CommentType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "km",
-        "vmax",
-        "text"
+            "km",
+            "vmax",
+            "text"
     })
     public static class Kinetics {
 
@@ -1152,25 +1032,23 @@ public class CommentType {
 
         /**
          * Gets the value of the km property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the km property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getKM().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         * 
-         * 
          */
         public List<EvidencedStringType> getKM() {
             if (km == null) {
@@ -1181,25 +1059,23 @@ public class CommentType {
 
         /**
          * Gets the value of the vmax property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the vmax property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getVmax().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         * 
-         * 
          */
         public List<EvidencedStringType> getVmax() {
             if (vmax == null) {
@@ -1210,11 +1086,9 @@ public class CommentType {
 
         /**
          * Gets the value of the text property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getText() {
             return text;
@@ -1222,11 +1096,9 @@ public class CommentType {
 
         /**
          * Sets the value of the text property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setText(EvidencedStringType value) {
             this.text = value;
@@ -1237,9 +1109,9 @@ public class CommentType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1249,8 +1121,6 @@ public class CommentType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
@@ -1262,11 +1132,9 @@ public class CommentType {
 
         /**
          * Gets the value of the uri property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getUri() {
             return uri;
@@ -1274,11 +1142,9 @@ public class CommentType {
 
         /**
          * Sets the value of the uri property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setUri(String value) {
             this.uri = value;

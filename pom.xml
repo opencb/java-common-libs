@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.opencb.opencb-commons</groupId>
-    <artifactId>opencb-commons</artifactId>
+    <groupId>org.opencb.java-libs</groupId>
+    <artifactId>java-libs</artifactId>
     <packaging>pom</packaging>
     <version>0.1.0</version>
 
@@ -57,6 +57,33 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-math3</artifactId>
                 <version>3.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.2.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <dependency>
+                <groupId>org.utgenome.thirdparty</groupId>
+                <artifactId>picard</artifactId>
+                <version>1.86.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.jersey.contribs</groupId>
+                <artifactId>jersey-multipart</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.3</version>
             </dependency>
 
         </dependencies>

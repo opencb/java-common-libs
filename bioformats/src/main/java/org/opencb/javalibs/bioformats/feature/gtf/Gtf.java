@@ -1,123 +1,124 @@
 package org.opencb.javalibs.bioformats.feature.gtf;
 
-import java.util.Map;
-
 import com.google.gson.Gson;
 
+import java.util.Map;
+
 public class Gtf {
-	
-	private String sequenceName;
-	private String source;
-	private String feature;
-	private int start;
-	private int end;
-	private String score;
-	private String strand;
-	private String frame;
-	private Map<String, String> attributes;
-	
-	public Gtf(String sequenceName, String source, String feature, int start, int end, String score, String strand, String frame, Map<String, String> attributes) {
-		super();
-		this.sequenceName = sequenceName;
-		this.source = source;
-		this.feature = feature;
-		this.start = start;
-		this.end = end;
-		this.score = score;
-		this.strand = strand;
-		this.frame = frame;
-		this.attributes = attributes;
-	}
 
-	public String toJson() {
-		Gson gson = new Gson();
-		return gson.toJson(this);
-	}
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(sequenceName).append("\t");
-		builder.append(source).append("\t");
-		builder.append(feature).append("\t");
-		builder.append(start).append("\t");
-		builder.append(end).append("\t");
-		builder.append(score).append("\t");
-		builder.append(strand).append("\t");
-		builder.append(frame).append("\t");
-		builder.append(attributes.toString());
-		return builder.toString();
-	}
-	
-	public String getSequenceName() {
-		return sequenceName;
-	}
+    private String sequenceName;
+    private String source;
+    private String feature;
+    private int start;
+    private int end;
+    private String score;
+    private String strand;
+    private String frame;
+    private Map<String, String> attributes;
 
-	public void setSequenceName(String sequenceName) {
-		this.sequenceName = sequenceName;
-	}
+    public Gtf(String sequenceName, String source, String feature, int start, int end, String score, String strand, String frame, Map<String, String> attributes) {
+        super();
+        this.sequenceName = sequenceName;
+        this.source = source;
+        this.feature = feature;
+        this.start = start;
+        this.end = end;
+        this.score = score;
+        this.strand = strand;
+        this.frame = frame;
+        this.attributes = attributes;
+    }
 
-	public String getSource() {
-		return source;
-	}
+    public String toJson() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
 
-	public void setSource(String source) {
-		this.source = source;
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(sequenceName).append("\t");
+        builder.append(source).append("\t");
+        builder.append(feature).append("\t");
+        builder.append(start).append("\t");
+        builder.append(end).append("\t");
+        builder.append(score).append("\t");
+        builder.append(strand).append("\t");
+        builder.append(frame).append("\t");
+        builder.append(attributes.toString());
+        return builder.toString();
+    }
 
-	public String getFeature() {
-		return feature;
-	}
+    public String getSequenceName() {
+        return sequenceName;
+    }
 
-	public void setFeature(String feature) {
-		this.feature = feature;
-	}
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
+    }
 
-	public int getStart() {
-		return start;
-	}
+    public String getSource() {
+        return source;
+    }
 
-	public void setStart(int start) {
-		this.start = start;
-	}
+    public void setSource(String source) {
+        this.source = source;
+    }
 
-	public int getEnd() {
-		return end;
-	}
+    public String getFeature() {
+        return feature;
+    }
 
-	public void setEnd(int end) {
-		this.end = end;
-	}
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
 
-	public String getScore() {
-		return score;
-	}
+    public int getStart() {
+        return start;
+    }
 
-	public void setScore(String score) {
-		this.score = score;
-	}
+    public void setStart(int start) {
+        this.start = start;
+    }
 
-	public String getStrand() {
-		return strand;
-	}
+    public int getEnd() {
+        return end;
+    }
 
-	public void setStrand(String strand) {
-		this.strand = strand;
-	}
+    public void setEnd(int end) {
+        this.end = end;
+    }
 
-	public String getFrame() {
-		return frame;
-	}
+    public String getScore() {
+        return score;
+    }
 
-	public void setFrame(String frame) {
-		this.frame = frame;
-	}
+    public void setScore(String score) {
+        this.score = score;
+    }
 
-	public Map<String, String> getAttributes() {
-		return attributes;
-	}
+    public String getStrand() {
+        return strand;
+    }
 
-	public void setAttributes(Map<String, String> attributes) {
-		this.attributes = attributes;
-	}
-	
+    public void setStrand(String strand) {
+        this.strand = strand;
+    }
+
+    public String getFrame() {
+        return frame;
+    }
+
+    public void setFrame(String frame) {
+        this.frame = frame;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
 }

@@ -15,12 +15,12 @@ import java.util.List;
 
 /**
  * Describes different types of gene designations.
- *             Equivalent to the flat file GN-line.
- * 
+ * Equivalent to the flat file GN-line.
+ * <p/>
  * <p>Java class for geneNameType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="geneNameType">
  *   &lt;simpleContent>
@@ -40,12 +40,10 @@ import java.util.List;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "geneNameType", propOrder = {
-    "value"
+        "value"
 })
 public class GeneNameType {
 
@@ -58,11 +56,9 @@ public class GeneNameType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -70,11 +66,9 @@ public class GeneNameType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -82,25 +76,23 @@ public class GeneNameType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the evidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEvidence().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
-     * 
-     * 
      */
     public List<Integer> getEvidence() {
         if (evidence == null) {
@@ -111,11 +103,9 @@ public class GeneNameType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -123,11 +113,9 @@ public class GeneNameType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;

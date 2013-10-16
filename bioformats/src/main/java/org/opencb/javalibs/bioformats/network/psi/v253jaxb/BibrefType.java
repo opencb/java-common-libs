@@ -15,11 +15,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Bibliographic reference.
- * 
+ * <p/>
  * <p>Java class for bibrefType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="bibrefType">
  *   &lt;complexContent>
@@ -32,13 +32,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "bibrefType", propOrder = {
-    "xref",
-    "attributeList"
+        "xref",
+        "attributeList"
 })
 public class BibrefType {
 
@@ -47,11 +45,9 @@ public class BibrefType {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *     
+     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -59,11 +55,9 @@ public class BibrefType {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;
@@ -71,11 +65,9 @@ public class BibrefType {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeListType }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeListType }
      */
     public AttributeListType getAttributeList() {
         return attributeList;
@@ -83,11 +75,9 @@ public class BibrefType {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeListType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeListType }
      */
     public void setAttributeList(AttributeListType value) {
         this.attributeList = value;

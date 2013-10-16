@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * The gene name type is used for gene information.
- * 
+ * <p/>
  * <p>Java class for geneNameType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="geneNameType">
  *   &lt;simpleContent>
@@ -37,12 +37,10 @@ import javax.xml.bind.annotation.*;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "geneNameType", propOrder = {
-    "value"
+        "value"
 })
 public class GeneNameType {
 
@@ -55,11 +53,9 @@ public class GeneNameType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -67,11 +63,9 @@ public class GeneNameType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -79,11 +73,9 @@ public class GeneNameType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getEvidence() {
         return evidence;
@@ -91,11 +83,9 @@ public class GeneNameType {
 
     /**
      * Sets the value of the evidence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setEvidence(String value) {
         this.evidence = value;
@@ -103,11 +93,9 @@ public class GeneNameType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -115,11 +103,9 @@ public class GeneNameType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;

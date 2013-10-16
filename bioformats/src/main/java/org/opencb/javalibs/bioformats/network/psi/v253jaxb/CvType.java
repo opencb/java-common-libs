@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Reference to an external controlled vocabulary.
- * 
+ * <p/>
  * <p>Java class for cvType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="cvType">
  *   &lt;complexContent>
@@ -30,18 +30,16 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "cvType", propOrder = {
-    "names",
-    "xref"
+        "names",
+        "xref"
 })
 @XmlSeeAlso({
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod.class,
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ExperimentalRoleList.ExperimentalRole.class,
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ExperimentalPreparationList.ExperimentalPreparation.class
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod.class,
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ExperimentalRoleList.ExperimentalRole.class,
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ExperimentalPreparationList.ExperimentalPreparation.class
 })
 public class CvType {
 
@@ -52,11 +50,9 @@ public class CvType {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *     
+     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -64,11 +60,9 @@ public class CvType {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -76,11 +70,9 @@ public class CvType {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *     
+     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -88,11 +80,9 @@ public class CvType {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;

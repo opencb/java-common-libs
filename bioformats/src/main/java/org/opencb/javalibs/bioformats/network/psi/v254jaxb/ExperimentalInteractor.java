@@ -15,9 +15,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for experimentalInteractor complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentalInteractor">
  *   &lt;complexContent>
@@ -33,14 +33,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentalInteractor", propOrder = {
-    "interactorRef",
-    "interactor",
-    "experimentRefList"
+        "interactorRef",
+        "interactor",
+        "experimentRefList"
 })
 public class ExperimentalInteractor {
 
@@ -50,11 +48,9 @@ public class ExperimentalInteractor {
 
     /**
      * Gets the value of the interactorRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getInteractorRef() {
         return interactorRef;
@@ -62,11 +58,9 @@ public class ExperimentalInteractor {
 
     /**
      * Sets the value of the interactorRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setInteractorRef(Integer value) {
         this.interactorRef = value;
@@ -74,11 +68,9 @@ public class ExperimentalInteractor {
 
     /**
      * Gets the value of the interactor property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Interactor }
-     *     
+     *
+     * @return possible object is
+     *         {@link Interactor }
      */
     public Interactor getInteractor() {
         return interactor;
@@ -86,11 +78,9 @@ public class ExperimentalInteractor {
 
     /**
      * Sets the value of the interactor property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Interactor }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Interactor }
      */
     public void setInteractor(Interactor value) {
         this.interactor = value;
@@ -98,11 +88,9 @@ public class ExperimentalInteractor {
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -110,11 +98,9 @@ public class ExperimentalInteractor {
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

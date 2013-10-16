@@ -14,12 +14,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Desciption of the source of the entry, usually an organisation
- *             
- * 
+ * <p/>
+ * <p/>
  * <p>Java class for source complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="source">
  *   &lt;complexContent>
@@ -42,15 +42,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "source", propOrder = {
-    "names",
-    "bibref",
-    "xref",
-    "attributeList"
+        "names",
+        "bibref",
+        "xref",
+        "attributeList"
 })
 public class Source {
 
@@ -66,11 +64,9 @@ public class Source {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *     
+     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -78,11 +74,9 @@ public class Source {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -90,11 +84,9 @@ public class Source {
 
     /**
      * Gets the value of the bibref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Bibref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Bibref }
      */
     public Bibref getBibref() {
         return bibref;
@@ -102,11 +94,9 @@ public class Source {
 
     /**
      * Sets the value of the bibref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Bibref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Bibref }
      */
     public void setBibref(Bibref value) {
         this.bibref = value;
@@ -114,11 +104,9 @@ public class Source {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -126,11 +114,9 @@ public class Source {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -138,11 +124,9 @@ public class Source {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -150,11 +134,9 @@ public class Source {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -162,11 +144,9 @@ public class Source {
 
     /**
      * Gets the value of the release property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getRelease() {
         return release;
@@ -174,11 +154,9 @@ public class Source {
 
     /**
      * Sets the value of the release property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setRelease(String value) {
         this.release = value;
@@ -186,11 +164,9 @@ public class Source {
 
     /**
      * Gets the value of the releaseDate property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
      *
+     * @return possible object is
+     *         {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public XMLGregorianCalendar getReleaseDate() {
         return releaseDate;
@@ -199,10 +175,8 @@ public class Source {
     /**
      * Sets the value of the releaseDate property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *     
+     * @param value allowed object is
+     *              {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public void setReleaseDate(XMLGregorianCalendar value) {
         this.releaseDate = value;

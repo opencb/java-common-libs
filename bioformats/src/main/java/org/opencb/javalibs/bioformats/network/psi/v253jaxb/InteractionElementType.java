@@ -16,11 +16,11 @@ import java.util.List;
 
 /**
  * A molecular interaction.
- * 
+ * <p/>
  * <p>Java class for interactionElementType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="interactionElementType">
  *   &lt;complexContent>
@@ -123,25 +123,23 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "interactionElementType", propOrder = {
-    "names",
-    "xref",
-    "availabilityRef",
-    "availability",
-    "experimentList",
-    "participantList",
-    "inferredInteractionList",
-    "interactionType",
-    "modelled",
-    "intraMolecular",
-    "negative",
-    "confidenceList",
-    "parameterList",
-    "attributeList"
+        "names",
+        "xref",
+        "availabilityRef",
+        "availability",
+        "experimentList",
+        "participantList",
+        "inferredInteractionList",
+        "interactionType",
+        "modelled",
+        "intraMolecular",
+        "negative",
+        "confidenceList",
+        "parameterList",
+        "attributeList"
 })
 @XmlSeeAlso({
         org.opencb.javalibs.bioformats.network.psi.v253jaxb.EntrySet.Entry.InteractionList.Interaction.class
@@ -174,10 +172,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the names property.
      *
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -186,10 +182,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the names property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -198,10 +192,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the xref property.
      *
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -210,10 +202,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the xref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;
@@ -222,10 +212,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the availabilityRef property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getAvailabilityRef() {
         return availabilityRef;
@@ -234,10 +222,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the availabilityRef property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setAvailabilityRef(Integer value) {
         this.availabilityRef = value;
@@ -246,10 +232,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the availability property.
      *
-     * @return
-     *     possible object is
-     *     {@link AvailabilityType }
-     *
+     * @return possible object is
+     *         {@link AvailabilityType }
      */
     public AvailabilityType getAvailability() {
         return availability;
@@ -258,10 +242,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the availability property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link AvailabilityType }
-     *
+     * @param value allowed object is
+     *              {@link AvailabilityType }
      */
     public void setAvailability(AvailabilityType value) {
         this.availability = value;
@@ -270,10 +252,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the experimentList property.
      *
-     * @return
-     *     possible object is
-     *     {@link InteractionElementType.ExperimentList }
-     *
+     * @return possible object is
+     *         {@link InteractionElementType.ExperimentList }
      */
     public InteractionElementType.ExperimentList getExperimentList() {
         return experimentList;
@@ -282,10 +262,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the experimentList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link InteractionElementType.ExperimentList }
-     *
+     * @param value allowed object is
+     *              {@link InteractionElementType.ExperimentList }
      */
     public void setExperimentList(InteractionElementType.ExperimentList value) {
         this.experimentList = value;
@@ -294,10 +272,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the participantList property.
      *
-     * @return
-     *     possible object is
-     *     {@link InteractionElementType.ParticipantList }
-     *
+     * @return possible object is
+     *         {@link InteractionElementType.ParticipantList }
      */
     public InteractionElementType.ParticipantList getParticipantList() {
         return participantList;
@@ -306,10 +282,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the participantList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link InteractionElementType.ParticipantList }
-     *
+     * @param value allowed object is
+     *              {@link InteractionElementType.ParticipantList }
      */
     public void setParticipantList(InteractionElementType.ParticipantList value) {
         this.participantList = value;
@@ -318,10 +292,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the inferredInteractionList property.
      *
-     * @return
-     *     possible object is
-     *     {@link InteractionElementType.InferredInteractionList }
-     *
+     * @return possible object is
+     *         {@link InteractionElementType.InferredInteractionList }
      */
     public InteractionElementType.InferredInteractionList getInferredInteractionList() {
         return inferredInteractionList;
@@ -330,10 +302,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the inferredInteractionList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link InteractionElementType.InferredInteractionList }
-     *
+     * @param value allowed object is
+     *              {@link InteractionElementType.InferredInteractionList }
      */
     public void setInferredInteractionList(InteractionElementType.InferredInteractionList value) {
         this.inferredInteractionList = value;
@@ -341,25 +311,23 @@ public class InteractionElementType {
 
     /**
      * Gets the value of the interactionType property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the interactionType property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInteractionType().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link CvType }
-     *
-     *
      */
     public List<CvType> getInteractionType() {
         if (interactionType == null) {
@@ -371,10 +339,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the modelled property.
      *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isModelled() {
         return modelled;
@@ -383,10 +349,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the modelled property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setModelled(Boolean value) {
         this.modelled = value;
@@ -395,10 +359,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the intraMolecular property.
      *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isIntraMolecular() {
         return intraMolecular;
@@ -407,10 +369,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the intraMolecular property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setIntraMolecular(Boolean value) {
         this.intraMolecular = value;
@@ -419,10 +379,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the negative property.
      *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isNegative() {
         return negative;
@@ -431,10 +389,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the negative property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setNegative(Boolean value) {
         this.negative = value;
@@ -443,10 +399,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the confidenceList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ConfidenceListType }
-     *
+     * @return possible object is
+     *         {@link ConfidenceListType }
      */
     public ConfidenceListType getConfidenceList() {
         return confidenceList;
@@ -455,10 +409,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the confidenceList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceListType }
-     *
+     * @param value allowed object is
+     *              {@link ConfidenceListType }
      */
     public void setConfidenceList(ConfidenceListType value) {
         this.confidenceList = value;
@@ -467,10 +419,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the parameterList property.
      *
-     * @return
-     *     possible object is
-     *     {@link InteractionElementType.ParameterList }
-     *
+     * @return possible object is
+     *         {@link InteractionElementType.ParameterList }
      */
     public InteractionElementType.ParameterList getParameterList() {
         return parameterList;
@@ -479,10 +429,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the parameterList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link InteractionElementType.ParameterList }
-     *
+     * @param value allowed object is
+     *              {@link InteractionElementType.ParameterList }
      */
     public void setParameterList(InteractionElementType.ParameterList value) {
         this.parameterList = value;
@@ -491,10 +439,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the attributeList property.
      *
-     * @return
-     *     possible object is
-     *     {@link AttributeListType }
-     *
+     * @return possible object is
+     *         {@link AttributeListType }
      */
     public AttributeListType getAttributeList() {
         return attributeList;
@@ -503,10 +449,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the attributeList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link AttributeListType }
-     *
+     * @param value allowed object is
+     *              {@link AttributeListType }
      */
     public void setAttributeList(AttributeListType value) {
         this.attributeList = value;
@@ -515,10 +459,8 @@ public class InteractionElementType {
     /**
      * Gets the value of the imexId property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getImexId() {
         return imexId;
@@ -527,10 +469,8 @@ public class InteractionElementType {
     /**
      * Sets the value of the imexId property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setImexId(String value) {
         this.imexId = value;
@@ -538,7 +478,6 @@ public class InteractionElementType {
 
     /**
      * Gets the value of the id property.
-     *
      */
     public int getId() {
         return id;
@@ -546,7 +485,6 @@ public class InteractionElementType {
 
     /**
      * Sets the value of the id property.
-     *
      */
     public void setId(int value) {
         this.id = value;
@@ -555,9 +493,9 @@ public class InteractionElementType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -570,43 +508,39 @@ public class InteractionElementType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "experimentRefOrExperimentDescription"
+            "experimentRefOrExperimentDescription"
     })
     public static class ExperimentList {
 
         @XmlElements({
-            @XmlElement(name = "experimentDescription", type = ExperimentType.class),
-            @XmlElement(name = "experimentRef", type = Integer.class)
+                @XmlElement(name = "experimentDescription", type = ExperimentType.class),
+                @XmlElement(name = "experimentRef", type = Integer.class)
         })
         protected List<Object> experimentRefOrExperimentDescription;
 
         /**
          * Gets the value of the experimentRefOrExperimentDescription property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the experimentRefOrExperimentDescription property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getExperimentRefOrExperimentDescription().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ExperimentType }
          * {@link Integer }
-         *
-         *
          */
         public List<Object> getExperimentRefOrExperimentDescription() {
             if (experimentRefOrExperimentDescription == null) {
@@ -620,9 +554,9 @@ public class InteractionElementType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -656,12 +590,10 @@ public class InteractionElementType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "inferredInteraction"
+            "inferredInteraction"
     })
     public static class InferredInteractionList {
 
@@ -670,25 +602,23 @@ public class InteractionElementType {
 
         /**
          * Gets the value of the inferredInteraction property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the inferredInteraction property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getInferredInteraction().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link InteractionElementType.InferredInteractionList.InferredInteraction }
-         *
-         *
          */
         public List<InferredInteraction> getInferredInteraction() {
             if (inferredInteraction == null) {
@@ -700,9 +630,9 @@ public class InteractionElementType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -726,13 +656,11 @@ public class InteractionElementType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "participant",
-            "experimentRefList"
+                "participant",
+                "experimentRefList"
         })
         public static class InferredInteraction {
 
@@ -742,25 +670,23 @@ public class InteractionElementType {
 
             /**
              * Gets the value of the participant property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the participant property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getParticipant().add(newItem);
              * </pre>
-             *
-             *
-             * <p>
+             * <p/>
+             * <p/>
+             * <p/>
              * Objects of the following type(s) are allowed in the list
              * {@link InteractionElementType.InferredInteractionList.InferredInteraction.Participant }
-             *
-             *
              */
             public List<Participant> getParticipant() {
                 if (participant == null) {
@@ -772,10 +698,8 @@ public class InteractionElementType {
             /**
              * Gets the value of the experimentRefList property.
              *
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -784,10 +708,8 @@ public class InteractionElementType {
             /**
              * Sets the value of the experimentRefList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;
@@ -796,9 +718,9 @@ public class InteractionElementType {
 
             /**
              * <p>Java class for anonymous complex type.
-             *
+             * <p/>
              * <p>The following schema fragment specifies the expected content contained within this class.
-             *
+             * <p/>
              * <pre>
              * &lt;complexType>
              *   &lt;complexContent>
@@ -811,13 +733,11 @@ public class InteractionElementType {
              *   &lt;/complexContent>
              * &lt;/complexType>
              * </pre>
-             *
-             *
              */
             @XmlAccessorType(XmlAccessType.FIELD)
             @XmlType(name = "", propOrder = {
-                "participantRef",
-                "participantFeatureRef"
+                    "participantRef",
+                    "participantFeatureRef"
             })
             public static class Participant {
 
@@ -827,10 +747,8 @@ public class InteractionElementType {
                 /**
                  * Gets the value of the participantRef property.
                  *
-                 * @return
-                 *     possible object is
-                 *     {@link Integer }
-                 *
+                 * @return possible object is
+                 *         {@link Integer }
                  */
                 public Integer getParticipantRef() {
                     return participantRef;
@@ -839,10 +757,8 @@ public class InteractionElementType {
                 /**
                  * Sets the value of the participantRef property.
                  *
-                 * @param value
-                 *     allowed object is
-                 *     {@link Integer }
-                 *
+                 * @param value allowed object is
+                 *              {@link Integer }
                  */
                 public void setParticipantRef(Integer value) {
                     this.participantRef = value;
@@ -851,10 +767,8 @@ public class InteractionElementType {
                 /**
                  * Gets the value of the participantFeatureRef property.
                  *
-                 * @return
-                 *     possible object is
-                 *     {@link Integer }
-                 *
+                 * @return possible object is
+                 *         {@link Integer }
                  */
                 public Integer getParticipantFeatureRef() {
                     return participantFeatureRef;
@@ -863,10 +777,8 @@ public class InteractionElementType {
                 /**
                  * Sets the value of the participantFeatureRef property.
                  *
-                 * @param value
-                 *     allowed object is
-                 *     {@link Integer }
-                 *
+                 * @param value allowed object is
+                 *              {@link Integer }
                  */
                 public void setParticipantFeatureRef(Integer value) {
                     this.participantFeatureRef = value;
@@ -881,9 +793,9 @@ public class InteractionElementType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -906,12 +818,10 @@ public class InteractionElementType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "parameter"
+            "parameter"
     })
     public static class ParameterList {
 
@@ -920,25 +830,23 @@ public class InteractionElementType {
 
         /**
          * Gets the value of the parameter property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the parameter property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getParameter().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link InteractionElementType.ParameterList.Parameter }
-         *
-         *
          */
         public List<Parameter> getParameter() {
             if (parameter == null) {
@@ -950,9 +858,9 @@ public class InteractionElementType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -965,16 +873,13 @@ public class InteractionElementType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRef"
+                "experimentRef"
         })
         public static class Parameter
-            extends ParameterType
-        {
+                extends ParameterType {
 
             protected int experimentRef;
             @XmlAttribute
@@ -982,7 +887,6 @@ public class InteractionElementType {
 
             /**
              * Gets the value of the experimentRef property.
-             *
              */
             public int getExperimentRef() {
                 return experimentRef;
@@ -990,7 +894,6 @@ public class InteractionElementType {
 
             /**
              * Sets the value of the experimentRef property.
-             *
              */
             public void setExperimentRef(int value) {
                 this.experimentRef = value;
@@ -999,10 +902,8 @@ public class InteractionElementType {
             /**
              * Gets the value of the uncertainty property.
              *
-             * @return
-             *     possible object is
-             *     {@link java.math.BigDecimal }
-             *
+             * @return possible object is
+             *         {@link java.math.BigDecimal }
              */
             public BigDecimal getUncertainty() {
                 return uncertainty;
@@ -1011,10 +912,8 @@ public class InteractionElementType {
             /**
              * Sets the value of the uncertainty property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link java.math.BigDecimal }
-             *     
+             * @param value allowed object is
+             *              {@link java.math.BigDecimal }
              */
             public void setUncertainty(BigDecimal value) {
                 this.uncertainty = value;
@@ -1027,9 +926,9 @@ public class InteractionElementType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1041,12 +940,10 @@ public class InteractionElementType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "participant"
+            "participant"
     })
     public static class ParticipantList {
 
@@ -1055,25 +952,23 @@ public class InteractionElementType {
 
         /**
          * Gets the value of the participant property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the participant property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getParticipant().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType }
-         * 
-         * 
          */
         public List<ParticipantType> getParticipant() {
             if (participant == null) {

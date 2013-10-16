@@ -16,9 +16,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -116,12 +116,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "entry"
+        "entry"
 })
 @XmlRootElement(name = "entrySet")
 public class EntrySet {
@@ -137,25 +135,23 @@ public class EntrySet {
 
     /**
      * Gets the value of the entry property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the entry property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEntry().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EntrySet.Entry }
-     *
-     *
      */
     public List<Entry> getEntry() {
         if (entry == null) {
@@ -166,7 +162,6 @@ public class EntrySet {
 
     /**
      * Gets the value of the level property.
-     *
      */
     public int getLevel() {
         return level;
@@ -174,7 +169,6 @@ public class EntrySet {
 
     /**
      * Sets the value of the level property.
-     *
      */
     public void setLevel(int value) {
         this.level = value;
@@ -182,7 +176,6 @@ public class EntrySet {
 
     /**
      * Gets the value of the version property.
-     *
      */
     public int getVersion() {
         return version;
@@ -190,7 +183,6 @@ public class EntrySet {
 
     /**
      * Sets the value of the version property.
-     *
      */
     public void setVersion(int value) {
         this.version = value;
@@ -199,14 +191,12 @@ public class EntrySet {
     /**
      * Gets the value of the minorVersion property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public int getMinorVersion() {
         if (minorVersion == null) {
-            return  3;
+            return 3;
         } else {
             return minorVersion;
         }
@@ -215,10 +205,8 @@ public class EntrySet {
     /**
      * Sets the value of the minorVersion property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setMinorVersion(Integer value) {
         this.minorVersion = value;
@@ -227,9 +215,9 @@ public class EntrySet {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -314,17 +302,15 @@ public class EntrySet {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "source",
-        "availabilityList",
-        "experimentList",
-        "interactorList",
-        "interactionList",
-        "attributeList"
+            "source",
+            "availabilityList",
+            "experimentList",
+            "interactorList",
+            "interactionList",
+            "attributeList"
     })
     public static class Entry {
 
@@ -339,10 +325,8 @@ public class EntrySet {
         /**
          * Gets the value of the source property.
          *
-         * @return
-         *     possible object is
-         *     {@link EntrySet.Entry.Source }
-         *
+         * @return possible object is
+         *         {@link EntrySet.Entry.Source }
          */
         public EntrySet.Entry.Source getSource() {
             return source;
@@ -351,10 +335,8 @@ public class EntrySet {
         /**
          * Sets the value of the source property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EntrySet.Entry.Source }
-         *
+         * @param value allowed object is
+         *              {@link EntrySet.Entry.Source }
          */
         public void setSource(EntrySet.Entry.Source value) {
             this.source = value;
@@ -363,10 +345,8 @@ public class EntrySet {
         /**
          * Gets the value of the availabilityList property.
          *
-         * @return
-         *     possible object is
-         *     {@link EntrySet.Entry.AvailabilityList }
-         *
+         * @return possible object is
+         *         {@link EntrySet.Entry.AvailabilityList }
          */
         public EntrySet.Entry.AvailabilityList getAvailabilityList() {
             return availabilityList;
@@ -375,10 +355,8 @@ public class EntrySet {
         /**
          * Sets the value of the availabilityList property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EntrySet.Entry.AvailabilityList }
-         *
+         * @param value allowed object is
+         *              {@link EntrySet.Entry.AvailabilityList }
          */
         public void setAvailabilityList(EntrySet.Entry.AvailabilityList value) {
             this.availabilityList = value;
@@ -387,10 +365,8 @@ public class EntrySet {
         /**
          * Gets the value of the experimentList property.
          *
-         * @return
-         *     possible object is
-         *     {@link EntrySet.Entry.ExperimentList }
-         *
+         * @return possible object is
+         *         {@link EntrySet.Entry.ExperimentList }
          */
         public EntrySet.Entry.ExperimentList getExperimentList() {
             return experimentList;
@@ -399,10 +375,8 @@ public class EntrySet {
         /**
          * Sets the value of the experimentList property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EntrySet.Entry.ExperimentList }
-         *
+         * @param value allowed object is
+         *              {@link EntrySet.Entry.ExperimentList }
          */
         public void setExperimentList(EntrySet.Entry.ExperimentList value) {
             this.experimentList = value;
@@ -411,10 +385,8 @@ public class EntrySet {
         /**
          * Gets the value of the interactorList property.
          *
-         * @return
-         *     possible object is
-         *     {@link EntrySet.Entry.InteractorList }
-         *
+         * @return possible object is
+         *         {@link EntrySet.Entry.InteractorList }
          */
         public EntrySet.Entry.InteractorList getInteractorList() {
             return interactorList;
@@ -423,10 +395,8 @@ public class EntrySet {
         /**
          * Sets the value of the interactorList property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EntrySet.Entry.InteractorList }
-         *
+         * @param value allowed object is
+         *              {@link EntrySet.Entry.InteractorList }
          */
         public void setInteractorList(EntrySet.Entry.InteractorList value) {
             this.interactorList = value;
@@ -435,10 +405,8 @@ public class EntrySet {
         /**
          * Gets the value of the interactionList property.
          *
-         * @return
-         *     possible object is
-         *     {@link EntrySet.Entry.InteractionList }
-         *
+         * @return possible object is
+         *         {@link EntrySet.Entry.InteractionList }
          */
         public EntrySet.Entry.InteractionList getInteractionList() {
             return interactionList;
@@ -447,10 +415,8 @@ public class EntrySet {
         /**
          * Sets the value of the interactionList property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EntrySet.Entry.InteractionList }
-         *
+         * @param value allowed object is
+         *              {@link EntrySet.Entry.InteractionList }
          */
         public void setInteractionList(EntrySet.Entry.InteractionList value) {
             this.interactionList = value;
@@ -459,10 +425,8 @@ public class EntrySet {
         /**
          * Gets the value of the attributeList property.
          *
-         * @return
-         *     possible object is
-         *     {@link AttributeListType }
-         *
+         * @return possible object is
+         *         {@link AttributeListType }
          */
         public AttributeListType getAttributeList() {
             return attributeList;
@@ -471,10 +435,8 @@ public class EntrySet {
         /**
          * Sets the value of the attributeList property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link AttributeListType }
-         *
+         * @param value allowed object is
+         *              {@link AttributeListType }
          */
         public void setAttributeList(AttributeListType value) {
             this.attributeList = value;
@@ -483,9 +445,9 @@ public class EntrySet {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -497,12 +459,10 @@ public class EntrySet {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "availability"
+                "availability"
         })
         public static class AvailabilityList {
 
@@ -510,25 +470,23 @@ public class EntrySet {
 
             /**
              * Gets the value of the availability property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the availability property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getAvailability().add(newItem);
              * </pre>
-             *
-             *
-             * <p>
+             * <p/>
+             * <p/>
+             * <p/>
              * Objects of the following type(s) are allowed in the list
              * {@link AvailabilityType }
-             *
-             *
              */
             public List<AvailabilityType> getAvailability() {
                 if (availability == null) {
@@ -542,9 +500,9 @@ public class EntrySet {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -556,12 +514,10 @@ public class EntrySet {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentDescription"
+                "experimentDescription"
         })
         public static class ExperimentList {
 
@@ -569,25 +525,23 @@ public class EntrySet {
 
             /**
              * Gets the value of the experimentDescription property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the experimentDescription property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getExperimentDescription().add(newItem);
              * </pre>
-             *
-             *
-             * <p>
+             * <p/>
+             * <p/>
+             * <p/>
              * Objects of the following type(s) are allowed in the list
              * {@link ExperimentType }
-             *
-             *
              */
             public List<ExperimentType> getExperimentDescription() {
                 if (experimentDescription == null) {
@@ -601,9 +555,9 @@ public class EntrySet {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -622,12 +576,10 @@ public class EntrySet {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "interaction"
+                "interaction"
         })
         public static class InteractionList {
 
@@ -636,25 +588,23 @@ public class EntrySet {
 
             /**
              * Gets the value of the interaction property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the interaction property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getInteraction().add(newItem);
              * </pre>
-             *
-             *
-             * <p>
+             * <p/>
+             * <p/>
+             * <p/>
              * Objects of the following type(s) are allowed in the list
              * {@link EntrySet.Entry.InteractionList.Interaction }
-             *
-             *
              */
             public List<Interaction> getInteraction() {
                 if (interaction == null) {
@@ -666,9 +616,9 @@ public class EntrySet {
 
             /**
              * <p>Java class for anonymous complex type.
-             *
+             * <p/>
              * <p>The following schema fragment specifies the expected content contained within this class.
-             *
+             * <p/>
              * <pre>
              * &lt;complexType>
              *   &lt;complexContent>
@@ -677,14 +627,11 @@ public class EntrySet {
              *   &lt;/complexContent>
              * &lt;/complexType>
              * </pre>
-             *
-             *
              */
             @XmlAccessorType(XmlAccessType.FIELD)
             @XmlType(name = "")
             public static class Interaction
-                extends InteractionElementType
-            {
+                    extends InteractionElementType {
 
 
             }
@@ -694,9 +641,9 @@ public class EntrySet {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -708,12 +655,10 @@ public class EntrySet {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "interactor"
+                "interactor"
         })
         public static class InteractorList {
 
@@ -721,25 +666,23 @@ public class EntrySet {
 
             /**
              * Gets the value of the interactor property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the interactor property.
-             *
-             * <p>
+             * <p/>
+             * <p/>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getInteractor().add(newItem);
              * </pre>
-             *
-             *
-             * <p>
+             * <p/>
+             * <p/>
+             * <p/>
              * Objects of the following type(s) are allowed in the list
              * {@link InteractorElementType }
-             *
-             *
              */
             public List<InteractorElementType> getInteractor() {
                 if (interactor == null) {
@@ -753,9 +696,9 @@ public class EntrySet {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -778,15 +721,13 @@ public class EntrySet {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "names",
-            "bibref",
-            "xref",
-            "attributeList"
+                "names",
+                "bibref",
+                "xref",
+                "attributeList"
         })
         public static class Source {
 
@@ -803,10 +744,8 @@ public class EntrySet {
             /**
              * Gets the value of the names property.
              *
-             * @return
-             *     possible object is
-             *     {@link NamesType }
-             *
+             * @return possible object is
+             *         {@link NamesType }
              */
             public NamesType getNames() {
                 return names;
@@ -815,10 +754,8 @@ public class EntrySet {
             /**
              * Sets the value of the names property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link NamesType }
-             *
+             * @param value allowed object is
+             *              {@link NamesType }
              */
             public void setNames(NamesType value) {
                 this.names = value;
@@ -827,10 +764,8 @@ public class EntrySet {
             /**
              * Gets the value of the bibref property.
              *
-             * @return
-             *     possible object is
-             *     {@link BibrefType }
-             *
+             * @return possible object is
+             *         {@link BibrefType }
              */
             public BibrefType getBibref() {
                 return bibref;
@@ -839,10 +774,8 @@ public class EntrySet {
             /**
              * Sets the value of the bibref property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link BibrefType }
-             *
+             * @param value allowed object is
+             *              {@link BibrefType }
              */
             public void setBibref(BibrefType value) {
                 this.bibref = value;
@@ -851,10 +784,8 @@ public class EntrySet {
             /**
              * Gets the value of the xref property.
              *
-             * @return
-             *     possible object is
-             *     {@link XrefType }
-             *
+             * @return possible object is
+             *         {@link XrefType }
              */
             public XrefType getXref() {
                 return xref;
@@ -863,10 +794,8 @@ public class EntrySet {
             /**
              * Sets the value of the xref property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link XrefType }
-             *
+             * @param value allowed object is
+             *              {@link XrefType }
              */
             public void setXref(XrefType value) {
                 this.xref = value;
@@ -875,10 +804,8 @@ public class EntrySet {
             /**
              * Gets the value of the attributeList property.
              *
-             * @return
-             *     possible object is
-             *     {@link AttributeListType }
-             *
+             * @return possible object is
+             *         {@link AttributeListType }
              */
             public AttributeListType getAttributeList() {
                 return attributeList;
@@ -887,10 +814,8 @@ public class EntrySet {
             /**
              * Sets the value of the attributeList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link AttributeListType }
-             *
+             * @param value allowed object is
+             *              {@link AttributeListType }
              */
             public void setAttributeList(AttributeListType value) {
                 this.attributeList = value;
@@ -899,10 +824,8 @@ public class EntrySet {
             /**
              * Gets the value of the release property.
              *
-             * @return
-             *     possible object is
-             *     {@link String }
-             *
+             * @return possible object is
+             *         {@link String }
              */
             public String getRelease() {
                 return release;
@@ -911,10 +834,8 @@ public class EntrySet {
             /**
              * Sets the value of the release property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link String }
-             *
+             * @param value allowed object is
+             *              {@link String }
              */
             public void setRelease(String value) {
                 this.release = value;
@@ -923,10 +844,8 @@ public class EntrySet {
             /**
              * Gets the value of the releaseDate property.
              *
-             * @return
-             *     possible object is
-             *     {@link javax.xml.datatype.XMLGregorianCalendar }
-             *
+             * @return possible object is
+             *         {@link javax.xml.datatype.XMLGregorianCalendar }
              */
             public XMLGregorianCalendar getReleaseDate() {
                 return releaseDate;
@@ -935,10 +854,8 @@ public class EntrySet {
             /**
              * Sets the value of the releaseDate property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link javax.xml.datatype.XMLGregorianCalendar }
-             *     
+             * @param value allowed object is
+             *              {@link javax.xml.datatype.XMLGregorianCalendar }
              */
             public void setReleaseDate(XMLGregorianCalendar value) {
                 this.releaseDate = value;

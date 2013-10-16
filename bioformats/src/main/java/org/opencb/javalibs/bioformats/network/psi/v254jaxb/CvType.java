@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Reference to an external controlled vocabulary.
- * 
+ * <p/>
  * <p>Java class for cvType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="cvType">
  *   &lt;complexContent>
@@ -30,18 +30,16 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "cvType", propOrder = {
-    "names",
-    "xref"
+        "names",
+        "xref"
 })
 @XmlSeeAlso({
-    ExperimentalPreparation.class,
-    ExperimentalRole.class,
-    ParticipantIdentificationMethod.class
+        ExperimentalPreparation.class,
+        ExperimentalRole.class,
+        ParticipantIdentificationMethod.class
 })
 public class CvType {
 
@@ -52,11 +50,9 @@ public class CvType {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *     
+     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -64,11 +60,9 @@ public class CvType {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -76,11 +70,9 @@ public class CvType {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -88,11 +80,9 @@ public class CvType {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;

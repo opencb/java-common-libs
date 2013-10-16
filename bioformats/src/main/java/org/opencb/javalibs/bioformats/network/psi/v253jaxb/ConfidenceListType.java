@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * A list of confidence values.
- * 
+ * <p/>
  * <p>Java class for confidenceListType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="confidenceListType">
  *   &lt;complexContent>
@@ -44,12 +44,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "confidenceListType", propOrder = {
-    "confidence"
+        "confidence"
 })
 public class ConfidenceListType {
 
@@ -58,25 +56,23 @@ public class ConfidenceListType {
 
     /**
      * Gets the value of the confidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the confidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getConfidence().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ConfidenceListType.Confidence }
-     *
-     *
      */
     public List<Confidence> getConfidence() {
         if (confidence == null) {
@@ -88,9 +84,9 @@ public class ConfidenceListType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -102,26 +98,21 @@ public class ConfidenceListType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "experimentRefList"
+            "experimentRefList"
     })
     public static class Confidence
-        extends ConfidenceType
-    {
+            extends ConfidenceType {
 
         protected ExperimentRefListType experimentRefList;
 
         /**
          * Gets the value of the experimentRefList property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link ExperimentRefListType }
-         *     
+         *
+         * @return possible object is
+         *         {@link ExperimentRefListType }
          */
         public ExperimentRefListType getExperimentRefList() {
             return experimentRefList;
@@ -129,11 +120,9 @@ public class ConfidenceListType {
 
         /**
          * Sets the value of the experimentRefList property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link ExperimentRefListType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link ExperimentRefListType }
          */
         public void setExperimentRefList(ExperimentRefListType value) {
             this.experimentRefList = value;

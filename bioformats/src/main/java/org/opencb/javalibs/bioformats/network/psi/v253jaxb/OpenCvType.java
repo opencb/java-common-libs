@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Allows to reference an external controlled vocabulary, or to directly include a value if no suitable external definition is available.
- * 
+ * <p/>
  * <p>Java class for openCvType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="openCvType">
  *   &lt;complexContent>
@@ -34,14 +34,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "openCvType", propOrder = {
-    "names",
-    "xref",
-    "attributeList"
+        "names",
+        "xref",
+        "attributeList"
 })
 public class OpenCvType {
 
@@ -52,11 +50,9 @@ public class OpenCvType {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *     
+     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -64,11 +60,9 @@ public class OpenCvType {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -76,11 +70,9 @@ public class OpenCvType {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *     
+     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -88,11 +80,9 @@ public class OpenCvType {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;
@@ -100,11 +90,9 @@ public class OpenCvType {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeListType }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeListType }
      */
     public AttributeListType getAttributeList() {
         return attributeList;
@@ -112,11 +100,9 @@ public class OpenCvType {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeListType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeListType }
      */
     public void setAttributeList(AttributeListType value) {
         this.attributeList = value;

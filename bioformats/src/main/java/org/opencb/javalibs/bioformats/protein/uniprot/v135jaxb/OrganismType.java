@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for organismType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="organismType">
  *   &lt;complexContent>
@@ -42,14 +42,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "organismType", propOrder = {
-    "name",
-    "dbReference",
-    "lineage"
+        "name",
+        "dbReference",
+        "lineage"
 })
 public class OrganismType {
 
@@ -63,25 +61,23 @@ public class OrganismType {
 
     /**
      * Gets the value of the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link OrganismNameType }
-     *
-     *
      */
     public List<OrganismNameType> getName() {
         if (name == null) {
@@ -92,25 +88,23 @@ public class OrganismType {
 
     /**
      * Gets the value of the dbReference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the dbReference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDbReference().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link DbReferenceType }
-     *
-     *
      */
     public List<DbReferenceType> getDbReference() {
         if (dbReference == null) {
@@ -122,10 +116,8 @@ public class OrganismType {
     /**
      * Gets the value of the lineage property.
      *
-     * @return
-     *     possible object is
-     *     {@link OrganismType.Lineage }
-     *
+     * @return possible object is
+     *         {@link OrganismType.Lineage }
      */
     public OrganismType.Lineage getLineage() {
         return lineage;
@@ -134,10 +126,8 @@ public class OrganismType {
     /**
      * Sets the value of the lineage property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link OrganismType.Lineage }
-     *
+     * @param value allowed object is
+     *              {@link OrganismType.Lineage }
      */
     public void setLineage(OrganismType.Lineage value) {
         this.lineage = value;
@@ -145,11 +135,9 @@ public class OrganismType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getEvidence() {
         return evidence;
@@ -157,11 +145,9 @@ public class OrganismType {
 
     /**
      * Sets the value of the evidence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setEvidence(String value) {
         this.evidence = value;
@@ -170,9 +156,9 @@ public class OrganismType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -184,12 +170,10 @@ public class OrganismType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "taxon"
+            "taxon"
     })
     public static class Lineage {
 
@@ -198,25 +182,23 @@ public class OrganismType {
 
         /**
          * Gets the value of the taxon property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the taxon property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getTaxon().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link String }
-         * 
-         * 
          */
         public List<String> getTaxon() {
             if (taxon == null) {

@@ -14,11 +14,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * The evidence element is equivalent to the actual evidence (**EV line).
- * 
+ * <p/>
  * <p>Java class for evidenceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="evidenceType">
  *   &lt;complexContent>
@@ -40,8 +40,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "evidenceType")
@@ -61,11 +59,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the category property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getCategory() {
         return category;
@@ -73,11 +69,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the category property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCategory(String value) {
         this.category = value;
@@ -85,11 +79,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -97,11 +89,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
@@ -109,11 +99,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the attribute property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getAttribute() {
         return attribute;
@@ -121,11 +109,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the attribute property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setAttribute(String value) {
         this.attribute = value;
@@ -133,11 +119,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the date property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
      *
+     * @return possible object is
+     *         {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public XMLGregorianCalendar getDate() {
         return date;
@@ -146,10 +130,8 @@ public class EvidenceType {
     /**
      * Sets the value of the date property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *     
+     * @param value allowed object is
+     *              {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public void setDate(XMLGregorianCalendar value) {
         this.date = value;
@@ -157,11 +139,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the key property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getKey() {
         return key;
@@ -169,11 +149,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the key property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setKey(String value) {
         this.key = value;

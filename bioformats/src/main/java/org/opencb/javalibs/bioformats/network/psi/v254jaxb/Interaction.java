@@ -15,11 +15,11 @@ import java.util.List;
 
 /**
  * A molecular interaction.
- * 
+ * <p/>
  * <p>Java class for interaction complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="interaction">
  *   &lt;complexContent>
@@ -48,25 +48,23 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "interaction", propOrder = {
-    "names",
-    "xref",
-    "availabilityRef",
-    "availability",
-    "experimentList",
-    "participantList",
-    "inferredInteractionList",
-    "interactionType",
-    "modelled",
-    "intraMolecular",
-    "negative",
-    "confidenceList",
-    "parameterList",
-    "attributeList"
+        "names",
+        "xref",
+        "availabilityRef",
+        "availability",
+        "experimentList",
+        "participantList",
+        "inferredInteractionList",
+        "interactionType",
+        "modelled",
+        "intraMolecular",
+        "negative",
+        "confidenceList",
+        "parameterList",
+        "attributeList"
 })
 public class Interaction {
 
@@ -94,11 +92,9 @@ public class Interaction {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *     
+     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -106,11 +102,9 @@ public class Interaction {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -118,11 +112,9 @@ public class Interaction {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -130,11 +122,9 @@ public class Interaction {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -142,11 +132,9 @@ public class Interaction {
 
     /**
      * Gets the value of the availabilityRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getAvailabilityRef() {
         return availabilityRef;
@@ -154,11 +142,9 @@ public class Interaction {
 
     /**
      * Sets the value of the availabilityRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setAvailabilityRef(Integer value) {
         this.availabilityRef = value;
@@ -166,11 +152,9 @@ public class Interaction {
 
     /**
      * Gets the value of the availability property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Availability }
-     *     
+     *
+     * @return possible object is
+     *         {@link Availability }
      */
     public Availability getAvailability() {
         return availability;
@@ -178,11 +162,9 @@ public class Interaction {
 
     /**
      * Sets the value of the availability property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Availability }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Availability }
      */
     public void setAvailability(Availability value) {
         this.availability = value;
@@ -190,11 +172,9 @@ public class Interaction {
 
     /**
      * Gets the value of the experimentList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentList }
      */
     public ExperimentList getExperimentList() {
         return experimentList;
@@ -202,11 +182,9 @@ public class Interaction {
 
     /**
      * Sets the value of the experimentList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentList }
      */
     public void setExperimentList(ExperimentList value) {
         this.experimentList = value;
@@ -214,11 +192,9 @@ public class Interaction {
 
     /**
      * Gets the value of the participantList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ParticipantList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ParticipantList }
      */
     public ParticipantList getParticipantList() {
         return participantList;
@@ -226,11 +202,9 @@ public class Interaction {
 
     /**
      * Sets the value of the participantList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ParticipantList }
      */
     public void setParticipantList(ParticipantList value) {
         this.participantList = value;
@@ -238,11 +212,9 @@ public class Interaction {
 
     /**
      * Gets the value of the inferredInteractionList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link InferredInteractionList }
-     *     
+     *
+     * @return possible object is
+     *         {@link InferredInteractionList }
      */
     public InferredInteractionList getInferredInteractionList() {
         return inferredInteractionList;
@@ -250,11 +222,9 @@ public class Interaction {
 
     /**
      * Sets the value of the inferredInteractionList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link InferredInteractionList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link InferredInteractionList }
      */
     public void setInferredInteractionList(InferredInteractionList value) {
         this.inferredInteractionList = value;
@@ -262,25 +232,23 @@ public class Interaction {
 
     /**
      * Gets the value of the interactionType property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the interactionType property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInteractionType().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link CvType }
-     * 
-     * 
      */
     public List<CvType> getInteractionType() {
         if (interactionType == null) {
@@ -291,11 +259,9 @@ public class Interaction {
 
     /**
      * Gets the value of the modelled property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isModelled() {
         return modelled;
@@ -303,11 +269,9 @@ public class Interaction {
 
     /**
      * Sets the value of the modelled property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setModelled(Boolean value) {
         this.modelled = value;
@@ -315,11 +279,9 @@ public class Interaction {
 
     /**
      * Gets the value of the intraMolecular property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isIntraMolecular() {
         return intraMolecular;
@@ -327,11 +289,9 @@ public class Interaction {
 
     /**
      * Sets the value of the intraMolecular property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setIntraMolecular(Boolean value) {
         this.intraMolecular = value;
@@ -339,11 +299,9 @@ public class Interaction {
 
     /**
      * Gets the value of the negative property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isNegative() {
         return negative;
@@ -351,11 +309,9 @@ public class Interaction {
 
     /**
      * Sets the value of the negative property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setNegative(Boolean value) {
         this.negative = value;
@@ -363,11 +319,9 @@ public class Interaction {
 
     /**
      * Gets the value of the confidenceList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ConfidenceList }
      */
     public ConfidenceList getConfidenceList() {
         return confidenceList;
@@ -375,11 +329,9 @@ public class Interaction {
 
     /**
      * Sets the value of the confidenceList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ConfidenceList }
      */
     public void setConfidenceList(ConfidenceList value) {
         this.confidenceList = value;
@@ -387,11 +339,9 @@ public class Interaction {
 
     /**
      * Gets the value of the parameterList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ParameterList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ParameterList }
      */
     public ParameterList getParameterList() {
         return parameterList;
@@ -399,11 +349,9 @@ public class Interaction {
 
     /**
      * Sets the value of the parameterList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ParameterList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ParameterList }
      */
     public void setParameterList(ParameterList value) {
         this.parameterList = value;
@@ -411,11 +359,9 @@ public class Interaction {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -423,11 +369,9 @@ public class Interaction {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -435,11 +379,9 @@ public class Interaction {
 
     /**
      * Gets the value of the imexId property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getImexId() {
         return imexId;
@@ -447,11 +389,9 @@ public class Interaction {
 
     /**
      * Sets the value of the imexId property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setImexId(String value) {
         this.imexId = value;
@@ -459,7 +399,6 @@ public class Interaction {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -467,7 +406,6 @@ public class Interaction {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;

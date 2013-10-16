@@ -15,9 +15,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for confidence complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="confidence">
  *   &lt;complexContent>
@@ -29,26 +29,21 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "confidence", propOrder = {
-    "experimentRefList"
+        "experimentRefList"
 })
 public class Confidence
-    extends ConfidenceBase
-{
+        extends ConfidenceBase {
 
     protected ExperimentRefList experimentRefList;
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -56,11 +51,9 @@ public class Confidence
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

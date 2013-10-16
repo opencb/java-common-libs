@@ -7,7 +7,7 @@ package org.opencb.javalibs.bioformats.commons.exception;
  * Time: 1:19 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileFormatException extends  Exception {
+public class FileFormatException extends Exception {
     public FileFormatException(String msg) {
         super(msg);
     }

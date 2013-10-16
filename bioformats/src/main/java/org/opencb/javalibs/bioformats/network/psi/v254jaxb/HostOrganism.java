@@ -15,9 +15,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for hostOrganism complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="hostOrganism">
  *   &lt;complexContent>
@@ -29,26 +29,21 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "hostOrganism", propOrder = {
-    "experimentRefList"
+        "experimentRefList"
 })
 public class HostOrganism
-    extends BioSource
-{
+        extends BioSource {
 
     protected ExperimentRefList experimentRefList;
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -56,11 +51,9 @@ public class HostOrganism
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

@@ -15,18 +15,17 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the org.bioinfo.formats.parser.uniprot.v140jaxb package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the org.bioinfo.formats.parser.uniprot.v140jaxb package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -35,14 +34,12 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.bioinfo.formats.parser.uniprot.v140jaxb
-     * 
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link ProteinType }
-     * 
      */
     public ProteinType createProteinType() {
         return new ProteinType();
@@ -50,7 +47,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinType.AlternativeName }
-     * 
      */
     public ProteinType.AlternativeName createProteinTypeAlternativeName() {
         return new ProteinType.AlternativeName();
@@ -58,7 +54,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SubcellularLocationType }
-     * 
      */
     public SubcellularLocationType createSubcellularLocationType() {
         return new SubcellularLocationType();
@@ -66,7 +61,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GeneLocationType }
-     * 
      */
     public GeneLocationType createGeneLocationType() {
         return new GeneLocationType();
@@ -74,7 +68,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OrganismType.Lineage }
-     * 
      */
     public OrganismType.Lineage createOrganismTypeLineage() {
         return new OrganismType.Lineage();
@@ -82,7 +75,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ReferenceType }
-     * 
      */
     public ReferenceType createReferenceType() {
         return new ReferenceType();
@@ -90,7 +82,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceType }
-     * 
      */
     public SourceType createSourceType() {
         return new SourceType();
@@ -98,7 +89,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceDataType.Strain }
-     * 
      */
     public SourceDataType.Strain createSourceDataTypeStrain() {
         return new SourceDataType.Strain();
@@ -106,7 +96,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IsoformType.Note }
-     * 
      */
     public IsoformType.Note createIsoformTypeNote() {
         return new IsoformType.Note();
@@ -114,7 +103,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GeneNameType }
-     * 
      */
     public GeneNameType createGeneNameType() {
         return new GeneNameType();
@@ -122,7 +110,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType.Kinetics }
-     * 
      */
     public CommentType.Kinetics createCommentTypeKinetics() {
         return new CommentType.Kinetics();
@@ -130,7 +117,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FeatureType }
-     * 
      */
     public FeatureType createFeatureType() {
         return new FeatureType();
@@ -138,7 +124,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinExistenceType }
-     * 
      */
     public ProteinExistenceType createProteinExistenceType() {
         return new ProteinExistenceType();
@@ -146,7 +131,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CitationType }
-     * 
      */
     public CitationType createCitationType() {
         return new CitationType();
@@ -154,7 +138,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType }
-     * 
      */
     public CommentType createCommentType() {
         return new CommentType();
@@ -162,7 +145,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IsoformType.Sequence }
-     * 
      */
     public IsoformType.Sequence createIsoformTypeSequence() {
         return new IsoformType.Sequence();
@@ -170,7 +152,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link LocationType }
-     * 
      */
     public LocationType createLocationType() {
         return new LocationType();
@@ -178,7 +159,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OrganismNameType }
-     * 
      */
     public OrganismNameType createOrganismNameType() {
         return new OrganismNameType();
@@ -186,7 +166,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link KeywordType }
-     * 
      */
     public KeywordType createKeywordType() {
         return new KeywordType();
@@ -194,7 +173,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DbReferenceType }
-     * 
      */
     public DbReferenceType createDbReferenceType() {
         return new DbReferenceType();
@@ -202,7 +180,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PositionType }
-     * 
      */
     public PositionType createPositionType() {
         return new PositionType();
@@ -210,7 +187,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinType.Domain }
-     * 
      */
     public ProteinType.Domain createProteinTypeDomain() {
         return new ProteinType.Domain();
@@ -218,7 +194,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PropertyType }
-     * 
      */
     public PropertyType createPropertyType() {
         return new PropertyType();
@@ -226,7 +201,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IsoformType.Name }
-     * 
      */
     public IsoformType.Name createIsoformTypeName() {
         return new IsoformType.Name();
@@ -234,7 +208,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType.Absorption }
-     * 
      */
     public CommentType.Absorption createCommentTypeAbsorption() {
         return new CommentType.Absorption();
@@ -242,7 +215,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EvidenceType }
-     * 
      */
     public EvidenceType createEvidenceType() {
         return new EvidenceType();
@@ -250,7 +222,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceDataType.Transposon }
-     * 
      */
     public SourceDataType.Transposon createSourceDataTypeTransposon() {
         return new SourceDataType.Transposon();
@@ -258,7 +229,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceDataType.Tissue }
-     * 
      */
     public SourceDataType.Tissue createSourceDataTypeTissue() {
         return new SourceDataType.Tissue();
@@ -266,7 +236,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OrganismType }
-     * 
      */
     public OrganismType createOrganismType() {
         return new OrganismType();
@@ -274,7 +243,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EvidencedStringType }
-     * 
      */
     public EvidencedStringType createEvidencedStringType() {
         return new EvidencedStringType();
@@ -282,7 +250,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Uniprot }
-     * 
      */
     public Uniprot createUniprot() {
         return new Uniprot();
@@ -290,7 +257,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinType.Component }
-     * 
      */
     public ProteinType.Component createProteinTypeComponent() {
         return new ProteinType.Component();
@@ -298,7 +264,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EventType }
-     * 
      */
     public EventType createEventType() {
         return new EventType();
@@ -306,7 +271,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinType.SubmittedName }
-     * 
      */
     public ProteinType.SubmittedName createProteinTypeSubmittedName() {
         return new ProteinType.SubmittedName();
@@ -314,7 +278,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PersonType }
-     * 
      */
     public PersonType createPersonType() {
         return new PersonType();
@@ -322,7 +285,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceDataType }
-     * 
      */
     public SourceDataType createSourceDataType() {
         return new SourceDataType();
@@ -330,7 +292,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProteinType.RecommendedName }
-     * 
      */
     public ProteinType.RecommendedName createProteinTypeRecommendedName() {
         return new ProteinType.RecommendedName();
@@ -338,7 +299,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link StatusType }
-     * 
      */
     public StatusType createStatusType() {
         return new StatusType();
@@ -346,7 +306,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConsortiumType }
-     * 
      */
     public ConsortiumType createConsortiumType() {
         return new ConsortiumType();
@@ -354,7 +313,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractantType }
-     * 
      */
     public InteractantType createInteractantType() {
         return new InteractantType();
@@ -362,7 +320,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType.Conflict }
-     * 
      */
     public CommentType.Conflict createCommentTypeConflict() {
         return new CommentType.Conflict();
@@ -370,7 +327,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SourceDataType.Plasmid }
-     * 
      */
     public SourceDataType.Plasmid createSourceDataTypePlasmid() {
         return new SourceDataType.Plasmid();
@@ -378,7 +334,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IsoformType }
-     * 
      */
     public IsoformType createIsoformType() {
         return new IsoformType();
@@ -386,7 +341,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SequenceType }
-     * 
      */
     public SequenceType createSequenceType() {
         return new SequenceType();
@@ -394,7 +348,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType.Link }
-     * 
      */
     public CommentType.Link createCommentTypeLink() {
         return new CommentType.Link();
@@ -402,7 +355,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Protein.Gene }
-     * 
      */
     public Protein.Gene createEntryGene() {
         return new Protein.Gene();
@@ -410,7 +362,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NameListType }
-     * 
      */
     public NameListType createNameListType() {
         return new NameListType();
@@ -418,7 +369,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ImportedFromType }
-     * 
      */
     public ImportedFromType createImportedFromType() {
         return new ImportedFromType();
@@ -426,7 +376,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Protein }
-     * 
      */
     public Protein createEntry() {
         return new Protein();
@@ -434,7 +383,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CommentType.Conflict.Sequence }
-     * 
      */
     public CommentType.Conflict.Sequence createCommentTypeConflictSequence() {
         return new CommentType.Conflict.Sequence();
@@ -442,7 +390,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link javax.xml.bind.JAXBElement }{@code <}{@link String }{@code >}}
-     * 
      */
     @XmlElementDecl(namespace = "http://uniprot.org/uniprot", name = "copyright")
     public JAXBElement<String> createCopyright(String value) {

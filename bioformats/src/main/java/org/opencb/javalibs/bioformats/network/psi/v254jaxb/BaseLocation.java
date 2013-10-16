@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * A location on a sequence. Both begin and end can be a defined position, a fuzzy position, or undetermined.
- * 
+ * <p/>
  * <p>Java class for baseLocation complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="baseLocation">
  *   &lt;complexContent>
@@ -46,18 +46,16 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "baseLocation", propOrder = {
-    "startStatus",
-    "begin",
-    "beginInterval",
-    "endStatus",
-    "end",
-    "endInterval",
-    "isLink"
+        "startStatus",
+        "begin",
+        "beginInterval",
+        "endStatus",
+        "end",
+        "endInterval",
+        "isLink"
 })
 public class BaseLocation {
 
@@ -74,11 +72,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the startStatus property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getStartStatus() {
         return startStatus;
@@ -86,11 +82,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the startStatus property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setStartStatus(CvType value) {
         this.startStatus = value;
@@ -98,11 +92,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the begin property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Position }
-     *     
+     *
+     * @return possible object is
+     *         {@link Position }
      */
     public Position getBegin() {
         return begin;
@@ -110,11 +102,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the begin property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Position }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Position }
      */
     public void setBegin(Position value) {
         this.begin = value;
@@ -122,11 +112,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the beginInterval property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Interval }
-     *     
+     *
+     * @return possible object is
+     *         {@link Interval }
      */
     public Interval getBeginInterval() {
         return beginInterval;
@@ -134,11 +122,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the beginInterval property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Interval }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Interval }
      */
     public void setBeginInterval(Interval value) {
         this.beginInterval = value;
@@ -146,11 +132,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the endStatus property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getEndStatus() {
         return endStatus;
@@ -158,11 +142,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the endStatus property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setEndStatus(CvType value) {
         this.endStatus = value;
@@ -170,11 +152,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the end property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Position }
-     *     
+     *
+     * @return possible object is
+     *         {@link Position }
      */
     public Position getEnd() {
         return end;
@@ -182,11 +162,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the end property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Position }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Position }
      */
     public void setEnd(Position value) {
         this.end = value;
@@ -194,11 +172,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the endInterval property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Interval }
-     *     
+     *
+     * @return possible object is
+     *         {@link Interval }
      */
     public Interval getEndInterval() {
         return endInterval;
@@ -206,11 +182,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the endInterval property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Interval }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Interval }
      */
     public void setEndInterval(Interval value) {
         this.endInterval = value;
@@ -218,11 +192,9 @@ public class BaseLocation {
 
     /**
      * Gets the value of the isLink property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isIsLink() {
         return isLink;
@@ -230,11 +202,9 @@ public class BaseLocation {
 
     /**
      * Sets the value of the isLink property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setIsLink(Boolean value) {
         this.isLink = value;

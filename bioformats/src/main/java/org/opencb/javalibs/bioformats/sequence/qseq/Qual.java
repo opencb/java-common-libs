@@ -5,59 +5,65 @@ import org.bioinfo.commons.utils.ArrayUtils;
 
 public class Qual {
 
-	/** Qual ID */
-	private String id;
-	
-	/** Qual Description */
-	private String description;
-	
-	/** Qualities vector */
-	private int[] qualityArray;
-	
-	public static final String SEQ_ID_CHAR = ">";
-	
-	public Qual(String id, String description, int[] qual) {
-		super();
-		this.id = id;
-		this.description = description;
-		this.qualityArray = qual;
-	}
+    /**
+     * Qual ID
+     */
+    private String id;
 
-	public String getDescription() {
-		return description;
-	}
+    /**
+     * Qual Description
+     */
+    private String description;
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    /**
+     * Qualities vector
+     */
+    private int[] qualityArray;
 
-	public String getId() {
-		return id;
-	}
+    public static final String SEQ_ID_CHAR = ">";
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public Qual(String id, String description, int[] qual) {
+        super();
+        this.id = id;
+        this.description = description;
+        this.qualityArray = qual;
+    }
 
-	public int[] getQualityArray() {
-		return qualityArray;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setQualityArray(int[] qualityArray) {
-		this.qualityArray = qualityArray;
-	}
-	
-	public int size(){
-		return this.qualityArray.length;
-	}
-	
-	public String toString(){
-		StringBuilder sb =  new StringBuilder(Qual.SEQ_ID_CHAR + this.id);
-		if (this.description != null && !this.description.equals("")){
-			sb.append(" " + this.description);
-		}
-		sb.append("\n" + ArrayUtils.toString(this.qualityArray, " "));		
-		return (sb.toString());
-	}
-	
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int[] getQualityArray() {
+        return qualityArray;
+    }
+
+    public void setQualityArray(int[] qualityArray) {
+        this.qualityArray = qualityArray;
+    }
+
+    public int size() {
+        return this.qualityArray.length;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(Qual.SEQ_ID_CHAR + this.id);
+        if (this.description != null && !this.description.equals("")) {
+            sb.append(" " + this.description);
+        }
+        sb.append("\n" + ArrayUtils.toString(this.qualityArray, " "));
+        return (sb.toString());
+    }
+
 }

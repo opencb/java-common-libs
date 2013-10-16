@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Terms describing the experimental sample preparation.
- * 
+ * <p/>
  * <p>Java class for experimentalPreparationList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentalPreparationList">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentalPreparationList", propOrder = {
-    "experimentalPreparation"
+        "experimentalPreparation"
 })
 public class ExperimentalPreparationList {
 
@@ -48,25 +46,23 @@ public class ExperimentalPreparationList {
 
     /**
      * Gets the value of the experimentalPreparation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the experimentalPreparation property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExperimentalPreparation().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ExperimentalPreparation }
-     * 
-     * 
      */
     public List<ExperimentalPreparation> getExperimentalPreparation() {
         if (experimentalPreparation == null) {

@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * A molecule participating in an interaction.
- * 
+ * <p/>
  * <p>Java class for participant complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="participant">
  *   &lt;complexContent>
@@ -49,26 +49,24 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "participant", propOrder = {
-    "names",
-    "xref",
-    "interactorRef",
-    "interactor",
-    "interactionRef",
-    "participantIdentificationMethodList",
-    "biologicalRole",
-    "experimentalRoleList",
-    "experimentalPreparationList",
-    "experimentalInteractorList",
-    "featureList",
-    "hostOrganismList",
-    "confidenceList",
-    "parameterList",
-    "attributeList"
+        "names",
+        "xref",
+        "interactorRef",
+        "interactor",
+        "interactionRef",
+        "participantIdentificationMethodList",
+        "biologicalRole",
+        "experimentalRoleList",
+        "experimentalPreparationList",
+        "experimentalInteractorList",
+        "featureList",
+        "hostOrganismList",
+        "confidenceList",
+        "parameterList",
+        "attributeList"
 })
 public class Participant {
 
@@ -92,11 +90,9 @@ public class Participant {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *     
+     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -104,11 +100,9 @@ public class Participant {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -116,11 +110,9 @@ public class Participant {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -128,11 +120,9 @@ public class Participant {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -140,11 +130,9 @@ public class Participant {
 
     /**
      * Gets the value of the interactorRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getInteractorRef() {
         return interactorRef;
@@ -152,11 +140,9 @@ public class Participant {
 
     /**
      * Sets the value of the interactorRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setInteractorRef(Integer value) {
         this.interactorRef = value;
@@ -164,11 +150,9 @@ public class Participant {
 
     /**
      * Gets the value of the interactor property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Interactor }
-     *     
+     *
+     * @return possible object is
+     *         {@link Interactor }
      */
     public Interactor getInteractor() {
         return interactor;
@@ -176,11 +160,9 @@ public class Participant {
 
     /**
      * Sets the value of the interactor property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Interactor }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Interactor }
      */
     public void setInteractor(Interactor value) {
         this.interactor = value;
@@ -188,11 +170,9 @@ public class Participant {
 
     /**
      * Gets the value of the interactionRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getInteractionRef() {
         return interactionRef;
@@ -200,11 +180,9 @@ public class Participant {
 
     /**
      * Sets the value of the interactionRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setInteractionRef(Integer value) {
         this.interactionRef = value;
@@ -212,11 +190,9 @@ public class Participant {
 
     /**
      * Gets the value of the participantIdentificationMethodList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ParticipantIdentificationMethodList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ParticipantIdentificationMethodList }
      */
     public ParticipantIdentificationMethodList getParticipantIdentificationMethodList() {
         return participantIdentificationMethodList;
@@ -224,11 +200,9 @@ public class Participant {
 
     /**
      * Sets the value of the participantIdentificationMethodList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantIdentificationMethodList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ParticipantIdentificationMethodList }
      */
     public void setParticipantIdentificationMethodList(ParticipantIdentificationMethodList value) {
         this.participantIdentificationMethodList = value;
@@ -236,11 +210,9 @@ public class Participant {
 
     /**
      * Gets the value of the biologicalRole property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getBiologicalRole() {
         return biologicalRole;
@@ -248,11 +220,9 @@ public class Participant {
 
     /**
      * Sets the value of the biologicalRole property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setBiologicalRole(CvType value) {
         this.biologicalRole = value;
@@ -260,11 +230,9 @@ public class Participant {
 
     /**
      * Gets the value of the experimentalRoleList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentalRoleList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentalRoleList }
      */
     public ExperimentalRoleList getExperimentalRoleList() {
         return experimentalRoleList;
@@ -272,11 +240,9 @@ public class Participant {
 
     /**
      * Sets the value of the experimentalRoleList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentalRoleList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentalRoleList }
      */
     public void setExperimentalRoleList(ExperimentalRoleList value) {
         this.experimentalRoleList = value;
@@ -284,11 +250,9 @@ public class Participant {
 
     /**
      * Gets the value of the experimentalPreparationList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentalPreparationList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentalPreparationList }
      */
     public ExperimentalPreparationList getExperimentalPreparationList() {
         return experimentalPreparationList;
@@ -296,11 +260,9 @@ public class Participant {
 
     /**
      * Sets the value of the experimentalPreparationList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentalPreparationList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentalPreparationList }
      */
     public void setExperimentalPreparationList(ExperimentalPreparationList value) {
         this.experimentalPreparationList = value;
@@ -308,11 +270,9 @@ public class Participant {
 
     /**
      * Gets the value of the experimentalInteractorList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentalInteractorList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentalInteractorList }
      */
     public ExperimentalInteractorList getExperimentalInteractorList() {
         return experimentalInteractorList;
@@ -320,11 +280,9 @@ public class Participant {
 
     /**
      * Sets the value of the experimentalInteractorList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentalInteractorList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentalInteractorList }
      */
     public void setExperimentalInteractorList(ExperimentalInteractorList value) {
         this.experimentalInteractorList = value;
@@ -332,11 +290,9 @@ public class Participant {
 
     /**
      * Gets the value of the featureList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FeatureList }
-     *     
+     *
+     * @return possible object is
+     *         {@link FeatureList }
      */
     public FeatureList getFeatureList() {
         return featureList;
@@ -344,11 +300,9 @@ public class Participant {
 
     /**
      * Sets the value of the featureList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FeatureList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link FeatureList }
      */
     public void setFeatureList(FeatureList value) {
         this.featureList = value;
@@ -356,11 +310,9 @@ public class Participant {
 
     /**
      * Gets the value of the hostOrganismList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link HostOrganismList }
-     *     
+     *
+     * @return possible object is
+     *         {@link HostOrganismList }
      */
     public HostOrganismList getHostOrganismList() {
         return hostOrganismList;
@@ -368,11 +320,9 @@ public class Participant {
 
     /**
      * Sets the value of the hostOrganismList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link HostOrganismList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link HostOrganismList }
      */
     public void setHostOrganismList(HostOrganismList value) {
         this.hostOrganismList = value;
@@ -380,11 +330,9 @@ public class Participant {
 
     /**
      * Gets the value of the confidenceList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ConfidenceList }
      */
     public ConfidenceList getConfidenceList() {
         return confidenceList;
@@ -392,11 +340,9 @@ public class Participant {
 
     /**
      * Sets the value of the confidenceList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ConfidenceList }
      */
     public void setConfidenceList(ConfidenceList value) {
         this.confidenceList = value;
@@ -404,11 +350,9 @@ public class Participant {
 
     /**
      * Gets the value of the parameterList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ParameterList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ParameterList }
      */
     public ParameterList getParameterList() {
         return parameterList;
@@ -416,11 +360,9 @@ public class Participant {
 
     /**
      * Sets the value of the parameterList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ParameterList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ParameterList }
      */
     public void setParameterList(ParameterList value) {
         this.parameterList = value;
@@ -428,11 +370,9 @@ public class Participant {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -440,11 +380,9 @@ public class Participant {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -452,7 +390,6 @@ public class Participant {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -460,7 +397,6 @@ public class Participant {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;

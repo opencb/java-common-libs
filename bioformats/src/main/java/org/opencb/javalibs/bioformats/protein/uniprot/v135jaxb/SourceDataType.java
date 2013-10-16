@@ -15,16 +15,16 @@ import java.util.List;
 
 /**
  * Contains all information about the source this citation is referring to (RC line). The
- *                 used child-element names are equivalent to the tokens used in the RC line. Examples:
- *                 RC STRAIN=Sprague-Dawley; TISSUE=Liver;
- *                 RC STRAIN=Holstein; TISSUE=Lymph node, and Mammary gland;
- *                 RC PLASMID=IncFII R100;
- *             
- * 
+ * used child-element names are equivalent to the tokens used in the RC line. Examples:
+ * RC STRAIN=Sprague-Dawley; TISSUE=Liver;
+ * RC STRAIN=Holstein; TISSUE=Lymph node, and Mammary gland;
+ * RC PLASMID=IncFII R100;
+ * <p/>
+ * <p/>
  * <p>Java class for sourceDataType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="sourceDataType">
  *   &lt;complexContent>
@@ -71,47 +71,43 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sourceDataType", propOrder = {
-    "strainOrPlasmidOrTransposon"
+        "strainOrPlasmidOrTransposon"
 })
 public class SourceDataType {
 
     @XmlElements({
-        @XmlElement(name = "transposon", type = SourceDataType.Transposon.class),
-        @XmlElement(name = "plasmid", type = SourceDataType.Plasmid.class),
-        @XmlElement(name = "tissue", type = SourceDataType.Tissue.class),
-        @XmlElement(name = "strain", type = SourceDataType.Strain.class)
+            @XmlElement(name = "transposon", type = SourceDataType.Transposon.class),
+            @XmlElement(name = "plasmid", type = SourceDataType.Plasmid.class),
+            @XmlElement(name = "tissue", type = SourceDataType.Tissue.class),
+            @XmlElement(name = "strain", type = SourceDataType.Strain.class)
     })
     protected List<Object> strainOrPlasmidOrTransposon;
 
     /**
      * Gets the value of the strainOrPlasmidOrTransposon property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the strainOrPlasmidOrTransposon property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getStrainOrPlasmidOrTransposon().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link SourceDataType.Transposon }
      * {@link SourceDataType.Plasmid }
      * {@link SourceDataType.Tissue }
      * {@link SourceDataType.Strain }
-     * 
-     * 
      */
     public List<Object> getStrainOrPlasmidOrTransposon() {
         if (strainOrPlasmidOrTransposon == null) {
@@ -123,9 +119,9 @@ public class SourceDataType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -135,12 +131,10 @@ public class SourceDataType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Plasmid {
 
@@ -151,11 +145,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -163,11 +155,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -175,11 +165,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -187,11 +175,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;
@@ -202,9 +188,9 @@ public class SourceDataType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -214,12 +200,10 @@ public class SourceDataType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Strain {
 
@@ -230,11 +214,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -242,11 +224,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -254,11 +234,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -266,11 +244,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;
@@ -281,9 +257,9 @@ public class SourceDataType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -293,12 +269,10 @@ public class SourceDataType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Tissue {
 
@@ -309,11 +283,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -321,11 +293,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -333,11 +303,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -345,11 +313,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;
@@ -360,9 +326,9 @@ public class SourceDataType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -372,12 +338,10 @@ public class SourceDataType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Transposon {
 
@@ -388,11 +352,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -400,11 +362,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -412,11 +372,9 @@ public class SourceDataType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -424,11 +382,9 @@ public class SourceDataType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;

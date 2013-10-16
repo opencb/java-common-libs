@@ -15,13 +15,13 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * This element is controlled by the PSI-MI controlled vocabulary
- *                 "experimentalPreparation", root term id MI:0346.
- *             
- * 
+ * "experimentalPreparation", root term id MI:0346.
+ * <p/>
+ * <p/>
  * <p>Java class for experimentalPreparation complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentalPreparation">
  *   &lt;complexContent>
@@ -33,26 +33,21 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentalPreparation", propOrder = {
-    "experimentRefList"
+        "experimentRefList"
 })
 public class ExperimentalPreparation
-    extends CvType
-{
+        extends CvType {
 
     protected ExperimentRefList experimentRefList;
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -60,11 +55,9 @@ public class ExperimentalPreparation
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

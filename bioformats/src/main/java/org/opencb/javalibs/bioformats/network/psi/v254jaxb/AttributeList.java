@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * A list of additional attributes. Open tag-value list to allow the inclusion of additional data.
- * 
+ * <p/>
  * <p>Java class for attributeList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="attributeList">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "attributeList", propOrder = {
-    "attribute"
+        "attribute"
 })
 public class AttributeList {
 
@@ -48,25 +46,23 @@ public class AttributeList {
 
     /**
      * Gets the value of the attribute property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the attribute property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAttribute().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Attribute }
-     * 
-     * 
      */
     public List<Attribute> getAttribute() {
         if (attribute == null) {

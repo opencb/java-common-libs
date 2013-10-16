@@ -15,11 +15,11 @@ import java.util.List;
 
 /**
  * Describes one set of experimental parameters.
- * 
+ * <p/>
  * <p>Java class for experimentType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentType">
  *   &lt;complexContent>
@@ -57,20 +57,18 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentType", propOrder = {
-    "names",
-    "bibref",
-    "xref",
-    "hostOrganismList",
-    "interactionDetectionMethod",
-    "participantIdentificationMethod",
-    "featureDetectionMethod",
-    "confidenceList",
-    "attributeList"
+        "names",
+        "bibref",
+        "xref",
+        "hostOrganismList",
+        "interactionDetectionMethod",
+        "participantIdentificationMethod",
+        "featureDetectionMethod",
+        "confidenceList",
+        "attributeList"
 })
 public class ExperimentType {
 
@@ -91,10 +89,8 @@ public class ExperimentType {
     /**
      * Gets the value of the names property.
      *
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -103,10 +99,8 @@ public class ExperimentType {
     /**
      * Sets the value of the names property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -115,10 +109,8 @@ public class ExperimentType {
     /**
      * Gets the value of the bibref property.
      *
-     * @return
-     *     possible object is
-     *     {@link BibrefType }
-     *
+     * @return possible object is
+     *         {@link BibrefType }
      */
     public BibrefType getBibref() {
         return bibref;
@@ -127,10 +119,8 @@ public class ExperimentType {
     /**
      * Sets the value of the bibref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link BibrefType }
-     *
+     * @param value allowed object is
+     *              {@link BibrefType }
      */
     public void setBibref(BibrefType value) {
         this.bibref = value;
@@ -139,10 +129,8 @@ public class ExperimentType {
     /**
      * Gets the value of the xref property.
      *
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -151,10 +139,8 @@ public class ExperimentType {
     /**
      * Sets the value of the xref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;
@@ -163,10 +149,8 @@ public class ExperimentType {
     /**
      * Gets the value of the hostOrganismList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ExperimentType.HostOrganismList }
-     *
+     * @return possible object is
+     *         {@link ExperimentType.HostOrganismList }
      */
     public ExperimentType.HostOrganismList getHostOrganismList() {
         return hostOrganismList;
@@ -175,10 +159,8 @@ public class ExperimentType {
     /**
      * Sets the value of the hostOrganismList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentType.HostOrganismList }
-     *
+     * @param value allowed object is
+     *              {@link ExperimentType.HostOrganismList }
      */
     public void setHostOrganismList(ExperimentType.HostOrganismList value) {
         this.hostOrganismList = value;
@@ -187,10 +169,8 @@ public class ExperimentType {
     /**
      * Gets the value of the interactionDetectionMethod property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getInteractionDetectionMethod() {
         return interactionDetectionMethod;
@@ -199,10 +179,8 @@ public class ExperimentType {
     /**
      * Sets the value of the interactionDetectionMethod property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setInteractionDetectionMethod(CvType value) {
         this.interactionDetectionMethod = value;
@@ -211,10 +189,8 @@ public class ExperimentType {
     /**
      * Gets the value of the participantIdentificationMethod property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getParticipantIdentificationMethod() {
         return participantIdentificationMethod;
@@ -223,10 +199,8 @@ public class ExperimentType {
     /**
      * Sets the value of the participantIdentificationMethod property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setParticipantIdentificationMethod(CvType value) {
         this.participantIdentificationMethod = value;
@@ -235,10 +209,8 @@ public class ExperimentType {
     /**
      * Gets the value of the featureDetectionMethod property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getFeatureDetectionMethod() {
         return featureDetectionMethod;
@@ -247,10 +219,8 @@ public class ExperimentType {
     /**
      * Sets the value of the featureDetectionMethod property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setFeatureDetectionMethod(CvType value) {
         this.featureDetectionMethod = value;
@@ -259,10 +229,8 @@ public class ExperimentType {
     /**
      * Gets the value of the confidenceList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ConfidenceListType }
-     *
+     * @return possible object is
+     *         {@link ConfidenceListType }
      */
     public ConfidenceListType getConfidenceList() {
         return confidenceList;
@@ -271,10 +239,8 @@ public class ExperimentType {
     /**
      * Sets the value of the confidenceList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceListType }
-     *
+     * @param value allowed object is
+     *              {@link ConfidenceListType }
      */
     public void setConfidenceList(ConfidenceListType value) {
         this.confidenceList = value;
@@ -283,10 +249,8 @@ public class ExperimentType {
     /**
      * Gets the value of the attributeList property.
      *
-     * @return
-     *     possible object is
-     *     {@link AttributeListType }
-     *
+     * @return possible object is
+     *         {@link AttributeListType }
      */
     public AttributeListType getAttributeList() {
         return attributeList;
@@ -295,10 +259,8 @@ public class ExperimentType {
     /**
      * Sets the value of the attributeList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link AttributeListType }
-     *
+     * @param value allowed object is
+     *              {@link AttributeListType }
      */
     public void setAttributeList(AttributeListType value) {
         this.attributeList = value;
@@ -306,7 +268,6 @@ public class ExperimentType {
 
     /**
      * Gets the value of the id property.
-     *
      */
     public int getId() {
         return id;
@@ -314,7 +275,6 @@ public class ExperimentType {
 
     /**
      * Sets the value of the id property.
-     *
      */
     public void setId(int value) {
         this.id = value;
@@ -323,9 +283,9 @@ public class ExperimentType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -344,12 +304,10 @@ public class ExperimentType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "hostOrganism"
+            "hostOrganism"
     })
     public static class HostOrganismList {
 
@@ -358,25 +316,23 @@ public class ExperimentType {
 
         /**
          * Gets the value of the hostOrganism property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the hostOrganism property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getHostOrganism().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ExperimentType.HostOrganismList.HostOrganism }
-         *
-         *
          */
         public List<HostOrganism> getHostOrganism() {
             if (hostOrganism == null) {
@@ -388,9 +344,9 @@ public class ExperimentType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -399,14 +355,11 @@ public class ExperimentType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "")
         public static class HostOrganism
-            extends BioSourceType
-        {
+                extends BioSourceType {
 
 
         }

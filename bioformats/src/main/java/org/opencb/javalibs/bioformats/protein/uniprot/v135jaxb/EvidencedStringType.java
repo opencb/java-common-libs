@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for evidencedStringType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="evidencedStringType">
  *   &lt;simpleContent>
@@ -34,12 +34,10 @@ import javax.xml.bind.annotation.*;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "evidencedStringType", propOrder = {
-    "value"
+        "value"
 })
 public class EvidencedStringType {
 
@@ -52,11 +50,9 @@ public class EvidencedStringType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -64,11 +60,9 @@ public class EvidencedStringType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -76,11 +70,9 @@ public class EvidencedStringType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getEvidence() {
         return evidence;
@@ -88,11 +80,9 @@ public class EvidencedStringType {
 
     /**
      * Sets the value of the evidence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setEvidence(String value) {
         this.evidence = value;
@@ -100,11 +90,9 @@ public class EvidencedStringType {
 
     /**
      * Gets the value of the status property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getStatus() {
         return status;
@@ -112,11 +100,9 @@ public class EvidencedStringType {
 
     /**
      * Sets the value of the status property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setStatus(String value) {
         this.status = value;

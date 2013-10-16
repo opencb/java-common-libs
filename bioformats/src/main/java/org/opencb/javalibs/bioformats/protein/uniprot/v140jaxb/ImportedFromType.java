@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Describes the source of the evidence, when it is not assigned by UniProt, but imported from an external database.
- * 
+ * <p/>
  * <p>Java class for importedFromType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="importedFromType">
  *   &lt;complexContent>
@@ -32,12 +32,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "importedFromType", propOrder = {
-    "dbReference"
+        "dbReference"
 })
 public class ImportedFromType {
 
@@ -46,11 +44,9 @@ public class ImportedFromType {
 
     /**
      * Gets the value of the dbReference property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DbReferenceType }
-     *     
+     *
+     * @return possible object is
+     *         {@link DbReferenceType }
      */
     public DbReferenceType getDbReference() {
         return dbReference;
@@ -58,11 +54,9 @@ public class ImportedFromType {
 
     /**
      * Sets the value of the dbReference property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DbReferenceType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DbReferenceType }
      */
     public void setDbReference(DbReferenceType value) {
         this.dbReference = value;

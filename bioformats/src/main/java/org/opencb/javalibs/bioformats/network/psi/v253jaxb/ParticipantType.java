@@ -16,11 +16,11 @@ import java.util.List;
 
 /**
  * A molecule participating in an interaction.
- * 
+ * <p/>
  * <p>Java class for participantType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="participantType">
  *   &lt;complexContent>
@@ -184,26 +184,24 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "participantType", propOrder = {
-    "names",
-    "xref",
-    "interactorRef",
-    "interactor",
-    "interactionRef",
-    "participantIdentificationMethodList",
-    "biologicalRole",
-    "experimentalRoleList",
-    "experimentalPreparationList",
-    "experimentalInteractorList",
-    "featureList",
-    "hostOrganismList",
-    "confidenceList",
-    "parameterList",
-    "attributeList"
+        "names",
+        "xref",
+        "interactorRef",
+        "interactor",
+        "interactionRef",
+        "participantIdentificationMethodList",
+        "biologicalRole",
+        "experimentalRoleList",
+        "experimentalPreparationList",
+        "experimentalInteractorList",
+        "featureList",
+        "hostOrganismList",
+        "confidenceList",
+        "parameterList",
+        "attributeList"
 })
 public class ParticipantType {
 
@@ -228,10 +226,8 @@ public class ParticipantType {
     /**
      * Gets the value of the names property.
      *
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -240,10 +236,8 @@ public class ParticipantType {
     /**
      * Sets the value of the names property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -252,10 +246,8 @@ public class ParticipantType {
     /**
      * Gets the value of the xref property.
      *
-     * @return
-     *     possible object is
-     *     {@link XrefType }
-     *
+     * @return possible object is
+     *         {@link XrefType }
      */
     public XrefType getXref() {
         return xref;
@@ -264,10 +256,8 @@ public class ParticipantType {
     /**
      * Sets the value of the xref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link XrefType }
-     *
+     * @param value allowed object is
+     *              {@link XrefType }
      */
     public void setXref(XrefType value) {
         this.xref = value;
@@ -276,10 +266,8 @@ public class ParticipantType {
     /**
      * Gets the value of the interactorRef property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getInteractorRef() {
         return interactorRef;
@@ -288,10 +276,8 @@ public class ParticipantType {
     /**
      * Sets the value of the interactorRef property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setInteractorRef(Integer value) {
         this.interactorRef = value;
@@ -300,10 +286,8 @@ public class ParticipantType {
     /**
      * Gets the value of the interactor property.
      *
-     * @return
-     *     possible object is
-     *     {@link InteractorElementType }
-     *
+     * @return possible object is
+     *         {@link InteractorElementType }
      */
     public InteractorElementType getInteractor() {
         return interactor;
@@ -312,10 +296,8 @@ public class ParticipantType {
     /**
      * Sets the value of the interactor property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link InteractorElementType }
-     *
+     * @param value allowed object is
+     *              {@link InteractorElementType }
      */
     public void setInteractor(InteractorElementType value) {
         this.interactor = value;
@@ -324,10 +306,8 @@ public class ParticipantType {
     /**
      * Gets the value of the interactionRef property.
      *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getInteractionRef() {
         return interactionRef;
@@ -336,10 +316,8 @@ public class ParticipantType {
     /**
      * Sets the value of the interactionRef property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setInteractionRef(Integer value) {
         this.interactionRef = value;
@@ -348,10 +326,8 @@ public class ParticipantType {
     /**
      * Gets the value of the participantIdentificationMethodList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.ParticipantIdentificationMethodList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.ParticipantIdentificationMethodList }
      */
     public ParticipantType.ParticipantIdentificationMethodList getParticipantIdentificationMethodList() {
         return participantIdentificationMethodList;
@@ -360,10 +336,8 @@ public class ParticipantType {
     /**
      * Sets the value of the participantIdentificationMethodList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.ParticipantIdentificationMethodList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.ParticipantIdentificationMethodList }
      */
     public void setParticipantIdentificationMethodList(ParticipantType.ParticipantIdentificationMethodList value) {
         this.participantIdentificationMethodList = value;
@@ -372,10 +346,8 @@ public class ParticipantType {
     /**
      * Gets the value of the biologicalRole property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getBiologicalRole() {
         return biologicalRole;
@@ -384,10 +356,8 @@ public class ParticipantType {
     /**
      * Sets the value of the biologicalRole property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setBiologicalRole(CvType value) {
         this.biologicalRole = value;
@@ -396,10 +366,8 @@ public class ParticipantType {
     /**
      * Gets the value of the experimentalRoleList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.ExperimentalRoleList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.ExperimentalRoleList }
      */
     public ParticipantType.ExperimentalRoleList getExperimentalRoleList() {
         return experimentalRoleList;
@@ -408,10 +376,8 @@ public class ParticipantType {
     /**
      * Sets the value of the experimentalRoleList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.ExperimentalRoleList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.ExperimentalRoleList }
      */
     public void setExperimentalRoleList(ParticipantType.ExperimentalRoleList value) {
         this.experimentalRoleList = value;
@@ -420,10 +386,8 @@ public class ParticipantType {
     /**
      * Gets the value of the experimentalPreparationList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.ExperimentalPreparationList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.ExperimentalPreparationList }
      */
     public ParticipantType.ExperimentalPreparationList getExperimentalPreparationList() {
         return experimentalPreparationList;
@@ -432,10 +396,8 @@ public class ParticipantType {
     /**
      * Sets the value of the experimentalPreparationList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.ExperimentalPreparationList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.ExperimentalPreparationList }
      */
     public void setExperimentalPreparationList(ParticipantType.ExperimentalPreparationList value) {
         this.experimentalPreparationList = value;
@@ -444,10 +406,8 @@ public class ParticipantType {
     /**
      * Gets the value of the experimentalInteractorList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.ExperimentalInteractorList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.ExperimentalInteractorList }
      */
     public ParticipantType.ExperimentalInteractorList getExperimentalInteractorList() {
         return experimentalInteractorList;
@@ -456,10 +416,8 @@ public class ParticipantType {
     /**
      * Sets the value of the experimentalInteractorList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.ExperimentalInteractorList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.ExperimentalInteractorList }
      */
     public void setExperimentalInteractorList(ParticipantType.ExperimentalInteractorList value) {
         this.experimentalInteractorList = value;
@@ -468,10 +426,8 @@ public class ParticipantType {
     /**
      * Gets the value of the featureList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.FeatureList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.FeatureList }
      */
     public ParticipantType.FeatureList getFeatureList() {
         return featureList;
@@ -480,10 +436,8 @@ public class ParticipantType {
     /**
      * Sets the value of the featureList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.FeatureList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.FeatureList }
      */
     public void setFeatureList(ParticipantType.FeatureList value) {
         this.featureList = value;
@@ -492,10 +446,8 @@ public class ParticipantType {
     /**
      * Gets the value of the hostOrganismList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.HostOrganismList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.HostOrganismList }
      */
     public ParticipantType.HostOrganismList getHostOrganismList() {
         return hostOrganismList;
@@ -504,10 +456,8 @@ public class ParticipantType {
     /**
      * Sets the value of the hostOrganismList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.HostOrganismList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.HostOrganismList }
      */
     public void setHostOrganismList(ParticipantType.HostOrganismList value) {
         this.hostOrganismList = value;
@@ -516,10 +466,8 @@ public class ParticipantType {
     /**
      * Gets the value of the confidenceList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ConfidenceListType }
-     *
+     * @return possible object is
+     *         {@link ConfidenceListType }
      */
     public ConfidenceListType getConfidenceList() {
         return confidenceList;
@@ -528,10 +476,8 @@ public class ParticipantType {
     /**
      * Sets the value of the confidenceList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceListType }
-     *
+     * @param value allowed object is
+     *              {@link ConfidenceListType }
      */
     public void setConfidenceList(ConfidenceListType value) {
         this.confidenceList = value;
@@ -540,10 +486,8 @@ public class ParticipantType {
     /**
      * Gets the value of the parameterList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ParticipantType.ParameterList }
-     *
+     * @return possible object is
+     *         {@link ParticipantType.ParameterList }
      */
     public ParticipantType.ParameterList getParameterList() {
         return parameterList;
@@ -552,10 +496,8 @@ public class ParticipantType {
     /**
      * Sets the value of the parameterList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ParticipantType.ParameterList }
-     *
+     * @param value allowed object is
+     *              {@link ParticipantType.ParameterList }
      */
     public void setParameterList(ParticipantType.ParameterList value) {
         this.parameterList = value;
@@ -564,10 +506,8 @@ public class ParticipantType {
     /**
      * Gets the value of the attributeList property.
      *
-     * @return
-     *     possible object is
-     *     {@link AttributeListType }
-     *
+     * @return possible object is
+     *         {@link AttributeListType }
      */
     public AttributeListType getAttributeList() {
         return attributeList;
@@ -576,10 +516,8 @@ public class ParticipantType {
     /**
      * Sets the value of the attributeList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link AttributeListType }
-     *
+     * @param value allowed object is
+     *              {@link AttributeListType }
      */
     public void setAttributeList(AttributeListType value) {
         this.attributeList = value;
@@ -587,7 +525,6 @@ public class ParticipantType {
 
     /**
      * Gets the value of the id property.
-     *
      */
     public int getId() {
         return id;
@@ -595,7 +532,6 @@ public class ParticipantType {
 
     /**
      * Sets the value of the id property.
-     *
      */
     public void setId(int value) {
         this.id = value;
@@ -604,9 +540,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -632,12 +568,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "experimentalInteractor"
+            "experimentalInteractor"
     })
     public static class ExperimentalInteractorList {
 
@@ -646,25 +580,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the experimentalInteractor property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the experimentalInteractor property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getExperimentalInteractor().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.ExperimentalInteractorList.ExperimentalInteractor }
-         *
-         *
          */
         public List<ExperimentalInteractor> getExperimentalInteractor() {
             if (experimentalInteractor == null) {
@@ -676,9 +608,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -694,14 +626,12 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "interactorRef",
-            "interactor",
-            "experimentRefList"
+                "interactorRef",
+                "interactor",
+                "experimentRefList"
         })
         public static class ExperimentalInteractor {
 
@@ -712,10 +642,8 @@ public class ParticipantType {
             /**
              * Gets the value of the interactorRef property.
              *
-             * @return
-             *     possible object is
-             *     {@link Integer }
-             *
+             * @return possible object is
+             *         {@link Integer }
              */
             public Integer getInteractorRef() {
                 return interactorRef;
@@ -724,10 +652,8 @@ public class ParticipantType {
             /**
              * Sets the value of the interactorRef property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link Integer }
-             *
+             * @param value allowed object is
+             *              {@link Integer }
              */
             public void setInteractorRef(Integer value) {
                 this.interactorRef = value;
@@ -736,10 +662,8 @@ public class ParticipantType {
             /**
              * Gets the value of the interactor property.
              *
-             * @return
-             *     possible object is
-             *     {@link InteractorElementType }
-             *
+             * @return possible object is
+             *         {@link InteractorElementType }
              */
             public InteractorElementType getInteractor() {
                 return interactor;
@@ -748,10 +672,8 @@ public class ParticipantType {
             /**
              * Sets the value of the interactor property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link InteractorElementType }
-             *
+             * @param value allowed object is
+             *              {@link InteractorElementType }
              */
             public void setInteractor(InteractorElementType value) {
                 this.interactor = value;
@@ -760,10 +682,8 @@ public class ParticipantType {
             /**
              * Gets the value of the experimentRefList property.
              *
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -772,10 +692,8 @@ public class ParticipantType {
             /**
              * Sets the value of the experimentRefList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;
@@ -788,9 +706,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -812,12 +730,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "experimentalPreparation"
+            "experimentalPreparation"
     })
     public static class ExperimentalPreparationList {
 
@@ -826,25 +742,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the experimentalPreparation property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the experimentalPreparation property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getExperimentalPreparation().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.ExperimentalPreparationList.ExperimentalPreparation }
-         *
-         *
          */
         public List<ExperimentalPreparation> getExperimentalPreparation() {
             if (experimentalPreparation == null) {
@@ -856,9 +770,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -870,26 +784,21 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRefList"
+                "experimentRefList"
         })
         public static class ExperimentalPreparation
-            extends CvType
-        {
+                extends CvType {
 
             protected ExperimentRefListType experimentRefList;
 
             /**
              * Gets the value of the experimentRefList property.
              *
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -898,10 +807,8 @@ public class ParticipantType {
             /**
              * Sets the value of the experimentRefList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;
@@ -914,9 +821,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -938,12 +845,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "experimentalRole"
+            "experimentalRole"
     })
     public static class ExperimentalRoleList {
 
@@ -952,25 +857,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the experimentalRole property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the experimentalRole property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getExperimentalRole().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.ExperimentalRoleList.ExperimentalRole }
-         *
-         *
          */
         public List<ExperimentalRole> getExperimentalRole() {
             if (experimentalRole == null) {
@@ -982,9 +885,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -996,26 +899,21 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRefList"
+                "experimentRefList"
         })
         public static class ExperimentalRole
-            extends CvType
-        {
+                extends CvType {
 
             protected ExperimentRefListType experimentRefList;
 
             /**
              * Gets the value of the experimentRefList property.
              *
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -1024,10 +922,8 @@ public class ParticipantType {
             /**
              * Sets the value of the experimentRefList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;
@@ -1040,9 +936,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1054,12 +950,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "feature"
+            "feature"
     })
     public static class FeatureList {
 
@@ -1068,25 +962,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the feature property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the feature property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getFeature().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link FeatureElementType }
-         *
-         *
          */
         public List<FeatureElementType> getFeature() {
             if (feature == null) {
@@ -1100,9 +992,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1124,12 +1016,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "hostOrganism"
+            "hostOrganism"
     })
     public static class HostOrganismList {
 
@@ -1137,25 +1027,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the hostOrganism property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the hostOrganism property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getHostOrganism().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.HostOrganismList.HostOrganism }
-         *
-         *
          */
         public List<HostOrganism> getHostOrganism() {
             if (hostOrganism == null) {
@@ -1167,9 +1055,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1181,26 +1069,21 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRefList"
+                "experimentRefList"
         })
         public static class HostOrganism
-            extends BioSourceType
-        {
+                extends BioSourceType {
 
             protected ExperimentRefListType experimentRefList;
 
             /**
              * Gets the value of the experimentRefList property.
              *
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -1209,10 +1092,8 @@ public class ParticipantType {
             /**
              * Sets the value of the experimentRefList property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;
@@ -1225,9 +1106,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1250,12 +1131,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "parameter"
+            "parameter"
     })
     public static class ParameterList {
 
@@ -1264,25 +1143,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the parameter property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the parameter property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getParameter().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.ParameterList.Parameter }
-         *
-         *
          */
         public List<Parameter> getParameter() {
             if (parameter == null) {
@@ -1294,9 +1171,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         *
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         *
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1309,16 +1186,13 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         *
-         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRef"
+                "experimentRef"
         })
         public static class Parameter
-            extends ParameterType
-        {
+                extends ParameterType {
 
             protected int experimentRef;
             @XmlAttribute
@@ -1326,7 +1200,6 @@ public class ParticipantType {
 
             /**
              * Gets the value of the experimentRef property.
-             *
              */
             public int getExperimentRef() {
                 return experimentRef;
@@ -1334,7 +1207,6 @@ public class ParticipantType {
 
             /**
              * Sets the value of the experimentRef property.
-             *
              */
             public void setExperimentRef(int value) {
                 this.experimentRef = value;
@@ -1343,10 +1215,8 @@ public class ParticipantType {
             /**
              * Gets the value of the uncertainty property.
              *
-             * @return
-             *     possible object is
-             *     {@link java.math.BigDecimal }
-             *
+             * @return possible object is
+             *         {@link java.math.BigDecimal }
              */
             public BigDecimal getUncertainty() {
                 return uncertainty;
@@ -1355,10 +1225,8 @@ public class ParticipantType {
             /**
              * Sets the value of the uncertainty property.
              *
-             * @param value
-             *     allowed object is
-             *     {@link java.math.BigDecimal }
-             *
+             * @param value allowed object is
+             *              {@link java.math.BigDecimal }
              */
             public void setUncertainty(BigDecimal value) {
                 this.uncertainty = value;
@@ -1371,9 +1239,9 @@ public class ParticipantType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1395,12 +1263,10 @@ public class ParticipantType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "participantIdentificationMethod"
+            "participantIdentificationMethod"
     })
     public static class ParticipantIdentificationMethodList {
 
@@ -1409,25 +1275,23 @@ public class ParticipantType {
 
         /**
          * Gets the value of the participantIdentificationMethod property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the participantIdentificationMethod property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getParticipantIdentificationMethod().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod }
-         *
-         *
          */
         public List<ParticipantIdentificationMethod> getParticipantIdentificationMethod() {
             if (participantIdentificationMethod == null) {
@@ -1439,9 +1303,9 @@ public class ParticipantType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         * <p/>
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         * <p/>
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1453,26 +1317,21 @@ public class ParticipantType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
-            "experimentRefList"
+                "experimentRefList"
         })
         public static class ParticipantIdentificationMethod
-            extends CvType
-        {
+                extends CvType {
 
             protected ExperimentRefListType experimentRefList;
 
             /**
              * Gets the value of the experimentRefList property.
-             * 
-             * @return
-             *     possible object is
-             *     {@link ExperimentRefListType }
-             *     
+             *
+             * @return possible object is
+             *         {@link ExperimentRefListType }
              */
             public ExperimentRefListType getExperimentRefList() {
                 return experimentRefList;
@@ -1480,11 +1339,9 @@ public class ParticipantType {
 
             /**
              * Sets the value of the experimentRefList property.
-             * 
-             * @param value
-             *     allowed object is
-             *     {@link ExperimentRefListType }
-             *     
+             *
+             * @param value allowed object is
+             *              {@link ExperimentRefListType }
              */
             public void setExperimentRefList(ExperimentRefListType value) {
                 this.experimentRefList = value;

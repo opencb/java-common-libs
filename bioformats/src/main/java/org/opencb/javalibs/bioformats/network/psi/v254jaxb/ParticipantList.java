@@ -18,13 +18,13 @@ import java.util.List;
 
 /**
  * A list of molecules participating in this interaction. An interaction has one
- *                 (intramolecular), two (binary), or more (n-ary, complexes) participants.
- *             
- * 
+ * (intramolecular), two (binary), or more (n-ary, complexes) participants.
+ * <p/>
+ * <p/>
  * <p>Java class for participantList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="participantList">
  *   &lt;complexContent>
@@ -36,12 +36,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "participantList", propOrder = {
-    "participant"
+        "participant"
 })
 public class ParticipantList {
 
@@ -50,25 +48,23 @@ public class ParticipantList {
 
     /**
      * Gets the value of the participant property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the participant property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParticipant().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Participant }
-     * 
-     * 
      */
     public List<Participant> getParticipant() {
         if (participant == null) {

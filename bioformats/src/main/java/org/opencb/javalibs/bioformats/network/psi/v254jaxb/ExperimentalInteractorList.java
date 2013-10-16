@@ -18,16 +18,16 @@ import java.util.List;
 
 /**
  * Describes molecules which have been used in specific experiments if these molecules are
- *                 different from the one listed as interactors. Example: The author of a paper makes a statement about
- *                 human proteins, but has really worked with mouse proteins. In this case the human protein would be the
- *                 main interactor, while the experimentalForm would be the mouse protein listed in this element.
- *                 Optionally this can refer to the experiment(s) in which this form has been used.
- *             
- * 
+ * different from the one listed as interactors. Example: The author of a paper makes a statement about
+ * human proteins, but has really worked with mouse proteins. In this case the human protein would be the
+ * main interactor, while the experimentalForm would be the mouse protein listed in this element.
+ * Optionally this can refer to the experiment(s) in which this form has been used.
+ * <p/>
+ * <p/>
  * <p>Java class for experimentalInteractorList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentalInteractorList">
  *   &lt;complexContent>
@@ -39,12 +39,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentalInteractorList", propOrder = {
-    "experimentalInteractor"
+        "experimentalInteractor"
 })
 public class ExperimentalInteractorList {
 
@@ -53,25 +51,23 @@ public class ExperimentalInteractorList {
 
     /**
      * Gets the value of the experimentalInteractor property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the experimentalInteractor property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExperimentalInteractor().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ExperimentalInteractor }
-     * 
-     * 
      */
     public List<ExperimentalInteractor> getExperimentalInteractor() {
         if (experimentalInteractor == null) {

@@ -15,11 +15,11 @@ import java.util.List;
 
 /**
  * A list of additional attributes. Open tag-value list to allow the inclusion of additional data.
- * 
+ * <p/>
  * <p>Java class for attributeListType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="attributeListType">
  *   &lt;complexContent>
@@ -52,12 +52,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "attributeListType", propOrder = {
-    "attribute"
+        "attribute"
 })
 public class AttributeListType {
 
@@ -66,25 +64,23 @@ public class AttributeListType {
 
     /**
      * Gets the value of the attribute property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the attribute property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAttribute().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link AttributeListType.Attribute }
-     *
-     *
      */
     public List<Attribute> getAttribute() {
         if (attribute == null) {
@@ -96,9 +92,9 @@ public class AttributeListType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -121,12 +117,10 @@ public class AttributeListType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Attribute {
 
@@ -139,11 +133,9 @@ public class AttributeListType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -151,11 +143,9 @@ public class AttributeListType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -163,11 +153,9 @@ public class AttributeListType {
 
         /**
          * Gets the value of the name property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getName() {
             return name;
@@ -175,11 +163,9 @@ public class AttributeListType {
 
         /**
          * Sets the value of the name property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setName(String value) {
             this.name = value;
@@ -187,11 +173,9 @@ public class AttributeListType {
 
         /**
          * Gets the value of the nameAc property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getNameAc() {
             return nameAc;
@@ -199,11 +183,9 @@ public class AttributeListType {
 
         /**
          * Sets the value of the nameAc property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setNameAc(String value) {
             this.nameAc = value;

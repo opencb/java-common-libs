@@ -18,15 +18,15 @@ import java.util.List;
 
 /**
  * Describes inferred interactions, usually combining data from more than one experiment.
- *                 Examples: 1: Show the topology of binary interactions within a complex. 2: Interaction inferred from
- *                 multiple experiments which on their own would not support the interaction. Example: A-B in experiment 1,
- *                 B-C- in experiment 2, A-C is the inferred interaction.
- *             
- * 
+ * Examples: 1: Show the topology of binary interactions within a complex. 2: Interaction inferred from
+ * multiple experiments which on their own would not support the interaction. Example: A-B in experiment 1,
+ * B-C- in experiment 2, A-C is the inferred interaction.
+ * <p/>
+ * <p/>
  * <p>Java class for inferredInteractionList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="inferredInteractionList">
  *   &lt;complexContent>
@@ -38,12 +38,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "inferredInteractionList", propOrder = {
-    "inferredInteraction"
+        "inferredInteraction"
 })
 public class InferredInteractionList {
 
@@ -52,25 +50,23 @@ public class InferredInteractionList {
 
     /**
      * Gets the value of the inferredInteraction property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the inferredInteraction property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInferredInteraction().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link InferredInteraction }
-     * 
-     * 
      */
     public List<InferredInteraction> getInferredInteraction() {
         if (inferredInteraction == null) {

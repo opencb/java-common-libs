@@ -15,18 +15,17 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the org.bioinfo.formats.parser.psi.v254jaxb package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the org.bioinfo.formats.parser.psi.v254jaxb package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -35,14 +34,12 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.bioinfo.formats.parser.psi.v254jaxb
-     * 
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link FullName }
-     * 
      */
     public FullName createFullName() {
         return new FullName();
@@ -50,7 +47,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BaseLocation }
-     * 
      */
     public BaseLocation createBaseLocation() {
         return new BaseLocation();
@@ -58,7 +54,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Attribute }
-     * 
      */
     public Attribute createAttribute() {
         return new Attribute();
@@ -66,7 +61,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalInteractorList }
-     * 
      */
     public ExperimentalInteractorList createExperimentalInteractorList() {
         return new ExperimentalInteractorList();
@@ -74,7 +68,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet }
-     * 
      */
     public EntrySet createEntrySet() {
         return new EntrySet();
@@ -82,7 +75,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalInteractor }
-     * 
      */
     public ExperimentalInteractor createExperimentalInteractor() {
         return new ExperimentalInteractor();
@@ -90,7 +82,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Bibref }
-     * 
      */
     public Bibref createBibref() {
         return new Bibref();
@@ -98,7 +89,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantIdentificationMethodList }
-     * 
      */
     public ParticipantIdentificationMethodList createParticipantIdentificationMethodList() {
         return new ParticipantIdentificationMethodList();
@@ -106,7 +96,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantIdentificationMethod }
-     * 
      */
     public ParticipantIdentificationMethod createParticipantIdentificationMethod() {
         return new ParticipantIdentificationMethod();
@@ -114,7 +103,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AvailabilityList }
-     * 
      */
     public AvailabilityList createAvailabilityList() {
         return new AvailabilityList();
@@ -122,7 +110,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Interval }
-     * 
      */
     public Interval createInterval() {
         return new Interval();
@@ -130,7 +117,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BioSource }
-     * 
      */
     public BioSource createBioSource() {
         return new BioSource();
@@ -138,7 +124,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Position }
-     * 
      */
     public Position createPosition() {
         return new Position();
@@ -146,7 +131,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Names }
-     * 
      */
     public Names createNames() {
         return new Names();
@@ -154,7 +138,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalPreparation }
-     * 
      */
     public ExperimentalPreparation createExperimentalPreparation() {
         return new ExperimentalPreparation();
@@ -162,7 +145,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InferredInteractionParticipant }
-     * 
      */
     public InferredInteractionParticipant createInferredInteractionParticipant() {
         return new InferredInteractionParticipant();
@@ -170,7 +152,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link HostOrganism }
-     * 
      */
     public HostOrganism createHostOrganism() {
         return new HostOrganism();
@@ -178,7 +159,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link HostOrganismList }
-     * 
      */
     public HostOrganismList createHostOrganismList() {
         return new HostOrganismList();
@@ -186,7 +166,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentDescriptionList }
-     * 
      */
     public ExperimentDescriptionList createExperimentDescriptionList() {
         return new ExperimentDescriptionList();
@@ -194,7 +173,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Alias }
-     * 
      */
     public Alias createAlias() {
         return new Alias();
@@ -202,7 +180,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Xref }
-     * 
      */
     public Xref createXref() {
         return new Xref();
@@ -210,7 +187,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantList }
-     * 
      */
     public ParticipantList createParticipantList() {
         return new ParticipantList();
@@ -218,7 +194,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalPreparationList }
-     * 
      */
     public ExperimentalPreparationList createExperimentalPreparationList() {
         return new ExperimentalPreparationList();
@@ -226,7 +201,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParameterList }
-     * 
      */
     public ParameterList createParameterList() {
         return new ParameterList();
@@ -234,7 +208,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConfidenceBase }
-     * 
      */
     public ConfidenceBase createConfidenceBase() {
         return new ConfidenceBase();
@@ -242,7 +215,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalRoleList }
-     * 
      */
     public ExperimentalRoleList createExperimentalRoleList() {
         return new ExperimentalRoleList();
@@ -250,7 +222,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractorList }
-     * 
      */
     public InteractorList createInteractorList() {
         return new InteractorList();
@@ -258,7 +229,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Interaction }
-     * 
      */
     public Interaction createInteraction() {
         return new Interaction();
@@ -266,7 +236,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Availability }
-     * 
      */
     public Availability createAvailability() {
         return new Availability();
@@ -274,7 +243,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentalRole }
-     * 
      */
     public ExperimentalRole createExperimentalRole() {
         return new ExperimentalRole();
@@ -282,7 +250,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConfidenceList }
-     * 
      */
     public ConfidenceList createConfidenceList() {
         return new ConfidenceList();
@@ -290,7 +257,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Protein }
-     * 
      */
     public Entry createEntry() {
         return new Entry();
@@ -298,7 +264,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InferredInteraction }
-     * 
      */
     public InferredInteraction createInferredInteraction() {
         return new InferredInteraction();
@@ -306,7 +271,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OpenCvType }
-     * 
      */
     public OpenCvType createOpenCvType() {
         return new OpenCvType();
@@ -314,7 +278,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Feature }
-     * 
      */
     public Feature createFeature() {
         return new Feature();
@@ -322,7 +285,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Parameter }
-     * 
      */
     public Parameter createParameter() {
         return new Parameter();
@@ -330,7 +292,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParameterBase }
-     * 
      */
     public ParameterBase createParameterBase() {
         return new ParameterBase();
@@ -338,7 +299,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Feature.FeatureRangeList }
-     * 
      */
     public Feature.FeatureRangeList createFeatureFeatureRangeList() {
         return new Feature.FeatureRangeList();
@@ -346,7 +306,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Participant }
-     * 
      */
     public Participant createParticipant() {
         return new Participant();
@@ -354,7 +313,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FeatureList }
-     * 
      */
     public FeatureList createFeatureList() {
         return new FeatureList();
@@ -362,7 +320,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentRefList }
-     * 
      */
     public ExperimentRefList createExperimentRefList() {
         return new ExperimentRefList();
@@ -370,7 +327,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Source }
-     * 
      */
     public Source createSource() {
         return new Source();
@@ -378,7 +334,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentList }
-     * 
      */
     public ExperimentList createExperimentList() {
         return new ExperimentList();
@@ -386,7 +341,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Confidence }
-     * 
      */
     public Confidence createConfidence() {
         return new Confidence();
@@ -394,7 +348,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CvType }
-     * 
      */
     public CvType createCvType() {
         return new CvType();
@@ -402,7 +355,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Label }
-     * 
      */
     public Label createLabel() {
         return new Label();
@@ -410,7 +362,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AttributeList }
-     * 
      */
     public AttributeList createAttributeList() {
         return new AttributeList();
@@ -418,7 +369,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Interactor }
-     * 
      */
     public Interactor createInteractor() {
         return new Interactor();
@@ -426,7 +376,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InferredInteractionList }
-     * 
      */
     public InferredInteractionList createInferredInteractionList() {
         return new InferredInteractionList();
@@ -434,7 +383,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Interactor.Organism }
-     * 
      */
     public Interactor.Organism createInteractorOrganism() {
         return new Interactor.Organism();
@@ -442,7 +390,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionList }
-     * 
      */
     public InteractionList createInteractionList() {
         return new InteractionList();
@@ -450,7 +397,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DbReference }
-     * 
      */
     public DbReference createDbReference() {
         return new DbReference();
@@ -458,7 +404,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentDescription }
-     * 
      */
     public ExperimentDescription createExperimentDescription() {
         return new ExperimentDescription();
@@ -466,7 +411,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link javax.xml.bind.JAXBElement }{@code <}{@link EntrySet }{@code >}}
-     * 
      */
     @XmlElementDecl(namespace = "http://psi.hupo.org/mi/mif", name = "entrySet")
     public JAXBElement<EntrySet> createEntrySet(EntrySet value) {

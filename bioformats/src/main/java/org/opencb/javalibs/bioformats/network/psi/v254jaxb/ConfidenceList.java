@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * A list of confidence values.
- * 
+ * <p/>
  * <p>Java class for confidenceList complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="confidenceList">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "confidenceList", propOrder = {
-    "confidence"
+        "confidence"
 })
 public class ConfidenceList {
 
@@ -48,25 +46,23 @@ public class ConfidenceList {
 
     /**
      * Gets the value of the confidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the confidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getConfidence().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Confidence }
-     * 
-     * 
      */
     public List<Confidence> getConfidence() {
         if (confidence == null) {

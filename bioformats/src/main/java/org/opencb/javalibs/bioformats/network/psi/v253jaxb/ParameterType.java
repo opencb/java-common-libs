@@ -14,11 +14,11 @@ import java.math.BigDecimal;
 
 /**
  * A numeric parameter, e.g. for a kinetic value
- * 
+ * <p/>
  * <p>Java class for parameterType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="parameterType">
  *   &lt;complexContent>
@@ -58,14 +58,12 @@ import java.math.BigDecimal;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "parameterType")
 @XmlSeeAlso({
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.InteractionElementType.ParameterList.Parameter.class,
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ParameterList.Parameter.class
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.InteractionElementType.ParameterList.Parameter.class,
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.ParameterList.Parameter.class
 })
 public class ParameterType {
 
@@ -86,11 +84,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the term property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getTerm() {
         return term;
@@ -98,11 +94,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the term property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setTerm(String value) {
         this.term = value;
@@ -110,11 +104,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the termAc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getTermAc() {
         return termAc;
@@ -122,11 +114,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the termAc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setTermAc(String value) {
         this.termAc = value;
@@ -134,11 +124,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the unit property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getUnit() {
         return unit;
@@ -146,11 +134,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the unit property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUnit(String value) {
         this.unit = value;
@@ -158,11 +144,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the unitAc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getUnitAc() {
         return unitAc;
@@ -170,11 +154,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the unitAc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUnitAc(String value) {
         this.unitAc = value;
@@ -182,11 +164,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the base property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Short }
-     *     
+     *
+     * @return possible object is
+     *         {@link Short }
      */
     public short getBase() {
         if (base == null) {
@@ -198,11 +178,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the base property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Short }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Short }
      */
     public void setBase(Short value) {
         this.base = value;
@@ -210,11 +188,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the exponent property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Short }
-     *     
+     *
+     * @return possible object is
+     *         {@link Short }
      */
     public short getExponent() {
         if (exponent == null) {
@@ -226,11 +202,9 @@ public class ParameterType {
 
     /**
      * Sets the value of the exponent property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Short }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Short }
      */
     public void setExponent(Short value) {
         this.exponent = value;
@@ -238,11 +212,9 @@ public class ParameterType {
 
     /**
      * Gets the value of the factor property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigDecimal }
      *
+     * @return possible object is
+     *         {@link java.math.BigDecimal }
      */
     public BigDecimal getFactor() {
         return factor;
@@ -251,10 +223,8 @@ public class ParameterType {
     /**
      * Sets the value of the factor property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigDecimal }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigDecimal }
      */
     public void setFactor(BigDecimal value) {
         this.factor = value;

@@ -17,9 +17,9 @@ import java.math.BigDecimal;
 
 /**
  * <p>Java class for parameter complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="parameter">
  *   &lt;complexContent>
@@ -32,16 +32,13 @@ import java.math.BigDecimal;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "parameter", propOrder = {
-    "experimentRef"
+        "experimentRef"
 })
 public class Parameter
-    extends ParameterBase
-{
+        extends ParameterBase {
 
     protected int experimentRef;
     @XmlAttribute
@@ -49,7 +46,6 @@ public class Parameter
 
     /**
      * Gets the value of the experimentRef property.
-     * 
      */
     public int getExperimentRef() {
         return experimentRef;
@@ -57,7 +53,6 @@ public class Parameter
 
     /**
      * Sets the value of the experimentRef property.
-     * 
      */
     public void setExperimentRef(int value) {
         this.experimentRef = value;
@@ -65,11 +60,9 @@ public class Parameter
 
     /**
      * Gets the value of the uncertainty property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigDecimal }
      *
+     * @return possible object is
+     *         {@link java.math.BigDecimal }
      */
     public BigDecimal getUncertainty() {
         return uncertainty;
@@ -78,10 +71,8 @@ public class Parameter
     /**
      * Sets the value of the uncertainty property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigDecimal }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigDecimal }
      */
     public void setUncertainty(BigDecimal value) {
         this.uncertainty = value;

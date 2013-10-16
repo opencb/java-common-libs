@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Refers to a unique object in an external database.
- * 
+ * <p/>
  * <p>Java class for dbReference complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="dbReference">
  *   &lt;complexContent>
@@ -81,12 +81,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "dbReference", propOrder = {
-    "attributeList"
+        "attributeList"
 })
 public class DbReference {
 
@@ -108,11 +106,9 @@ public class DbReference {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -120,11 +116,9 @@ public class DbReference {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -132,11 +126,9 @@ public class DbReference {
 
     /**
      * Gets the value of the db property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDb() {
         return db;
@@ -144,11 +136,9 @@ public class DbReference {
 
     /**
      * Sets the value of the db property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDb(String value) {
         this.db = value;
@@ -156,11 +146,9 @@ public class DbReference {
 
     /**
      * Gets the value of the dbAc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDbAc() {
         return dbAc;
@@ -168,11 +156,9 @@ public class DbReference {
 
     /**
      * Sets the value of the dbAc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDbAc(String value) {
         this.dbAc = value;
@@ -180,11 +166,9 @@ public class DbReference {
 
     /**
      * Gets the value of the id property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getId() {
         return id;
@@ -192,11 +176,9 @@ public class DbReference {
 
     /**
      * Sets the value of the id property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setId(String value) {
         this.id = value;
@@ -204,11 +186,9 @@ public class DbReference {
 
     /**
      * Gets the value of the secondary property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getSecondary() {
         return secondary;
@@ -216,11 +196,9 @@ public class DbReference {
 
     /**
      * Sets the value of the secondary property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setSecondary(String value) {
         this.secondary = value;
@@ -228,11 +206,9 @@ public class DbReference {
 
     /**
      * Gets the value of the version property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getVersion() {
         return version;
@@ -240,11 +216,9 @@ public class DbReference {
 
     /**
      * Sets the value of the version property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVersion(String value) {
         this.version = value;
@@ -252,11 +226,9 @@ public class DbReference {
 
     /**
      * Gets the value of the refType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getRefType() {
         return refType;
@@ -264,11 +236,9 @@ public class DbReference {
 
     /**
      * Sets the value of the refType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setRefType(String value) {
         this.refType = value;
@@ -276,11 +246,9 @@ public class DbReference {
 
     /**
      * Gets the value of the refTypeAc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getRefTypeAc() {
         return refTypeAc;
@@ -288,11 +256,9 @@ public class DbReference {
 
     /**
      * Sets the value of the refTypeAc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setRefTypeAc(String value) {
         this.refTypeAc = value;

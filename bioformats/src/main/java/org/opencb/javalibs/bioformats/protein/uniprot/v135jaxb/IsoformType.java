@@ -15,13 +15,13 @@ import java.util.List;
 
 /**
  * Contains all information on a certain isoform including references to possible features
- *                 defining the sequence.
- *             
- * 
+ * defining the sequence.
+ * <p/>
+ * <p/>
  * <p>Java class for isoformType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="isoformType">
  *   &lt;complexContent>
@@ -70,15 +70,13 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "isoformType", propOrder = {
-    "id",
-    "name",
-    "sequence",
-    "note"
+        "id",
+        "name",
+        "sequence",
+        "note"
 })
 public class IsoformType {
 
@@ -92,25 +90,23 @@ public class IsoformType {
 
     /**
      * Gets the value of the id property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the id property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getId().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     *
-     *
      */
     public List<String> getId() {
         if (id == null) {
@@ -121,25 +117,23 @@ public class IsoformType {
 
     /**
      * Gets the value of the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link IsoformType.Name }
-     *
-     *
      */
     public List<Name> getName() {
         if (name == null) {
@@ -151,10 +145,8 @@ public class IsoformType {
     /**
      * Gets the value of the sequence property.
      *
-     * @return
-     *     possible object is
-     *     {@link IsoformType.Sequence }
-     *
+     * @return possible object is
+     *         {@link IsoformType.Sequence }
      */
     public IsoformType.Sequence getSequence() {
         return sequence;
@@ -163,10 +155,8 @@ public class IsoformType {
     /**
      * Sets the value of the sequence property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link IsoformType.Sequence }
-     *
+     * @param value allowed object is
+     *              {@link IsoformType.Sequence }
      */
     public void setSequence(IsoformType.Sequence value) {
         this.sequence = value;
@@ -175,10 +165,8 @@ public class IsoformType {
     /**
      * Gets the value of the note property.
      *
-     * @return
-     *     possible object is
-     *     {@link IsoformType.Note }
-     *
+     * @return possible object is
+     *         {@link IsoformType.Note }
      */
     public IsoformType.Note getNote() {
         return note;
@@ -187,10 +175,8 @@ public class IsoformType {
     /**
      * Sets the value of the note property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link IsoformType.Note }
-     *
+     * @param value allowed object is
+     *              {@link IsoformType.Note }
      */
     public void setNote(IsoformType.Note value) {
         this.note = value;
@@ -199,9 +185,9 @@ public class IsoformType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -211,12 +197,10 @@ public class IsoformType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Name {
 
@@ -227,11 +211,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -239,11 +221,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -251,11 +231,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -263,11 +241,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;
@@ -278,9 +254,9 @@ public class IsoformType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
@@ -290,12 +266,10 @@ public class IsoformType {
      *   &lt;/simpleContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "value"
+            "value"
     })
     public static class Note {
 
@@ -306,11 +280,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getValue() {
             return value;
@@ -318,11 +290,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setValue(String value) {
             this.value = value;
@@ -330,11 +300,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the evidence property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getEvidence() {
             return evidence;
@@ -342,11 +310,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the evidence property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setEvidence(String value) {
             this.evidence = value;
@@ -357,9 +323,9 @@ public class IsoformType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -379,8 +345,6 @@ public class IsoformType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
@@ -393,11 +357,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the type property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getType() {
             return type;
@@ -405,11 +367,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the type property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setType(String value) {
             this.type = value;
@@ -417,11 +377,9 @@ public class IsoformType {
 
         /**
          * Gets the value of the ref property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getRef() {
             return ref;
@@ -429,11 +387,9 @@ public class IsoformType {
 
         /**
          * Sets the value of the ref property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setRef(String value) {
             this.ref = value;

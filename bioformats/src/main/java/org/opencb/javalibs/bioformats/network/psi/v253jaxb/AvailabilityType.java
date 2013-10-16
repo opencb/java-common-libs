@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * A text describing the availability of data, e.g. a copyright statement.
- * 
+ * <p/>
  * <p>Java class for availabilityType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="availabilityType">
  *   &lt;simpleContent>
@@ -27,12 +27,10 @@ import javax.xml.bind.annotation.*;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "availabilityType", propOrder = {
-    "value"
+        "value"
 })
 public class AvailabilityType {
 
@@ -43,11 +41,9 @@ public class AvailabilityType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -55,11 +51,9 @@ public class AvailabilityType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -67,7 +61,6 @@ public class AvailabilityType {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -75,7 +68,6 @@ public class AvailabilityType {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;

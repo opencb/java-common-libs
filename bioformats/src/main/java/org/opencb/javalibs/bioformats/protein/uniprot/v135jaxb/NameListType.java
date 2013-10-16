@@ -15,9 +15,9 @@ import java.util.List;
 
 /**
  * <p>Java class for nameListType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="nameListType">
  *   &lt;complexContent>
@@ -30,43 +30,39 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "nameListType", propOrder = {
-    "personOrConsortium"
+        "personOrConsortium"
 })
 public class NameListType {
 
     @XmlElements({
-        @XmlElement(name = "person", type = PersonType.class),
-        @XmlElement(name = "consortium", type = ConsortiumType.class)
+            @XmlElement(name = "person", type = PersonType.class),
+            @XmlElement(name = "consortium", type = ConsortiumType.class)
     })
     protected List<Object> personOrConsortium;
 
     /**
      * Gets the value of the personOrConsortium property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the personOrConsortium property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPersonOrConsortium().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link PersonType }
      * {@link ConsortiumType }
-     * 
-     * 
      */
     public List<Object> getPersonOrConsortium() {
         if (personOrConsortium == null) {

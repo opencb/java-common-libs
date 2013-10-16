@@ -12,18 +12,17 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the org.bioinfo.formats.arser.psimi package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the org.bioinfo.formats.arser.psimi package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -31,14 +30,12 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.bioinfo.formats.arser.psimi
-     * 
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link FeatureElementType }
-     * 
      */
     public FeatureElementType createFeatureElementType() {
         return new FeatureElementType();
@@ -46,7 +43,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.ParameterList.Parameter }
-     * 
      */
     public InteractionElementType.ParameterList.Parameter createInteractionElementTypeParameterListParameter() {
         return new InteractionElementType.ParameterList.Parameter();
@@ -54,7 +50,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BibrefType }
-     * 
      */
     public BibrefType createBibrefType() {
         return new BibrefType();
@@ -62,7 +57,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.Source }
-     * 
      */
     public EntrySet.Entry.Source createEntrySetEntrySource() {
         return new EntrySet.Entry.Source();
@@ -70,7 +64,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.InferredInteractionList.InferredInteraction }
-     * 
      */
     public InteractionElementType.InferredInteractionList.InferredInteraction createInteractionElementTypeInferredInteractionListInferredInteraction() {
         return new InteractionElementType.InferredInteractionList.InferredInteraction();
@@ -78,7 +71,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractorElementType.Organism }
-     * 
      */
     public InteractorElementType.Organism createInteractorElementTypeOrganism() {
         return new InteractorElementType.Organism();
@@ -86,7 +78,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link OpenCvType }
-     * 
      */
     public OpenCvType createOpenCvType() {
         return new OpenCvType();
@@ -94,7 +85,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.FeatureList }
-     * 
      */
     public ParticipantType.FeatureList createParticipantTypeFeatureList() {
         return new ParticipantType.FeatureList();
@@ -102,7 +92,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentType.HostOrganismList.HostOrganism }
-     * 
      */
     public ExperimentType.HostOrganismList.HostOrganism createExperimentTypeHostOrganismListHostOrganism() {
         return new ExperimentType.HostOrganismList.HostOrganism();
@@ -110,7 +99,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.AvailabilityList }
-     * 
      */
     public EntrySet.Entry.AvailabilityList createEntrySetEntryAvailabilityList() {
         return new EntrySet.Entry.AvailabilityList();
@@ -118,7 +106,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BaseLocationType }
-     * 
      */
     public BaseLocationType createBaseLocationType() {
         return new BaseLocationType();
@@ -126,7 +113,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.InteractionList }
-     * 
      */
     public EntrySet.Entry.InteractionList createEntrySetEntryInteractionList() {
         return new EntrySet.Entry.InteractionList();
@@ -134,7 +120,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AttributeListType }
-     * 
      */
     public AttributeListType createAttributeListType() {
         return new AttributeListType();
@@ -142,7 +127,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConfidenceType }
-     * 
      */
     public ConfidenceType createConfidenceType() {
         return new ConfidenceType();
@@ -150,7 +134,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CvType }
-     * 
      */
     public CvType createCvType() {
         return new CvType();
@@ -158,7 +141,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentRefListType }
-     * 
      */
     public ExperimentRefListType createExperimentRefListType() {
         return new ExperimentRefListType();
@@ -166,7 +148,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType }
-     * 
      */
     public InteractionElementType createInteractionElementType() {
         return new InteractionElementType();
@@ -174,7 +155,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConfidenceListType }
-     * 
      */
     public ConfidenceListType createConfidenceListType() {
         return new ConfidenceListType();
@@ -182,7 +162,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentType }
-     * 
      */
     public ExperimentType createExperimentType() {
         return new ExperimentType();
@@ -190,7 +169,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.InteractorList }
-     * 
      */
     public EntrySet.Entry.InteractorList createEntrySetEntryInteractorList() {
         return new EntrySet.Entry.InteractorList();
@@ -198,7 +176,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FullNameType }
-     * 
      */
     public FullNameType createFullNameType() {
         return new FullNameType();
@@ -206,7 +183,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalInteractorList }
-     * 
      */
     public ParticipantType.ExperimentalInteractorList createParticipantTypeExperimentalInteractorList() {
         return new ParticipantType.ExperimentalInteractorList();
@@ -214,7 +190,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PositionType }
-     * 
      */
     public PositionType createPositionType() {
         return new PositionType();
@@ -222,7 +197,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.ParameterList }
-     * 
      */
     public InteractionElementType.ParameterList createInteractionElementTypeParameterList() {
         return new InteractionElementType.ParameterList();
@@ -230,7 +204,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod }
-     * 
      */
     public ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod createParticipantTypeParticipantIdentificationMethodListParticipantIdentificationMethod() {
         return new ParticipantType.ParticipantIdentificationMethodList.ParticipantIdentificationMethod();
@@ -238,7 +211,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link XrefType }
-     * 
      */
     public XrefType createXrefType() {
         return new XrefType();
@@ -246,7 +218,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ParticipantIdentificationMethodList }
-     * 
      */
     public ParticipantType.ParticipantIdentificationMethodList createParticipantTypeParticipantIdentificationMethodList() {
         return new ParticipantType.ParticipantIdentificationMethodList();
@@ -254,7 +225,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalPreparationList.ExperimentalPreparation }
-     * 
      */
     public ParticipantType.ExperimentalPreparationList.ExperimentalPreparation createParticipantTypeExperimentalPreparationListExperimentalPreparation() {
         return new ParticipantType.ExperimentalPreparationList.ExperimentalPreparation();
@@ -262,7 +232,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.HostOrganismList.HostOrganism }
-     * 
      */
     public ParticipantType.HostOrganismList.HostOrganism createParticipantTypeHostOrganismListHostOrganism() {
         return new ParticipantType.HostOrganismList.HostOrganism();
@@ -270,7 +239,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.InferredInteractionList }
-     * 
      */
     public InteractionElementType.InferredInteractionList createInteractionElementTypeInferredInteractionList() {
         return new InteractionElementType.InferredInteractionList();
@@ -278,7 +246,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParameterType }
-     * 
      */
     public ParameterType createParameterType() {
         return new ParameterType();
@@ -286,7 +253,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExperimentType.HostOrganismList }
-     * 
      */
     public ExperimentType.HostOrganismList createExperimentTypeHostOrganismList() {
         return new ExperimentType.HostOrganismList();
@@ -294,7 +260,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalRoleList }
-     * 
      */
     public ParticipantType.ExperimentalRoleList createParticipantTypeExperimentalRoleList() {
         return new ParticipantType.ExperimentalRoleList();
@@ -302,7 +267,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConfidenceListType.Confidence }
-     * 
      */
     public ConfidenceListType.Confidence createConfidenceListTypeConfidence() {
         return new ConfidenceListType.Confidence();
@@ -310,7 +274,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DbReferenceType }
-     * 
      */
     public DbReferenceType createDbReferenceType() {
         return new DbReferenceType();
@@ -318,7 +281,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IntervalType }
-     * 
      */
     public IntervalType createIntervalType() {
         return new IntervalType();
@@ -326,7 +288,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.ParticipantList }
-     * 
      */
     public InteractionElementType.ParticipantList createInteractionElementTypeParticipantList() {
         return new InteractionElementType.ParticipantList();
@@ -334,7 +295,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractorElementType }
-     * 
      */
     public InteractorElementType createInteractorElementType() {
         return new InteractorElementType();
@@ -342,7 +302,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.ExperimentList }
-     * 
      */
     public InteractionElementType.ExperimentList createInteractionElementTypeExperimentList() {
         return new InteractionElementType.ExperimentList();
@@ -350,7 +309,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.ExperimentList }
-     * 
      */
     public EntrySet.Entry.ExperimentList createEntrySetEntryExperimentList() {
         return new EntrySet.Entry.ExperimentList();
@@ -358,7 +316,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ParameterList.Parameter }
-     * 
      */
     public ParticipantType.ParameterList.Parameter createParticipantTypeParameterListParameter() {
         return new ParticipantType.ParameterList.Parameter();
@@ -366,7 +323,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NamesType.Alias }
-     * 
      */
     public NamesType.Alias createNamesTypeAlias() {
         return new NamesType.Alias();
@@ -374,7 +330,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AttributeListType.Attribute }
-     * 
      */
     public AttributeListType.Attribute createAttributeListTypeAttribute() {
         return new AttributeListType.Attribute();
@@ -382,7 +337,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry }
-     * 
      */
     public EntrySet.Entry createEntrySetEntry() {
         return new EntrySet.Entry();
@@ -390,7 +344,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link NamesType }
-     * 
      */
     public NamesType createNamesType() {
         return new NamesType();
@@ -398,7 +351,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet.Entry.InteractionList.Interaction }
-     * 
      */
     public EntrySet.Entry.InteractionList.Interaction createEntrySetEntryInteractionListInteraction() {
         return new EntrySet.Entry.InteractionList.Interaction();
@@ -406,7 +358,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.HostOrganismList }
-     * 
      */
     public ParticipantType.HostOrganismList createParticipantTypeHostOrganismList() {
         return new ParticipantType.HostOrganismList();
@@ -414,7 +365,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalInteractorList.ExperimentalInteractor }
-     * 
      */
     public ParticipantType.ExperimentalInteractorList.ExperimentalInteractor createParticipantTypeExperimentalInteractorListExperimentalInteractor() {
         return new ParticipantType.ExperimentalInteractorList.ExperimentalInteractor();
@@ -422,7 +372,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalPreparationList }
-     * 
      */
     public ParticipantType.ExperimentalPreparationList createParticipantTypeExperimentalPreparationList() {
         return new ParticipantType.ExperimentalPreparationList();
@@ -430,7 +379,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InteractionElementType.InferredInteractionList.InferredInteraction.Participant }
-     * 
      */
     public InteractionElementType.InferredInteractionList.InferredInteraction.Participant createInteractionElementTypeInferredInteractionListInferredInteractionParticipant() {
         return new InteractionElementType.InferredInteractionList.InferredInteraction.Participant();
@@ -438,7 +386,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType }
-     * 
      */
     public ParticipantType createParticipantType() {
         return new ParticipantType();
@@ -446,7 +393,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EntrySet }
-     * 
      */
     public EntrySet createEntrySet() {
         return new EntrySet();
@@ -454,7 +400,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link LabelType }
-     * 
      */
     public LabelType createLabelType() {
         return new LabelType();
@@ -462,7 +407,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FeatureElementType.FeatureRangeList }
-     * 
      */
     public FeatureElementType.FeatureRangeList createFeatureElementTypeFeatureRangeList() {
         return new FeatureElementType.FeatureRangeList();
@@ -470,7 +414,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AvailabilityType }
-     * 
      */
     public AvailabilityType createAvailabilityType() {
         return new AvailabilityType();
@@ -478,7 +421,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ExperimentalRoleList.ExperimentalRole }
-     * 
      */
     public ParticipantType.ExperimentalRoleList.ExperimentalRole createParticipantTypeExperimentalRoleListExperimentalRole() {
         return new ParticipantType.ExperimentalRoleList.ExperimentalRole();
@@ -486,7 +428,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ParticipantType.ParameterList }
-     * 
      */
     public ParticipantType.ParameterList createParticipantTypeParameterList() {
         return new ParticipantType.ParameterList();
@@ -494,7 +435,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BioSourceType }
-     * 
      */
     public BioSourceType createBioSourceType() {
         return new BioSourceType();

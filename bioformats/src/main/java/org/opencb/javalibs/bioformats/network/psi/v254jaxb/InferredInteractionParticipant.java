@@ -15,11 +15,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Participant of the inferred interaction.
- * 
+ * <p/>
  * <p>Java class for inferredInteractionParticipant complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="inferredInteractionParticipant">
  *   &lt;complexContent>
@@ -32,13 +32,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "inferredInteractionParticipant", propOrder = {
-    "participantRef",
-    "participantFeatureRef"
+        "participantRef",
+        "participantFeatureRef"
 })
 public class InferredInteractionParticipant {
 
@@ -47,11 +45,9 @@ public class InferredInteractionParticipant {
 
     /**
      * Gets the value of the participantRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getParticipantRef() {
         return participantRef;
@@ -59,11 +55,9 @@ public class InferredInteractionParticipant {
 
     /**
      * Sets the value of the participantRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setParticipantRef(Integer value) {
         this.participantRef = value;
@@ -71,11 +65,9 @@ public class InferredInteractionParticipant {
 
     /**
      * Gets the value of the participantFeatureRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *     
+     *
+     * @return possible object is
+     *         {@link Integer }
      */
     public Integer getParticipantFeatureRef() {
         return participantFeatureRef;
@@ -83,11 +75,9 @@ public class InferredInteractionParticipant {
 
     /**
      * Sets the value of the participantFeatureRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Integer }
      */
     public void setParticipantFeatureRef(Integer value) {
         this.participantFeatureRef = value;

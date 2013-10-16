@@ -14,9 +14,9 @@ import java.math.BigInteger;
 
 /**
  * <p>Java class for positionType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="positionType">
  *   &lt;complexContent>
@@ -38,8 +38,6 @@ import java.math.BigInteger;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "positionType")
@@ -55,11 +53,9 @@ public class PositionType {
 
     /**
      * Gets the value of the position property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getPosition() {
         return position;
@@ -68,10 +64,8 @@ public class PositionType {
     /**
      * Sets the value of the position property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setPosition(BigInteger value) {
         this.position = value;
@@ -79,11 +73,9 @@ public class PositionType {
 
     /**
      * Gets the value of the status property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getStatus() {
         if (status == null) {
@@ -95,11 +87,9 @@ public class PositionType {
 
     /**
      * Sets the value of the status property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setStatus(String value) {
         this.status = value;
@@ -107,11 +97,9 @@ public class PositionType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getEvidence() {
         return evidence;
@@ -119,11 +107,9 @@ public class PositionType {
 
     /**
      * Sets the value of the evidence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setEvidence(String value) {
         this.evidence = value;

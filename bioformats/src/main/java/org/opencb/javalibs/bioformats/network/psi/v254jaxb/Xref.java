@@ -18,11 +18,11 @@ import java.util.List;
 
 /**
  * Crossreference to an external database. Crossreferences to literature databases, e.g. PubMed, should not be put into this structure, but into the bibRef element where possible.
- * 
+ * <p/>
  * <p>Java class for xref complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="xref">
  *   &lt;complexContent>
@@ -35,13 +35,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "xref", propOrder = {
-    "primaryRef",
-    "secondaryRef"
+        "primaryRef",
+        "secondaryRef"
 })
 public class Xref {
 
@@ -51,11 +49,9 @@ public class Xref {
 
     /**
      * Gets the value of the primaryRef property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DbReference }
-     *     
+     *
+     * @return possible object is
+     *         {@link DbReference }
      */
     public DbReference getPrimaryRef() {
         return primaryRef;
@@ -63,11 +59,9 @@ public class Xref {
 
     /**
      * Sets the value of the primaryRef property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DbReference }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DbReference }
      */
     public void setPrimaryRef(DbReference value) {
         this.primaryRef = value;
@@ -75,25 +69,23 @@ public class Xref {
 
     /**
      * Gets the value of the secondaryRef property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the secondaryRef property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSecondaryRef().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link DbReference }
-     * 
-     * 
      */
     public List<DbReference> getSecondaryRef() {
         if (secondaryRef == null) {

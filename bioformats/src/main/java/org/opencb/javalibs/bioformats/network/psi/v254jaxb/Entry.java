@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for entry complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="entry">
  *   &lt;complexContent>
@@ -35,17 +35,15 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "entry", propOrder = {
-    "source",
-    "availabilityList",
-    "experimentList",
-    "interactorList",
-    "interactionList",
-    "attributeList"
+        "source",
+        "availabilityList",
+        "experimentList",
+        "interactorList",
+        "interactionList",
+        "attributeList"
 })
 public class Entry {
 
@@ -59,11 +57,9 @@ public class Entry {
 
     /**
      * Gets the value of the source property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Source }
-     *     
+     *
+     * @return possible object is
+     *         {@link Source }
      */
     public Source getSource() {
         return source;
@@ -71,11 +67,9 @@ public class Entry {
 
     /**
      * Sets the value of the source property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Source }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Source }
      */
     public void setSource(Source value) {
         this.source = value;
@@ -83,11 +77,9 @@ public class Entry {
 
     /**
      * Gets the value of the availabilityList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AvailabilityList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AvailabilityList }
      */
     public AvailabilityList getAvailabilityList() {
         return availabilityList;
@@ -95,11 +87,9 @@ public class Entry {
 
     /**
      * Sets the value of the availabilityList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AvailabilityList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AvailabilityList }
      */
     public void setAvailabilityList(AvailabilityList value) {
         this.availabilityList = value;
@@ -107,11 +97,9 @@ public class Entry {
 
     /**
      * Gets the value of the experimentList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentDescriptionList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentDescriptionList }
      */
     public ExperimentDescriptionList getExperimentList() {
         return experimentList;
@@ -119,11 +107,9 @@ public class Entry {
 
     /**
      * Sets the value of the experimentList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentDescriptionList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentDescriptionList }
      */
     public void setExperimentList(ExperimentDescriptionList value) {
         this.experimentList = value;
@@ -131,11 +117,9 @@ public class Entry {
 
     /**
      * Gets the value of the interactorList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link InteractorList }
-     *     
+     *
+     * @return possible object is
+     *         {@link InteractorList }
      */
     public InteractorList getInteractorList() {
         return interactorList;
@@ -143,11 +127,9 @@ public class Entry {
 
     /**
      * Sets the value of the interactorList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link InteractorList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link InteractorList }
      */
     public void setInteractorList(InteractorList value) {
         this.interactorList = value;
@@ -155,11 +137,9 @@ public class Entry {
 
     /**
      * Gets the value of the interactionList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link InteractionList }
-     *     
+     *
+     * @return possible object is
+     *         {@link InteractionList }
      */
     public InteractionList getInteractionList() {
         return interactionList;
@@ -167,11 +147,9 @@ public class Entry {
 
     /**
      * Sets the value of the interactionList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link InteractionList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link InteractionList }
      */
     public void setInteractionList(InteractionList value) {
         this.interactionList = value;
@@ -179,11 +157,9 @@ public class Entry {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -191,11 +167,9 @@ public class Entry {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;

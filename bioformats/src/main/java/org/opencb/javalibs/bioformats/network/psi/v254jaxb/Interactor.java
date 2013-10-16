@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Describes a molecular interactor.
- * 
+ * <p/>
  * <p>Java class for interactor complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="interactor">
  *   &lt;complexContent>
@@ -48,17 +48,15 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "interactor", propOrder = {
-    "names",
-    "xref",
-    "interactorType",
-    "organism",
-    "sequence",
-    "attributeList"
+        "names",
+        "xref",
+        "interactorType",
+        "organism",
+        "sequence",
+        "attributeList"
 })
 public class Interactor {
 
@@ -76,10 +74,8 @@ public class Interactor {
     /**
      * Gets the value of the names property.
      *
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -88,10 +84,8 @@ public class Interactor {
     /**
      * Sets the value of the names property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -100,10 +94,8 @@ public class Interactor {
     /**
      * Gets the value of the xref property.
      *
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -112,10 +104,8 @@ public class Interactor {
     /**
      * Sets the value of the xref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -124,10 +114,8 @@ public class Interactor {
     /**
      * Gets the value of the interactorType property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getInteractorType() {
         return interactorType;
@@ -136,10 +124,8 @@ public class Interactor {
     /**
      * Sets the value of the interactorType property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setInteractorType(CvType value) {
         this.interactorType = value;
@@ -148,10 +134,8 @@ public class Interactor {
     /**
      * Gets the value of the organism property.
      *
-     * @return
-     *     possible object is
-     *     {@link Interactor.Organism }
-     *
+     * @return possible object is
+     *         {@link Interactor.Organism }
      */
     public Interactor.Organism getOrganism() {
         return organism;
@@ -160,10 +144,8 @@ public class Interactor {
     /**
      * Sets the value of the organism property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Interactor.Organism }
-     *
+     * @param value allowed object is
+     *              {@link Interactor.Organism }
      */
     public void setOrganism(Interactor.Organism value) {
         this.organism = value;
@@ -171,11 +153,9 @@ public class Interactor {
 
     /**
      * Gets the value of the sequence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getSequence() {
         return sequence;
@@ -183,11 +163,9 @@ public class Interactor {
 
     /**
      * Sets the value of the sequence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setSequence(String value) {
         this.sequence = value;
@@ -195,11 +173,9 @@ public class Interactor {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -207,11 +183,9 @@ public class Interactor {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -219,7 +193,6 @@ public class Interactor {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -227,7 +200,6 @@ public class Interactor {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;
@@ -236,9 +208,9 @@ public class Interactor {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -247,14 +219,11 @@ public class Interactor {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")
     public static class Organism
-        extends BioSource
-    {
+            extends BioSource {
 
 
     }

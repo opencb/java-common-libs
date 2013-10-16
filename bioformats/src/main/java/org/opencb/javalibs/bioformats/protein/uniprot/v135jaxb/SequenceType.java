@@ -15,9 +15,9 @@ import java.math.BigInteger;
 
 /**
  * <p>Java class for sequenceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="sequenceType">
  *   &lt;simpleContent>
@@ -40,12 +40,10 @@ import java.math.BigInteger;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sequenceType", propOrder = {
-    "value"
+        "value"
 })
 public class SequenceType {
 
@@ -69,11 +67,9 @@ public class SequenceType {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -81,11 +77,9 @@ public class SequenceType {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -93,11 +87,9 @@ public class SequenceType {
 
     /**
      * Gets the value of the length property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getLength() {
         return length;
@@ -106,10 +98,8 @@ public class SequenceType {
     /**
      * Sets the value of the length property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setLength(BigInteger value) {
         this.length = value;
@@ -118,10 +108,8 @@ public class SequenceType {
     /**
      * Gets the value of the mass property.
      *
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
-     *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getMass() {
         return mass;
@@ -130,10 +118,8 @@ public class SequenceType {
     /**
      * Sets the value of the mass property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setMass(BigInteger value) {
         this.mass = value;
@@ -142,10 +128,8 @@ public class SequenceType {
     /**
      * Gets the value of the checksum property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getChecksum() {
         return checksum;
@@ -154,10 +138,8 @@ public class SequenceType {
     /**
      * Sets the value of the checksum property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setChecksum(String value) {
         this.checksum = value;
@@ -166,10 +148,8 @@ public class SequenceType {
     /**
      * Gets the value of the modified property.
      *
-     * @return
-     *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @return possible object is
+     *         {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public XMLGregorianCalendar getModified() {
         return modified;
@@ -178,10 +158,8 @@ public class SequenceType {
     /**
      * Sets the value of the modified property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @param value allowed object is
+     *              {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public void setModified(XMLGregorianCalendar value) {
         this.modified = value;
@@ -190,10 +168,8 @@ public class SequenceType {
     /**
      * Gets the value of the version property.
      *
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
-     *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getVersion() {
         return version;
@@ -202,10 +178,8 @@ public class SequenceType {
     /**
      * Sets the value of the version property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setVersion(BigInteger value) {
         this.version = value;
@@ -213,11 +187,9 @@ public class SequenceType {
 
     /**
      * Gets the value of the precursor property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     *
+     * @return possible object is
+     *         {@link Boolean }
      */
     public Boolean isPrecursor() {
         return precursor;
@@ -225,11 +197,9 @@ public class SequenceType {
 
     /**
      * Sets the value of the precursor property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Boolean }
      */
     public void setPrecursor(Boolean value) {
         this.precursor = value;
@@ -237,11 +207,9 @@ public class SequenceType {
 
     /**
      * Gets the value of the fragment property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getFragment() {
         return fragment;
@@ -249,11 +217,9 @@ public class SequenceType {
 
     /**
      * Sets the value of the fragment property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFragment(String value) {
         this.fragment = value;

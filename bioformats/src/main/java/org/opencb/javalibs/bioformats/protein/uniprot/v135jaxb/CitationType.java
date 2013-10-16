@@ -18,14 +18,14 @@ import java.util.List;
 
 /**
  * The citation type stores all information about a citation. The equivalent information in
- *                 the flatfile can be found in the RA (authors), RT (title), RX (PubMed/MEDLINE/DOI IDs) and RL (citation
- *                 location information such journal name, volume numbers, pages, etc.) lines.
- *             
- * 
+ * the flatfile can be found in the RA (authors), RT (title), RX (PubMed/MEDLINE/DOI IDs) and RL (citation
+ * location information such journal name, volume numbers, pages, etc.) lines.
+ * <p/>
+ * <p/>
  * <p>Java class for citationType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="citationType">
  *   &lt;complexContent>
@@ -72,17 +72,15 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "citationType", propOrder = {
-    "title",
-    "editorList",
-    "authorList",
-    "locator",
-    "dbReference",
-    "citingCitation"
+        "title",
+        "editorList",
+        "authorList",
+        "locator",
+        "dbReference",
+        "citingCitation"
 })
 public class CitationType {
 
@@ -119,11 +117,9 @@ public class CitationType {
 
     /**
      * Gets the value of the title property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getTitle() {
         return title;
@@ -131,11 +127,9 @@ public class CitationType {
 
     /**
      * Sets the value of the title property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setTitle(String value) {
         this.title = value;
@@ -143,11 +137,9 @@ public class CitationType {
 
     /**
      * Gets the value of the editorList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NameListType }
-     *     
+     *
+     * @return possible object is
+     *         {@link NameListType }
      */
     public NameListType getEditorList() {
         return editorList;
@@ -155,11 +147,9 @@ public class CitationType {
 
     /**
      * Sets the value of the editorList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NameListType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NameListType }
      */
     public void setEditorList(NameListType value) {
         this.editorList = value;
@@ -167,11 +157,9 @@ public class CitationType {
 
     /**
      * Gets the value of the authorList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NameListType }
-     *     
+     *
+     * @return possible object is
+     *         {@link NameListType }
      */
     public NameListType getAuthorList() {
         return authorList;
@@ -179,11 +167,9 @@ public class CitationType {
 
     /**
      * Sets the value of the authorList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NameListType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NameListType }
      */
     public void setAuthorList(NameListType value) {
         this.authorList = value;
@@ -191,11 +177,9 @@ public class CitationType {
 
     /**
      * Gets the value of the locator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getLocator() {
         return locator;
@@ -203,11 +187,9 @@ public class CitationType {
 
     /**
      * Sets the value of the locator property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLocator(String value) {
         this.locator = value;
@@ -215,25 +197,23 @@ public class CitationType {
 
     /**
      * Gets the value of the dbReference property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the dbReference property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDbReference().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link DbReferenceType }
-     * 
-     * 
      */
     public List<DbReferenceType> getDbReference() {
         if (dbReference == null) {
@@ -244,11 +224,9 @@ public class CitationType {
 
     /**
      * Gets the value of the citingCitation property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CitationType }
      *
+     * @return possible object is
+     *         {@link CitationType }
      */
     public CitationType getCitingCitation() {
         return citingCitation;
@@ -257,10 +235,8 @@ public class CitationType {
     /**
      * Sets the value of the citingCitation property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CitationType }
-     *     
+     * @param value allowed object is
+     *              {@link CitationType }
      */
     public void setCitingCitation(CitationType value) {
         this.citingCitation = value;
@@ -268,11 +244,9 @@ public class CitationType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -280,11 +254,9 @@ public class CitationType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
@@ -292,11 +264,9 @@ public class CitationType {
 
     /**
      * Gets the value of the date property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDate() {
         return date;
@@ -304,11 +274,9 @@ public class CitationType {
 
     /**
      * Sets the value of the date property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDate(String value) {
         this.date = value;
@@ -316,11 +284,9 @@ public class CitationType {
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getName() {
         return name;
@@ -328,11 +294,9 @@ public class CitationType {
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -340,11 +304,9 @@ public class CitationType {
 
     /**
      * Gets the value of the volume property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getVolume() {
         return volume;
@@ -352,11 +314,9 @@ public class CitationType {
 
     /**
      * Sets the value of the volume property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setVolume(String value) {
         this.volume = value;
@@ -364,11 +324,9 @@ public class CitationType {
 
     /**
      * Gets the value of the first property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getFirst() {
         return first;
@@ -376,11 +334,9 @@ public class CitationType {
 
     /**
      * Sets the value of the first property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setFirst(String value) {
         this.first = value;
@@ -388,11 +344,9 @@ public class CitationType {
 
     /**
      * Gets the value of the last property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getLast() {
         return last;
@@ -400,11 +354,9 @@ public class CitationType {
 
     /**
      * Sets the value of the last property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLast(String value) {
         this.last = value;
@@ -412,11 +364,9 @@ public class CitationType {
 
     /**
      * Gets the value of the publisher property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getPublisher() {
         return publisher;
@@ -424,11 +374,9 @@ public class CitationType {
 
     /**
      * Sets the value of the publisher property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPublisher(String value) {
         this.publisher = value;
@@ -436,11 +384,9 @@ public class CitationType {
 
     /**
      * Gets the value of the city property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getCity() {
         return city;
@@ -448,11 +394,9 @@ public class CitationType {
 
     /**
      * Sets the value of the city property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCity(String value) {
         this.city = value;
@@ -460,11 +404,9 @@ public class CitationType {
 
     /**
      * Gets the value of the db property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDb() {
         return db;
@@ -472,11 +414,9 @@ public class CitationType {
 
     /**
      * Sets the value of the db property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDb(String value) {
         this.db = value;
@@ -484,11 +424,9 @@ public class CitationType {
 
     /**
      * Gets the value of the country property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getCountry() {
         return country;
@@ -496,11 +434,9 @@ public class CitationType {
 
     /**
      * Sets the value of the country property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setCountry(String value) {
         this.country = value;
@@ -508,11 +444,9 @@ public class CitationType {
 
     /**
      * Gets the value of the number property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getNumber() {
         return number;
@@ -520,11 +454,9 @@ public class CitationType {
 
     /**
      * Sets the value of the number property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setNumber(String value) {
         this.number = value;
@@ -532,11 +464,9 @@ public class CitationType {
 
     /**
      * Gets the value of the institute property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getInstitute() {
         return institute;
@@ -544,11 +474,9 @@ public class CitationType {
 
     /**
      * Sets the value of the institute property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setInstitute(String value) {
         this.institute = value;

@@ -17,12 +17,12 @@ import java.math.BigInteger;
 
 /**
  * Describes the evidence for an annotation.
- *             No flat file equivalent.
- * 
+ * No flat file equivalent.
+ * <p/>
  * <p>Java class for evidenceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="evidenceType">
  *   &lt;complexContent>
@@ -37,13 +37,11 @@ import java.math.BigInteger;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "evidenceType", propOrder = {
-    "source",
-    "importedFrom"
+        "source",
+        "importedFrom"
 })
 public class EvidenceType {
 
@@ -56,11 +54,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the source property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SourceType }
-     *     
+     *
+     * @return possible object is
+     *         {@link SourceType }
      */
     public SourceType getSource() {
         return source;
@@ -68,11 +64,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the source property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link SourceType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link SourceType }
      */
     public void setSource(SourceType value) {
         this.source = value;
@@ -80,11 +74,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the importedFrom property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ImportedFromType }
-     *     
+     *
+     * @return possible object is
+     *         {@link ImportedFromType }
      */
     public ImportedFromType getImportedFrom() {
         return importedFrom;
@@ -92,11 +84,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the importedFrom property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ImportedFromType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ImportedFromType }
      */
     public void setImportedFrom(ImportedFromType value) {
         this.importedFrom = value;
@@ -104,11 +94,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -116,11 +104,9 @@ public class EvidenceType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;
@@ -128,11 +114,9 @@ public class EvidenceType {
 
     /**
      * Gets the value of the key property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getKey() {
         return key;
@@ -141,10 +125,8 @@ public class EvidenceType {
     /**
      * Sets the value of the key property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setKey(BigInteger value) {
         this.key = value;

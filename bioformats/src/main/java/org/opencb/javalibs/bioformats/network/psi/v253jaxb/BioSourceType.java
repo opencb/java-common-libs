@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Describes the biological source of an object, in simple form only the NCBI taxid.
- * 
+ * <p/>
  * <p>Java class for bioSourceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="bioSourceType">
  *   &lt;complexContent>
@@ -33,20 +33,18 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "bioSourceType", propOrder = {
-    "names",
-    "cellType",
-    "compartment",
-    "tissue"
+        "names",
+        "cellType",
+        "compartment",
+        "tissue"
 })
 @XmlSeeAlso({
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ExperimentType.HostOrganismList.HostOrganism.class,
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.InteractorElementType.Organism.class,
-    org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.HostOrganismList.HostOrganism.class
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ExperimentType.HostOrganismList.HostOrganism.class,
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.InteractorElementType.Organism.class,
+        org.opencb.javalibs.bioformats.network.psi.v253jaxb.ParticipantType.HostOrganismList.HostOrganism.class
 })
 public class BioSourceType {
 
@@ -59,11 +57,9 @@ public class BioSourceType {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link NamesType }
-     *     
+     *
+     * @return possible object is
+     *         {@link NamesType }
      */
     public NamesType getNames() {
         return names;
@@ -71,11 +67,9 @@ public class BioSourceType {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link NamesType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link NamesType }
      */
     public void setNames(NamesType value) {
         this.names = value;
@@ -83,11 +77,9 @@ public class BioSourceType {
 
     /**
      * Gets the value of the cellType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link OpenCvType }
      */
     public OpenCvType getCellType() {
         return cellType;
@@ -95,11 +87,9 @@ public class BioSourceType {
 
     /**
      * Sets the value of the cellType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link OpenCvType }
      */
     public void setCellType(OpenCvType value) {
         this.cellType = value;
@@ -107,11 +97,9 @@ public class BioSourceType {
 
     /**
      * Gets the value of the compartment property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link OpenCvType }
      */
     public OpenCvType getCompartment() {
         return compartment;
@@ -119,11 +107,9 @@ public class BioSourceType {
 
     /**
      * Sets the value of the compartment property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link OpenCvType }
      */
     public void setCompartment(OpenCvType value) {
         this.compartment = value;
@@ -131,11 +117,9 @@ public class BioSourceType {
 
     /**
      * Gets the value of the tissue property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link OpenCvType }
      */
     public OpenCvType getTissue() {
         return tissue;
@@ -143,11 +127,9 @@ public class BioSourceType {
 
     /**
      * Sets the value of the tissue property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link OpenCvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link OpenCvType }
      */
     public void setTissue(OpenCvType value) {
         this.tissue = value;
@@ -155,7 +137,6 @@ public class BioSourceType {
 
     /**
      * Gets the value of the ncbiTaxId property.
-     * 
      */
     public int getNcbiTaxId() {
         return ncbiTaxId;
@@ -163,7 +144,6 @@ public class BioSourceType {
 
     /**
      * Sets the value of the ncbiTaxId property.
-     * 
      */
     public void setNcbiTaxId(int value) {
         this.ncbiTaxId = value;

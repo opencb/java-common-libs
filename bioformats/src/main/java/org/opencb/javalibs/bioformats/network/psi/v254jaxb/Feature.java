@@ -15,11 +15,11 @@ import java.util.List;
 
 /**
  * A feature, e.g. domain, on a sequence.
- * 
+ * <p/>
  * <p>Java class for feature complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="feature">
  *   &lt;complexContent>
@@ -48,18 +48,16 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "feature", propOrder = {
-    "names",
-    "xref",
-    "featureType",
-    "featureDetectionMethod",
-    "experimentRefList",
-    "featureRangeList",
-    "attributeList"
+        "names",
+        "xref",
+        "featureType",
+        "featureDetectionMethod",
+        "experimentRefList",
+        "featureRangeList",
+        "attributeList"
 })
 public class Feature {
 
@@ -77,10 +75,8 @@ public class Feature {
     /**
      * Gets the value of the names property.
      *
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -89,10 +85,8 @@ public class Feature {
     /**
      * Sets the value of the names property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -101,10 +95,8 @@ public class Feature {
     /**
      * Gets the value of the xref property.
      *
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -113,10 +105,8 @@ public class Feature {
     /**
      * Sets the value of the xref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -125,10 +115,8 @@ public class Feature {
     /**
      * Gets the value of the featureType property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getFeatureType() {
         return featureType;
@@ -137,10 +125,8 @@ public class Feature {
     /**
      * Sets the value of the featureType property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setFeatureType(CvType value) {
         this.featureType = value;
@@ -149,10 +135,8 @@ public class Feature {
     /**
      * Gets the value of the featureDetectionMethod property.
      *
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getFeatureDetectionMethod() {
         return featureDetectionMethod;
@@ -161,10 +145,8 @@ public class Feature {
     /**
      * Sets the value of the featureDetectionMethod property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setFeatureDetectionMethod(CvType value) {
         this.featureDetectionMethod = value;
@@ -173,10 +155,8 @@ public class Feature {
     /**
      * Gets the value of the experimentRefList property.
      *
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -185,10 +165,8 @@ public class Feature {
     /**
      * Sets the value of the experimentRefList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;
@@ -197,10 +175,8 @@ public class Feature {
     /**
      * Gets the value of the featureRangeList property.
      *
-     * @return
-     *     possible object is
-     *     {@link Feature.FeatureRangeList }
-     *
+     * @return possible object is
+     *         {@link Feature.FeatureRangeList }
      */
     public Feature.FeatureRangeList getFeatureRangeList() {
         return featureRangeList;
@@ -209,10 +185,8 @@ public class Feature {
     /**
      * Sets the value of the featureRangeList property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link Feature.FeatureRangeList }
-     *
+     * @param value allowed object is
+     *              {@link Feature.FeatureRangeList }
      */
     public void setFeatureRangeList(Feature.FeatureRangeList value) {
         this.featureRangeList = value;
@@ -220,11 +194,9 @@ public class Feature {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -232,11 +204,9 @@ public class Feature {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -244,7 +214,6 @@ public class Feature {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -252,7 +221,6 @@ public class Feature {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;
@@ -261,9 +229,9 @@ public class Feature {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -275,12 +243,10 @@ public class Feature {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "featureRange"
+            "featureRange"
     })
     public static class FeatureRangeList {
 
@@ -289,25 +255,23 @@ public class Feature {
 
         /**
          * Gets the value of the featureRange property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the featureRange property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getFeatureRange().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link BaseLocation }
-         * 
-         * 
          */
         public List<BaseLocation> getFeatureRange() {
             if (featureRange == null) {

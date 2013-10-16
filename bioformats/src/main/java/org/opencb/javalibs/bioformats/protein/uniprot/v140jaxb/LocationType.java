@@ -16,11 +16,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Describes a sequence location as either a range with a begin and end or as a position. The 'sequence' attribute is only used when the location is not on the canonical sequence displayed in the current entry.
- * 
+ * <p/>
  * <p>Java class for locationType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="locationType">
  *   &lt;complexContent>
@@ -37,14 +37,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "locationType", propOrder = {
-    "begin",
-    "end",
-    "position"
+        "begin",
+        "end",
+        "position"
 })
 public class LocationType {
 
@@ -56,11 +54,9 @@ public class LocationType {
 
     /**
      * Gets the value of the begin property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PositionType }
-     *     
+     *
+     * @return possible object is
+     *         {@link PositionType }
      */
     public PositionType getBegin() {
         return begin;
@@ -68,11 +64,9 @@ public class LocationType {
 
     /**
      * Sets the value of the begin property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PositionType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PositionType }
      */
     public void setBegin(PositionType value) {
         this.begin = value;
@@ -80,11 +74,9 @@ public class LocationType {
 
     /**
      * Gets the value of the end property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PositionType }
-     *     
+     *
+     * @return possible object is
+     *         {@link PositionType }
      */
     public PositionType getEnd() {
         return end;
@@ -92,11 +84,9 @@ public class LocationType {
 
     /**
      * Sets the value of the end property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PositionType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PositionType }
      */
     public void setEnd(PositionType value) {
         this.end = value;
@@ -104,11 +94,9 @@ public class LocationType {
 
     /**
      * Gets the value of the position property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PositionType }
-     *     
+     *
+     * @return possible object is
+     *         {@link PositionType }
      */
     public PositionType getPosition() {
         return position;
@@ -116,11 +104,9 @@ public class LocationType {
 
     /**
      * Sets the value of the position property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PositionType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PositionType }
      */
     public void setPosition(PositionType value) {
         this.position = value;
@@ -128,11 +114,9 @@ public class LocationType {
 
     /**
      * Gets the value of the sequence property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getSequence() {
         return sequence;
@@ -140,11 +124,9 @@ public class LocationType {
 
     /**
      * Sets the value of the sequence property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setSequence(String value) {
         this.sequence = value;

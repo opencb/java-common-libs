@@ -18,9 +18,9 @@ import java.util.List;
 
 /**
  * <p>Java class for inferredInteraction complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="inferredInteraction">
  *   &lt;complexContent>
@@ -33,13 +33,11 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "inferredInteraction", propOrder = {
-    "participant",
-    "experimentRefList"
+        "participant",
+        "experimentRefList"
 })
 public class InferredInteraction {
 
@@ -49,25 +47,23 @@ public class InferredInteraction {
 
     /**
      * Gets the value of the participant property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the participant property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getParticipant().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link InferredInteractionParticipant }
-     * 
-     * 
      */
     public List<InferredInteractionParticipant> getParticipant() {
         if (participant == null) {
@@ -78,11 +74,9 @@ public class InferredInteraction {
 
     /**
      * Gets the value of the experimentRefList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ExperimentRefList }
      */
     public ExperimentRefList getExperimentRefList() {
         return experimentRefList;
@@ -90,11 +84,9 @@ public class InferredInteraction {
 
     /**
      * Sets the value of the experimentRefList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ExperimentRefList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ExperimentRefList }
      */
     public void setExperimentRefList(ExperimentRefList value) {
         this.experimentRefList = value;

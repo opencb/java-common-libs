@@ -15,13 +15,13 @@ import java.util.List;
 
 /**
  * The protein element stores all the information found in the DE line of a flatfile
- *                 entry.
- *             
- * 
+ * entry.
+ * <p/>
+ * <p/>
  * <p>Java class for proteinType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="proteinType">
  *   &lt;complexContent>
@@ -51,20 +51,18 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "proteinType", propOrder = {
-    "recommendedName",
-    "alternativeName",
-    "submittedName",
-    "allergenName",
-    "biotechName",
-    "cdAntigenName",
-    "innName",
-    "domain",
-    "component"
+        "recommendedName",
+        "alternativeName",
+        "submittedName",
+        "allergenName",
+        "biotechName",
+        "cdAntigenName",
+        "innName",
+        "domain",
+        "component"
 })
 public class ProteinType {
 
@@ -81,10 +79,8 @@ public class ProteinType {
     /**
      * Gets the value of the recommendedName property.
      *
-     * @return
-     *     possible object is
-     *     {@link ProteinType.RecommendedName }
-     *
+     * @return possible object is
+     *         {@link ProteinType.RecommendedName }
      */
     public ProteinType.RecommendedName getRecommendedName() {
         return recommendedName;
@@ -93,10 +89,8 @@ public class ProteinType {
     /**
      * Sets the value of the recommendedName property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ProteinType.RecommendedName }
-     *
+     * @param value allowed object is
+     *              {@link ProteinType.RecommendedName }
      */
     public void setRecommendedName(ProteinType.RecommendedName value) {
         this.recommendedName = value;
@@ -104,25 +98,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the alternativeName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the alternativeName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAlternativeName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ProteinType.AlternativeName }
-     *
-     *
      */
     public List<AlternativeName> getAlternativeName() {
         if (alternativeName == null) {
@@ -133,25 +125,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the submittedName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the submittedName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSubmittedName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ProteinType.SubmittedName }
-     *
-     *
      */
     public List<SubmittedName> getSubmittedName() {
         if (submittedName == null) {
@@ -163,10 +153,8 @@ public class ProteinType {
     /**
      * Gets the value of the allergenName property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getAllergenName() {
         return allergenName;
@@ -175,10 +163,8 @@ public class ProteinType {
     /**
      * Sets the value of the allergenName property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setAllergenName(EvidencedStringType value) {
         this.allergenName = value;
@@ -187,10 +173,8 @@ public class ProteinType {
     /**
      * Gets the value of the biotechName property.
      *
-     * @return
-     *     possible object is
-     *     {@link EvidencedStringType }
-     *
+     * @return possible object is
+     *         {@link EvidencedStringType }
      */
     public EvidencedStringType getBiotechName() {
         return biotechName;
@@ -199,10 +183,8 @@ public class ProteinType {
     /**
      * Sets the value of the biotechName property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link EvidencedStringType }
-     *
+     * @param value allowed object is
+     *              {@link EvidencedStringType }
      */
     public void setBiotechName(EvidencedStringType value) {
         this.biotechName = value;
@@ -210,25 +192,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the cdAntigenName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the cdAntigenName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCdAntigenName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidencedStringType }
-     *
-     *
      */
     public List<EvidencedStringType> getCdAntigenName() {
         if (cdAntigenName == null) {
@@ -239,25 +219,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the innName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the innName property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInnName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidencedStringType }
-     *
-     *
      */
     public List<EvidencedStringType> getInnName() {
         if (innName == null) {
@@ -268,25 +246,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the domain property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the domain property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDomain().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ProteinType.Domain }
-     *
-     *
      */
     public List<Domain> getDomain() {
         if (domain == null) {
@@ -297,25 +273,23 @@ public class ProteinType {
 
     /**
      * Gets the value of the component property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the component property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getComponent().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ProteinType.Component }
-     *
-     *
      */
     public List<Component> getComponent() {
         if (component == null) {
@@ -327,9 +301,9 @@ public class ProteinType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -343,13 +317,11 @@ public class ProteinType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "fullName",
-        "shortName"
+            "fullName",
+            "shortName"
     })
     public static class AlternativeName {
 
@@ -361,10 +333,8 @@ public class ProteinType {
         /**
          * Gets the value of the fullName property.
          *
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getFullName() {
             return fullName;
@@ -373,10 +343,8 @@ public class ProteinType {
         /**
          * Sets the value of the fullName property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setFullName(EvidencedStringType value) {
             this.fullName = value;
@@ -384,25 +352,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the shortName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shortName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShortName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         *
-         *
          */
         public List<EvidencedStringType> getShortName() {
             if (shortName == null) {
@@ -414,10 +380,8 @@ public class ProteinType {
         /**
          * Gets the value of the ref property.
          *
-         * @return
-         *     possible object is
-         *     {@link String }
-         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getRef() {
             return ref;
@@ -426,10 +390,8 @@ public class ProteinType {
         /**
          * Sets the value of the ref property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setRef(String value) {
             this.ref = value;
@@ -440,9 +402,9 @@ public class ProteinType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -452,18 +414,16 @@ public class ProteinType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "recommendedName",
-        "alternativeName",
-        "submittedName",
-        "allergenName",
-        "biotechName",
-        "cdAntigenName",
-        "innName"
+            "recommendedName",
+            "alternativeName",
+            "submittedName",
+            "allergenName",
+            "biotechName",
+            "cdAntigenName",
+            "innName"
     })
     public static class Component {
 
@@ -478,10 +438,8 @@ public class ProteinType {
         /**
          * Gets the value of the recommendedName property.
          *
-         * @return
-         *     possible object is
-         *     {@link ProteinType.RecommendedName }
-         *
+         * @return possible object is
+         *         {@link ProteinType.RecommendedName }
          */
         public ProteinType.RecommendedName getRecommendedName() {
             return recommendedName;
@@ -490,10 +448,8 @@ public class ProteinType {
         /**
          * Sets the value of the recommendedName property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link ProteinType.RecommendedName }
-         *
+         * @param value allowed object is
+         *              {@link ProteinType.RecommendedName }
          */
         public void setRecommendedName(ProteinType.RecommendedName value) {
             this.recommendedName = value;
@@ -501,25 +457,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the alternativeName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the alternativeName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAlternativeName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ProteinType.AlternativeName }
-         *
-         *
          */
         public List<AlternativeName> getAlternativeName() {
             if (alternativeName == null) {
@@ -530,25 +484,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the submittedName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the submittedName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getSubmittedName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ProteinType.SubmittedName }
-         *
-         *
          */
         public List<SubmittedName> getSubmittedName() {
             if (submittedName == null) {
@@ -560,10 +512,8 @@ public class ProteinType {
         /**
          * Gets the value of the allergenName property.
          *
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getAllergenName() {
             return allergenName;
@@ -572,10 +522,8 @@ public class ProteinType {
         /**
          * Sets the value of the allergenName property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setAllergenName(EvidencedStringType value) {
             this.allergenName = value;
@@ -584,10 +532,8 @@ public class ProteinType {
         /**
          * Gets the value of the biotechName property.
          *
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getBiotechName() {
             return biotechName;
@@ -596,10 +542,8 @@ public class ProteinType {
         /**
          * Sets the value of the biotechName property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setBiotechName(EvidencedStringType value) {
             this.biotechName = value;
@@ -607,25 +551,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the cdAntigenName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the cdAntigenName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getCdAntigenName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         *
-         *
          */
         public List<EvidencedStringType> getCdAntigenName() {
             if (cdAntigenName == null) {
@@ -636,25 +578,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the innName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the innName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getInnName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         *
-         *
          */
         public List<EvidencedStringType> getInnName() {
             if (innName == null) {
@@ -668,9 +608,9 @@ public class ProteinType {
 
     /**
      * <p>Java class for anonymous complex type.
-     *
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     *
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -680,18 +620,16 @@ public class ProteinType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     *
-     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "recommendedName",
-        "alternativeName",
-        "submittedName",
-        "allergenName",
-        "biotechName",
-        "cdAntigenName",
-        "innName"
+            "recommendedName",
+            "alternativeName",
+            "submittedName",
+            "allergenName",
+            "biotechName",
+            "cdAntigenName",
+            "innName"
     })
     public static class Domain {
 
@@ -706,10 +644,8 @@ public class ProteinType {
         /**
          * Gets the value of the recommendedName property.
          *
-         * @return
-         *     possible object is
-         *     {@link ProteinType.RecommendedName }
-         *
+         * @return possible object is
+         *         {@link ProteinType.RecommendedName }
          */
         public ProteinType.RecommendedName getRecommendedName() {
             return recommendedName;
@@ -718,10 +654,8 @@ public class ProteinType {
         /**
          * Sets the value of the recommendedName property.
          *
-         * @param value
-         *     allowed object is
-         *     {@link ProteinType.RecommendedName }
-         *
+         * @param value allowed object is
+         *              {@link ProteinType.RecommendedName }
          */
         public void setRecommendedName(ProteinType.RecommendedName value) {
             this.recommendedName = value;
@@ -729,25 +663,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the alternativeName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the alternativeName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAlternativeName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ProteinType.AlternativeName }
-         *
-         *
          */
         public List<AlternativeName> getAlternativeName() {
             if (alternativeName == null) {
@@ -758,25 +690,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the submittedName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the submittedName property.
-         *
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getSubmittedName().add(newItem);
          * </pre>
-         *
-         *
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link ProteinType.SubmittedName }
-         *
-         *
          */
         public List<SubmittedName> getSubmittedName() {
             if (submittedName == null) {
@@ -787,11 +717,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the allergenName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getAllergenName() {
             return allergenName;
@@ -799,11 +727,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the allergenName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setAllergenName(EvidencedStringType value) {
             this.allergenName = value;
@@ -811,11 +737,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the biotechName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getBiotechName() {
             return biotechName;
@@ -823,11 +747,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the biotechName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setBiotechName(EvidencedStringType value) {
             this.biotechName = value;
@@ -835,25 +757,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the cdAntigenName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the cdAntigenName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getCdAntigenName().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         * 
-         * 
          */
         public List<EvidencedStringType> getCdAntigenName() {
             if (cdAntigenName == null) {
@@ -864,25 +784,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the innName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the innName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getInnName().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         * 
-         * 
          */
         public List<EvidencedStringType> getInnName() {
             if (innName == null) {
@@ -896,9 +814,9 @@ public class ProteinType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -912,13 +830,11 @@ public class ProteinType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "fullName",
-        "shortName"
+            "fullName",
+            "shortName"
     })
     public static class RecommendedName {
 
@@ -930,11 +846,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the fullName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getFullName() {
             return fullName;
@@ -942,11 +856,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the fullName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setFullName(EvidencedStringType value) {
             this.fullName = value;
@@ -954,25 +866,23 @@ public class ProteinType {
 
         /**
          * Gets the value of the shortName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shortName property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShortName().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link EvidencedStringType }
-         * 
-         * 
          */
         public List<EvidencedStringType> getShortName() {
             if (shortName == null) {
@@ -983,11 +893,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the ref property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getRef() {
             return ref;
@@ -995,11 +903,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the ref property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setRef(String value) {
             this.ref = value;
@@ -1010,9 +916,9 @@ public class ProteinType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1025,12 +931,10 @@ public class ProteinType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "fullName"
+            "fullName"
     })
     public static class SubmittedName {
 
@@ -1041,11 +945,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the fullName property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @return possible object is
+         *         {@link EvidencedStringType }
          */
         public EvidencedStringType getFullName() {
             return fullName;
@@ -1053,11 +955,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the fullName property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link EvidencedStringType }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link EvidencedStringType }
          */
         public void setFullName(EvidencedStringType value) {
             this.fullName = value;
@@ -1065,11 +965,9 @@ public class ProteinType {
 
         /**
          * Gets the value of the ref property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         *
+         * @return possible object is
+         *         {@link String }
          */
         public String getRef() {
             return ref;
@@ -1077,11 +975,9 @@ public class ProteinType {
 
         /**
          * Sets the value of the ref property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *
+         * @param value allowed object is
+         *              {@link String }
          */
         public void setRef(String value) {
             this.ref = value;

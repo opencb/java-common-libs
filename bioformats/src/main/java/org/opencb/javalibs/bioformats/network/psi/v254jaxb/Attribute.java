@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for attribute complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="attribute">
  *   &lt;simpleContent>
@@ -38,12 +38,10 @@ import javax.xml.bind.annotation.*;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "attribute", propOrder = {
-    "value"
+        "value"
 })
 public class Attribute {
 
@@ -56,11 +54,9 @@ public class Attribute {
 
     /**
      * Gets the value of the value property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getValue() {
         return value;
@@ -68,11 +64,9 @@ public class Attribute {
 
     /**
      * Sets the value of the value property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setValue(String value) {
         this.value = value;
@@ -80,11 +74,9 @@ public class Attribute {
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getName() {
         return name;
@@ -92,11 +84,9 @@ public class Attribute {
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setName(String value) {
         this.name = value;
@@ -104,11 +94,9 @@ public class Attribute {
 
     /**
      * Gets the value of the nameAc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getNameAc() {
         return nameAc;
@@ -116,11 +104,9 @@ public class Attribute {
 
     /**
      * Sets the value of the nameAc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setNameAc(String value) {
         this.nameAc = value;

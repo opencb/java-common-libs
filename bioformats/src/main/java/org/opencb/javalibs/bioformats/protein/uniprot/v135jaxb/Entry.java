@@ -17,9 +17,9 @@ import java.util.List;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -66,26 +66,24 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "accession",
-    "name",
-    "protein",
-    "gene",
-    "organism",
-    "organismHost",
-    "geneLocation",
-    "reference",
-    "comment",
-    "dbReference",
-    "proteinExistence",
-    "keyword",
-    "feature",
-    "evidence",
-    "sequence"
+        "accession",
+        "name",
+        "protein",
+        "gene",
+        "organism",
+        "organismHost",
+        "geneLocation",
+        "reference",
+        "comment",
+        "dbReference",
+        "proteinExistence",
+        "keyword",
+        "feature",
+        "evidence",
+        "sequence"
 })
 @XmlRootElement(name = "entry")
 public class Entry {
@@ -126,25 +124,23 @@ public class Entry {
 
     /**
      * Gets the value of the accession property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accession property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccession().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     *
-     *
      */
     public List<String> getAccession() {
         if (accession == null) {
@@ -155,25 +151,23 @@ public class Entry {
 
     /**
      * Gets the value of the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the name property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getName().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     *
-     *
      */
     public List<String> getName() {
         if (name == null) {
@@ -185,10 +179,8 @@ public class Entry {
     /**
      * Gets the value of the protein property.
      *
-     * @return
-     *     possible object is
-     *     {@link ProteinType }
-     *
+     * @return possible object is
+     *         {@link ProteinType }
      */
     public ProteinType getProtein() {
         return protein;
@@ -197,10 +189,8 @@ public class Entry {
     /**
      * Sets the value of the protein property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ProteinType }
-     *
+     * @param value allowed object is
+     *              {@link ProteinType }
      */
     public void setProtein(ProteinType value) {
         this.protein = value;
@@ -208,25 +198,23 @@ public class Entry {
 
     /**
      * Gets the value of the gene property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the gene property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGene().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Protein.Gene }
-     *
-     *
      */
     public List<Gene> getGene() {
         if (gene == null) {
@@ -238,10 +226,8 @@ public class Entry {
     /**
      * Gets the value of the organism property.
      *
-     * @return
-     *     possible object is
-     *     {@link OrganismType }
-     *
+     * @return possible object is
+     *         {@link OrganismType }
      */
     public OrganismType getOrganism() {
         return organism;
@@ -250,10 +236,8 @@ public class Entry {
     /**
      * Sets the value of the organism property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link OrganismType }
-     *
+     * @param value allowed object is
+     *              {@link OrganismType }
      */
     public void setOrganism(OrganismType value) {
         this.organism = value;
@@ -261,25 +245,23 @@ public class Entry {
 
     /**
      * Gets the value of the organismHost property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the organismHost property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getOrganismHost().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link OrganismType }
-     *
-     *
      */
     public List<OrganismType> getOrganismHost() {
         if (organismHost == null) {
@@ -290,25 +272,23 @@ public class Entry {
 
     /**
      * Gets the value of the geneLocation property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the geneLocation property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGeneLocation().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link GeneLocationType }
-     *
-     *
      */
     public List<GeneLocationType> getGeneLocation() {
         if (geneLocation == null) {
@@ -319,25 +299,23 @@ public class Entry {
 
     /**
      * Gets the value of the reference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the reference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getReference().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link ReferenceType }
-     *
-     *
      */
     public List<ReferenceType> getReference() {
         if (reference == null) {
@@ -348,25 +326,23 @@ public class Entry {
 
     /**
      * Gets the value of the comment property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the comment property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getComment().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link CommentType }
-     *
-     *
      */
     public List<CommentType> getComment() {
         if (comment == null) {
@@ -377,25 +353,23 @@ public class Entry {
 
     /**
      * Gets the value of the dbReference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the dbReference property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDbReference().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link DbReferenceType }
-     *
-     *
      */
     public List<DbReferenceType> getDbReference() {
         if (dbReference == null) {
@@ -407,10 +381,8 @@ public class Entry {
     /**
      * Gets the value of the proteinExistence property.
      *
-     * @return
-     *     possible object is
-     *     {@link ProteinExistenceType }
-     *
+     * @return possible object is
+     *         {@link ProteinExistenceType }
      */
     public ProteinExistenceType getProteinExistence() {
         return proteinExistence;
@@ -419,10 +391,8 @@ public class Entry {
     /**
      * Sets the value of the proteinExistence property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link ProteinExistenceType }
-     *
+     * @param value allowed object is
+     *              {@link ProteinExistenceType }
      */
     public void setProteinExistence(ProteinExistenceType value) {
         this.proteinExistence = value;
@@ -430,25 +400,23 @@ public class Entry {
 
     /**
      * Gets the value of the keyword property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the keyword property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getKeyword().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link KeywordType }
-     *
-     *
      */
     public List<KeywordType> getKeyword() {
         if (keyword == null) {
@@ -459,25 +427,23 @@ public class Entry {
 
     /**
      * Gets the value of the feature property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the feature property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getFeature().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link FeatureType }
-     *
-     *
      */
     public List<FeatureType> getFeature() {
         if (feature == null) {
@@ -488,25 +454,23 @@ public class Entry {
 
     /**
      * Gets the value of the evidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the evidence property.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEvidence().add(newItem);
      * </pre>
-     *
-     *
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link EvidenceType }
-     *
-     *
      */
     public List<EvidenceType> getEvidence() {
         if (evidence == null) {
@@ -518,10 +482,8 @@ public class Entry {
     /**
      * Gets the value of the sequence property.
      *
-     * @return
-     *     possible object is
-     *     {@link SequenceType }
-     *
+     * @return possible object is
+     *         {@link SequenceType }
      */
     public SequenceType getSequence() {
         return sequence;
@@ -530,10 +492,8 @@ public class Entry {
     /**
      * Sets the value of the sequence property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link SequenceType }
-     *
+     * @param value allowed object is
+     *              {@link SequenceType }
      */
     public void setSequence(SequenceType value) {
         this.sequence = value;
@@ -542,10 +502,8 @@ public class Entry {
     /**
      * Gets the value of the dataset property.
      *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getDataset() {
         return dataset;
@@ -554,10 +512,8 @@ public class Entry {
     /**
      * Sets the value of the dataset property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setDataset(String value) {
         this.dataset = value;
@@ -566,10 +522,8 @@ public class Entry {
     /**
      * Gets the value of the created property.
      *
-     * @return
-     *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @return possible object is
+     *         {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public XMLGregorianCalendar getCreated() {
         return created;
@@ -578,10 +532,8 @@ public class Entry {
     /**
      * Sets the value of the created property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @param value allowed object is
+     *              {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public void setCreated(XMLGregorianCalendar value) {
         this.created = value;
@@ -590,10 +542,8 @@ public class Entry {
     /**
      * Gets the value of the modified property.
      *
-     * @return
-     *     possible object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @return possible object is
+     *         {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public XMLGregorianCalendar getModified() {
         return modified;
@@ -602,10 +552,8 @@ public class Entry {
     /**
      * Sets the value of the modified property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.datatype.XMLGregorianCalendar }
-     *
+     * @param value allowed object is
+     *              {@link javax.xml.datatype.XMLGregorianCalendar }
      */
     public void setModified(XMLGregorianCalendar value) {
         this.modified = value;
@@ -614,10 +562,8 @@ public class Entry {
     /**
      * Gets the value of the version property.
      *
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
-     *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getVersion() {
         return version;
@@ -626,10 +572,8 @@ public class Entry {
     /**
      * Sets the value of the version property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setVersion(BigInteger value) {
         this.version = value;
@@ -638,9 +582,9 @@ public class Entry {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     * <p/>
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     * <p/>
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -652,12 +596,10 @@ public class Entry {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
-        "name"
+            "name"
     })
     public static class Gene {
 
@@ -666,25 +608,23 @@ public class Entry {
 
         /**
          * Gets the value of the name property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the name property.
-         * 
-         * <p>
+         * <p/>
+         * <p/>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getName().add(newItem);
          * </pre>
-         * 
-         * 
-         * <p>
+         * <p/>
+         * <p/>
+         * <p/>
          * Objects of the following type(s) are allowed in the list
          * {@link GeneNameType }
-         * 
-         * 
          */
         public List<GeneNameType> getName() {
             if (name == null) {

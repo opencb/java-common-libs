@@ -15,12 +15,12 @@ import java.util.List;
 
 /**
  * Describes a citation and a summary of its content.
- *             Equivalent to the flat file RN-, RP-, RC-, RX-, RG-, RA-, RT- and RL-lines.
- * 
+ * Equivalent to the flat file RN-, RP-, RC-, RX-, RG-, RA-, RT- and RL-lines.
+ * <p/>
  * <p>Java class for referenceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="referenceType">
  *   &lt;complexContent>
@@ -35,14 +35,12 @@ import java.util.List;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "referenceType", propOrder = {
-    "citation",
-    "scope",
-    "source"
+        "citation",
+        "scope",
+        "source"
 })
 public class ReferenceType {
 
@@ -58,11 +56,9 @@ public class ReferenceType {
 
     /**
      * Gets the value of the citation property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CitationType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CitationType }
      */
     public CitationType getCitation() {
         return citation;
@@ -70,11 +66,9 @@ public class ReferenceType {
 
     /**
      * Sets the value of the citation property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CitationType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CitationType }
      */
     public void setCitation(CitationType value) {
         this.citation = value;
@@ -82,25 +76,23 @@ public class ReferenceType {
 
     /**
      * Gets the value of the scope property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the scope property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getScope().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
      */
     public List<String> getScope() {
         if (scope == null) {
@@ -111,11 +103,9 @@ public class ReferenceType {
 
     /**
      * Gets the value of the source property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SourceDataType }
-     *     
+     *
+     * @return possible object is
+     *         {@link SourceDataType }
      */
     public SourceDataType getSource() {
         return source;
@@ -123,11 +113,9 @@ public class ReferenceType {
 
     /**
      * Sets the value of the source property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link SourceDataType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link SourceDataType }
      */
     public void setSource(SourceDataType value) {
         this.source = value;
@@ -135,25 +123,23 @@ public class ReferenceType {
 
     /**
      * Gets the value of the evidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the evidence property.
-     * 
-     * <p>
+     * <p/>
+     * <p/>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEvidence().add(newItem);
      * </pre>
-     * 
-     * 
-     * <p>
+     * <p/>
+     * <p/>
+     * <p/>
      * Objects of the following type(s) are allowed in the list
      * {@link Integer }
-     * 
-     * 
      */
     public List<Integer> getEvidence() {
         if (evidence == null) {
@@ -164,11 +150,9 @@ public class ReferenceType {
 
     /**
      * Gets the value of the key property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getKey() {
         return key;
@@ -176,11 +160,9 @@ public class ReferenceType {
 
     /**
      * Sets the value of the key property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setKey(String value) {
         this.key = value;

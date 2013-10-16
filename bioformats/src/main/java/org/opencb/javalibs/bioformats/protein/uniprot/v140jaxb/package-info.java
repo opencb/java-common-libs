@@ -5,5 +5,4 @@
 // Generated on: 2011.09.14 at 07:50:17 PM CEST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://uniprot.org/uniprot", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package org.opencb.javalibs.bioformats.protein.uniprot.v140jaxb;
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://uniprot.org/uniprot", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED) package org.opencb.javalibs.bioformats.protein.uniprot.v140jaxb;

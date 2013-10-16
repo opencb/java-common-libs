@@ -5,5 +5,4 @@
 // Generated on: 2012.05.04 at 12:38:29 AM CEST 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://psi.hupo.org/mi/mif", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package org.opencb.javalibs.bioformats.network.psi.v254jaxb;
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://psi.hupo.org/mi/mif", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED) package org.opencb.javalibs.bioformats.network.psi.v254jaxb;

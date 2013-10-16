@@ -14,11 +14,11 @@ import java.math.BigInteger;
 
 /**
  * A interval on a sequence.
- * 
+ * <p/>
  * <p>Java class for intervalType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="intervalType">
  *   &lt;complexContent>
@@ -29,8 +29,6 @@ import java.math.BigInteger;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "intervalType")
@@ -45,11 +43,9 @@ public class IntervalType {
 
     /**
      * Gets the value of the begin property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getBegin() {
         return begin;
@@ -58,10 +54,8 @@ public class IntervalType {
     /**
      * Sets the value of the begin property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setBegin(BigInteger value) {
         this.begin = value;
@@ -70,10 +64,8 @@ public class IntervalType {
     /**
      * Gets the value of the end property.
      *
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
-     *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getEnd() {
         return end;
@@ -82,10 +74,8 @@ public class IntervalType {
     /**
      * Sets the value of the end property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setEnd(BigInteger value) {
         this.end = value;

@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.*;
 
 /**
  * Describes one set of experimental parameters.
- * 
+ * <p/>
  * <p>Java class for experimentDescription complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="experimentDescription">
  *   &lt;complexContent>
@@ -38,20 +38,18 @@ import javax.xml.bind.annotation.*;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "experimentDescription", propOrder = {
-    "names",
-    "bibref",
-    "xref",
-    "hostOrganismList",
-    "interactionDetectionMethod",
-    "participantIdentificationMethod",
-    "featureDetectionMethod",
-    "confidenceList",
-    "attributeList"
+        "names",
+        "bibref",
+        "xref",
+        "hostOrganismList",
+        "interactionDetectionMethod",
+        "participantIdentificationMethod",
+        "featureDetectionMethod",
+        "confidenceList",
+        "attributeList"
 })
 public class ExperimentDescription {
 
@@ -71,11 +69,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the names property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Names }
-     *     
+     *
+     * @return possible object is
+     *         {@link Names }
      */
     public Names getNames() {
         return names;
@@ -83,11 +79,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the names property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Names }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Names }
      */
     public void setNames(Names value) {
         this.names = value;
@@ -95,11 +89,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the bibref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Bibref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Bibref }
      */
     public Bibref getBibref() {
         return bibref;
@@ -107,11 +99,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the bibref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Bibref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Bibref }
      */
     public void setBibref(Bibref value) {
         this.bibref = value;
@@ -119,11 +109,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the xref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Xref }
-     *     
+     *
+     * @return possible object is
+     *         {@link Xref }
      */
     public Xref getXref() {
         return xref;
@@ -131,11 +119,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the xref property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Xref }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Xref }
      */
     public void setXref(Xref value) {
         this.xref = value;
@@ -143,11 +129,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the hostOrganismList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link HostOrganismList }
-     *     
+     *
+     * @return possible object is
+     *         {@link HostOrganismList }
      */
     public HostOrganismList getHostOrganismList() {
         return hostOrganismList;
@@ -155,11 +139,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the hostOrganismList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link HostOrganismList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link HostOrganismList }
      */
     public void setHostOrganismList(HostOrganismList value) {
         this.hostOrganismList = value;
@@ -167,11 +149,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the interactionDetectionMethod property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getInteractionDetectionMethod() {
         return interactionDetectionMethod;
@@ -179,11 +159,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the interactionDetectionMethod property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setInteractionDetectionMethod(CvType value) {
         this.interactionDetectionMethod = value;
@@ -191,11 +169,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the participantIdentificationMethod property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getParticipantIdentificationMethod() {
         return participantIdentificationMethod;
@@ -203,11 +179,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the participantIdentificationMethod property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setParticipantIdentificationMethod(CvType value) {
         this.participantIdentificationMethod = value;
@@ -215,11 +189,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the featureDetectionMethod property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link CvType }
-     *     
+     *
+     * @return possible object is
+     *         {@link CvType }
      */
     public CvType getFeatureDetectionMethod() {
         return featureDetectionMethod;
@@ -227,11 +199,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the featureDetectionMethod property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link CvType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link CvType }
      */
     public void setFeatureDetectionMethod(CvType value) {
         this.featureDetectionMethod = value;
@@ -239,11 +209,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the confidenceList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @return possible object is
+     *         {@link ConfidenceList }
      */
     public ConfidenceList getConfidenceList() {
         return confidenceList;
@@ -251,11 +219,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the confidenceList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link ConfidenceList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link ConfidenceList }
      */
     public void setConfidenceList(ConfidenceList value) {
         this.confidenceList = value;
@@ -263,11 +229,9 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the attributeList property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @return possible object is
+     *         {@link AttributeList }
      */
     public AttributeList getAttributeList() {
         return attributeList;
@@ -275,11 +239,9 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the attributeList property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link AttributeList }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link AttributeList }
      */
     public void setAttributeList(AttributeList value) {
         this.attributeList = value;
@@ -287,7 +249,6 @@ public class ExperimentDescription {
 
     /**
      * Gets the value of the id property.
-     * 
      */
     public int getId() {
         return id;
@@ -295,7 +256,6 @@ public class ExperimentDescription {
 
     /**
      * Sets the value of the id property.
-     * 
      */
     public void setId(int value) {
         this.id = value;

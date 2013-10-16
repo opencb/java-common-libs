@@ -16,13 +16,13 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * This element stores information about events that cause an alternative
- *                 product.
- *             
- * 
+ * product.
+ * <p/>
+ * <p/>
  * <p>Java class for eventType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="eventType">
  *   &lt;complexContent>
@@ -41,8 +41,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "eventType")
@@ -53,11 +51,9 @@ public class EventType {
 
     /**
      * Gets the value of the type property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     *         {@link String }
      */
     public String getType() {
         return type;
@@ -65,11 +61,9 @@ public class EventType {
 
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setType(String value) {
         this.type = value;

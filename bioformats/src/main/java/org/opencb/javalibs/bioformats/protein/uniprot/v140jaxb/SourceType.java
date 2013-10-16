@@ -17,11 +17,11 @@ import java.math.BigInteger;
 
 /**
  * Describes the source of the data using a database cross-reference (or a 'ref' attribute when the source cannot be found in a public data source, such as PubMed, and is cited only within the UniProtKB entry).
- * 
+ * <p/>
  * <p>Java class for sourceType complex type.
- * 
+ * <p/>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p/>
  * <pre>
  * &lt;complexType name="sourceType">
  *   &lt;complexContent>
@@ -34,12 +34,10 @@ import java.math.BigInteger;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "sourceType", propOrder = {
-    "dbReference"
+        "dbReference"
 })
 public class SourceType {
 
@@ -49,11 +47,9 @@ public class SourceType {
 
     /**
      * Gets the value of the dbReference property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DbReferenceType }
-     *     
+     *
+     * @return possible object is
+     *         {@link DbReferenceType }
      */
     public DbReferenceType getDbReference() {
         return dbReference;
@@ -61,11 +57,9 @@ public class SourceType {
 
     /**
      * Sets the value of the dbReference property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DbReferenceType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DbReferenceType }
      */
     public void setDbReference(DbReferenceType value) {
         this.dbReference = value;
@@ -73,11 +67,9 @@ public class SourceType {
 
     /**
      * Gets the value of the ref property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link java.math.BigInteger }
      *
+     * @return possible object is
+     *         {@link java.math.BigInteger }
      */
     public BigInteger getRef() {
         return ref;
@@ -86,10 +78,8 @@ public class SourceType {
     /**
      * Sets the value of the ref property.
      *
-     * @param value
-     *     allowed object is
-     *     {@link java.math.BigInteger }
-     *     
+     * @param value allowed object is
+     *              {@link java.math.BigInteger }
      */
     public void setRef(BigInteger value) {
         this.ref = value;
