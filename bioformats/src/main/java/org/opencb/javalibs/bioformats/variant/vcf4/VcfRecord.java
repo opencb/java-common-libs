@@ -1,6 +1,5 @@
 package org.opencb.javalibs.bioformats.variant.vcf4;
 
-import org.bioinfo.commons.utils.ListUtils;
 import org.opencb.javalibs.bioformats.feature.Genotype;
 
 import java.util.*;

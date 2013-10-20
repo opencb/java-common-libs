@@ -1,10 +1,12 @@
 package org.opencb.javalibs.bioformats.variant.vcf4.io.writers.stats;
 
 import org.bioinfo.commons.utils.StringUtils;
+import org.opencb.javalibs.bioformats.feature.Genotype;
 import org.opencb.javalibs.bioformats.variant.vcf4.VariantEffect;
 import org.opencb.javalibs.bioformats.variant.vcf4.stats.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +93,8 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 "cases_percent_dominant DOUBLE, " +
                 "controls_percent_dominant DOUBLE, " +
                 "cases_percent_recessive DOUBLE, " +
-                "controls_percent_recessive DOUBLE);";
+                "controls_percent_recessive DOUBLE, " +
+                "genotypes TEXT);";
         String sample_stats = "CREATE TABLE IF NOT EXISTS sample_stats(" +
                 "name TEXT, " +
                 "mendelian_errors INT, " +
@@ -172,8 +175,10 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
     @Override
     public boolean writeVariantStats(List<VcfVariantStat> data) {
 
-        String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, id, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO variant_stats (chromosome, position, allele_ref, allele_alt, id, maf, mgf, allele_maf, genotype_maf, miss_allele, miss_gt, mendel_err, is_indel, cases_percent_dominant, controls_percent_dominant, cases_percent_recessive, controls_percent_recessive, genotypes) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
         boolean res = true;
+
+        List<String> genotypes = new ArrayList<>(10);
 
         try {
             pstmt = con.prepareStatement(sql);
@@ -197,7 +202,13 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt.setDouble(16, v.getCasesPercentRecessive());
                 pstmt.setDouble(17, v.getControlsPercentRecessive());
 
+                for (Genotype g : v.getGenotypes()) {
+                    genotypes.add(g.toString());
+                }
+                pstmt.setString(18, StringUtils.join(genotypes, ","));
+
                 pstmt.execute();
+                genotypes.clear();
 
             }
             con.commit();

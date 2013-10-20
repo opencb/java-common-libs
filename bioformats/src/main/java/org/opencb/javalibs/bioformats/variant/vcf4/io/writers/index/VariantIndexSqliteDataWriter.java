@@ -129,6 +129,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
             stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
             stmt.execute("CREATE INDEX sample_name_idx ON sample (name);");
             stmt.execute("CREATE INDEX sample_info_id_variant_idx ON sample_info (id_variant);");
+            stmt.execute("CREATE INDEX variant_id_variant_idx ON variant (id_variant);");
             stmt.execute("CREATE INDEX variant_info_id_variant_key_idx ON variant_info (id_variant, key);");
             stmt.close();
             con.commit();
@@ -200,13 +201,10 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
                 if (rs.next()) {
                     id = rs.getInt(1);
                     for (Map.Entry<String, String> entry : v.getSampleRawData().entrySet()) {
-
-                        System.out.println("entry = " + entry);
                         sampleName = entry.getKey();
                         sampleData = entry.getValue();
 
                         g = v.getSampleGenotype(sampleName);
-
 
                         allele_1 = (g.getAllele1() == null) ? -1 : g.getAllele1();
                         allele_2 = (g.getAllele2() == null) ? -1 : g.getAllele2();
