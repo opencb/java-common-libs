@@ -11,6 +11,7 @@
 
 # Maven
 target/
+*.asc
 
 # IntelliJ
 *.iml
