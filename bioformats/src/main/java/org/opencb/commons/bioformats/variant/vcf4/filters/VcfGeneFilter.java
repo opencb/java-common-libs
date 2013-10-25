@@ -2,6 +2,8 @@ package org.opencb.commons.bioformats.variant.vcf4.filters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
+import com.sun.jersey.api.client.WebResource;
 import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
@@ -9,10 +11,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,56 +25,77 @@ import java.util.List;
  */
 public class VcfGeneFilter extends VcfFilter {
     private List<Region> regionList;
+    private List<String> geneList;
 
 
-    public VcfGeneFilter(String filename) {
-        regionList = new ArrayList<>(1000);
-        populateRegionList(filename);
+    public VcfGeneFilter(String genes) {
+        this.regionList = new ArrayList<>(10);
+        this.geneList = Splitter.on(",").splitToList(genes);
+        populateRegionList();
     }
 
-    public VcfGeneFilter(String filename, int priority) {
+    public VcfGeneFilter(String genes, int priority) {
         super(priority);
-        regionList = new ArrayList<>(1000);
-        populateRegionList(filename);
+        this.regionList = new ArrayList<>(10);
+        this.geneList = Splitter.on(",").splitToList(genes);
+        populateRegionList();
     }
 
-    private void populateRegionList(String filename) {
 
-        BufferedReader br = null;
-        List<String> genes = new ArrayList<>(1000);
-        Client wsRestClient = ClientBuilder.newClient();
-        WebTarget webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+    public VcfGeneFilter(File file) {
+        this.regionList = new ArrayList<>(10);
+        this.geneList = parseFile(file);
+        populateRegionList();
 
+    }
 
+    public VcfGeneFilter(File file, int priority) {
+        super(priority);
+        this.geneList = parseFile(file);
+        populateRegionList();
+    }
+
+    private List<String> parseFile(File file) {
+        List<String> genes = new ArrayList<>(10);
+        BufferedReader br;
         String line;
         try {
-            br = new BufferedReader(new FileReader(filename));
+            br = new BufferedReader(new FileReader(file));
             while ((line = br.readLine()) != null) {
                 if (!line.equals("")) {
                     genes.add(line);
 
                 }
-
             }
-
             br.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
+
+        return genes;
+    }
+
+    private void populateRegionList() {
+
+//        Client wsRestClient = ClientBuilder.newClient();
+//        WebTarget webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+
+        com.sun.jersey.api.client.Client wsRestClient = com.sun.jersey.api.client.Client.create();
+        WebResource webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Iterator<String> it = genes.iterator();
+        Iterator<String> it = geneList.iterator();
         while (it.hasNext()) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 100 && it.hasNext(); i++) {
                 sb.append(it.next()).append(",");
             }
-            Response response = webResource.path(sb.toString()).path("info").queryParam("of", "json").request("text/plain").get();
+            String response = webResource.path(sb.toString()).path("info").queryParam("of", "json").get(String.class);
+            System.out.println("response = " + response);
 
-            JsonNode actualObj = null;
+            JsonNode actualObj;
             try {
                 actualObj = mapper.readTree(response.toString());
                 Iterator<JsonNode> itAux = actualObj.iterator();
@@ -101,9 +121,11 @@ public class VcfGeneFilter extends VcfFilter {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
+
+        System.out.println("regionList = " + regionList);
     }
 
     @Override
