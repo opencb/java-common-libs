@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
 
 import com.google.common.base.Joiner;
+import org.opencb.commons.bioformats.commons.SqliteSingletonConnection;
 import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
@@ -17,47 +18,31 @@ import java.util.Map;
  */
 public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
 
-    private String dbName;
-    private Connection con;
     private Statement stmt;
     private PreparedStatement pstmt;
     private boolean createdSampleTable;
+    private SqliteSingletonConnection connection;
 
     public VariantIndexSqliteDataWriter(String dbName) {
 
-        this.dbName = dbName;
         this.stmt = null;
         this.pstmt = null;
         this.createdSampleTable = false;
+        this.connection = new SqliteSingletonConnection(dbName);
     }
 
     @Override
     public boolean open() {
 
-        try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
-            con.setAutoCommit(false);
+        return SqliteSingletonConnection.getConnection() != null;
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
-
-        }
-
-        return true;
     }
 
     @Override
     public boolean close() {
 
         try {
-            con.close();
+            SqliteSingletonConnection.getConnection().close();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -100,7 +85,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
                 "FOREIGN KEY(id_variant) REFERENCES variant(id_variant));";
 
         try {
-            stmt = con.createStatement();
+            stmt = SqliteSingletonConnection.getConnection().createStatement();
 
             stmt.execute(variantTable);
             stmt.execute(variantInfoTable);
@@ -109,7 +94,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
 
             stmt.close();
 
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
         } catch (SQLException e) {
             System.err.println("PRE: " + e.getClass().getName() + ": " + e.getMessage());
             return false;
@@ -123,7 +108,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
 
         try {
 
-            stmt = con.createStatement();
+            stmt = SqliteSingletonConnection.getConnection().createStatement();
             stmt.execute("CREATE INDEX variant_chromosome_position_idx ON variant (chromosome, position);");
             stmt.execute("CREATE INDEX variant_pass_idx ON variant (filter);");
             stmt.execute("CREATE INDEX variant_id_idx ON variant (id);");
@@ -131,8 +116,11 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
             stmt.execute("CREATE INDEX sample_info_id_variant_idx ON sample_info (id_variant);");
             stmt.execute("CREATE INDEX variant_id_variant_idx ON variant (id_variant);");
             stmt.execute("CREATE INDEX variant_info_id_variant_key_idx ON variant_info (id_variant, key);");
+
+            stmt.execute("CREATE TABLE IF NOT EXISTS chromosome_count AS SELECT count(*) as count, chromosome from variant group by chromosome order by chromosome ASC;");
+
             stmt.close();
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
 
         } catch (SQLException e) {
             System.err.println("POST: " + e.getClass().getName() + ": " + e.getMessage());
@@ -158,7 +146,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
         if (!createdSampleTable && data.size() > 0) {
             try {
                 sql = "INSERT INTO sample (name) VALUES(?);";
-                pstmt = con.prepareStatement(sql);
+                pstmt = SqliteSingletonConnection.getConnection().prepareStatement(sql);
                 VcfRecord v = data.get(0);
                 for (String name : v.getSampleNames()) {
                     pstmt.setString(1, name);
@@ -166,7 +154,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
                 }
 
                 pstmt.close();
-                con.commit();
+                SqliteSingletonConnection.getConnection().commit();
                 createdSampleTable = true;
             } catch (SQLException e) {
                 System.err.println("SAMPLE: " + e.getClass().getName() + ": " + e.getMessage());
@@ -180,9 +168,9 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
 
         try {
 
-            pstmt = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-            pstmtSample = con.prepareStatement(sqlSampleInfo);
-            pstmtInfo = con.prepareStatement(sqlInfo);
+            pstmt = SqliteSingletonConnection.getConnection().prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            pstmtSample = SqliteSingletonConnection.getConnection().prepareStatement(sqlSampleInfo);
+            pstmtInfo = SqliteSingletonConnection.getConnection().prepareStatement(sqlInfo);
 
             for (VcfRecord v : data) {
 
@@ -236,7 +224,7 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
             pstmt.close();
             pstmtSample.close();
             pstmtInfo.close();
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
 
         } catch (SQLException e) {
             System.err.println("VARIANT/SAMPLE_INFO: " + e.getClass().getName() + ": " + e.getMessage());

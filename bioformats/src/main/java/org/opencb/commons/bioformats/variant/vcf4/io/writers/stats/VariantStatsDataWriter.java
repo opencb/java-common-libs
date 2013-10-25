@@ -26,5 +26,4 @@ public interface VariantStatsDataWriter extends DataWriter {
 
     boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException;
 
-    boolean writeVariantEffect(List<VariantEffect> batchEffect);
 }

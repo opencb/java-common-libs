@@ -36,6 +36,11 @@ public class VariantEffect {
     private String aminoacidChange;
     private String codonChange;
 
+
+    public VariantEffect() {
+
+    }
+
     public VariantEffect(String chromosome,
                          int position,
                          String referenceAllele,
@@ -88,7 +93,6 @@ public class VariantEffect {
         this.aminoacidChange = aminoacidChange;
         this.codonChange = codonChange;
     }
-
 
     public String getChromosome() {
         return chromosome;

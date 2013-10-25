@@ -22,11 +22,13 @@ public class VcfControlAnnotator implements VcfAnnotator {
     private String tabixFile;
     private List<String> samples;
     private HashMap<String, Integer> samplesMap;
-    private HashMap<String, TabixReader> controlList;
-    private String prefix;
+    private HashMap<String, String> controlList;
 
+    private Map<Long, Map<String, TabixReader>> multipleControlsTabix;
     private HashMap<Long, TabixReader> tabix;
 
+    private String prefix;
+    private boolean single;
 
     public VcfControlAnnotator(String infoPrefix, String control) throws IOException {
 
@@ -50,13 +52,14 @@ public class VcfControlAnnotator implements VcfAnnotator {
         }
 
         tabixReader.close();
-
+        single = true;
     }
 
     public VcfControlAnnotator(String infoPrefix, HashMap<String, String> controlList) {
 
         this.prefix = infoPrefix;
-        this.controlList = new LinkedHashMap<>(controlList.size());
+        this.controlList = controlList;
+        multipleControlsTabix = new LinkedHashMap<>(5);
 
         boolean b = true;
         TabixReader t;
@@ -65,7 +68,6 @@ public class VcfControlAnnotator implements VcfAnnotator {
             for (Map.Entry<String, String> entry : controlList.entrySet()) {
 
                 t = new TabixReader(entry.getValue());
-                this.controlList.put(entry.getKey(), t);
 
                 if (b) {
                     b = false;
@@ -90,21 +92,29 @@ public class VcfControlAnnotator implements VcfAnnotator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        single = false;
 
     }
 
     @Override
     public void annot(List<VcfRecord> batch) {
 
+        if (single)
+            singleAnnot(batch);
+        else
+            multipleAnnot(batch);
+    }
+
+    private void singleAnnot(List<VcfRecord> batch) {
         VcfRecord tabixRecord;
 
         long pid = Thread.currentThread().getId();
         TabixReader currentTabix = null;
 
 
-        if(tabix.containsKey(pid)){
+        if (tabix.containsKey(pid)) {
             currentTabix = tabix.get(pid);
-        }else{
+        } else {
             try {
                 currentTabix = new TabixReader(this.tabixFile);
                 tabix.put(pid, currentTabix);
@@ -133,15 +143,14 @@ public class VcfControlAnnotator implements VcfAnnotator {
                         String[] fields = line.split("\t");
                         tabixRecord = new VcfRecord(fields, samples);
 
-                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
 
+                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
                             controlBatch.add(tabixRecord);
                             map.put(record, cont++);
                         }
                         line = it.next();
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ArrayIndexOutOfBoundsException e) { // If the Chr does not exist in Controls... TabixReader throws ArrayIndexOut...
                     continue;
@@ -162,6 +171,86 @@ public class VcfControlAnnotator implements VcfAnnotator {
                 record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
             }
         }
+    }
+
+    private void multipleAnnot(List<VcfRecord> batch) {
+
+        VcfRecord tabixRecord;
+        TabixReader currentTabix = null;
+
+        long pid = Thread.currentThread().getId();
+        Map<String, TabixReader> tabixMap;
+        List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
+        List<VcfVariantStat> statsBatch;
+        HashMap<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+
+
+        if (multipleControlsTabix.containsKey(pid)) {
+            tabixMap = multipleControlsTabix.get(pid);
+        } else {
+            tabixMap = new LinkedHashMap<>();
+            multipleControlsTabix.put(pid, tabixMap);
+        }
+
+
+        int cont = 0;
+        for (VcfRecord record : batch) {
+            currentTabix = null;
+
+            if (tabixMap.containsKey(record.getChromosome())) {
+                currentTabix = tabixMap.get(record.getChromosome());
+            } else {
+                if (controlList.containsKey(record.getChromosome())) {
+                    try {
+                        currentTabix = new TabixReader(controlList.get(record.getChromosome()));
+                        tabixMap.put(record.getChromosome(), currentTabix);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (currentTabix != null) {
+                try {
+
+                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
+
+                    String line = null;
+                    while (it != null && (line = it.next()) != null) {
+
+                        String[] fields = line.split("\t");
+                        tabixRecord = new VcfRecord(fields, samples);
+
+                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+
+                            controlBatch.add(tabixRecord);
+                            map.put(record, cont++);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ArrayIndexOutOfBoundsException e) { // If the Chr does not exist in Controls... TabixReader throws ArrayIndexOut...
+                    continue;
+                }
+            }
+
+
+        }
+
+        statsBatch = CalculateStats.variantStats(controlBatch, this.samples, null);
+
+        VcfVariantStat statRecord;
+
+        for (VcfRecord record : batch) {
+
+            if (map.containsKey(record)) {
+                statRecord = statsBatch.get(map.get(record));
+                record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", statRecord.getMaf()));
+                record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
+            }
+        }
+
     }
 
     @Override
