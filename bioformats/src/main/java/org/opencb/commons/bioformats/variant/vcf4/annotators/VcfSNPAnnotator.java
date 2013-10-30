@@ -57,16 +57,10 @@ public class VcfSNPAnnotator implements VcfAnnotator {
 
 
         System.out.println(response);
-
-
-//        ObjectMapper mapper = new ObjectMapper();
-
-
     }
 
     @Override
     public void annot(VcfRecord elem) {
-        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     class SnpJson {
