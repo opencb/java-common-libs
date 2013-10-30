@@ -3,12 +3,11 @@ package org.opencb.commons.bioformats.variant.vcf4.filters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -78,8 +77,11 @@ public class VcfGeneFilter extends VcfFilter {
 
     private void populateRegionList() {
 
-        Client wsRestClient = ClientBuilder.newClient();
-        WebTarget webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+//        Client wsRestClient = ClientBuilder.newClient();
+//        WebTarget webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
+
+        Client wsRestClient = Client.create();
+        WebResource webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/feature/gene/");
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -89,7 +91,7 @@ public class VcfGeneFilter extends VcfFilter {
             for (int i = 0; i < 100 && it.hasNext(); i++) {
                 sb.append(it.next()).append(",");
             }
-            String response = webResource.path(sb.toString()).path("info").queryParam("of", "json").request().get(String.class);
+            String response = webResource.path(sb.toString()).path("info").queryParam("of", "json").get(String.class);
 
             JsonNode actualObj;
             try {

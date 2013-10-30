@@ -1,14 +1,12 @@
 package org.opencb.commons.bioformats.variant.vcf4.effect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -29,8 +27,12 @@ public class EffectCalculator {
         List<VariantEffect> batchEffect = new ArrayList<>();
 
         StringBuilder chunkVcfRecords = new StringBuilder();
-        Client client = ClientBuilder.newClient();
-        WebTarget webTarget = client.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+        Client client = Client.create();
+        WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+
+
+//        Client client = ClientBuilder.newClient();
+//        WebTarget webTarget = client.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
         for (VcfRecord record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
@@ -42,8 +44,12 @@ public class EffectCalculator {
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
 
-        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.text(formDataMultiPart.toString()));
-        System.out.println("response = " + response.readEntity(String.class));
+//        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.text(formDataMultiPart.toString()));
+        String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
+
+
+//        System.out.println("response = " + response);
+//        System.out.println("response = " + response.readEntity(String.class));
         // TODO aaleman: Check the new Web Service
 
         try {
