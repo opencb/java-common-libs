@@ -16,14 +16,14 @@ import java.util.Map;
  * Time: 1:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantIndexSqliteDataWriter implements VariantDataWriter {
+public class VariantVcfSqliteDataWriter implements VariantDataWriter<VcfRecord> {
 
     private Statement stmt;
     private PreparedStatement pstmt;
     private boolean createdSampleTable;
     private SqliteSingletonConnection connection;
 
-    public VariantIndexSqliteDataWriter(String dbName) {
+    public VariantVcfSqliteDataWriter(String dbName) {
 
         this.stmt = null;
         this.pstmt = null;

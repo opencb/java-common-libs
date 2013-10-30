@@ -17,7 +17,7 @@ import java.util.zip.GZIPOutputStream;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfGzipDataWriter implements VariantDataWriter {
+public class VariantVcfGzipDataWriter implements VariantDataWriter<VcfRecord> {
 
     private BufferedWriter printer;
     private String filename;

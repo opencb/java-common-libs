@@ -12,8 +12,8 @@ import java.util.List;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface VariantDataWriter extends DataWriter {
+public interface VariantDataWriter<T> extends DataWriter {
     boolean writeHeader(String header);
 
-    boolean writeBatch(List<VcfRecord> batch);
+    boolean writeBatch(List<T> batch);
 }

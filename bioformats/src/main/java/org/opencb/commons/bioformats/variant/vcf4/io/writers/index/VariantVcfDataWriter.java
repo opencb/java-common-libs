@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfDataWriter implements VariantDataWriter {
+public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
 
     private PrintWriter printer;
     private String filename;
