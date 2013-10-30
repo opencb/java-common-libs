@@ -1,17 +1,19 @@
 package org.opencb.commons.bioformats.variant.vcf4.effect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,10 +29,8 @@ public class EffectCalculator {
         List<VariantEffect> batchEffect = new ArrayList<>();
 
         StringBuilder chunkVcfRecords = new StringBuilder();
-//        Client wsRestClient = ClientBuilder.newClient();
-//        WebTarget wsRestClient = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
-        Client wsRestClient = Client.create();
-        WebResource webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+        Client client = ClientBuilder.newClient();
+        WebTarget webTarget = client.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
         for (VcfRecord record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
@@ -42,8 +42,9 @@ public class EffectCalculator {
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
 
-//        Response response = webResource.path("consequence_type").queryParam("of", "json").request(MediaType.MULTIPART_FORM_DATA).post(Entity.text(formDataMultiPart.toString()));
-        String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
+        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.text(formDataMultiPart.toString()));
+        System.out.println("response = " + response.readEntity(String.class));
+        // TODO aaleman: Check the new Web Service
 
         try {
             batchEffect = mapper.readValue(response.toString(), mapper.getTypeFactory().constructCollectionType(List.class, VariantEffect.class));
