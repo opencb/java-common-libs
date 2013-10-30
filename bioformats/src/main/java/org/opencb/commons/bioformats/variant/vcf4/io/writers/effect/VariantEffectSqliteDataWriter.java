@@ -2,8 +2,6 @@ package org.opencb.commons.bioformats.variant.vcf4.io.writers.effect;
 
 import org.opencb.commons.bioformats.commons.SqliteSingletonConnection;
 import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
-import org.opencb.commons.bioformats.variant.vcf4.io.writers.index.VariantIndexDataWriter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

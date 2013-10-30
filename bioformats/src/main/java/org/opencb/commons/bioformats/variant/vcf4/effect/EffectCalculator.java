@@ -30,7 +30,6 @@ public class EffectCalculator {
         Client client = Client.create();
         WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
-
 //        Client client = ClientBuilder.newClient();
 //        WebTarget webTarget = client.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
@@ -48,7 +47,6 @@ public class EffectCalculator {
         String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
 
 
-//        System.out.println("response = " + response);
 //        System.out.println("response = " + response.readEntity(String.class));
         // TODO aaleman: Check the new Web Service
 

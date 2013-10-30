@@ -16,7 +16,7 @@ import java.util.Map;
  * Time: 1:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
+public class VariantIndexSqliteDataWriter implements VariantDataWriter {
 
     private Statement stmt;
     private PreparedStatement pstmt;
@@ -132,7 +132,13 @@ public class VariantIndexSqliteDataWriter implements VariantIndexDataWriter {
     }
 
     @Override
-    public boolean writeVariantIndex(List<VcfRecord> data) {
+    public boolean writeHeader(String header) {
+        return true;
+
+    }
+
+    @Override
+    public boolean writeBatch(List<VcfRecord> data) {
         String sql, sqlSampleInfo, sqlInfo;
         PreparedStatement pstmtSample, pstmtInfo;
         String sampleName;
