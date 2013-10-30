@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4;
 
 import org.opencb.commons.bioformats.feature.Genotype;
+import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
 import java.util.*;
 
@@ -18,6 +19,8 @@ public class VcfRecord {
     private List<String> sampleOrder;
     private Map<String, String> sampleRawData;
     private Map<String, Map<String, String>> sampleData;
+    private VcfVariantStat stats;
+    private List<VariantEffect> effects;
 
     /**
      * @param chromosome
@@ -42,6 +45,8 @@ public class VcfRecord {
         this.sampleRawData = new HashMap<>();
         this.sampleData = new HashMap<>();
         this.sampleOrder = new ArrayList<>();
+        this.effects = null;
+        this.stats = null;
     }
 
     /**
@@ -325,5 +330,26 @@ public class VcfRecord {
             this.info += ";" + info;
         }
 
+    }
+
+    public VcfVariantStat getStats() {
+        return stats;
+    }
+
+    public void setStats(VcfVariantStat stats) {
+        this.stats = stats;
+    }
+
+    public List<VariantEffect> getEffects() {
+        return effects;
+    }
+
+    public void setEffects(List<VariantEffect> effects) {
+        this.effects = effects;
+    }
+
+    public void addEffect(VariantEffect effect) {
+        if (this.effects != null)
+            this.effects.add(effect);
     }
 }

@@ -149,7 +149,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt.setInt(10, v.getMissingAlleles());
                 pstmt.setInt(11, v.getMissingGenotypes());
                 pstmt.setInt(12, v.getMendelinanErrors());
-                pstmt.setInt(13, (v.getIndel() ? 1 : 0));
+                pstmt.setInt(13, (v.isIndel() ? 1 : 0));
                 pstmt.setDouble(14, v.getCasesPercentDominant());
                 pstmt.setDouble(15, v.getControlsPercentDominant());
                 pstmt.setDouble(16, v.getCasesPercentRecessive());

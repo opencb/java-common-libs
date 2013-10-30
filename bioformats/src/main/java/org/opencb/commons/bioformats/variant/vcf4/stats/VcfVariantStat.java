@@ -197,9 +197,9 @@ public class VcfVariantStat {
         return mendelinanErrors;
     }
 
-    public boolean getIndel() {
-        return isIndel;
-    }
+//    public boolean getIndel() {
+//        return isIndel;
+//    }
 
     public float getCasesPercentDominant() {
         return casesPercentDominant;
@@ -281,9 +281,7 @@ public class VcfVariantStat {
         this.mendelinanErrors = mendelinanErrors;
     }
 
-    public void setIndel(boolean indel) {
-        this.isIndel = indel;
-    }
+
 
     public void setCasesPercentDominant(float casesPercentDominant) {
         this.casesPercentDominant = casesPercentDominant;
@@ -333,6 +331,10 @@ public class VcfVariantStat {
 
     public boolean isIndel() {
         return isIndel;
+    }
+
+    public void setIndel(boolean indel) {
+        this.isIndel = indel;
     }
 
     public boolean isSNP() {
