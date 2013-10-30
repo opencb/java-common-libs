@@ -1,5 +1,8 @@
 package org.opencb.commons.bioformats.feature;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aleman
@@ -17,6 +20,16 @@ public class Region {
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;
+    }
+
+    public Region(String region) {
+        Pattern pattern = Pattern.compile("(\\w+):(\\d+)-(\\d+)");
+        Matcher matcher = pattern.matcher(region);
+        if (matcher.find()) {
+            this.chromosome = matcher.group(1);
+            this.start = Integer.valueOf(matcher.group(2));
+            this.end = Integer.valueOf(matcher.group(3));
+        }
     }
 
     public String getChromosome() {

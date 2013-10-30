@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.stats;
 
 import com.google.common.base.Joiner;
+import org.opencb.commons.bioformats.commons.SqliteSingletonConnection;
 import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.stats.*;
@@ -19,48 +20,32 @@ import java.util.Map;
  */
 public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
-    private String dbName;
-    private Connection con;
     private Statement stmt;
     private PreparedStatement pstmt;
     private boolean createdSampleTable;
+    private SqliteSingletonConnection connection;
 
 
     public VariantStatsSqliteDataWriter(String dbName) {
 
-        this.dbName = dbName;
         this.stmt = null;
         this.pstmt = null;
         this.createdSampleTable = false;
+        this.connection = new SqliteSingletonConnection(dbName);
     }
 
     @Override
     public boolean open() {
 
-        try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:" + dbName);
-            con.setAutoCommit(false);
+        return SqliteSingletonConnection.getConnection() != null;
 
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            return false;
-
-        }
-
-        return true;
     }
 
     @Override
     public boolean close() {
 
         try {
-            con.close();
+            SqliteSingletonConnection.getConnection().close();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -103,45 +88,16 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 "PRIMARY KEY (name));";
 
 
-        String variantEffectTable = "CREATE TABLE IF NOT EXISTS variant_effect(" +
-                "id_variant_effect INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "chromosome	TEXT, " +
-                "position INT64, " +
-                "reference_allele TEXT, " +
-                "alternative_allele TEXT, " +
-                "feature_id TEXT, " +
-                "feature_name TEXT, " +
-                "feature_type TEXT, " +
-                "feature_biotype TEXT, " +
-                "feature_chromosome TEXT, " +
-                "feature_start INT64, " +
-                "feature_end INT64, " +
-                "feature_strand TEXT, " +
-                "snp_id TEXT, " +
-                "ancestral TEXT, " +
-                "alternative TEXT, " +
-                "gene_id TEXT, " +
-                "transcript_id TEXT, " +
-                "gene_name TEXT, " +
-                "consequence_type TEXT, " +
-                "consequence_type_obo TEXT, " +
-                "consequence_type_desc TEXT, " +
-                "consequence_type_type TEXT, " +
-                "aa_position INT64, " +
-                "aminoacid_change TEXT, " +
-                "codon_change TEXT); ";
-
         try {
-            stmt = con.createStatement();
+            stmt = SqliteSingletonConnection.getConnection().createStatement();
 
             stmt.execute(globalStatsTable);
             stmt.execute(variant_stats);
             stmt.execute(sample_stats);
-            stmt.execute(variantEffectTable);
 
             stmt.close();
 
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
         } catch (SQLException e) {
             System.err.println("PRE: " + e.getClass().getName() + ": " + e.getMessage());
             return false;
@@ -155,13 +111,10 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
 
         try {
 
-            stmt = con.createStatement();
+            stmt = SqliteSingletonConnection.getConnection().createStatement();
             stmt.execute("CREATE INDEX variant_stats_chromosome_position_idx ON variant_stats (chromosome, position);");
-            stmt.execute("CREATE INDEX variant_effect_chromosome_position_idx ON variant_effect (chromosome, position);");
-            stmt.execute("CREATE INDEX variant_effect_feature_biotype_idx ON variant_effect (feature_biotype);");
-            stmt.execute("CREATE INDEX variant_effect_consequence_type_obo_idx ON variant_effect (consequence_type_obo);");
             stmt.close();
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
 
         } catch (SQLException e) {
             System.err.println("POST: " + e.getClass().getName() + ": " + e.getMessage());
@@ -181,7 +134,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         List<String> genotypes = new ArrayList<>(10);
 
         try {
-            pstmt = con.prepareStatement(sql);
+            pstmt = SqliteSingletonConnection.getConnection().prepareStatement(sql);
 
             for (VcfVariantStat v : data) {
                 pstmt.setString(1, v.getChromosome());
@@ -196,7 +149,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt.setInt(10, v.getMissingAlleles());
                 pstmt.setInt(11, v.getMissingGenotypes());
                 pstmt.setInt(12, v.getMendelinanErrors());
-                pstmt.setInt(13, (v.getIndel() ? 1 : 0));
+                pstmt.setInt(13, (v.isIndel() ? 1 : 0));
                 pstmt.setDouble(14, v.getCasesPercentDominant());
                 pstmt.setDouble(15, v.getControlsPercentDominant());
                 pstmt.setDouble(16, v.getCasesPercentRecessive());
@@ -211,7 +164,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 genotypes.clear();
 
             }
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
             pstmt.close();
         } catch (SQLException e) {
             System.err.println("VARIANT_STATS: " + e.getClass().getName() + ": " + e.getMessage());
@@ -230,7 +183,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         float avg = 0;
         try {
             String sql;
-            stmt = con.createStatement();
+            stmt = SqliteSingletonConnection.getConnection().createStatement();
 
             sql = "INSERT INTO global_stats VALUES ('NUM_VARIANTS', 'Number of variants'," + globalStats.getVariantsCount() + ");";
             stmt.executeUpdate(sql);
@@ -246,7 +199,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
             stmt.executeUpdate(sql);
             sql = "INSERT INTO global_stats VALUES ('NUM_TRANSITIONS', 'Number of transitions'," + globalStats.getTransitionsCount() + ");";
             stmt.executeUpdate(sql);
-            sql = "INSERT INTO global_stats VALUES ('NUM_TRANSVERSSIONS', 'Number of transversions'," + globalStats.getTransversionsCount() + ");";
+            sql = "INSERT INTO global_stats VALUES ('NUM_TRANSVERSIONS', 'Number of transversions'," + globalStats.getTransversionsCount() + ");";
             stmt.executeUpdate(sql);
             if (globalStats.getTransversionsCount() > 0) {
                 titv = globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount();
@@ -264,7 +217,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
             sql = "INSERT INTO global_stats VALUES ('AVG_QUALITY', 'Average quality'," + avg + ");";
             stmt.executeUpdate(sql);
 
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
             stmt.close();
 
         } catch (SQLException e) {
@@ -282,7 +235,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         String name;
         boolean res = true;
         try {
-            pstmt = con.prepareStatement(sql);
+            pstmt = SqliteSingletonConnection.getConnection().prepareStatement(sql);
 
             for (Map.Entry<String, SampleStat> entry : sampleStat.getSamplesStats().entrySet()) {
                 s = entry.getValue();
@@ -295,7 +248,7 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
                 pstmt.execute();
 
             }
-            con.commit();
+            SqliteSingletonConnection.getConnection().commit();
             pstmt.close();
         } catch (SQLException e) {
             System.err.println("SAMPLE_STATS: " + e.getClass().getName() + ": " + e.getMessage());
@@ -316,56 +269,5 @@ public class VariantStatsSqliteDataWriter implements VariantStatsDataWriter {
         return false;
     }
 
-    @Override
-    public boolean writeVariantEffect(List<VariantEffect> batchEffect) {
 
-        String sql = "INSERT INTO variant_effect(chromosome	, position , reference_allele , alternative_allele , " +
-                "feature_id , feature_name , feature_type , feature_biotype , feature_chromosome , feature_start , " +
-                "feature_end , feature_strand , snp_id , ancestral , alternative , gene_id , transcript_id , gene_name , " +
-                "consequence_type , consequence_type_obo , consequence_type_desc , consequence_type_type , aa_position , " +
-                "aminoacid_change , codon_change) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-
-        boolean res = true;
-
-        try {
-            pstmt = con.prepareStatement(sql);
-
-            for (VariantEffect v : batchEffect) {
-                pstmt.setString(1, v.getChromosome());
-                pstmt.setInt(2, v.getPosition());
-                pstmt.setString(3, v.getReferenceAllele());
-                pstmt.setString(4, v.getAlternativeAllele());
-                pstmt.setString(5, v.getFeatureId());
-                pstmt.setString(6, v.getFeatureName());
-                pstmt.setString(7, v.getFeatureType());
-                pstmt.setString(8, v.getFeatureBiotype());
-                pstmt.setString(9, v.getFeatureChromosome());
-                pstmt.setInt(10, v.getFeatureStart());
-                pstmt.setInt(11, v.getFeatureEnd());
-                pstmt.setString(12, v.getFeatureStrand());
-                pstmt.setString(13, v.getSnpId());
-                pstmt.setString(14, v.getAncestral());
-                pstmt.setString(15, v.getAlternative());
-                pstmt.setString(16, v.getGeneId());
-                pstmt.setString(17, v.getTranscriptId());
-                pstmt.setString(18, v.getGeneName());
-                pstmt.setString(19, v.getConsequenceType());
-                pstmt.setString(20, v.getConsequenceTypeObo());
-                pstmt.setString(21, v.getConsequenceTypeDesc());
-                pstmt.setString(22, v.getConsequenceTypeType());
-                pstmt.setInt(23, v.getAaPosition());
-                pstmt.setString(24, v.getAminoacidChange());
-                pstmt.setString(25, v.getCodonChange());
-
-                pstmt.execute();
-
-            }
-            con.commit();
-            pstmt.close();
-        } catch (SQLException e) {
-            System.err.println("VARIANT_EFFECT: " + e.getClass().getName() + ": " + e.getMessage());
-            res = false;
-        }
-        return res;
-    }
 }

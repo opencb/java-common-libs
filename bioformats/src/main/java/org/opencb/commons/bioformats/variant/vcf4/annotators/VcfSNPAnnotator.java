@@ -1,14 +1,11 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,12 +18,18 @@ import java.util.List;
  */
 public class VcfSNPAnnotator implements VcfAnnotator {
 
+    //    private Client wsRestClient;
+//    private WebTarget webResource;
     private Client wsRestClient;
-    private WebTarget webResource;
+    private WebResource webResource;
+
 
     public VcfSNPAnnotator() {
-        wsRestClient = ClientBuilder.newClient();
-        webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/position/");
+//        wsRestClient = ClientBuilder.newClient();
+//        webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/position/");
+
+        wsRestClient = Client.create();
+        webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/position/");
 
     }
 
@@ -40,7 +43,8 @@ public class VcfSNPAnnotator implements VcfAnnotator {
 
         }
         System.out.println(positions.toString());
-        Response response = webResource.path(positions.toString().substring(0, positions.toString().length() - 1)).path("snp").queryParam("of", "json").request("text/plain").get();
+//        Response response = webResource.path(positions.toString().substring(0, positions.toString().length() - 1)).path("snp").queryParam("of", "json").request("text/plain").get();
+        String response = webResource.path(positions.toString().substring(0, positions.toString().length() - 1)).path("snp").queryParam("of", "json").type("text/plain").get(String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -64,7 +68,6 @@ public class VcfSNPAnnotator implements VcfAnnotator {
     public void annot(VcfRecord elem) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
-
 
     class SnpJson {
         private int snpId;

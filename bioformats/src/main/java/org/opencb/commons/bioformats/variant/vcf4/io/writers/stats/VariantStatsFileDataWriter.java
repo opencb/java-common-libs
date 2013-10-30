@@ -27,8 +27,6 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     private PrintWriter globalPw;
     private PrintWriter samplePw;
     private Map<String, Map<String, PrintWriter>> mapGroupPw;
-
-
     private String path;
     private String pathSampleGroup;
     private String pathGroup;
@@ -104,7 +102,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
                     "%-10.2f%-10.2f%-10.2f%-10.2f\n",
                     v.getChromosome(),
                     v.getPosition(),
-                    (v.getIndel() ? "Y" : "N"),
+                    (v.isIndel() ? "Y" : "N"),
                     v.getRefAlleles(),
                     Arrays.toString(v.getAltAlleles()),
                     v.getMafAllele(),
@@ -230,7 +228,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
                         "%-10.2f%-10.2f%-10.2f%-10.2f\n",
                         v.getChromosome(),
                         v.getPosition(),
-                        (v.getIndel() ? "Y" : "N"),
+                        (v.isIndel() ? "Y" : "N"),
                         v.getRefAlleles(),
                         Arrays.toString(v.getAltAlleles()),
                         v.getMafAllele(),
@@ -256,12 +254,6 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
         return true;
     }
-
-    @Override
-    public boolean writeVariantEffect(List<VariantEffect> batchEffect) {
-        return false;
-    }
-
 
     public void writeVariantStatsHeader() {
         variantPw.append(String.format("%-5s%-10s%-10s%-5s%-10s%-10s%-10s" +

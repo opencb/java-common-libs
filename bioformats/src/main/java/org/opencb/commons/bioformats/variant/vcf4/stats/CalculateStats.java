@@ -99,7 +99,15 @@ public class CalculateStats {
                         break;
                     case HAPLOID:
                         // Haploid (chromosome X/Y)
-                        allelesCount[g.getAllele1()]++;
+
+
+                        try {
+                            allelesCount[g.getAllele1()]++;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            System.out.println("vcfRecord = " + vcfRecord);
+                            System.out.println("g = " + g);
+
+                        }
                         totalAllelesCount++;
                         break;
                     default:

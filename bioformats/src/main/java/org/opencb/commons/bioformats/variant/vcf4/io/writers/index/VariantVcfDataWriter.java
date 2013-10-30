@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.io.writers.vcf;
+package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
 
 
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfDataWriter implements VariantDataWriter {
+public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
 
     private PrintWriter printer;
     private String filename;
@@ -57,19 +57,22 @@ public class VariantVcfDataWriter implements VariantDataWriter {
         return true;
     }
 
-
     @Override
-    public void writeVcfHeader(String header) {
+    public boolean writeHeader(String header) {
 
         printer.append(header);
+
+        return true;
 
     }
 
     @Override
-    public void writeBatch(List<VcfRecord> batch) {
+    public boolean writeBatch(List<VcfRecord> batch) {
 
         for (VcfRecord record : batch) {
             printer.append(record.toString()).append("\n");
         }
+
+        return true;
     }
 }

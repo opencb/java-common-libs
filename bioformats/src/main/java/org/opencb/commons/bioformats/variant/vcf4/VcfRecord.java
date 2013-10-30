@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4;
 
 import org.opencb.commons.bioformats.feature.Genotype;
+import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
 import java.util.*;
 
@@ -15,9 +16,11 @@ public class VcfRecord {
     private String filter;
     private String info;
     private String format;
-
+    private List<String> sampleOrder;
     private Map<String, String> sampleRawData;
     private Map<String, Map<String, String>> sampleData;
+    private VcfVariantStat stats;
+    private List<VariantEffect> effects;
 
     /**
      * @param chromosome
@@ -41,6 +44,9 @@ public class VcfRecord {
 
         this.sampleRawData = new HashMap<>();
         this.sampleData = new HashMap<>();
+        this.sampleOrder = new ArrayList<>();
+        this.effects = null;
+        this.stats = null;
     }
 
     /**
@@ -78,11 +84,12 @@ public class VcfRecord {
     public VcfRecord(String[] fields, List<String> sampleNames) {
         this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
 
+        this.sampleOrder = sampleNames;
+
         for (int i = 9; i < fields.length; i++) {
             sampleRawData.put(sampleNames.get(i - 9), fields[i]);
         }
     }
-
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -101,12 +108,15 @@ public class VcfRecord {
         if (format != null) {
             builder.append("\t").append(format);
         }
-//        if (samples != null) {
-//            builder.append("\t").append(ListUtils.toString(samples, "\t"));
-//        }
+        if (sampleOrder.size() > 0) {
+
+            for (String sample : sampleOrder) {
+                builder.append("\t").append(sampleRawData.get(sample));
+            }
+        }
+
         return builder.toString();
     }
-
 
     /**
      * @return the chromosome
@@ -221,17 +231,17 @@ public class VcfRecord {
     }
 
     /**
-     * @param format the format to set
-     */
-    public void setFormat(String format) {
-        this.format = format;
-    }
-
-    /**
      * @return the format
      */
     public String getFormat() {
         return format;
+    }
+
+    /**
+     * @param format the format to set
+     */
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     public String[] getAltAlleles() {
@@ -265,7 +275,6 @@ public class VcfRecord {
         return sampleRawData.keySet();
     }
 
-
     public Map<String, String> getSampleData(String sampleName) {
         if (sampleData.size() == 0) {
             initializeSamplesValues();
@@ -273,7 +282,6 @@ public class VcfRecord {
 
         return sampleData.get(sampleName);
     }
-
 
     public Map<String, Map<String, String>> getSampleData() {
         if (sampleData.size() == 0) {
@@ -283,17 +291,14 @@ public class VcfRecord {
         return sampleData;
     }
 
-
     public String getSampleRawData(String sampleName) {
 
         return sampleRawData.get(sampleName);
     }
 
-
     public Map<String, String> getSampleRawData() {
         return sampleRawData;
     }
-
 
     private void initializeSamplesValues() {
         Map<String, String> sampleValuesMap;
@@ -325,5 +330,26 @@ public class VcfRecord {
             this.info += ";" + info;
         }
 
+    }
+
+    public VcfVariantStat getStats() {
+        return stats;
+    }
+
+    public void setStats(VcfVariantStat stats) {
+        this.stats = stats;
+    }
+
+    public List<VariantEffect> getEffects() {
+        return effects;
+    }
+
+    public void setEffects(List<VariantEffect> effects) {
+        this.effects = effects;
+    }
+
+    public void addEffect(VariantEffect effect) {
+        if (this.effects != null)
+            this.effects.add(effect);
     }
 }

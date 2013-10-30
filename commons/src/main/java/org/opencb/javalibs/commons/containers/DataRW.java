@@ -94,7 +94,6 @@ public class DataRW<R, W> {
         return this.write.size();
     }
 
-
     public void incConsumer() {
         this.numProducersConsumers++;
     }
@@ -112,7 +111,6 @@ public class DataRW<R, W> {
 
         return read.size() + " - " + write.size() + " --- " + numProducersConsumers;
     }
-
 
     public boolean isContinueProducing() {
         return continueProducing;

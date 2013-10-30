@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.readers;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 import org.opencb.commons.bioformats.variant.vcf4.*;
@@ -38,19 +38,17 @@ public class VariantVcfDataReader implements VariantDataReader {
         this.filename = filename;
     }
 
-
     @Override
     public boolean open() {
 
         try {
-//            this.path = new File(this.filename);
             this.path = Paths.get(this.filename);
             Files.exists(this.path);
 
             vcf4 = new Vcf4();
-            if(path.toFile().getName().endsWith(".gz")) {
+            if (path.toFile().getName().endsWith(".gz")) {
                 this.reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
-            }else {
+            } else {
                 this.reader = Files.newBufferedReader(path, Charset.defaultCharset());
             }
 
@@ -61,7 +59,6 @@ public class VariantVcfDataReader implements VariantDataReader {
 
         return true;
     }
-
 
     @Override
     public boolean pre() {
@@ -84,7 +81,6 @@ public class VariantVcfDataReader implements VariantDataReader {
         }
         return true;
     }
-
 
     @Override
     public boolean post() {
@@ -147,7 +143,6 @@ public class VariantVcfDataReader implements VariantDataReader {
         return listRecords;
     }
 
-
     @Override
     public List<String> getSampleNames() {
         return this.vcf4.getSampleNames();
@@ -187,7 +182,6 @@ public class VariantVcfDataReader implements VariantDataReader {
         return header.toString();
     }
 
-
     private void processHeader() throws IOException, FileFormatException {
         VcfInfoHeader vcfInfo;
         VcfFilterHeader vcfFilter;
@@ -197,10 +191,11 @@ public class VariantVcfDataReader implements VariantDataReader {
         String[] fields;
 
         BufferedReader localBufferedReader;
-        if (Files.probeContentType(file.toPath()).contains("gzip")) {
-            localBufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(this.file))));
+
+        if (Files.probeContentType(path).contains("gzip")) {
+            localBufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
         } else {
-            localBufferedReader = new BufferedReader(new FileReader(this.file));
+            localBufferedReader = new BufferedReader(new FileReader(path.toFile()));
         }
 
 

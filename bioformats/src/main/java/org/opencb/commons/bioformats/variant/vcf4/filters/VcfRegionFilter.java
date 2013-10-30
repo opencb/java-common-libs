@@ -1,7 +1,11 @@
 package org.opencb.commons.bioformats.variant.vcf4.filters;
 
 
+import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,29 +16,48 @@ import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
  */
 public class VcfRegionFilter extends VcfFilter {
 
-    private String chromosome;
-    private long start;
-    private long end;
+    private List<Region> regionList;
 
     public VcfRegionFilter(String chromosome, long start, long end) {
         super();
-        this.chromosome = chromosome;
-        this.start = start;
-        this.end = end;
+        regionList = new ArrayList<>();
+        regionList.add(new Region(chromosome, start, end));
     }
 
     public VcfRegionFilter(String chromosome, long start, long end, int priority) {
         super(priority);
-        this.chromosome = chromosome;
-        this.start = start;
-        this.end = end;
+        regionList = new ArrayList<>();
+        regionList.add(new Region(chromosome, start, end));
+
     }
 
+    public VcfRegionFilter(String regions) {
+        super();
+        regionList = new ArrayList<>();
+
+        String[] splits = regions.split(",");
+        for (String split : splits) {
+            regionList.add(new Region(split));
+        }
+    }
+
+    public VcfRegionFilter(String regions, int priority) {
+        super(priority);
+        regionList = new ArrayList<>();
+
+        String[] splits = regions.split(",");
+        for (String split : splits) {
+            regionList.add(new Region(split));
+        }
+    }
 
     @Override
     public boolean apply(VcfRecord vcfRecord) {
-        return (vcfRecord.getChromosome().equalsIgnoreCase(chromosome) &&
-                vcfRecord.getPosition() >= start
-                && vcfRecord.getPosition() <= end);
+        for (Region r : regionList) {
+            if (r.contains(vcfRecord.getChromosome(), vcfRecord.getPosition())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

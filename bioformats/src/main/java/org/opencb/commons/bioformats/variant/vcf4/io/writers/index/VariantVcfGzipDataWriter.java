@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.io.writers.vcf;
+package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
 
 
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
@@ -17,7 +17,7 @@ import java.util.zip.GZIPOutputStream;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfGzipDataWriter implements VariantDataWriter {
+public class VariantVcfGzipDataWriter implements VariantDataWriter<VcfRecord> {
 
     private BufferedWriter printer;
     private String filename;
@@ -64,27 +64,32 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter {
         return true;
     }
 
-
     @Override
-    public void writeVcfHeader(String header) {
+    public boolean writeHeader(String header) {
 
+        boolean res = true;
         try {
             printer.append(header).append("\n");
         } catch (IOException e) {
             e.printStackTrace();
+            res = false;
         }
+        return res;
 
     }
 
     @Override
-    public void writeBatch(List<VcfRecord> batch) {
+    public boolean writeBatch(List<VcfRecord> batch) {
 
-        for (VcfRecord record : batch) {
-            try {
+        boolean res = true;
+        try {
+            for (VcfRecord record : batch) {
                 printer.append(record.toString()).append("\n");
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            res = false;
         }
+        return res;
     }
 }
