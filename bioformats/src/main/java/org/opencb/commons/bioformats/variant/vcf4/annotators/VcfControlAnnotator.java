@@ -1,32 +1,26 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
+import java.io.IOException;
+import java.util.*;
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.stats.CalculateStats;
 import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
-import java.io.IOException;
-import java.util.*;
-
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 9/14/13
- * Time: 1:11 PM
- * To change this template use File | Settings | File Templates.
+ * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
+ * change this template use File | Settings | File Templates.
  */
 public class VcfControlAnnotator implements VcfAnnotator {
 
     // private TabixReader tabix;
     private String tabixFile;
     private List<String> samples;
-    private HashMap<String, Integer> samplesMap;
-    private HashMap<String, String> controlList;
-
+    private Map<String, Integer> samplesMap;
+    private Map<String, String> controlList;
     private Map<Long, Map<String, TabixReader>> multipleControlsTabix;
-    private HashMap<Long, TabixReader> tabix;
-
+    private Map<Long, TabixReader> tabix;
     private String prefix;
     private boolean single;
 
@@ -55,7 +49,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
         single = true;
     }
 
-    public VcfControlAnnotator(String infoPrefix, HashMap<String, String> controlList) {
+    public VcfControlAnnotator(String infoPrefix, Map<String, String> controlList) {
 
         this.prefix = infoPrefix;
         this.controlList = controlList;
@@ -99,10 +93,11 @@ public class VcfControlAnnotator implements VcfAnnotator {
     @Override
     public void annot(List<VcfRecord> batch) {
 
-        if (single)
+        if (single) {
             singleAnnot(batch);
-        else
+        } else {
             multipleAnnot(batch);
+        }
     }
 
     private void singleAnnot(List<VcfRecord> batch) {
