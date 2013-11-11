@@ -1,20 +1,16 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
+import java.io.IOException;
+import java.util.*;
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.stats.CalculateStats;
 import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
-import java.io.IOException;
-import java.util.*;
-
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 9/14/13
- * Time: 1:11 PM
- * To change this template use File | Settings | File Templates.
+ * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
+ * change this template use File | Settings | File Templates.
  */
 public class VcfControlAnnotator implements VcfAnnotator {
 
@@ -97,10 +93,11 @@ public class VcfControlAnnotator implements VcfAnnotator {
     @Override
     public void annot(List<VcfRecord> batch) {
 
-        if (single)
+        if (single) {
             singleAnnot(batch);
-        else
+        } else {
             multipleAnnot(batch);
+        }
     }
 
     private void singleAnnot(List<VcfRecord> batch) {
