@@ -16,5 +16,7 @@ import java.util.List;
 public interface VariantDataReader extends DataReader<VcfRecord> {
     public List<String> getSampleNames();
 
+//    public void setSampleNames(List<String> sampleNames);
+
     public String getHeader();
 }
