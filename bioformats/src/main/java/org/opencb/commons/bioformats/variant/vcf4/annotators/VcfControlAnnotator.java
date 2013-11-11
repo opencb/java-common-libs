@@ -21,12 +21,10 @@ public class VcfControlAnnotator implements VcfAnnotator {
     // private TabixReader tabix;
     private String tabixFile;
     private List<String> samples;
-    private HashMap<String, Integer> samplesMap;
-    private HashMap<String, String> controlList;
-
+    private Map<String, Integer> samplesMap;
+    private Map<String, String> controlList;
     private Map<Long, Map<String, TabixReader>> multipleControlsTabix;
-    private HashMap<Long, TabixReader> tabix;
-
+    private Map<Long, TabixReader> tabix;
     private String prefix;
     private boolean single;
 
@@ -55,7 +53,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
         single = true;
     }
 
-    public VcfControlAnnotator(String infoPrefix, HashMap<String, String> controlList) {
+    public VcfControlAnnotator(String infoPrefix, Map<String, String> controlList) {
 
         this.prefix = infoPrefix;
         this.controlList = controlList;
@@ -125,7 +123,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
         List<VcfVariantStat> statsBatch;
-        HashMap<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+        Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
 
         int cont = 0;
         for (VcfRecord record : batch) {
@@ -182,7 +180,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
         Map<String, TabixReader> tabixMap;
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
         List<VcfVariantStat> statsBatch;
-        HashMap<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+        Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
 
 
         if (multipleControlsTabix.containsKey(pid)) {

@@ -66,5 +66,9 @@
             <artifactId>jersey-multipart</artifactId>
             <version>1.17</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 </project>

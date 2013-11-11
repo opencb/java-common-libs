@@ -5,10 +5,7 @@ import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +15,7 @@ import java.util.TreeSet;
  * To change this template use File | Settings | File Templates.
  */
 public class VcfBedFilter extends VcfFilter {
-    private HashMap<String, SortedSet<Region>> regions;
+    private Map<String, SortedSet<Region>> regions;
 
 
     public VcfBedFilter(String filename) {
