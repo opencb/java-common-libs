@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
 import com.google.common.base.Joiner;
-import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
+import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
 

@@ -1,7 +1,6 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.stats;
 
 import org.opencb.commons.bioformats.commons.DataWriter;
-import org.opencb.commons.bioformats.variant.vcf4.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.stats.*;
 
 import java.io.IOException;
