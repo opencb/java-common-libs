@@ -1,5 +1,7 @@
 package org.opencb.commons.bioformats.feature;
 
+import java.util.Arrays;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aleman
@@ -15,6 +17,58 @@ public class Genotype {
 
 
     public Genotype(String genotype) {
+        parseGenotype(genotype);
+
+    }
+
+    public Genotype(String genotype, String ref, String alt) {
+        String[] alleles = genotype.split("/|\\|");
+        StringBuilder newGenotype = new StringBuilder();
+        if (alleles[0].equals(".")) {
+            newGenotype.append(".");
+        } else if (alleles[0].equals(ref)) {
+            newGenotype.append("0");
+        } else {
+            String[] altAlleles = alt.split(",");
+            String a = null;
+            for (int i = 0; i < altAlleles.length; i++) {
+                if (alleles[0].equals(altAlleles[i])) {
+                    a = String.valueOf(i + 1);
+                }
+            }
+            if (a != null) {
+                newGenotype.append(a);
+            } else {
+                newGenotype.append(".");
+            }
+        }
+
+        newGenotype.append("/");
+
+        if (alleles[1].equals(".")) {
+            newGenotype.append(".");
+        } else if (alleles[1].equals(ref)) {
+            newGenotype.append("0");
+        } else {
+            String[] altAlleles = alt.split(",");
+            String a = null;
+            for (int i = 0; i < altAlleles.length; i++) {
+                if (alleles[1].equals(altAlleles[i])) {
+                    a = String.valueOf(i + 1);
+                }
+            }
+            if (a != null) {
+                newGenotype.append(a);
+            } else {
+                newGenotype.append(".");
+            }
+        }
+
+        parseGenotype(newGenotype.toString());
+
+    }
+
+    private void parseGenotype(String genotype) {
         this.code = null;
         this.count = 0;
         if (genotype.length() < 3) {
@@ -48,7 +102,6 @@ public class Genotype {
             this.code = AllelesCode.ALLELES_OK;
 
         }
-
     }
 
     public Integer getAllele1() {

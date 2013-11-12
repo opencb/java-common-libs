@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
+import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.stats.CalculateStats;
 import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
@@ -75,35 +76,103 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
 
     private void parseAndAnnot(VcfRecord record, VcfRecord tabixRecord) {
 
-        Pattern pattern;
-        Matcher matcher;
+        Pattern patternGenot, patternGenotCount, patternAlleleCount;
+        Matcher matcherGenot, matcherGenotCount, matcherAlleleCount;
         String info = tabixRecord.getInfo();
+        StringBuilder gts = new StringBuilder(this.prefix + "_gt=");
+        Genotype g = null;
+        int min = Integer.MAX_VALUE;
+        int minPos = -1;
+        int count = 0;
+        String maf = ".";
 
-        pattern = Pattern.compile("MAF=(\\d+\\.\\d+),(\\d+\\.\\d+),(\\d+\\.\\d+)");
-        matcher = pattern.matcher(info);
-        if (matcher.find()) {
-            float maf = Float.valueOf(matcher.group(3)) / 100;
-            record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", maf));
+        patternGenot = Pattern.compile("MAF=(\\d+\\.\\d+),(\\d+\\.\\d+),(\\d+\\.\\d+)");
+        matcherGenot = patternGenot.matcher(info);
+        if (matcherGenot.find()) {
+            record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", Float.valueOf(matcherGenot.group(3)) / 100));
         }
 
-//        if (tabixRecord.isIndel()) {
-//            pattern = Pattern.compile("GTS=((\\w,?)*)");
-//            matcher = pattern.matcher(info);
-//            if(matcher.find()){
-//                System.out.println(matcher.toString());
-//            }
-//
-//        }else{
-//            pattern = Pattern.compile("GTS=(([ACTG],?)*)");
-//            matcher = pattern.matcher(info);
-//            if(matcher.find()){
-//                System.out.println(matcher.toString());
-//            }
-//        }
+        if (tabixRecord.isIndel()) {
+            patternGenot = Pattern.compile("GTS=((\\w,?)*)");
+            patternAlleleCount = Pattern.compile("TAC=((\\d+,?)*)");
+            patternGenotCount = Pattern.compile(";GTC=((\\d+,?)*)");
+
+            matcherGenot = patternGenot.matcher(info);
+            matcherAlleleCount = patternAlleleCount.matcher(info);
+            matcherGenotCount = patternGenotCount.matcher(info);
 
 
-//        record.addInfoField(this.prefix + "_gt=.");
-//        record.addInfoField(this.prefix + "_amaf=.");
+            if (matcherGenot.find() && matcherGenotCount.find() && matcherAlleleCount.find()) {
+
+                String[] genotypes = matcherGenot.group(1).split(",");
+                String[] genotypesCounts = matcherGenotCount.group(1).split(",");
+                String[] alleleCounts = matcherAlleleCount.group(1).split(",");
+
+                for (int i = 0; i < genotypes.length; i++) {
+//                    System.out.println(genotypes[i]);
+
+                }
+
+            }
+
+        } else {
+            patternGenot = Pattern.compile("GTS=(([A-Z]+,?)*)");
+            patternAlleleCount = Pattern.compile("TAC=((\\d+,?)*)");
+            patternGenotCount = Pattern.compile(";GTC=((\\d+,?)*)");
+
+            matcherGenot = patternGenot.matcher(info);
+            matcherAlleleCount = patternAlleleCount.matcher(info);
+            matcherGenotCount = patternGenotCount.matcher(info);
+            if (matcherGenot.find() && matcherGenotCount.find() && matcherAlleleCount.find()) {
+
+                String[] genotypes = matcherGenot.group(1).split(",");
+                String[] genotypesCounts = matcherGenotCount.group(1).split(",");
+                String[] alleleCounts = matcherAlleleCount.group(1).split(",");
+
+                for (int i = 0; i < genotypes.length; i++) {
+                    String gt = genotypes[i];
+
+
+                    if (gt.length() == 1) {
+                        g = new Genotype(gt + "/" + gt, tabixRecord.getReference(), tabixRecord.getAlternate());
+                    } else if (gt.length() == 2) {
+                        g = new Genotype(gt.charAt(0) + "/" + gt.charAt(1), tabixRecord.getReference(), tabixRecord.getAlternate());
+                    } else {
+                        System.out.println("gt.length() = " + gt.length());
+                    }
+
+                    g.setCount(Integer.valueOf(genotypesCounts[i]));
+                    gts.append(g);
+
+                    if (i + 1 < genotypes.length) {
+                        gts.append(",");
+                    }
+                }
+
+
+                for (int i = 0; i < alleleCounts.length; i++) {
+                    int alleleCount = Integer.parseInt(alleleCounts[i]);
+                    if (alleleCount < min) {
+                        min = alleleCount;
+                        minPos = i;
+                    }
+                    count += alleleCount;
+                }
+
+                if (minPos < 0) {
+
+                } else if (minPos == 0) {
+                    maf = tabixRecord.getReference();
+                } else {
+                    maf = tabixRecord.getAlternate().split(",")[minPos - 1];
+                }
+
+            }
+
+        }
+
+        record.addInfoField(gts.toString());
+        record.addInfoField(this.prefix + "_amaf=" + maf);
 
 
     }
