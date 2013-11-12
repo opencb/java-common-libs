@@ -353,4 +353,8 @@ public class VcfRecord {
         if (this.effects != null)
             this.effects.add(effect);
     }
+
+    public boolean isIndel() {
+        return this.reference.length() > 1 || this.alternate.length() > 1;
+    }
 }
