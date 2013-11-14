@@ -24,29 +24,34 @@ public class VcfControlAnnotator implements VcfAnnotator {
     private String prefix;
     private boolean single;
 
-    public VcfControlAnnotator(String infoPrefix, String control) throws IOException {
+    public VcfControlAnnotator(String infoPrefix, String control){
 
         this.prefix = infoPrefix;
         this.tabixFile = control;
         this.tabix = new LinkedHashMap<>();
-        TabixReader tabixReader = new TabixReader(this.tabixFile);
+        TabixReader tabixReader;
+        try {
+            tabixReader = new TabixReader(this.tabixFile);
+            String line;
+            while ((line = tabixReader.readLine()) != null && !line.startsWith("#CHROM")) {
+            }
 
-        String line;
-        while ((line = tabixReader.readLine()) != null && !line.startsWith("#CHROM")) {
+            String[] fields = line.split("\t");
+
+            samples = new ArrayList<>(fields.length - 9);
+            samplesMap = new LinkedHashMap<>(fields.length - 9);
+            for (int i = 9, j = 0; i < fields.length; i++, j++) {
+                samples.add(fields[i]);
+                samplesMap.put(fields[i], j);
+
+            }
+
+            tabixReader.close();
+            single = true;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        String[] fields = line.split("\t");
-
-        samples = new ArrayList<>(fields.length - 9);
-        samplesMap = new LinkedHashMap<>(fields.length - 9);
-        for (int i = 9, j = 0; i < fields.length; i++, j++) {
-            samples.add(fields[i]);
-            samplesMap.put(fields[i], j);
-
-        }
-
-        tabixReader.close();
-        single = true;
     }
 
     public VcfControlAnnotator(String infoPrefix, Map<String, String> controlList) {
@@ -162,7 +167,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
                 record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", statRecord.getMaf()));
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", statRecord.getMaf()));
                 record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
             }
         }
@@ -241,7 +246,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
                 record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", statRecord.getMaf()));
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", statRecord.getMaf()));
                 record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
             }
         }

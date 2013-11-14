@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
@@ -12,6 +13,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,6 +67,10 @@ public class VcfSNPAnnotator implements VcfAnnotator {
                 }
                 cont++;
             }
+
+        } catch (JsonParseException e) {
+            System.err.println(response);
+            e.printStackTrace();
 
         } catch (IOException e) {
             e.printStackTrace();

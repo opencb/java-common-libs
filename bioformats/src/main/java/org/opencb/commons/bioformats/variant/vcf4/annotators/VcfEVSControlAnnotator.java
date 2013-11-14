@@ -52,13 +52,8 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
                     while (it != null && line != null) {
                         String[] fields = line.split("\t");
                         tabixRecord = new VcfRecord(fields[0], Integer.valueOf(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
-
-
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
-
                             parseAndAnnot(record, tabixRecord);
-
-
                         }
                         line = it.next();
                     }
@@ -68,54 +63,27 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
             } catch (ArrayIndexOutOfBoundsException e) { // If the Chr does not exist in Controls... TabixReader throws ArrayIndexOut...
                 continue;
             }
-
-
         }
 
     }
 
     private void parseAndAnnot(VcfRecord record, VcfRecord tabixRecord) {
 
-        Pattern patternGenot, patternGenotCount, patternAlleleCount;
-        Matcher matcherGenot, matcherGenotCount, matcherAlleleCount;
-        String info = tabixRecord.getInfo();
-        StringBuilder gts = new StringBuilder(this.prefix + "_gt=");
-        Genotype g = null;
-        int min = Integer.MAX_VALUE;
-        int minPos = -1;
-        int count = 0;
-        String maf = ".";
+        if (!tabixRecord.isIndel()) {
+            Pattern patternGenot, patternGenotCount, patternAlleleCount;
+            Matcher matcherGenot, matcherGenotCount, matcherAlleleCount;
+            String info = tabixRecord.getInfo();
+            StringBuilder gts = new StringBuilder(this.prefix + "_gt=");
+            Genotype g = null;
+            int min = Integer.MAX_VALUE;
+            int minPos = -1;
+            String maf = ".";
 
-        patternGenot = Pattern.compile("MAF=(\\d+\\.\\d+),(\\d+\\.\\d+),(\\d+\\.\\d+)");
-        matcherGenot = patternGenot.matcher(info);
-        if (matcherGenot.find()) {
-            record.addInfoField(this.prefix + "_maf=" + String.format("%.3f", Float.valueOf(matcherGenot.group(3)) / 100));
-        }
-
-        if (tabixRecord.isIndel()) {
-            patternGenot = Pattern.compile("GTS=((\\w,?)*)");
-            patternAlleleCount = Pattern.compile("TAC=((\\d+,?)*)");
-            patternGenotCount = Pattern.compile(";GTC=((\\d+,?)*)");
-
+            patternGenot = Pattern.compile("MAF=(\\d+\\.\\d+),(\\d+\\.\\d+),(\\d+\\.\\d+)");
             matcherGenot = patternGenot.matcher(info);
-            matcherAlleleCount = patternAlleleCount.matcher(info);
-            matcherGenotCount = patternGenotCount.matcher(info);
-
-
-            if (matcherGenot.find() && matcherGenotCount.find() && matcherAlleleCount.find()) {
-
-                String[] genotypes = matcherGenot.group(1).split(",");
-                String[] genotypesCounts = matcherGenotCount.group(1).split(",");
-                String[] alleleCounts = matcherAlleleCount.group(1).split(",");
-
-                for (int i = 0; i < genotypes.length; i++) {
-//                    System.out.println(genotypes[i]);
-
-                }
-
+            if (matcherGenot.find()) {
+                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", Float.valueOf(matcherGenot.group(3)) / 100));
             }
-
-        } else {
             patternGenot = Pattern.compile("GTS=(([A-Z]+,?)*)");
             patternAlleleCount = Pattern.compile("TAC=((\\d+,?)*)");
             patternGenotCount = Pattern.compile(";GTC=((\\d+,?)*)");
@@ -156,7 +124,6 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
                         min = alleleCount;
                         minPos = i;
                     }
-                    count += alleleCount;
                 }
 
                 if (minPos < 0) {
@@ -169,10 +136,9 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
 
             }
 
+            record.addInfoField(gts.toString());
+            record.addInfoField(this.prefix + "_amaf=" + maf);
         }
-
-        record.addInfoField(gts.toString());
-        record.addInfoField(this.prefix + "_amaf=" + maf);
 
 
     }
