@@ -333,6 +333,14 @@ public class VcfRecord {
 
     }
 
+    public void addSnp(String snp) {
+        if (this.id.equals(".")) {
+            this.id = snp;
+        } else {
+            this.id += ";" + snp;
+        }
+    }
+
     public VcfVariantStat getStats() {
         return stats;
     }

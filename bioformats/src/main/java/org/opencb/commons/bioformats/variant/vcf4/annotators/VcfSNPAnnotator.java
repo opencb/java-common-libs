@@ -1,12 +1,18 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -18,82 +24,57 @@ import java.util.List;
  */
 public class VcfSNPAnnotator implements VcfAnnotator {
 
-    //    private Client wsRestClient;
-//    private WebTarget webResource;
     private Client wsRestClient;
-    private WebResource webResource;
-
+    private WebTarget webResource;
 
     public VcfSNPAnnotator() {
-//        wsRestClient = ClientBuilder.newClient();
-//        webResource = wsRestClient.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/position/");
-
-        wsRestClient = Client.create();
-        webResource = wsRestClient.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/position/");
+        wsRestClient = ClientBuilder.newClient();
+        webResource = wsRestClient.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/genomic/position");
 
     }
 
     @Override
     public void annot(List<VcfRecord> batch) {
 
-        List<SnpJson> snpList;
         StringBuilder positions = new StringBuilder();
         for (VcfRecord record : batch) {
             positions.append(record.getChromosome()).append(":").append(record.getPosition()).append(",");
 
         }
-        System.out.println(positions.toString());
-//        Response response = webResource.path(positions.toString().substring(0, positions.toString().length() - 1)).path("snp").queryParam("of", "json").request("text/plain").get();
-        String response = webResource.path(positions.toString().substring(0, positions.toString().length() - 1)).path("snp").queryParam("of", "json").type("text/plain").get(String.class);
+
+        Form form = new Form();
+        form.param("position", positions.substring(0, positions.length() - 1));
+
+        Response response = webResource.path("snp").queryParam("of", "json").queryParam("include", "id").request().post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
 
         ObjectMapper mapper = new ObjectMapper();
+        JsonNode actualObj;
+
         try {
-            snpList = mapper.readValue(response.toString(), new TypeReference<List<SnpJson>>() {
-            });
-            System.out.println(snpList);
+            actualObj = mapper.readTree(response.readEntity(String.class));
+            Iterator<JsonNode> it = actualObj.get("response").iterator();
+
+            int cont = 0;
+            while (it.hasNext()) {
+                JsonNode snp = it.next();
+                if (snp.get("numResults").asInt() > 0) {
+                    Iterator<JsonNode> itResults = snp.get("result").iterator();
+                    while (itResults.hasNext()) {
+                        batch.get(cont).addSnp(itResults.next().get("id").asText());
+                    }
+                }
+                cont++;
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
-        System.out.println(response);
     }
 
     @Override
     public void annot(VcfRecord elem) {
     }
 
-    class SnpJson {
-        private int snpId;
-        private String name;
-        private String chromosome;
-        private int start;
-        private int end;
-        private String strand;
-        private int mapWeight;
-        private String alleleString;
-        private String ancestralAllele;
-        private String source;
-        private String displaySoConsequence;
-        private String soConsequenceType;
-        private String displayConsequence;
-        private String sequence;
-
-        private SnpJson(int snpId, String name, String chromosome, int start, int end, String strand, int mapWeight, String alleleString, String ancestralAllele, String source, String displaySoConsequence, String soConsequenceType, String displayConsequence, String sequence) {
-            this.snpId = snpId;
-            this.name = name;
-            this.chromosome = chromosome;
-            this.start = start;
-            this.end = end;
-            this.strand = strand;
-            this.mapWeight = mapWeight;
-            this.alleleString = alleleString;
-            this.ancestralAllele = ancestralAllele;
-            this.source = source;
-            this.displaySoConsequence = displaySoConsequence;
-            this.soConsequenceType = soConsequenceType;
-            this.displayConsequence = displayConsequence;
-            this.sequence = sequence;
-        }
-    }
 }
