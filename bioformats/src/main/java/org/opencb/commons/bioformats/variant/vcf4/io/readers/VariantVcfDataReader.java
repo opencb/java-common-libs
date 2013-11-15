@@ -99,14 +99,9 @@ public class VariantVcfDataReader implements VariantDataReader {
                 VcfRecord vcfRecord = null;
                 if (fields.length == 8) {
                     vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
-//                    vcfRecord.setSampleNames(vcf4.getSampleNames());
-
-//                    vcfRecord.setSampleIndex(vcf4.getSamples());
                 } else {
                     if (fields.length > 8) {
                         vcfRecord = new VcfRecord(fields, vcf4.getSampleNames());
-//                        vcfRecord.setSampleNames(vcf4.getSampleNames());
-//                        vcfRecord.setSampleIndex(vcf4.getSamples());
                     }
                 }
                 return vcfRecord;

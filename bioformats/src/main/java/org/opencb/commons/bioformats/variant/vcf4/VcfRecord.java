@@ -84,7 +84,6 @@ public class VcfRecord {
 
     public VcfRecord(String[] fields, List<String> sampleNames) {
         this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
-
         this.sampleOrder = sampleNames;
 
         for (int i = 9; i < fields.length; i++) {

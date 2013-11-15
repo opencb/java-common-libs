@@ -13,7 +13,6 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,7 +31,6 @@ public class VcfSNPAnnotator implements VcfAnnotator {
     public VcfSNPAnnotator() {
         wsRestClient = ClientBuilder.newClient();
         webResource = wsRestClient.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/genomic/position");
-
     }
 
     @Override
@@ -41,7 +39,6 @@ public class VcfSNPAnnotator implements VcfAnnotator {
         StringBuilder positions = new StringBuilder();
         for (VcfRecord record : batch) {
             positions.append(record.getChromosome()).append(":").append(record.getPosition()).append(",");
-
         }
 
         Form form = new Form();
@@ -52,8 +49,10 @@ public class VcfSNPAnnotator implements VcfAnnotator {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode actualObj;
 
+        String resp = null;
         try {
-            actualObj = mapper.readTree(response.readEntity(String.class));
+            resp = response.readEntity(String.class);
+            actualObj = mapper.readTree(resp);
             Iterator<JsonNode> it = actualObj.get("response").iterator();
 
             int cont = 0;
@@ -69,18 +68,17 @@ public class VcfSNPAnnotator implements VcfAnnotator {
             }
 
         } catch (JsonParseException e) {
-            System.err.println(response);
+            System.err.println(resp);
             e.printStackTrace();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
     public void annot(VcfRecord elem) {
     }
+
 
 }

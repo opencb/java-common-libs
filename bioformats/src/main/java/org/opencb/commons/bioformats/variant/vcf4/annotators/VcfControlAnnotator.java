@@ -137,8 +137,8 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
                     TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
 
-                    String line = it.next();
-                    while (it != null && line != null) {
+                    String line;
+                    while (it != null && (line = it.next()) != null) {
 
                         String[] fields = line.split("\t");
                         tabixRecord = new VcfRecord(fields, samples);
@@ -148,7 +148,6 @@ public class VcfControlAnnotator implements VcfAnnotator {
                             controlBatch.add(tabixRecord);
                             map.put(record, cont++);
                         }
-                        line = it.next();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -215,7 +214,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
                     TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
 
-                    String line = null;
+                    String line;
                     while (it != null && (line = it.next()) != null) {
 
                         String[] fields = line.split("\t");

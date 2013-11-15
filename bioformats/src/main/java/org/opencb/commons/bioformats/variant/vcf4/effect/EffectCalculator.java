@@ -41,11 +41,9 @@ public class EffectCalculator {
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
 
-//        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.text(formDataMultiPart.toString()));
+//        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(formDataMultiPart.toString(), MediaType.MULTIPART_FORM_DATA_TYPE));
         String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
 
-
-//        System.out.println("response = " + response.readEntity(String.class));
         // TODO aaleman: Check the new Web Service
 
         try {
