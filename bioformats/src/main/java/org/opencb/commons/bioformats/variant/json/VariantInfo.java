@@ -4,7 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
-import java.lang.Float;import java.lang.Integer;import java.lang.Override;import java.lang.String;import java.util.HashMap;import java.util.HashSet;import java.util.LinkedHashMap;import java.util.Map;import java.util.Set;
+import java.lang.Float;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,7 +62,9 @@ public class VariantInfo {
     @JsonProperty
     private String stats_id_snp;
     @JsonProperty
-    private HashMap<String, String> genes;
+    private Set<String> genes;
+    @JsonProperty
+    private Set<String> consequence_types;
     @JsonProperty
     private Set<VariantEffect> effect;
     @JsonProperty
@@ -69,7 +79,8 @@ public class VariantInfo {
         this.ref = ref;
         this.alt = alt;
         this.effect = new HashSet<>();
-        this.genes = new LinkedHashMap<>();
+        this.genes = new HashSet<>();
+        this.consequence_types = new HashSet<>();
         this.sampleGenotypes = new LinkedHashMap<>();
         this.controls = new LinkedHashMap<>();
         this.genotypes = new LinkedHashMap<>();
@@ -287,16 +298,6 @@ public class VariantInfo {
 
     }
 
-    public void addGeneAndConsequenceType(String gene_name, String ct) {
-
-        if (this.genes.containsKey(gene_name)) {
-            if (!this.genes.get(gene_name).contains(ct))
-                this.genes.put(gene_name, this.genes.get(gene_name) + ", " + ct);
-        } else {
-            this.genes.put(gene_name, ct);
-        }
-    }
-
     public HashMap<String, VariantControl> getControls() {
         return controls;
     }
@@ -353,4 +354,21 @@ public class VariantInfo {
             this.addGenotype(aux[0], Integer.parseInt(aux[1]));
         }
     }
+
+    public void addGenes(String genes) {
+        String[] splits = genes.split(",");
+        String[] aux;
+        for (String split : splits) {
+            this.genes.add(split);
+        }
+    }
+
+    public void addConsequenceTypes(String conseqType) {
+        String[] splits = conseqType.split(",");
+        String[] aux;
+        for (String split : splits) {
+            this.consequence_types.add(split);
+        }
+    }
+
 }

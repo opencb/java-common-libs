@@ -78,7 +78,9 @@ public class VcfStats {
     public void addSampleGroupStats(String group, VcfSampleGroupStat sgs) {
 
         List<VcfSampleGroupStat> list;
+        System.out.println("group = " + group);
         if (!sampleGroupStats.containsKey(group)) {
+            System.out.println("group = " + group);
             list = new ArrayList<>();
             sampleGroupStats.put(group, list);
         } else {
@@ -111,7 +113,7 @@ public class VcfStats {
         SampleStat ss, ssAux;
         Map<String, SampleStat> map;
 
-        for (VcfSampleStat vcfSampleStat : sampleStats) {
+        for (VcfSampleStat vcfSampleStat : this.sampleStats) {
             map = vcfSampleStat.getSamplesStats();
             for (Map.Entry<String, SampleStat> entry : map.entrySet()) {
                 sampleName = entry.getKey();
@@ -134,6 +136,7 @@ public class VcfStats {
         SampleStat sampleStat;
 
 
+        System.out.println(this.sampleGroupStats);
         for (VcfSampleGroupStat sgs : this.sampleGroupStats.get(group)) {
             sgsFinal.setGroup(sgs.getGroup());
             for (Map.Entry<String, VcfSampleStat> ss : sgs.getSampleStats().entrySet()) {
