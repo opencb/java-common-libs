@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.variant.vcf4;
 
 import org.opencb.commons.bioformats.feature.Genotype;
-import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
 
 import java.util.*;
 

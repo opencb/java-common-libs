@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opencb.commons.bioformats.pedigree.Pedigree;
-import org.opencb.commons.bioformats.variant.vcf4.stats.GlobalStat;
+import org.opencb.commons.bioformats.variant.utils.stats.GlobalStat;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia

@@ -8,6 +8,7 @@ import org.opencb.commons.bioformats.pedigree.Condition;
 import org.opencb.commons.bioformats.pedigree.Individual;
 import org.opencb.commons.bioformats.pedigree.Pedigree;
 import org.opencb.commons.bioformats.pedigree.Sex;
+import org.opencb.commons.bioformats.variant.utils.stats.*;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import java.util.*;
@@ -20,7 +21,7 @@ import java.util.concurrent.Callable;
  * Time: 12:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CalculateStats {
+public class StatsCalculator {
 
 
     public static List<VariantStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {

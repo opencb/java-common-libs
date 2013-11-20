@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.effect;
 
 import org.opencb.commons.bioformats.commons.DataWriter;
-import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 
 import java.util.List;
 

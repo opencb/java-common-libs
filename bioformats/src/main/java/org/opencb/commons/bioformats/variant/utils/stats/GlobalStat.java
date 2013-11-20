@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.utils.stats;
 
 import java.util.List;
 

@@ -5,8 +5,8 @@ import java.util.*;
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
-import org.opencb.commons.bioformats.variant.vcf4.stats.CalculateStats;
-import org.opencb.commons.bioformats.variant.vcf4.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.vcf4.stats.StatsCalculator;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
 
 /**
  * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
@@ -157,7 +157,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
             }
         }
 
-        statsBatch = CalculateStats.variantStats(controlBatch, this.samples, null);
+        statsBatch = StatsCalculator.variantStats(controlBatch, this.samples, null);
 
         VariantStat statRecord;
 
@@ -236,7 +236,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         }
 
-        statsBatch = CalculateStats.variantStats(controlBatch, this.samples, null);
+        statsBatch = StatsCalculator.variantStats(controlBatch, this.samples, null);
 
         VariantStat statRecord;
 

@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
 
 import java.lang.Float;
 import java.lang.Integer;
