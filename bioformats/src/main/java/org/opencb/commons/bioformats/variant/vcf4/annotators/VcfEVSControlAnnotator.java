@@ -1,17 +1,11 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
-import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
-import org.opencb.commons.bioformats.variant.vcf4.stats.CalculateStats;
-import org.opencb.commons.bioformats.variant.vcf4.stats.VcfVariantStat;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

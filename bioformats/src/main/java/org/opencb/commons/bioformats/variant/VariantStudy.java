@@ -1,11 +1,13 @@
 package org.opencb.commons.bioformats.variant;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.opencb.commons.bioformats.pedigree.Pedigree;
-import org.opencb.commons.bioformats.variant.vcf4.stats.VcfGlobalStat;
+import org.opencb.commons.bioformats.variant.utils.stats.GlobalStat;
 
 /**
- *
  * @author Cristina Yenyxe Gonzalez Garcia
  * @todo Add members for date and meta (headers and so on)
  */
@@ -15,22 +17,22 @@ public class VariantStudy {
     private String alias;
     private String description;
     private List<String> authors;
-    private List<String> samples;
+    private List<String> samples; // names
     private Pedigree pedigree;
-    private List<String> files;
-    private VcfGlobalStat stats;
-    
+    private List<String> sources;
+    private Map<String, String> metadata;
+    private GlobalStat stats;
 
-    public VariantStudy(String name, String alias, String description, List<String> authors, List<String> files) {
+    public VariantStudy(String name, String alias, String description, List<String> authors, List<String> sources) {
         this.name = name;
         this.alias = alias;
         this.description = description;
         this.authors = authors;
-        this.files = files;
+        this.sources = sources;
+        this.metadata = new HashMap<>();
         // TODO initialize pedigree?
     }
-    
-   
+
     public String getAlias() {
         return alias;
     }
@@ -47,12 +49,12 @@ public class VariantStudy {
         this.description = description;
     }
 
-    public List<String> getFiles() {
-        return files;
+    public List<String> getSources() {
+        return sources;
     }
 
-    public void setFiles(List<String> files) {
-        this.files = files;
+    public void setSources(List<String> sources) {
+        this.sources = sources;
     }
 
     public String getName() {
@@ -79,12 +81,31 @@ public class VariantStudy {
         this.pedigree = pedigree;
     }
 
-    public VcfGlobalStat getStats() {
+    public GlobalStat getStats() {
         return stats;
     }
 
-    public void setStats(VcfGlobalStat stats) {
+    public void setStats(GlobalStat stats) {
         this.stats = stats;
     }
 
+    public List<String> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<String> authors) {
+        this.authors = authors;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
+    }
+
+    public void addMetadata(String key, String value){
+
+    }
 }

@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.utils.stats;
 
 
 import org.opencb.commons.bioformats.feature.Genotype;
@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 1:00 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfVariantStat {
+public class VariantStat {
     private String chromosome;
     private long position;
     private String refAllele;
@@ -47,10 +47,10 @@ public class VcfVariantStat {
     private float qual;
     private int samples;
 
-    private VcfHardyWeinbergStat hw;
+    private HardyWeinbergStat hw;
 
 
-    public VcfVariantStat() {
+    public VariantStat() {
         this.chromosome = "";
         this.refAllele = "";
         this.altAlleles = null;
@@ -75,14 +75,14 @@ public class VcfVariantStat {
         this.genotypes = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
         this.transitionsCount = 0;
         this.transversionsCount = 0;
-        this.hw = new VcfHardyWeinbergStat();
+        this.hw = new HardyWeinbergStat();
     }
 
-    public VcfVariantStat(String chromosome, int position, String allele_ref, String allele_alt, double maf,
-                          double mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
-                          int mendel_err, int is_indel, double cases_percent_dominant,
-                          double controls_percent_dominant, double cases_percent_recessive,
-                          double controls_percent_recessive) {
+    public VariantStat(String chromosome, int position, String allele_ref, String allele_alt, double maf,
+                       double mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
+                       int mendel_err, int is_indel, double cases_percent_dominant,
+                       double controls_percent_dominant, double cases_percent_recessive,
+                       double controls_percent_recessive) {
 
         this.chromosome = chromosome;
         this.position = position;
@@ -105,7 +105,7 @@ public class VcfVariantStat {
 
     @Override
     public String toString() {
-        return "VcfVariantStat{" +
+        return "VariantStat{" +
                 "chromosome='" + chromosome + '\'' +
                 ", position=" + position +
                 ", refAllele='" + refAllele + '\'' +
@@ -324,7 +324,7 @@ public class VcfVariantStat {
         this.transversionsCount = transversionsCount;
     }
 
-    public VcfHardyWeinbergStat getHw() {
+    public HardyWeinbergStat getHw() {
         return hw;
     }
 

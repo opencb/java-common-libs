@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.stats;
 
 import org.opencb.commons.bioformats.commons.DataWriter;
-import org.opencb.commons.bioformats.variant.vcf4.stats.*;
+import org.opencb.commons.bioformats.variant.utils.stats.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,14 +15,14 @@ import java.util.List;
  */
 public interface VariantStatsDataWriter extends DataWriter {
 
-    boolean writeVariantStats(List<VcfVariantStat> data);
+    boolean writeVariantStats(List<VariantStat> data);
 
-    boolean writeGlobalStats(VcfGlobalStat globalStats);
+    boolean writeGlobalStats(GlobalStat globalStats);
 
-    boolean writeSampleStats(VcfSampleStat vcfSampleStat);
+    boolean writeSampleStats(SampleStat sampleStat);
 
-    boolean writeSampleGroupStats(VcfSampleGroupStat vcfSampleGroupStat) throws IOException;
+    boolean writeSampleGroupStats(SampleGroupStat sampleGroupStat) throws IOException;
 
-    boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException;
+    boolean writeVariantGroupStats(VariantGroupStat groupStats) throws IOException;
 
 }

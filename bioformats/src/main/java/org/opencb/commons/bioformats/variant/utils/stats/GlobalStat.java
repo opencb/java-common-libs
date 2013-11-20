@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.utils.stats;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * Time: 11:40 AM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfGlobalStat {
+public class GlobalStat {
 
     private int variantsCount;
     private int samplesCount;
@@ -22,7 +22,7 @@ public class VcfGlobalStat {
     private int multiallelicsCount;
     private float accumQuality;
 
-    public VcfGlobalStat() {
+    public GlobalStat() {
 
         this.variantsCount = 0;
         this.samplesCount = 0;
@@ -36,10 +36,10 @@ public class VcfGlobalStat {
         this.accumQuality = 0;
     }
 
-    public VcfGlobalStat(List<VcfGlobalStat> globalStatList) {
+    public GlobalStat(List<GlobalStat> globalStatList) {
         this();
 
-        for (VcfGlobalStat gs : globalStatList) {
+        for (GlobalStat gs : globalStatList) {
             this.updateStats(gs.getVariantsCount(), gs.samplesCount, gs.getSnpsCount(), gs.indelsCount, gs.passCount, gs.transitionsCount, gs.transversionsCount, gs.getBiallelicsCount(), gs.getMultiallelicsCount(), gs.getAccumQuality());
         }
 
@@ -174,7 +174,7 @@ public class VcfGlobalStat {
 
     @Override
     public String toString() {
-        return "VcfGlobalStat{" +
+        return "GlobalStat{" +
                 "variantsCount=" + variantsCount +
                 ", samplesCount=" + samplesCount +
                 ", snpsCount=" + snpsCount +

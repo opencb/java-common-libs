@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.utils.stats;
 
 /**
  * Created with IntelliJ IDEA.
@@ -7,7 +7,7 @@ package org.opencb.commons.bioformats.variant.vcf4.stats;
  * Time: 10:21 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SampleStat {
+public class SingleSampleStat {
 
     private String id;
     private int mendelianErrors;
@@ -15,7 +15,7 @@ public class SampleStat {
     private int homozygotesNumber;
 
 
-    public SampleStat(String id) {
+    public SingleSampleStat(String id) {
         this.id = id;
         this.mendelianErrors = 0;
         this.missingGenotypes = 0;

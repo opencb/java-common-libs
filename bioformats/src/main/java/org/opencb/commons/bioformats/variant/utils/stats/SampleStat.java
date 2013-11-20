@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.utils.stats;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,29 +11,29 @@ import java.util.Map;
  * Time: 10:20 AM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfSampleStat {
+public class SampleStat {
 
-    private Map<String, SampleStat> samplesStats;
+    private Map<String, SingleSampleStat> samplesStats;
 
 
-    public VcfSampleStat(List<String> sampleNames) {
+    public SampleStat(List<String> sampleNames) {
         samplesStats = new LinkedHashMap<>(sampleNames.size());
-        SampleStat s;
+        SingleSampleStat s;
 
         for (String name : sampleNames) {
-            s = new SampleStat(name);
+            s = new SingleSampleStat(name);
             samplesStats.put(name, s);
         }
     }
 
-    public VcfSampleStat(List<String> sampleNames, List<VcfSampleStat> sampleStats) {
+    public SampleStat(List<String> sampleNames, List<SampleStat> sampleStats) {
         this(sampleNames);
         String sampleName;
-        SampleStat ss, ssAux;
-        Map<String, SampleStat> map;
-        for (VcfSampleStat vcfSampleStat : sampleStats) {
-            map = vcfSampleStat.getSamplesStats();
-            for (Map.Entry<String, SampleStat> entry : map.entrySet()) {
+        SingleSampleStat ss, ssAux;
+        Map<String, SingleSampleStat> map;
+        for (SampleStat sampleStat : sampleStats) {
+            map = sampleStat.getSamplesStats();
+            for (Map.Entry<String, SingleSampleStat> entry : map.entrySet()) {
                 sampleName = entry.getKey();
                 ss = entry.getValue();
                 ssAux = this.getSamplesStats().get(sampleName);
@@ -44,32 +44,31 @@ public class VcfSampleStat {
         }
     }
 
-
-    public Map<String, SampleStat> getSamplesStats() {
+    public Map<String, SingleSampleStat> getSamplesStats() {
         return samplesStats;
     }
 
     public void incrementMendelianErrors(String sampleName) {
-        SampleStat s = samplesStats.get(sampleName);
+        SingleSampleStat s = samplesStats.get(sampleName);
         s.incrementMendelianErrors();
     }
 
     public void incrementMissingGenotypes(String sampleName) {
-        SampleStat s = samplesStats.get(sampleName);
+        SingleSampleStat s = samplesStats.get(sampleName);
         s.incrementMissingGenotypes();
     }
 
     public void incrementHomozygotesNumber(String sampleName) {
-        SampleStat s = samplesStats.get(sampleName);
+        SingleSampleStat s = samplesStats.get(sampleName);
         s.incrementHomozygotesNumber();
     }
 
     @Override
     public String toString() {
-        SampleStat s;
+        SingleSampleStat s;
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
-        for (Map.Entry<String, SampleStat> entry : samplesStats.entrySet()) {
+        for (Map.Entry<String, SingleSampleStat> entry : samplesStats.entrySet()) {
             s = entry.getValue();
             sb.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 

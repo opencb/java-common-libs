@@ -1,6 +1,6 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.stats;
 
-import org.opencb.commons.bioformats.variant.vcf4.stats.*;
+import org.opencb.commons.bioformats.variant.utils.stats.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -94,8 +94,8 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeVariantStats(List<VcfVariantStat> data) {
-        for (VcfVariantStat v : data) {
+    public boolean writeVariantStats(List<VariantStat> data) {
+        for (VariantStat v : data) {
             variantPw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                     "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                     "%-10.2f%-10.2f%-10.2f%-10.2f\n",
@@ -124,7 +124,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeGlobalStats(VcfGlobalStat globalStats) {
+    public boolean writeGlobalStats(GlobalStat globalStats) {
 
         globalPw.append("Number of variants = " + globalStats.getVariantsCount() + "\n");
         globalPw.append("Number of samples = " + globalStats.getSamplesCount() + "\n");
@@ -142,10 +142,10 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeSampleStats(VcfSampleStat vcfSampleStat) {
-        SampleStat s;
+    public boolean writeSampleStats(SampleStat sampleStat) {
+        SingleSampleStat s;
         samplePw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
-        for (Map.Entry<String, SampleStat> entry : vcfSampleStat.getSamplesStats().entrySet()) {
+        for (Map.Entry<String, SingleSampleStat> entry : sampleStat.getSamplesStats().entrySet()) {
             s = entry.getValue();
             samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
@@ -154,20 +154,20 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeSampleGroupStats(VcfSampleGroupStat vcfSampleGroupStat) throws IOException {
+    public boolean writeSampleGroupStats(SampleGroupStat sampleGroupStat) throws IOException {
         PrintWriter pw;
         String filename;
-        VcfSampleStat sampleStat;
-        SampleStat s;
+        SampleStat sampleStat;
+        SingleSampleStat s;
 
-        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStat.getSampleStats().entrySet()) {
-            filename = pathSampleGroup + "variant_stats_" + vcfSampleGroupStat.getGroup() + "_" + entry.getKey() + ".sample.stats";
+        for (Map.Entry<String, SampleStat> entry : sampleGroupStat.getSampleStats().entrySet()) {
+            filename = pathSampleGroup + "variant_stats_" + sampleGroupStat.getGroup() + "_" + entry.getKey() + ".sample.stats";
             sampleStat = entry.getValue();
             pw = new PrintWriter(new FileWriter(filename));
 
             pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
 
-            for (Map.Entry<String, SampleStat> entrySample : sampleStat.getSamplesStats().entrySet()) {
+            for (Map.Entry<String, SingleSampleStat> entrySample : sampleStat.getSamplesStats().entrySet()) {
                 s = entrySample.getValue();
                 pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
@@ -180,10 +180,10 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeVariantGroupStats(VcfVariantGroupStat groupStats) throws IOException {
+    public boolean writeVariantGroupStats(VariantGroupStat groupStats) throws IOException {
         PrintWriter pw;
         String filename;
-        List<VcfVariantStat> list;
+        List<VariantStat> list;
 
         Map<String, PrintWriter> auxMap;
 
@@ -197,7 +197,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
             auxMap = new LinkedHashMap<>(2);
 
-            for (Map.Entry<String, List<VcfVariantStat>> entry : groupStats.getVariantStats().entrySet()) {
+            for (Map.Entry<String, List<VariantStat>> entry : groupStats.getVariantStats().entrySet()) {
                 filename = pathGroup + "variant_stats_" + groupStats.getGroup() + "_" + entry.getKey() + ".stats";
                 pw = new PrintWriter(new FileWriter(filename));
 
@@ -221,7 +221,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
         for (Map.Entry<String, PrintWriter> entry : auxMap.entrySet()) {
             pw = entry.getValue();
             list = groupStats.getVariantStats().get(entry.getKey());
-            for (VcfVariantStat v : list) {
+            for (VariantStat v : list) {
                 pw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                         "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                         "%-10.2f%-10.2f%-10.2f%-10.2f\n",

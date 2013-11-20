@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opencb.commons.bioformats.variant.vcf4.effect.VariantEffect;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
 

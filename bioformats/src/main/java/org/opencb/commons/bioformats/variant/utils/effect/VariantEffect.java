@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.effect;
+package org.opencb.commons.bioformats.variant.utils.effect;
 
 
 /**
