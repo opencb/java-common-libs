@@ -105,7 +105,22 @@ public class VariantStudy {
         this.metadata = metadata;
     }
 
-    public void addMetadata(String key, String value){
+    public void addMetadata(String key, String value) {
+        this.metadata.put(key, value);
+    }
 
+    @Override
+    public String toString() {
+        return "VariantStudy{" +
+                "name='" + name + '\'' +
+                ", alias='" + alias + '\'' +
+                ", description='" + description + '\'' +
+                ", authors=" + authors +
+                ", samples=" + samples +
+                ", pedigree=" + pedigree +
+                ", sources=" + sources +
+                ", metadata=" + metadata +
+                ", stats=" + stats +
+                '}';
     }
 }
