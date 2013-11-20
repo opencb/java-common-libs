@@ -9,16 +9,16 @@ import java.util.*;
  * Time: 5:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantGroupStat {
+public class VariantGroupStats {
 
     private String group;
-    private Map<String, List<VariantStat>> variantStats;
+    private Map<String, List<VariantStats>> variantStats;
     private Object samples;
 
-    public VariantGroupStat(String group, Set<String> groupValues) {
+    public VariantGroupStats(String group, Set<String> groupValues) {
         this.group = group;
         variantStats = new LinkedHashMap<>(groupValues.size());
-        List<VariantStat> list;
+        List<VariantStats> list;
         for (String groupVal : groupValues) {
             list = new ArrayList<>(1000);
             variantStats.put(groupVal, list);
@@ -33,11 +33,11 @@ public class VariantGroupStat {
         this.group = group;
     }
 
-    public Map<String, List<VariantStat>> getVariantStats() {
+    public Map<String, List<VariantStats>> getVariantStats() {
         return variantStats;
     }
 
-    public void setVariantStats(Map<String, List<VariantStat>> variantStats) {
+    public void setVariantStats(Map<String, List<VariantStats>> variantStats) {
         this.variantStats = variantStats;
     }
 

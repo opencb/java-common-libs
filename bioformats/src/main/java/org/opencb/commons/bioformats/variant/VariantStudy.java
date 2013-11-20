@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.opencb.commons.bioformats.pedigree.Pedigree;
-import org.opencb.commons.bioformats.variant.utils.stats.GlobalStat;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantGlobalStats;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia
@@ -21,7 +21,7 @@ public class VariantStudy {
     private Pedigree pedigree;
     private List<String> sources;
     private Map<String, String> metadata;
-    private GlobalStat stats;
+    private VariantGlobalStats stats;
 
     public VariantStudy(String name, String alias, String description, List<String> authors, List<String> sources) {
         this.name = name;
@@ -81,11 +81,11 @@ public class VariantStudy {
         this.pedigree = pedigree;
     }
 
-    public GlobalStat getStats() {
+    public VariantGlobalStats getStats() {
         return stats;
     }
 
-    public void setStats(GlobalStat stats) {
+    public void setStats(VariantGlobalStats stats) {
         this.stats = stats;
     }
 

@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant;
 
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class Variant {
     private String format;
     private String sampleRawData;
     private Map<String, Map<String, String>> sampleData;
-    private VariantStat stats;
+    private VariantStats stats;
     private List<VariantEffect> effect;
 
     public String getChromosome() {
@@ -89,11 +89,11 @@ public class Variant {
         this.sampleData = sampleData;
     }
 
-    public VariantStat getStats() {
+    public VariantStats getStats() {
         return stats;
     }
 
-    public void setStats(VariantStat stats) {
+    public void setStats(VariantStats stats) {
         this.stats = stats;
     }
 

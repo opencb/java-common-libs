@@ -7,7 +7,7 @@ package org.opencb.commons.bioformats.variant.utils.stats;
  * Time: 10:21 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SingleSampleStat {
+public class VariantSingleSampleStats {
 
     private String id;
     private int mendelianErrors;
@@ -15,7 +15,7 @@ public class SingleSampleStat {
     private int homozygotesNumber;
 
 
-    public SingleSampleStat(String id) {
+    public VariantSingleSampleStats(String id) {
         this.id = id;
         this.mendelianErrors = 0;
         this.missingGenotypes = 0;

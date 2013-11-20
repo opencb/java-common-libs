@@ -2,7 +2,7 @@ package org.opencb.commons.bioformats.variant.vcf4;
 
 import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 import java.util.*;
 
@@ -20,7 +20,7 @@ public class VcfRecord {
     private List<String> sampleOrder;
     private Map<String, String> sampleRawData;
     private Map<String, Map<String, String>> sampleData;
-    private VariantStat stats;
+    private VariantStats stats;
     private List<VariantEffect> effects;
 
     /**
@@ -340,11 +340,11 @@ public class VcfRecord {
         }
     }
 
-    public VariantStat getStats() {
+    public VariantStats getStats() {
         return stats;
     }
 
-    public void setStats(VariantStat stats) {
+    public void setStats(VariantStats stats) {
         this.stats = stats;
     }
 

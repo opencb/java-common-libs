@@ -9,7 +9,7 @@ import java.util.List;
  * Time: 11:40 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GlobalStat {
+public class VariantGlobalStats {
 
     private int variantsCount;
     private int samplesCount;
@@ -22,7 +22,7 @@ public class GlobalStat {
     private int multiallelicsCount;
     private float accumQuality;
 
-    public GlobalStat() {
+    public VariantGlobalStats() {
 
         this.variantsCount = 0;
         this.samplesCount = 0;
@@ -36,10 +36,10 @@ public class GlobalStat {
         this.accumQuality = 0;
     }
 
-    public GlobalStat(List<GlobalStat> globalStatList) {
+    public VariantGlobalStats(List<VariantGlobalStats> variantGlobalStatsList) {
         this();
 
-        for (GlobalStat gs : globalStatList) {
+        for (VariantGlobalStats gs : variantGlobalStatsList) {
             this.updateStats(gs.getVariantsCount(), gs.samplesCount, gs.getSnpsCount(), gs.indelsCount, gs.passCount, gs.transitionsCount, gs.transversionsCount, gs.getBiallelicsCount(), gs.getMultiallelicsCount(), gs.getAccumQuality());
         }
 
@@ -174,7 +174,7 @@ public class GlobalStat {
 
     @Override
     public String toString() {
-        return "GlobalStat{" +
+        return "VariantGlobalStats{" +
                 "variantsCount=" + variantsCount +
                 ", samplesCount=" + samplesCount +
                 ", snpsCount=" + snpsCount +

@@ -11,29 +11,29 @@ import java.util.Map;
  * Time: 10:20 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SampleStat {
+public class VariantSampleStats {
 
-    private Map<String, SingleSampleStat> samplesStats;
+    private Map<String, VariantSingleSampleStats> samplesStats;
 
 
-    public SampleStat(List<String> sampleNames) {
+    public VariantSampleStats(List<String> sampleNames) {
         samplesStats = new LinkedHashMap<>(sampleNames.size());
-        SingleSampleStat s;
+        VariantSingleSampleStats s;
 
         for (String name : sampleNames) {
-            s = new SingleSampleStat(name);
+            s = new VariantSingleSampleStats(name);
             samplesStats.put(name, s);
         }
     }
 
-    public SampleStat(List<String> sampleNames, List<SampleStat> sampleStats) {
+    public VariantSampleStats(List<String> sampleNames, List<VariantSampleStats> variantSampleStatses) {
         this(sampleNames);
         String sampleName;
-        SingleSampleStat ss, ssAux;
-        Map<String, SingleSampleStat> map;
-        for (SampleStat sampleStat : sampleStats) {
-            map = sampleStat.getSamplesStats();
-            for (Map.Entry<String, SingleSampleStat> entry : map.entrySet()) {
+        VariantSingleSampleStats ss, ssAux;
+        Map<String, VariantSingleSampleStats> map;
+        for (VariantSampleStats variantSampleStat : variantSampleStatses) {
+            map = variantSampleStat.getSamplesStats();
+            for (Map.Entry<String, VariantSingleSampleStats> entry : map.entrySet()) {
                 sampleName = entry.getKey();
                 ss = entry.getValue();
                 ssAux = this.getSamplesStats().get(sampleName);
@@ -44,31 +44,31 @@ public class SampleStat {
         }
     }
 
-    public Map<String, SingleSampleStat> getSamplesStats() {
+    public Map<String, VariantSingleSampleStats> getSamplesStats() {
         return samplesStats;
     }
 
     public void incrementMendelianErrors(String sampleName) {
-        SingleSampleStat s = samplesStats.get(sampleName);
+        VariantSingleSampleStats s = samplesStats.get(sampleName);
         s.incrementMendelianErrors();
     }
 
     public void incrementMissingGenotypes(String sampleName) {
-        SingleSampleStat s = samplesStats.get(sampleName);
+        VariantSingleSampleStats s = samplesStats.get(sampleName);
         s.incrementMissingGenotypes();
     }
 
     public void incrementHomozygotesNumber(String sampleName) {
-        SingleSampleStat s = samplesStats.get(sampleName);
+        VariantSingleSampleStats s = samplesStats.get(sampleName);
         s.incrementHomozygotesNumber();
     }
 
     @Override
     public String toString() {
-        SingleSampleStat s;
+        VariantSingleSampleStats s;
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
-        for (Map.Entry<String, SingleSampleStat> entry : samplesStats.entrySet()) {
+        for (Map.Entry<String, VariantSingleSampleStats> entry : samplesStats.entrySet()) {
             s = entry.getValue();
             sb.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 

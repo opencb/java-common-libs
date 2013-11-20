@@ -2,7 +2,7 @@ package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 import java.lang.Float;
 import java.lang.Integer;
@@ -88,14 +88,14 @@ public class VariantInfo {
 
     }
 
-    public VariantInfo(String chromosome, int position, String ref, String alt, VariantStat stats) {
+    public VariantInfo(String chromosome, int position, String ref, String alt, VariantStats stats) {
         this(chromosome, position, ref, alt);
         this.addStats(stats);
 
 
     }
 
-    public void addStats(VariantStat stat) {
+    public void addStats(VariantStats stat) {
 
         this.stats_maf = stat.getMaf();
         this.stats_mgf = stat.getMgf();

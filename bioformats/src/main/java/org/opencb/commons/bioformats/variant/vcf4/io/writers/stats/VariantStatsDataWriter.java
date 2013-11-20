@@ -15,14 +15,14 @@ import java.util.List;
  */
 public interface VariantStatsDataWriter extends DataWriter {
 
-    boolean writeVariantStats(List<VariantStat> data);
+    boolean writeVariantStats(List<VariantStats> data);
 
-    boolean writeGlobalStats(GlobalStat globalStats);
+    boolean writeGlobalStats(VariantGlobalStats variantGlobalStats);
 
-    boolean writeSampleStats(SampleStat sampleStat);
+    boolean writeSampleStats(VariantSampleStats variantSampleStats);
 
-    boolean writeSampleGroupStats(SampleGroupStat sampleGroupStat) throws IOException;
+    boolean writeSampleGroupStats(VariantSampleGroupStats variantSampleGroupStats) throws IOException;
 
-    boolean writeVariantGroupStats(VariantGroupStat groupStats) throws IOException;
+    boolean writeVariantGroupStats(VariantGroupStats groupStats) throws IOException;
 
 }

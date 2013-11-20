@@ -94,8 +94,8 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeVariantStats(List<VariantStat> data) {
-        for (VariantStat v : data) {
+    public boolean writeVariantStats(List<VariantStats> data) {
+        for (VariantStats v : data) {
             variantPw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                     "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                     "%-10.2f%-10.2f%-10.2f%-10.2f\n",
@@ -124,28 +124,28 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeGlobalStats(GlobalStat globalStats) {
+    public boolean writeGlobalStats(VariantGlobalStats variantGlobalStats) {
 
-        globalPw.append("Number of variants = " + globalStats.getVariantsCount() + "\n");
-        globalPw.append("Number of samples = " + globalStats.getSamplesCount() + "\n");
-        globalPw.append("Number of biallelic variants = " + globalStats.getBiallelicsCount() + "\n");
-        globalPw.append("Number of multiallelic variants = " + globalStats.getMultiallelicsCount() + "\n");
-        globalPw.append("Number of SNP = " + globalStats.getSnpsCount() + "\n");
-        globalPw.append("Number of indels = " + globalStats.getIndelsCount() + "\n");
-        globalPw.append("Number of transitions = " + globalStats.getTransitionsCount() + "\n");
-        globalPw.append("Number of transversions = " + globalStats.getTransversionsCount() + "\n");
-        globalPw.append("Ti/TV ratio = " + ((float) globalStats.getTransitionsCount() / (float) globalStats.getTransversionsCount()) + "\n");
-        globalPw.append("Percentage of PASS = " + (((float) globalStats.getPassCount() / (float) globalStats.getVariantsCount()) * 100) + "%\n");
-        globalPw.append("Average quality = " + (globalStats.getAccumQuality() / (float) globalStats.getVariantsCount()) + "\n");
+        globalPw.append("Number of variants = " + variantGlobalStats.getVariantsCount() + "\n");
+        globalPw.append("Number of samples = " + variantGlobalStats.getSamplesCount() + "\n");
+        globalPw.append("Number of biallelic variants = " + variantGlobalStats.getBiallelicsCount() + "\n");
+        globalPw.append("Number of multiallelic variants = " + variantGlobalStats.getMultiallelicsCount() + "\n");
+        globalPw.append("Number of SNP = " + variantGlobalStats.getSnpsCount() + "\n");
+        globalPw.append("Number of indels = " + variantGlobalStats.getIndelsCount() + "\n");
+        globalPw.append("Number of transitions = " + variantGlobalStats.getTransitionsCount() + "\n");
+        globalPw.append("Number of transversions = " + variantGlobalStats.getTransversionsCount() + "\n");
+        globalPw.append("Ti/TV ratio = " + ((float) variantGlobalStats.getTransitionsCount() / (float) variantGlobalStats.getTransversionsCount()) + "\n");
+        globalPw.append("Percentage of PASS = " + (((float) variantGlobalStats.getPassCount() / (float) variantGlobalStats.getVariantsCount()) * 100) + "%\n");
+        globalPw.append("Average quality = " + (variantGlobalStats.getAccumQuality() / (float) variantGlobalStats.getVariantsCount()) + "\n");
 
         return true;
     }
 
     @Override
-    public boolean writeSampleStats(SampleStat sampleStat) {
-        SingleSampleStat s;
+    public boolean writeSampleStats(VariantSampleStats variantSampleStats) {
+        VariantSingleSampleStats s;
         samplePw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
-        for (Map.Entry<String, SingleSampleStat> entry : sampleStat.getSamplesStats().entrySet()) {
+        for (Map.Entry<String, VariantSingleSampleStats> entry : variantSampleStats.getSamplesStats().entrySet()) {
             s = entry.getValue();
             samplePw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
@@ -154,20 +154,20 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeSampleGroupStats(SampleGroupStat sampleGroupStat) throws IOException {
+    public boolean writeSampleGroupStats(VariantSampleGroupStats variantSampleGroupStats) throws IOException {
         PrintWriter pw;
         String filename;
-        SampleStat sampleStat;
-        SingleSampleStat s;
+        VariantSampleStats variantSampleStats;
+        VariantSingleSampleStats s;
 
-        for (Map.Entry<String, SampleStat> entry : sampleGroupStat.getSampleStats().entrySet()) {
-            filename = pathSampleGroup + "variant_stats_" + sampleGroupStat.getGroup() + "_" + entry.getKey() + ".sample.stats";
-            sampleStat = entry.getValue();
+        for (Map.Entry<String, VariantSampleStats> entry : variantSampleGroupStats.getSampleStats().entrySet()) {
+            filename = pathSampleGroup + "variant_stats_" + variantSampleGroupStats.getGroup() + "_" + entry.getKey() + ".sample.stats";
+            variantSampleStats = entry.getValue();
             pw = new PrintWriter(new FileWriter(filename));
 
             pw.append(String.format("%-10s%-10s%-10s%-10s\n", "Sample", "MissGt", "Mendel Err", "Homoz Count"));
 
-            for (Map.Entry<String, SingleSampleStat> entrySample : sampleStat.getSamplesStats().entrySet()) {
+            for (Map.Entry<String, VariantSingleSampleStats> entrySample : variantSampleStats.getSamplesStats().entrySet()) {
                 s = entrySample.getValue();
                 pw.append(String.format("%-10s%-10d%-10d%10d\n", s.getId(), s.getMissingGenotypes(), s.getMendelianErrors(), s.getHomozygotesNumber()));
 
@@ -180,10 +180,10 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
-    public boolean writeVariantGroupStats(VariantGroupStat groupStats) throws IOException {
+    public boolean writeVariantGroupStats(VariantGroupStats groupStats) throws IOException {
         PrintWriter pw;
         String filename;
-        List<VariantStat> list;
+        List<VariantStats> list;
 
         Map<String, PrintWriter> auxMap;
 
@@ -197,7 +197,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
 
             auxMap = new LinkedHashMap<>(2);
 
-            for (Map.Entry<String, List<VariantStat>> entry : groupStats.getVariantStats().entrySet()) {
+            for (Map.Entry<String, List<VariantStats>> entry : groupStats.getVariantStats().entrySet()) {
                 filename = pathGroup + "variant_stats_" + groupStats.getGroup() + "_" + entry.getKey() + ".stats";
                 pw = new PrintWriter(new FileWriter(filename));
 
@@ -221,7 +221,7 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
         for (Map.Entry<String, PrintWriter> entry : auxMap.entrySet()) {
             pw = entry.getValue();
             list = groupStats.getVariantStats().get(entry.getKey());
-            for (VariantStat v : list) {
+            for (VariantStats v : list) {
                 pw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +
                         "%-10d%-10d%-10d%-15s%-40s%-10d%-10d%-15d" +
                         "%-10.2f%-10.2f%-10.2f%-10.2f\n",

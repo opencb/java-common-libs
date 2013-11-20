@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.*;
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
+import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.stats.StatsCalculator;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStat;
 
 /**
  * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
@@ -124,7 +124,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
         }
 
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
-        List<VariantStat> statsBatch;
+        List<VariantStats> statsBatch;
         Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
 
         int cont = 0;
@@ -159,7 +159,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         statsBatch = StatsCalculator.variantStats(controlBatch, this.samples, null);
 
-        VariantStat statRecord;
+        VariantStats statRecord;
 
         for (VcfRecord record : batch) {
 
@@ -180,7 +180,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
         long pid = Thread.currentThread().getId();
         Map<String, TabixReader> tabixMap;
         List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
-        List<VariantStat> statsBatch;
+        List<VariantStats> statsBatch;
         Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
 
 
@@ -238,7 +238,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         statsBatch = StatsCalculator.variantStats(controlBatch, this.samples, null);
 
-        VariantStat statRecord;
+        VariantStats statRecord;
 
         for (VcfRecord record : batch) {
 

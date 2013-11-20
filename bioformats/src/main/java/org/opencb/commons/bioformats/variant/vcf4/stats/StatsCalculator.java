@@ -24,8 +24,8 @@ import java.util.concurrent.Callable;
 public class StatsCalculator {
 
 
-    public static List<VariantStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
-        List<VariantStat> statList = new ArrayList<>(vcfRecordsList.size());
+    public static List<VariantStats> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
+        List<VariantStats> statList = new ArrayList<>(vcfRecordsList.size());
 
         for (VcfRecord vcfRecord : vcfRecordsList) {
             int transitionsCount = 0, transversionsCount = 0;
@@ -48,7 +48,7 @@ public class StatsCalculator {
             float casesRecessive = 0;
 
 
-            VariantStat vcfStat = new VariantStat();
+            VariantStats vcfStat = new VariantStats();
 
             vcfStat.setChromosome(vcfRecord.getChromosome());
             vcfStat.setPosition((long) vcfRecord.getPosition());
@@ -327,12 +327,12 @@ public class StatsCalculator {
         return statList;
     }
 
-    public static GlobalStat globalStats(List<VariantStat> variantStats) {
+    public static VariantGlobalStats globalStats(List<VariantStats> variantStatses) {
 
-        GlobalStat gs = new GlobalStat();
+        VariantGlobalStats gs = new VariantGlobalStats();
 
-        gs.setVariantsCount(variantStats.size());
-        for (VariantStat vs : variantStats) {
+        gs.setVariantsCount(variantStatses.size());
+        for (VariantStats vs : variantStatses) {
             gs.setSamplesCount(vs.getSamples());
             if (vs.isIndel()) {
                 gs.addIndel();
@@ -359,34 +359,34 @@ public class StatsCalculator {
 
     }
 
-    public static VariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
+    public static VariantGroupStats groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
 
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> sampleList;
-        VariantGroupStat groupStats = null;
-        List<VariantStat> variantStats;
+        VariantGroupStats groupStats = null;
+        List<VariantStats> variantStatses;
 
-        GlobalStat globalStats = new GlobalStat();
+        VariantGlobalStats variantGlobalStats = new VariantGlobalStats();
 
         if (groupValues != null) {
-            groupStats = new VariantGroupStat(group, groupValues);
+            groupStats = new VariantGroupStats(group, groupValues);
 
 
             for (String val : groupValues) {
                 sampleList = getSamplesValueGroup(val, group, ped);
-                variantStats = variantStats(vcfRecords, sampleList, ped);
-                groupStats.getVariantStats().put(val, variantStats);
+                variantStatses = variantStats(vcfRecords, sampleList, ped);
+                groupStats.getVariantStats().put(val, variantStatses);
             }
 
         }
         return groupStats;
     }
 
-    public static SampleStat sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
+    public static VariantSampleStats sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
 
         Genotype g;
         Individual ind;
-        SampleStat sampleStat = new SampleStat(sampleNames);
+        VariantSampleStats variantSampleStats = new VariantSampleStats(sampleNames);
 
         for (VcfRecord record : vcfRecords) {
 
@@ -398,13 +398,13 @@ public class StatsCalculator {
                 // Find the missing alleles
                 if (g.getCode() != AllelesCode.ALLELES_OK) {                   // Missing genotype (one or both alleles missing)
 
-                    sampleStat.incrementMissingGenotypes(sample);
+                    variantSampleStats.incrementMissingGenotypes(sample);
                 }
                 // Check mendelian errors
                 if (ped != null) {
                     ind = ped.getIndividual(sample);
                     if (g.getCode() == AllelesCode.ALLELES_OK && isMendelianError(ind, g, record)) {
-                        sampleStat.incrementMendelianErrors(sample);
+                        variantSampleStats.incrementMendelianErrors(sample);
 
                     }
 
@@ -412,46 +412,46 @@ public class StatsCalculator {
                 }
                 //Count homozygotes
                 if (g.getAllele1() == g.getAllele2()) {
-                    sampleStat.incrementHomozygotesNumber(sample);
+                    variantSampleStats.incrementHomozygotesNumber(sample);
                 }
             }
         }
-        return sampleStat;
+        return variantSampleStats;
     }
 
-    public static SampleGroupStat sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
+    public static VariantSampleGroupStats sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
 
 
-        SampleGroupStat sampleGroupStat = new SampleGroupStat();
+        VariantSampleGroupStats variantSampleGroupStats = new VariantSampleGroupStats();
 
         Set<String> groupValues = getGroupValues(ped, group);
-        SampleStat sampleStat;
+        VariantSampleStats variantSampleStats;
 
         List<String> sampleList;
 
-        if (sampleGroupStat.getGroup() == null) {
-            sampleGroupStat.setGroup(group);
+        if (variantSampleGroupStats.getGroup() == null) {
+            variantSampleGroupStats.setGroup(group);
         }
 
-        if (sampleGroupStat.getSampleStats().size() == 0) {
+        if (variantSampleGroupStats.getSampleStats().size() == 0) {
             for (String groupVal : groupValues) {
                 sampleList = getSamplesValueGroup(groupVal, group, ped);
-                sampleStat = new SampleStat(sampleList);
+                variantSampleStats = new VariantSampleStats(sampleList);
 
-                sampleGroupStat.getSampleStats().put(groupVal, sampleStat);
+                variantSampleGroupStats.getSampleStats().put(groupVal, variantSampleStats);
 
             }
 
 
         }
 
-        for (Map.Entry<String, SampleStat> entry : sampleGroupStat.getSampleStats().entrySet()) {
+        for (Map.Entry<String, VariantSampleStats> entry : variantSampleGroupStats.getSampleStats().entrySet()) {
             sampleList = getSamplesValueGroup(entry.getKey(), group, ped);
             entry.setValue(sampleStats(batch, sampleList, ped));
-//            sampleStat = entry.getValue();
+//            variantSampleStats = entry.getValue();
 //            sampleStats(batch, sampleList, ped);
         }
-        return sampleGroupStat;
+        return variantSampleGroupStats;
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
@@ -623,11 +623,11 @@ public class StatsCalculator {
         return mendelType;
     }
 
-    private static void calculateHardyWeinberChiSquareTest(List<VariantStat> statList) {
+    private static void calculateHardyWeinberChiSquareTest(List<VariantStats> statList) {
         //To change body of created methods use File | Settings | File Templates.
     }
 
-    private static void hardyWeinbergTest(HardyWeinbergStat hw) {
+    private static void hardyWeinbergTest(VariantHardyWeinbergStats hw) {
 
         hw.setN(hw.getN_AA() + hw.getN_Aa() + hw.getN_aa());
         int n = hw.getN();
@@ -682,13 +682,13 @@ public class StatsCalculator {
 
     }
 
-    private static class StatsTask implements Callable<List<VariantStat>> {
+    private static class StatsTask implements Callable<List<VariantStats>> {
         private List<VcfRecord> list;
         private List<String> sampleNames;
         private Pedigree ped;
-        private GlobalStat gs;
+        private VariantGlobalStats gs;
 
-        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, GlobalStat gs) {
+        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VariantGlobalStats gs) {
             this.list = list;
             this.sampleNames = sampleNames;
             this.ped = ped;
@@ -696,7 +696,7 @@ public class StatsCalculator {
         }
 
         @Override
-        public List<VariantStat> call() throws Exception {
+        public List<VariantStats> call() throws Exception {
             return variantStats(list, sampleNames, ped);
         }
     }
