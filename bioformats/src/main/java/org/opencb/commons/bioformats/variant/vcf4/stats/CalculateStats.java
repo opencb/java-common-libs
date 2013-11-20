@@ -23,8 +23,8 @@ import java.util.concurrent.Callable;
 public class CalculateStats {
 
 
-    public static List<VcfVariantStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
-        List<VcfVariantStat> statList = new ArrayList<>(vcfRecordsList.size());
+    public static List<VariantStat> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
+        List<VariantStat> statList = new ArrayList<>(vcfRecordsList.size());
 
         for (VcfRecord vcfRecord : vcfRecordsList) {
             int transitionsCount = 0, transversionsCount = 0;
@@ -47,7 +47,7 @@ public class CalculateStats {
             float casesRecessive = 0;
 
 
-            VcfVariantStat vcfStat = new VcfVariantStat();
+            VariantStat vcfStat = new VariantStat();
 
             vcfStat.setChromosome(vcfRecord.getChromosome());
             vcfStat.setPosition((long) vcfRecord.getPosition());
@@ -326,12 +326,12 @@ public class CalculateStats {
         return statList;
     }
 
-    public static VcfGlobalStat globalStats(List<VcfVariantStat> variantStats) {
+    public static GlobalStat globalStats(List<VariantStat> variantStats) {
 
-        VcfGlobalStat gs = new VcfGlobalStat();
+        GlobalStat gs = new GlobalStat();
 
         gs.setVariantsCount(variantStats.size());
-        for (VcfVariantStat vs : variantStats) {
+        for (VariantStat vs : variantStats) {
             gs.setSamplesCount(vs.getSamples());
             if (vs.isIndel()) {
                 gs.addIndel();
@@ -358,17 +358,17 @@ public class CalculateStats {
 
     }
 
-    public static VcfVariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
+    public static VariantGroupStat groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
 
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> sampleList;
-        VcfVariantGroupStat groupStats = null;
-        List<VcfVariantStat> variantStats;
+        VariantGroupStat groupStats = null;
+        List<VariantStat> variantStats;
 
-        VcfGlobalStat globalStats = new VcfGlobalStat();
+        GlobalStat globalStats = new GlobalStat();
 
         if (groupValues != null) {
-            groupStats = new VcfVariantGroupStat(group, groupValues);
+            groupStats = new VariantGroupStat(group, groupValues);
 
 
             for (String val : groupValues) {
@@ -381,11 +381,11 @@ public class CalculateStats {
         return groupStats;
     }
 
-    public static VcfSampleStat sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
+    public static SampleStat sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
 
         Genotype g;
         Individual ind;
-        VcfSampleStat sampleStat = new VcfSampleStat(sampleNames);
+        SampleStat sampleStat = new SampleStat(sampleNames);
 
         for (VcfRecord record : vcfRecords) {
 
@@ -418,39 +418,39 @@ public class CalculateStats {
         return sampleStat;
     }
 
-    public static VcfSampleGroupStat sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
+    public static SampleGroupStat sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
 
 
-        VcfSampleGroupStat vcfSampleGroupStat = new VcfSampleGroupStat();
+        SampleGroupStat sampleGroupStat = new SampleGroupStat();
 
         Set<String> groupValues = getGroupValues(ped, group);
-        VcfSampleStat vcfSampleStat;
+        SampleStat sampleStat;
 
         List<String> sampleList;
 
-        if (vcfSampleGroupStat.getGroup() == null) {
-            vcfSampleGroupStat.setGroup(group);
+        if (sampleGroupStat.getGroup() == null) {
+            sampleGroupStat.setGroup(group);
         }
 
-        if (vcfSampleGroupStat.getSampleStats().size() == 0) {
+        if (sampleGroupStat.getSampleStats().size() == 0) {
             for (String groupVal : groupValues) {
                 sampleList = getSamplesValueGroup(groupVal, group, ped);
-                vcfSampleStat = new VcfSampleStat(sampleList);
+                sampleStat = new SampleStat(sampleList);
 
-                vcfSampleGroupStat.getSampleStats().put(groupVal, vcfSampleStat);
+                sampleGroupStat.getSampleStats().put(groupVal, sampleStat);
 
             }
 
 
         }
 
-        for (Map.Entry<String, VcfSampleStat> entry : vcfSampleGroupStat.getSampleStats().entrySet()) {
+        for (Map.Entry<String, SampleStat> entry : sampleGroupStat.getSampleStats().entrySet()) {
             sampleList = getSamplesValueGroup(entry.getKey(), group, ped);
             entry.setValue(sampleStats(batch, sampleList, ped));
-//            vcfSampleStat = entry.getValue();
+//            sampleStat = entry.getValue();
 //            sampleStats(batch, sampleList, ped);
         }
-        return vcfSampleGroupStat;
+        return sampleGroupStat;
     }
 
     private static List<String> getSamplesValueGroup(String val, String group, Pedigree ped) {
@@ -622,11 +622,11 @@ public class CalculateStats {
         return mendelType;
     }
 
-    private static void calculateHardyWeinberChiSquareTest(List<VcfVariantStat> statList) {
+    private static void calculateHardyWeinberChiSquareTest(List<VariantStat> statList) {
         //To change body of created methods use File | Settings | File Templates.
     }
 
-    private static void hardyWeinbergTest(VcfHardyWeinbergStat hw) {
+    private static void hardyWeinbergTest(HardyWeinbergStat hw) {
 
         hw.setN(hw.getN_AA() + hw.getN_Aa() + hw.getN_aa());
         int n = hw.getN();
@@ -681,13 +681,13 @@ public class CalculateStats {
 
     }
 
-    private static class StatsTask implements Callable<List<VcfVariantStat>> {
+    private static class StatsTask implements Callable<List<VariantStat>> {
         private List<VcfRecord> list;
         private List<String> sampleNames;
         private Pedigree ped;
-        private VcfGlobalStat gs;
+        private GlobalStat gs;
 
-        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VcfGlobalStat gs) {
+        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, GlobalStat gs) {
             this.list = list;
             this.sampleNames = sampleNames;
             this.ped = ped;
@@ -695,7 +695,7 @@ public class CalculateStats {
         }
 
         @Override
-        public List<VcfVariantStat> call() throws Exception {
+        public List<VariantStat> call() throws Exception {
             return variantStats(list, sampleNames, ped);
         }
     }

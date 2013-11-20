@@ -7,7 +7,7 @@ package org.opencb.commons.bioformats.variant.vcf4.stats;
  * Time: 10:09 AM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfHardyWeinbergStat {
+public class HardyWeinbergStat {
 
     private float chi2;
     private float pValue;
@@ -21,7 +21,7 @@ public class VcfHardyWeinbergStat {
     private float p;
     private float q;
 
-    public VcfHardyWeinbergStat() {
+    public HardyWeinbergStat() {
     }
 
     public void incNAA() {
