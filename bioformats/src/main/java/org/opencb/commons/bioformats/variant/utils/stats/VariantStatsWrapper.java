@@ -14,16 +14,16 @@ import java.util.Map;
  */
 public class VariantStatsWrapper {
 
-    private List<VariantStats> variantStatses;
-    private List<VariantGlobalStats> variantGlobalStatses;
-    private List<VariantSampleStats> variantSampleStatses;
+    private List<VariantStats> variantStats;
+    private List<VariantGlobalStats> variantGlobalStats;
+    private List<VariantSampleStats> variantSampleStats;
     private Map<String, VariantGroupStats> groupStats;
     private Map<String, List<VariantSampleGroupStats>> sampleGroupStats;
     private List<String> sampleNames;
 
     public VariantStatsWrapper() {
-        variantGlobalStatses = new ArrayList<>();
-        variantSampleStatses = new ArrayList<>();
+        variantGlobalStats = new ArrayList<>();
+        variantSampleStats = new ArrayList<>();
         groupStats = new LinkedHashMap<>();
         sampleGroupStats = new LinkedHashMap<>();
     }
@@ -36,28 +36,28 @@ public class VariantStatsWrapper {
         this.sampleNames = sampleNames;
     }
 
-    public List<VariantStats> getVariantStatses() {
-        return variantStatses;
+    public List<VariantStats> getVariantStats() {
+        return variantStats;
     }
 
-    public void setVariantStatses(List<VariantStats> variantStatses) {
-        this.variantStatses = variantStatses;
+    public void setVariantStats(List<VariantStats> variantStats) {
+        this.variantStats = variantStats;
     }
 
     public void addGlobalStats(VariantGlobalStats gs) {
-        variantGlobalStatses.add(gs);
+        variantGlobalStats.add(gs);
     }
 
     public void addSampleStats(VariantSampleStats ss) {
-        variantSampleStatses.add(ss);
+        variantSampleStats.add(ss);
     }
 
-    public List<VariantGlobalStats> getVariantGlobalStatses() {
-        return variantGlobalStatses;
+    public List<VariantGlobalStats> getVariantGlobalStats() {
+        return variantGlobalStats;
     }
 
-    public List<VariantSampleStats> getVariantSampleStatses() {
-        return variantSampleStatses;
+    public List<VariantSampleStats> getVariantSampleStats() {
+        return variantSampleStats;
     }
 
     public void addGroupStats(String group) {
@@ -97,7 +97,7 @@ public class VariantStatsWrapper {
 
         VariantGlobalStats gsFinal = new VariantGlobalStats();
 
-        for (VariantGlobalStats gs : this.variantGlobalStatses) {
+        for (VariantGlobalStats gs : this.variantGlobalStats) {
             gsFinal.updateStats(gs.getVariantsCount(), gs.getSamplesCount(),
                     gs.getSnpsCount(), gs.getIndelsCount(), gs.getPassCount(),
                     gs.getTransitionsCount(), gs.getTransversionsCount(), gs.getBiallelicsCount(), gs.getMultiallelicsCount(), gs.getAccumQuality());
@@ -113,7 +113,7 @@ public class VariantStatsWrapper {
         VariantSingleSampleStats ss, ssAux;
         Map<String, VariantSingleSampleStats> map;
 
-        for (VariantSampleStats variantSampleStats : this.variantSampleStatses) {
+        for (VariantSampleStats variantSampleStats : this.variantSampleStats) {
             map = variantSampleStats.getSamplesStats();
             for (Map.Entry<String, VariantSingleSampleStats> entry : map.entrySet()) {
                 sampleName = entry.getKey();
