@@ -5,6 +5,7 @@ public class QueryResult<T> {
 
     private String id;
     private long dbTime;
+    private long time;
     private long numResults;
     private String warningMsg;
     private String errorMsg;
@@ -16,6 +17,7 @@ public class QueryResult<T> {
     public QueryResult() {
         this.id = "";
         this.dbTime = -1;
+        this.time = -1;
         this.numResults = -1;
         this.warningMsg = "";
         this.errorMsg = "";
@@ -24,16 +26,16 @@ public class QueryResult<T> {
         this.result = null;
     }
 
-    public QueryResult(String id, long dbTime, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
+    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
         this.id = id;
         this.dbTime = dbTime;
+        this.time = time;
         this.numResults = numResults;
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
         this.featureType = featureType;
         this.resultType = resultType;
         this.result = result;
-
     }
 
     public String getId() {
@@ -98,5 +100,13 @@ public class QueryResult<T> {
 
     public void setResult(T result) {
         this.result = result;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }
