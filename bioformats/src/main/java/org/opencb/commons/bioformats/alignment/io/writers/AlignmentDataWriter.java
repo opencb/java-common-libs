@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.alignment.io;
+package org.opencb.commons.bioformats.alignment.io.writers;
 
 
 import org.opencb.commons.bioformats.commons.DataWriter;

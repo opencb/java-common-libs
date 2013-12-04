@@ -4,7 +4,7 @@ import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
-import org.opencb.commons.bioformats.alignment.io.AlignmentDataReader;
+import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
 
 import java.io.File;
 import java.nio.file.Files;

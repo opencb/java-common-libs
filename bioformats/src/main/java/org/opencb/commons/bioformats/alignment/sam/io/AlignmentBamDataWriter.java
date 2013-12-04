@@ -3,7 +3,7 @@ package org.opencb.commons.bioformats.alignment.sam.io;
 import net.sf.samtools.BAMFileWriter;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
-import org.opencb.commons.bioformats.alignment.io.AlignmentDataWriter;
+import org.opencb.commons.bioformats.alignment.io.writers.AlignmentDataWriter;
 
 import java.io.File;
 import java.nio.file.Path;
