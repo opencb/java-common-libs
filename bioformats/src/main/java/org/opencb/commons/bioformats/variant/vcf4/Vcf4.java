@@ -10,12 +10,10 @@ public class Vcf4 {
 
     private String fileFormat;
     private Map<String, String> metaInformation;
-
     private Map<String, VcfAlternateHeader> alternate;
     private Map<String, VcfFilterHeader> filter;
     private Map<String, VcfInfoHeader> info;
     private Map<String, VcfFormatHeader> format;
-
     private List<String> headerLine;
     private List<VcfRecord> records;
     private Map<String, Integer> samples;
@@ -111,7 +109,6 @@ public class Vcf4 {
         return stringBuilder.toString().trim();
     }
 
-
     /**
      * @return the fileFormat
      */
@@ -125,7 +122,6 @@ public class Vcf4 {
     public void setFileFormat(String fileFormat) {
         this.fileFormat = fileFormat;
     }
-
 
     /**
      * @return the metaInformation
@@ -141,7 +137,6 @@ public class Vcf4 {
         this.metaInformation = metaInformation;
     }
 
-
     /**
      * @return the alternate
      */
@@ -155,7 +150,6 @@ public class Vcf4 {
     public void setAlternate(Map<String, VcfAlternateHeader> alternate) {
         this.alternate = alternate;
     }
-
 
     /**
      * @return the filter
@@ -171,7 +165,6 @@ public class Vcf4 {
         this.filter = filter;
     }
 
-
     /**
      * @return the info
      */
@@ -185,7 +178,6 @@ public class Vcf4 {
     public void setInfo(Map<String, VcfInfoHeader> info) {
         this.info = info;
     }
-
 
     /**
      * @return the format
@@ -201,7 +193,6 @@ public class Vcf4 {
         this.format = format;
     }
 
-
     /**
      * @return the headerLine
      */
@@ -215,13 +206,16 @@ public class Vcf4 {
     public void setHeaderLine(List<String> headerLine) {
         this.headerLine = headerLine;
         int i = 0;
-        for (String sample : this.headerLine.subList(9, this.headerLine.size())) {
-            samples.put(sample, i);
-            sampleNames.add(sample);
-            i++;
-        }
-    }
 
+        if (headerLine.size() > 9) {
+            for (String sample : this.headerLine.subList(9, this.headerLine.size())) {
+                samples.put(sample, i);
+                sampleNames.add(sample);
+                i++;
+            }
+        }
+
+    }
 
     /**
      * @return the records

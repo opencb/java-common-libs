@@ -1,4 +1,4 @@
-package org.opencb.javalibs.commons.containers;
+package org.opencb.commons.containers;
 
 /**
  * Created with IntelliJ IDEA.
