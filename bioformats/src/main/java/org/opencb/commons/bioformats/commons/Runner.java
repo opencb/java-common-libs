@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.commons;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
 
-    protected org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+    protected Logger logger = LoggerFactory.getLogger(this.getClass());
     protected R reader;
     protected W writer;
     protected Runner prev;

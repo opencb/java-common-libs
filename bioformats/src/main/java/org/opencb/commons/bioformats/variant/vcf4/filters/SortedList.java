@@ -10,13 +10,13 @@ import java.util.Collections;
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFilterList extends ArrayList<VcfFilter> {
+public class SortedList extends ArrayList<VcfFilter> {
 
-    public VcfFilterList() {
+    public SortedList() {
         super();
     }
 
-    public VcfFilterList(int i) {
+    public SortedList(int i) {
         super(i);
     }
 
