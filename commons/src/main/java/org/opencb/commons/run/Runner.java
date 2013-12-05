@@ -1,6 +1,8 @@
-package org.opencb.commons.bioformats.commons;
+package org.opencb.commons.run;
 
-import org.slf4j.LoggerFactory;
+
+import org.opencb.commons.io.DataReader;
+import org.opencb.commons.io.DataWriter;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +16,6 @@ import java.util.List;
  */
 public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
 
-    protected org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
     protected R reader;
     protected W writer;
     protected Runner prev;
@@ -35,11 +36,9 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
     public abstract List<E> apply(List<E> batch) throws IOException;
 
     public void pre() throws IOException {
-        logger.debug(this.getClass().getSimpleName() + " Empty pre");
     }
 
     public void post() throws IOException {
-        logger.debug(this.getClass().getSimpleName() + " Empty post");
     }
 
     public List<E> launch(List<E> batch) throws IOException {

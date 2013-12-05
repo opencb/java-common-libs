@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
 
-import org.opencb.commons.bioformats.commons.DataWriter;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+
+import org.opencb.commons.io.DataWriter;
 
 import java.util.List;
 

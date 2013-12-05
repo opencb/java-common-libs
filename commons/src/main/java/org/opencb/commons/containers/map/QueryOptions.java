@@ -1,4 +1,4 @@
-package org.opencb.commons.containers;
+package org.opencb.commons.containers.map;
 
 
 public class QueryOptions extends ObjectMap {

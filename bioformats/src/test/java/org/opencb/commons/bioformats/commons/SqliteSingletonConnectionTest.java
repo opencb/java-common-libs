@@ -1,11 +1,7 @@
 package org.opencb.commons.bioformats.commons;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.db.SqliteSingletonConnection;
 import org.opencb.commons.test.GenericTest;
 
 import java.sql.Connection;
