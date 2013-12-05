@@ -80,13 +80,13 @@ public class Alignment {
         this.attributes = attributes;
     }
 
-    public Alignment(String chromosome, SAMRecord record, String referenceSequence, Map<String, String> attributes) {
-        this(record.getReadName(), chromosome, record.getAlignmentStart(), record.getAlignmentEnd(), 
+    public Alignment(SAMRecord record, Map<String, String> attributes, String referenceSequence, boolean showSoftClipping) {
+        this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(), 
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(), 
                 record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""), 
                 record.getMateReferenceName(), record.getMateAlignmentStart(), 
                 record.getInferredInsertSize(), record.getFlags(), 
-                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence), 
+                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence, showSoftClipping), 
                 attributes);
     }
 
@@ -247,9 +247,13 @@ public class Alignment {
         private final char op;
         private final String seq;
 
-        public static final char ALIGNMENT_INSERTION = 'I';
-        public static final char ALIGNMENT_DELETION = 'D';
-        public static final char ALIGNMENT_MISMATCH = 'M';
+        public static final char INSERTION = 'I';
+        public static final char DELETION = 'D';
+        public static final char MISMATCH = 'X';
+        public static final char SKIPPED_REGION = 'N';
+        public static final char SOFT_CLIPPING = 'S';
+        public static final char HARD_CLIPPING = 'H';
+        public static final char PADDING = 'P';
         
         public AlignmentDifference(int pos, char op, String seq) {
             this.pos = pos;
