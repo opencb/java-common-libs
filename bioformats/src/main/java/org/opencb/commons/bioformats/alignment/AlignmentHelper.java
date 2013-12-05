@@ -3,7 +3,6 @@ package org.opencb.commons.bioformats.alignment;
 import java.util.LinkedList;
 import java.util.List;
 import net.sf.samtools.CigarElement;
-import net.sf.samtools.CigarOperator;
 import net.sf.samtools.SAMRecord;
 
 /**
@@ -19,88 +18,82 @@ public class AlignmentHelper {
      * @param cigar The input cigar string
      * @return The list of alignment differences
      */
-    public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr, boolean showSoftClipping) {
+    public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr) {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
         
-        String readStr = record.getReadString();
-        StringBuilder diffStr = new StringBuilder();
         int index = 0;
         int indexRef = 0;
         
-        for (CigarElement cigarEl : record.getCigar().getCigarElements()) {
-            CigarOperator cigarOp = cigarEl.getOperator();
-            int cigarLen = cigarEl.getLength();
-//            logger.info(cigarOp + " found" + " index:" + index + " indexRef:" + indexRef + " cigarLen:" + cigarLen);
+        for (CigarElement element : record.getCigar().getCigarElements()) {
+            int cigarLen = element.getLength();
+            String subref = refStr.substring(indexRef, indexRef + cigarLen);
+            String subread = record.getReadString().substring(index, index + cigarLen);
+            Alignment.AlignmentDifference currentDifference = null;
 
-            switch (cigarOp) {
+            switch (element.getOperator()) {
                 case M:
                 case EQ:
                 case X:
-                    String subref = refStr.substring(indexRef, indexRef + cigarLen);
-                    String subread = readStr.substring(index, index + cigarLen);
-                    diffStr.append(getDiff(subref, subread));
+                    differences.addAll(getMismatchDiff(subref, subread, indexRef));
                     index = index + cigarLen;
                     indexRef = indexRef + cigarLen;
                     break;
                 case I:
-                    diffStr.append(readStr.substring(index, index + cigarLen).toLowerCase());
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread);
                     index = index + cigarLen;
-                    // TODO save insertions
                     break;
                 case D:
-                    for (int bi = 0; bi < cigarLen; bi++) {
-                        diffStr.append("d");
-                    }
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case N:
-                    for (int bi = 0; bi < cigarLen; bi++) {
-                        diffStr.append("n");
-                    }
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case S:
-                    if (showSoftClipping) {
-                        subread = readStr.substring(index, index + cigarLen);
-                        diffStr.append(subread);
-                        index = index + cigarLen;
-                        indexRef = indexRef + cigarLen;
-                    } else {
-                        for (int bi = 0; bi < cigarLen; bi++) {
-                            diffStr.append(" ");
-                        }
-                        index = index + cigarLen;
-                        indexRef = indexRef + cigarLen;
-                    }
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
+                    index = index + cigarLen;
+                    indexRef = indexRef + cigarLen;
                     break;
                 case H:
-                    for (int bi = 0; bi < cigarLen; bi++) {
-                        diffStr.append("h");
-                    }
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.HARD_CLIPPING, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case P:
-                    for (int bi = 0; bi < cigarLen; bi++) {
-                        diffStr.append("p");
-                    }
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, subref);
                     indexRef = indexRef + cigarLen;
                     break;
+            }
+            
+            if (currentDifference != null) {
+                differences.add(currentDifference);
             }
         }
         
         return differences;
     }
     
-    private static String getDiff(String refStr, String readStr) {
+    
+    private static List<Alignment.AlignmentDifference> getMismatchDiff(String referenceSequence, String readSequence, int baseIndex) {
+        List<Alignment.AlignmentDifference> differences = new LinkedList<>();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < refStr.length(); i++) {
-            if (refStr.charAt(i) != readStr.charAt(i)) {
-                sb.append(readStr.charAt(i));
+        int foundIndex = 0;
+        for (int i = 0; i < referenceSequence.length(); i++) {
+            if (referenceSequence.charAt(i) != readSequence.charAt(i)) {
+                sb.append(readSequence.charAt(i));
+                if (sb.length() == 0) {
+                    foundIndex = i;
+                }
             } else {
-                sb.append(" ");
+                if (sb.length() > 0) {
+                    Alignment.AlignmentDifference difference = 
+                            new Alignment.AlignmentDifference(baseIndex + foundIndex, Alignment.AlignmentDifference.MISMATCH, sb.toString());
+                    differences.add(difference);
+                    sb.setLength(0);
+                }
             }
         }
-        return sb.toString();
+        return differences;
     }
-
+    
 }
