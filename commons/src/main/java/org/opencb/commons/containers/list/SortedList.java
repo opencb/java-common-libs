@@ -1,4 +1,4 @@
-package org.opencb.commons.containers;
+package org.opencb.commons.containers.list;
 
 import java.util.ArrayList;
 import java.util.Collections;

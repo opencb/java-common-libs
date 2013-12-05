@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.readers;
 
 
-import org.opencb.commons.bioformats.commons.DataReader;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.io.DataReader;
 
 import java.util.List;
 
