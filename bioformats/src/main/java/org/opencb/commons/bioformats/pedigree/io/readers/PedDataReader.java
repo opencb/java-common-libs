@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.pedigree.io.readers;
 
 
-import org.opencb.commons.bioformats.commons.DataReader;
 import org.opencb.commons.bioformats.pedigree.Pedigree;
+import org.opencb.commons.io.DataReader;
 
 /**
  * Created with IntelliJ IDEA.

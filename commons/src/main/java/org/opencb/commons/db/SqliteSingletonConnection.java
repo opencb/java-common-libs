@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons;
+package org.opencb.commons.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
