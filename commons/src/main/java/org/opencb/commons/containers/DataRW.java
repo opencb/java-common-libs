@@ -1,4 +1,4 @@
-package org.opencb.javalibs.commons.containers;
+package org.opencb.commons.containers;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;

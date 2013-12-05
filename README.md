@@ -1,5 +1,9 @@
-variant
-=======
+java-common-libs
+================
 
-Variant is an ambitious project aimed to provide a complete suite of tools to work with genomic variation data, from VCF tools to variant profiling or genomic statistics
+This repository contains a set of libraries used by OpenCB projects that use the Java language. It is composed of three parts:
+
+* bioformats: Readers and writers of file formats typically used in bioformatics
+* commons: Data structures and utility classes
+* math: Mathematical functions
 

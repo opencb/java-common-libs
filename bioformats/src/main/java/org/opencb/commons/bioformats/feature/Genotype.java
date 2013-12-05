@@ -174,4 +174,21 @@ public class Genotype {
     public boolean isAllele2Ref() {
         return allele2 == 0;
     }
+
+    public String getGenotype() {
+        StringBuilder sb = new StringBuilder(6);
+        if (allele1 != null) {
+            sb.append(allele1);
+        } else {
+            sb.append(".");
+        }
+        sb.append("/");
+
+        if (allele2 != null) {
+            sb.append(allele2);
+        } else {
+            sb.append(".");
+        }
+        return sb.toString();
+    }
 }
