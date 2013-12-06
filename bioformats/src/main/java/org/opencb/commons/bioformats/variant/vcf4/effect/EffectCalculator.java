@@ -23,7 +23,11 @@ public class EffectCalculator {
 
     public static List<VariantEffect> getEffects(List<VcfRecord> batch) {
         ObjectMapper mapper = new ObjectMapper();
-        List<VariantEffect> batchEffect = new ArrayList<>();
+        List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
+
+        if(batch.size() == 0){
+            return batchEffect;
+        }
 
         StringBuilder chunkVcfRecords = new StringBuilder();
         Client client = Client.create();

@@ -17,9 +17,8 @@
     <dependencies>
         <dependency>
             <groupId>org.opencb.commons</groupId>
-            <artifactId>commons</artifactId>
+            <artifactId>commons-lib</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -89,5 +88,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+
     </dependencies>
 </project>

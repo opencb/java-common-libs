@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.commons;
+package org.opencb.commons.io;
 
 import java.util.List;
 

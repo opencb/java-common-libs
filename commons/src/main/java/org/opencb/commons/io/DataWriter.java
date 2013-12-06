@@ -1,15 +1,13 @@
-package org.opencb.commons.bioformats.commons;
-
-import java.util.List;
+package org.opencb.commons.io;
 
 /**
  * Created with IntelliJ IDEA.
  * User: aaleman
  * Date: 8/30/13
- * Time: 12:20 PM
+ * Time: 12:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DataReader<T> {
+public interface DataWriter {
 
     public boolean open();
 
@@ -19,7 +17,4 @@ public interface DataReader<T> {
 
     public boolean post();
 
-    public T read();
-
-    public List<T> read(int batchSize);
 }
