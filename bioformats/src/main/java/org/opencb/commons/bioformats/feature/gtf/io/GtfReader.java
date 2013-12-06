@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.feature.gtf.io;
 
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
 import org.opencb.commons.bioformats.feature.gtf.Gtf;
+import org.opencb.commons.utils.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,7 +23,8 @@ public class GtfReader {
     public GtfReader(Path path) throws IOException, SecurityException, NoSuchMethodException {
         Files.exists(path);
         this.file = file;
-        bufferedReader = new BufferedReader(new FileReader(file));
+        bufferedReader = FileUtils.newBufferedReader(path);
+//        bufferedReader = new BufferedReader(new FileReader(file));
     }
 
     public Gtf read() throws FileFormatException {

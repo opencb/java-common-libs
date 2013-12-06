@@ -45,6 +45,17 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Intra-module dependencies -->
+            <dependency>
+                <groupId>org.opencb.commons</groupId>
+                <artifactId>bioformats</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opencb.commons</groupId>
+                <artifactId>commons</artifactId>
+                <version>1.0.0</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
