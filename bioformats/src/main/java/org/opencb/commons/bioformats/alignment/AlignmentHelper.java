@@ -80,10 +80,10 @@ public class AlignmentHelper {
         int foundIndex = 0;
         for (int i = 0; i < referenceSequence.length(); i++) {
             if (referenceSequence.charAt(i) != readSequence.charAt(i)) {
-                sb.append(readSequence.charAt(i));
                 if (sb.length() == 0) {
                     foundIndex = i;
                 }
+                sb.append(readSequence.charAt(i));
             } else {
                 if (sb.length() > 0) {
                     Alignment.AlignmentDifference difference = 
@@ -93,6 +93,14 @@ public class AlignmentHelper {
                 }
             }
         }
+        
+        // If a mismatch was found at the end, it can't be appended inside the loop
+        if (sb.length() > 0) {
+            Alignment.AlignmentDifference difference = 
+                    new Alignment.AlignmentDifference(baseIndex + foundIndex, Alignment.AlignmentDifference.MISMATCH, sb.toString());
+            differences.add(difference);
+        }
+        
         return differences;
     }
     
