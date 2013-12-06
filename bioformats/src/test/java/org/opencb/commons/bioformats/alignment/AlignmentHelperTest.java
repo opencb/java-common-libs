@@ -134,9 +134,6 @@ public class AlignmentHelperTest {
         expResult.add(new Alignment.AlignmentDifference(13, Alignment.AlignmentDifference.DELETION, "TT"));
         expResult.add(new Alignment.AlignmentDifference(25, Alignment.AlignmentDifference.DELETION, "GGGTT"));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
-//        for (int i = 0; i < result.size(); i++) {
-//            System.out.println(result.get(i).toString());
-//        }
         assertEquals(expResult.size(), result.size());
         
         for (int i = 0; i < result.size(); i++) {
@@ -145,5 +142,43 @@ public class AlignmentHelperTest {
         }
         
         // TODO Test deletion at the end? Does it make sense?
+    }
+    
+    
+    /**
+     * Test of getDifferencesFromCigar method, of class AlignmentHelper.
+     */
+    @Test
+    public void testGetDifferencesFromCigarMismatches() {
+        SAMRecord record = new SAMRecord(new SAMFileHeader());
+        List<CigarElement> elements = null;
+        List expResult = null, result = null;
+        String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTT"; // 80 nt
+        
+        // 20M2D18M - middle and end
+        System.out.println("20M2D18M");
+        elements = new LinkedList<>();
+        elements.add(new CigarElement(20, CigarOperator.M));
+        elements.add(new CigarElement(2, CigarOperator.D));
+        elements.add(new CigarElement(18, CigarOperator.M));
+        record.setCigar(new Cigar(elements));
+        record.setReadString("ACAACGGGTGGGTTTTAAAACCGGGGTTTAAAAACCGT");
+        
+        expResult = new LinkedList<>();
+        expResult.add(new Alignment.AlignmentDifference(1, Alignment.AlignmentDifference.MISMATCH, "C"));
+        expResult.add(new Alignment.AlignmentDifference(5, Alignment.AlignmentDifference.MISMATCH, "GGGT"));
+        expResult.add(new Alignment.AlignmentDifference(20, Alignment.AlignmentDifference.DELETION, "CC"));
+        expResult.add(new Alignment.AlignmentDifference(31, Alignment.AlignmentDifference.MISMATCH, "A"));
+        expResult.add(new Alignment.AlignmentDifference(38, Alignment.AlignmentDifference.MISMATCH, "GT"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+        for (int i = 0; i < result.size(); i++) {
+            System.out.println(result.get(i).toString());
+        }
+        assertEquals(expResult.size(), result.size());
+        
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
+                        expResult.get(i).equals(result.get(i)));
+        }
     }
 }
