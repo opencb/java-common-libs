@@ -38,9 +38,6 @@ public class SortedList<T extends Comparable<T>> extends ArrayList<T> {
         if (res) {
             Collections.sort(this);
         }
-
-
-
         return res;
     }
 }
