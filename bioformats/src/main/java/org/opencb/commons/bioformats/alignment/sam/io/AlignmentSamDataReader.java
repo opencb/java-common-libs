@@ -26,9 +26,14 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMRecord, SA
     private SAMFileReader reader;
     public SAMFileHeader header;
     private SAMRecordIterator iterator;
+    private boolean enableFileSource;
 
-    public AlignmentSamDataReader(String filename) {
+    public AlignmentSamDataReader(String filename){
+        this(filename,false);
+    }
+    public AlignmentSamDataReader(String filename, boolean enableFileSource) {
         this.filename = filename;
+        this.enableFileSource = enableFileSource;
     }
 
     @Override
@@ -42,6 +47,9 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMRecord, SA
         file = path.toFile();
 
         reader = new SAMFileReader(file);
+        if(enableFileSource){
+            reader.enableFileSource(true);
+        }
         reader.setValidationStringency(SAMFileReader.ValidationStringency.LENIENT);
         iterator = reader.iterator();
 
