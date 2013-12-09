@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.alignment;
 
 import java.util.LinkedList;
 import java.util.List;
+import net.sf.samtools.AlignmentBlock;
 import net.sf.samtools.CigarElement;
 import net.sf.samtools.SAMRecord;
 
@@ -23,43 +24,67 @@ public class AlignmentHelper {
         
         int index = 0;
         int indexRef = 0;
+        int indexMismatchBlock = 0;
         
         for (CigarElement element : record.getCigar().getCigarElements()) {
             int cigarLen = element.getLength();
-            String subref = refStr.substring(indexRef, indexRef + cigarLen);
-            String subread = record.getReadString().substring(index, index + cigarLen);
+            String subref = null, subread = null;
             Alignment.AlignmentDifference currentDifference = null;
 
             switch (element.getOperator()) {
                 case M:
                 case EQ:
                 case X:
+                    AlignmentBlock blk = record.getAlignmentBlocks().get(indexMismatchBlock);
+                    // Picard ignores hard clipping, the indices could be neccessary
+                    indexRef = blk.getReferenceStart() >= indexRef ? blk.getReferenceStart() : indexRef;
+                    subref = refStr.substring(indexRef, indexRef + blk.getLength());
+                    subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
                     differences.addAll(getMismatchDiff(subref, subread, indexRef));
-                    index = index + cigarLen;
-                    indexRef = indexRef + cigarLen;
+                    
+                    index = index + record.getAlignmentBlocks().get(indexMismatchBlock).getLength();
+                    indexRef = indexRef + record.getAlignmentBlocks().get(indexMismatchBlock).getLength();
+                    indexMismatchBlock++;
                     break;
                 case I:
+                    if (cigarLen < 30) {
+                        subread = record.getReadString().substring(index, index + cigarLen);
+                    } else { // Get only first 30 characters in the sequence to copy
+                        subread = subread.substring(index, index + 30).concat("...");
+                    }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread);
                     index = index + cigarLen;
                     break;
                 case D:
+                    if (cigarLen < 30) {
+                        subref = refStr.substring(indexRef, indexRef + cigarLen);
+                    } else { // Get only first 30 characters in the sequence to copy
+                        subref = refStr.substring(indexRef, indexRef + 30).concat("...");
+                    }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case N:
+                    if (cigarLen < 30) {
+                        subref = refStr.substring(indexRef, indexRef + cigarLen);
+                    } else { // Get only first 30 characters in the sequence to copy
+                        subref = refStr.substring(indexRef, indexRef + 30).concat("...");
+                    }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case S:
+                    subread = record.getReadString().substring(index, index + cigarLen);
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
                     index = index + cigarLen;
-                    indexRef = indexRef + cigarLen;
                     break;
                 case H:
+                    subref = refStr.substring(indexRef, Math.min(indexRef + cigarLen, refStr.length()));
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.HARD_CLIPPING, subref);
                     indexRef = indexRef + cigarLen;
                     break;
                 case P:
+                    subref = refStr.substring(indexRef, indexRef + cigarLen);
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, subref);
                     indexRef = indexRef + cigarLen;
                     break;
@@ -78,7 +103,7 @@ public class AlignmentHelper {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
         StringBuilder sb = new StringBuilder();
         int foundIndex = 0;
-        for (int i = 0; i < referenceSequence.length(); i++) {
+        for (int i = 0; i < Math.min(referenceSequence.length(), readSequence.length()); i++) {
             if (referenceSequence.charAt(i) != readSequence.charAt(i)) {
                 if (sb.length() == 0) {
                     foundIndex = i;

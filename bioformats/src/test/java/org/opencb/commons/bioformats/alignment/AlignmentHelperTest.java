@@ -56,6 +56,7 @@ public class AlignmentHelperTest {
         assertEquals(expResult.size(), result.size());
         
         for (int i = 0; i < result.size(); i++) {
+//            System.out.println("got " + result.get(i).toString());
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
@@ -153,7 +154,7 @@ public class AlignmentHelperTest {
         SAMRecord record = new SAMRecord(new SAMFileHeader());
         List<CigarElement> elements = null;
         List expResult = null, result = null;
-        String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTT"; // 80 nt
+        String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCC"; // 40 nt
         
         // 20M2D18M - middle and end
         System.out.println("20M2D18M");
@@ -171,9 +172,65 @@ public class AlignmentHelperTest {
         expResult.add(new Alignment.AlignmentDifference(31, Alignment.AlignmentDifference.MISMATCH, "A"));
         expResult.add(new Alignment.AlignmentDifference(38, Alignment.AlignmentDifference.MISMATCH, "GT"));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+        assertEquals(expResult.size(), result.size());
+        
         for (int i = 0; i < result.size(); i++) {
-            System.out.println(result.get(i).toString());
+            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
+                        expResult.get(i).equals(result.get(i)));
         }
+    }
+    
+    
+    /**
+     * Test of getDifferencesFromCigar method, of class AlignmentHelper.
+     */
+    @Test
+    public void testGetDifferencesFromCigarClipping() {
+        SAMRecord record = new SAMRecord(new SAMFileHeader());
+        List<CigarElement> elements = null;
+        List expResult = null, result = null;
+        String referenceSequence = "AAAACCCCGGGGTTTTAAAACC"; // 22 nt
+        
+        // 2H20M8S - start (hard) and end (soft)
+        System.out.println("2H20M8S");
+        elements = new LinkedList<>();
+        elements.add(new CigarElement(2, CigarOperator.H));
+        elements.add(new CigarElement(20, CigarOperator.M));
+        elements.add(new CigarElement(8, CigarOperator.S));
+        record.setCigar(new Cigar(elements));
+        record.setReadString("AACCCCGGGGTTTTAAAACCCCGGGGTT");
+         
+        expResult = new LinkedList<>();
+        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.HARD_CLIPPING, "AA"));
+        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.SOFT_CLIPPING, "CCGGGGTT"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+//        for (int i = 0; i < result.size(); i++) {
+//            System.out.println(result.get(i).toString());
+//        }
+        assertEquals(expResult.size(), result.size());
+        
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
+                        expResult.get(i).equals(result.get(i)));
+        }
+        
+        
+        // 2S20M10H - start (soft) and end (hard)
+        System.out.println("2S20M10H");
+        elements = new LinkedList<>();
+        elements.add(new CigarElement(2, CigarOperator.S));
+        elements.add(new CigarElement(20, CigarOperator.M));
+        elements.add(new CigarElement(2, CigarOperator.H));
+        record.setCigar(new Cigar(elements));
+        record.setReadString("GTAAAACCCCGGGGTTTTAAAA");
+         
+        expResult = new LinkedList<>();
+        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.SOFT_CLIPPING, "GT"));
+        expResult.add(new Alignment.AlignmentDifference(20, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+//        for (int i = 0; i < result.size(); i++) {
+//            System.out.println(result.get(i).toString());
+//        }
         assertEquals(expResult.size(), result.size());
         
         for (int i = 0; i < result.size(); i++) {
