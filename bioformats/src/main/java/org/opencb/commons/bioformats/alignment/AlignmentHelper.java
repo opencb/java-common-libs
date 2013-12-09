@@ -84,9 +84,9 @@ public class AlignmentHelper {
                     indexRef = indexRef + cigarLen;
                     break;
                 case P:
-                    subref = refStr.substring(indexRef, indexRef + cigarLen);
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, subref);
-                    indexRef = indexRef + cigarLen;
+//                    subref = refStr.substring(indexRef, indexRef + cigarLen);
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, "");
+//                    indexRef = indexRef + cigarLen;
                     break;
             }
             

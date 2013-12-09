@@ -238,4 +238,42 @@ public class AlignmentHelperTest {
                         expResult.get(i).equals(result.get(i)));
         }
     }
+    
+    /**
+     * Test of getDifferencesFromCigar method, of class AlignmentHelper.
+     */
+    @Test
+    public void testGetDifferencesFromCigarPadding() {
+        SAMRecord record = new SAMRecord(new SAMFileHeader());
+        List<CigarElement> elements = null;
+        List expResult = null, result = null;
+        String referenceSequence = "AGATAAGATA"; // 10 nt
+        
+        // 6M1P1I4M - middle (padding and insert)
+        System.out.println("6M1P1I4M");
+        elements = new LinkedList<>();
+        elements.add(new CigarElement(6, CigarOperator.M));
+        elements.add(new CigarElement(1, CigarOperator.P));
+        elements.add(new CigarElement(1, CigarOperator.I));
+        elements.add(new CigarElement(4, CigarOperator.M));
+        record.setCigar(new Cigar(elements));
+        record.setReadString("AGATAAGGATA");
+         
+        expResult = new LinkedList<>();
+        expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.PADDING, ""));
+        expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.INSERTION, "G"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+//        for (int i = 0; i < result.size(); i++) {
+//            System.out.println(result.get(i).toString());
+//        }
+        assertEquals(expResult.size(), result.size());
+        
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
+                        expResult.get(i).equals(result.get(i)));
+        }
+        
+        
+        
+    }
 }
