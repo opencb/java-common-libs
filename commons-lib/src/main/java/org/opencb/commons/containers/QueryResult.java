@@ -15,15 +15,11 @@ public class QueryResult<T> {
 
 
     public QueryResult() {
-        this.id = "";
-        this.dbTime = -1;
-        this.time = -1;
-        this.numResults = -1;
-        this.warningMsg = "";
-        this.errorMsg = "";
-        this.featureType = "";
-        this.resultType = "";
-        this.result = null;
+        this("", -1, -1, -1, "", "", "", "", null);
+    }
+    
+    public QueryResult(String id) {
+        this(id, -1, -1, -1, "", "", "", "", null);
     }
 
     public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
