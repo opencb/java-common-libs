@@ -22,9 +22,10 @@ public class AlignmentHelper {
     public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr) {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
         
-        int index = 0;
-        int indexRef = 0;
-        int indexMismatchBlock = 0;
+        int index = 0, indexRef = 0, indexMismatchBlock = 0;
+//        System.out.println("align start = " + record.getAlignmentStart() + 
+//                "\t1st block start = " + record.getAlignmentBlocks().get(0).getReferenceStart() + 
+//                "\n*****\n" + refStr + "\n" + record.getReadString());
         
         for (CigarElement element : record.getCigar().getCigarElements()) {
             int cigarLen = element.getLength();
@@ -36,8 +37,9 @@ public class AlignmentHelper {
                 case EQ:
                 case X:
                     AlignmentBlock blk = record.getAlignmentBlocks().get(indexMismatchBlock);
+                    int realStart = blk.getReferenceStart() - record.getAlignmentStart();
                     // Picard ignores hard clipping, the indices could be neccessary
-                    indexRef = blk.getReferenceStart() >= indexRef ? blk.getReferenceStart() : indexRef;
+                    indexRef = realStart >= indexRef ? realStart : indexRef;
                     subref = refStr.substring(indexRef, indexRef + blk.getLength());
                     subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
                     differences.addAll(getMismatchDiff(subref, subread, indexRef));
@@ -77,6 +79,7 @@ public class AlignmentHelper {
                     subread = record.getReadString().substring(index, index + cigarLen);
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
                     index = index + cigarLen;
+                    indexRef = indexRef + cigarLen;
                     break;
                 case H:
                     subref = refStr.substring(indexRef, Math.min(indexRef + cigarLen, refStr.length()));
