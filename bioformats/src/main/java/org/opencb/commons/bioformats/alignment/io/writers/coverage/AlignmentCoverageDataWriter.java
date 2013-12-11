@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.alignment.io.writers.coverage;
 
-import org.opencb.commons.bioformats.alignment.AlignmentCoverage;
-import org.opencb.commons.bioformats.commons.DataWriter;
+import org.opencb.commons.bioformats.alignment.stats.AlignmentCoverage;
+import org.opencb.commons.io.DataWriter;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.alignment.sam.stats;
+package org.opencb.commons.containers.list;
 
 import java.util.*;import java.util.LinkedList;import java.util.List;import java.util.ListIterator;
 

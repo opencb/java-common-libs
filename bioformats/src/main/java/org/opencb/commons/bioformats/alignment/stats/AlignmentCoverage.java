@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.alignment;
+package org.opencb.commons.bioformats.alignment.stats;
 
 /**
  * Created with IntelliJ IDEA.

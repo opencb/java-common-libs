@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.alignment.io.readers;
 
-import org.opencb.commons.bioformats.commons.DataReader;
+
+import org.opencb.commons.io.DataReader;
 
 /**
  * Created with IntelliJ IDEA.
