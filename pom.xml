@@ -35,7 +35,7 @@
 
     <modules>
         <module>bioformats</module>
-        <module>commons</module>
+        <module>commons-lib</module>
     </modules>
 
     <properties>
@@ -45,16 +45,23 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Intra-module dependencies -->
+            <dependency>
+                <groupId>org.opencb.commons</groupId>
+                <artifactId>bioformats</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opencb.commons</groupId>
+                <artifactId>commons-lib</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>15.0</version>
             </dependency>
-            <!--<dependency>-->
-            <!--<groupId>dom4j</groupId>-->
-            <!--<artifactId>dom4j</artifactId>-->
-            <!--<version>20040902.021138</version>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -64,6 +71,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-math3</artifactId>
                 <version>3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.3</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

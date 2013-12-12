@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.pedigree.io.writers;
 
 
-import org.opencb.commons.bioformats.commons.DataWriter;
 import org.opencb.commons.bioformats.pedigree.Pedigree;
+import org.opencb.commons.io.DataWriter;
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,39 +1,41 @@
 package org.opencb.commons.containers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class QueryResult<T> {
 
     private String id;
     private long dbTime;
+    private long time;
     private long numResults;
     private String warningMsg;
     private String errorMsg;
     private String featureType;
     private String resultType;
-    private T result;
+    private List<T> result;
 
 
     public QueryResult() {
-        this.id = "";
-        this.dbTime = -1;
-        this.numResults = -1;
-        this.warningMsg = "";
-        this.errorMsg = "";
-        this.featureType = "";
-        this.resultType = "";
-        this.result = null;
+        this("", -1, -1, -1, "", "", "", "", null);
+    }
+    
+    public QueryResult(String id) {
+        this(id, -1, -1, -1, "", "", "", "", new ArrayList<T>());
     }
 
-    public QueryResult(String id, long dbTime, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
+    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, 
+            String featureType, String resultType, List<T> result) {
         this.id = id;
         this.dbTime = dbTime;
+        this.time = time;
         this.numResults = numResults;
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
         this.featureType = featureType;
         this.resultType = resultType;
         this.result = result;
-
     }
 
     public String getId() {
@@ -92,11 +94,27 @@ public class QueryResult<T> {
         this.resultType = resultType;
     }
 
-    public T getResult() {
+    public List<T> getResult() {
         return result;
     }
 
-    public void setResult(T result) {
+    public void setResult(List<T> result) {
         this.result = result;
+    }
+    
+    public void addResult(T result) {
+        this.result.add(result);
+    }
+    
+    public void addAllResults(List<T> result) {
+        this.result.addAll(result);
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

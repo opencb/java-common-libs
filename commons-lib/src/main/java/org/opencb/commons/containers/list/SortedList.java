@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.filters;
+package org.opencb.commons.containers.list;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,27 +10,27 @@ import java.util.Collections;
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VcfFilterList extends ArrayList<VcfFilter> {
+public class SortedList<T extends Comparable<T>> extends ArrayList<T> {
 
-    public VcfFilterList() {
+    public SortedList() {
         super();
     }
 
-    public VcfFilterList(int i) {
+    public SortedList(int i) {
         super(i);
     }
 
     @Override
-    public boolean add(VcfFilter vcfFilter) {
+    public boolean add(T vcfFilter) {
         return this.addList(vcfFilter);
     }
 
-    private boolean addList(VcfFilter... vcfFilter) {
+    private boolean addList(T... vcfFilter) {
         boolean res = true;
         if (vcfFilter.length == 1) {
             res = super.add(vcfFilter[0]);
         } else {
-            for (VcfFilter v : vcfFilter) {
+            for (T v : vcfFilter) {
                 res &= super.add(v);
             }
         }
