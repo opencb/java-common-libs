@@ -1,5 +1,8 @@
 package org.opencb.commons.containers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class QueryResult<T> {
 
@@ -11,7 +14,7 @@ public class QueryResult<T> {
     private String errorMsg;
     private String featureType;
     private String resultType;
-    private T result;
+    private List<T> result;
 
 
     public QueryResult() {
@@ -19,10 +22,11 @@ public class QueryResult<T> {
     }
     
     public QueryResult(String id) {
-        this(id, -1, -1, -1, "", "", "", "", null);
+        this(id, -1, -1, -1, "", "", "", "", new ArrayList<T>());
     }
 
-    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
+    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, 
+            String featureType, String resultType, List<T> result) {
         this.id = id;
         this.dbTime = dbTime;
         this.time = time;
@@ -90,12 +94,20 @@ public class QueryResult<T> {
         this.resultType = resultType;
     }
 
-    public T getResult() {
+    public List<T> getResult() {
         return result;
     }
 
-    public void setResult(T result) {
+    public void setResult(List<T> result) {
         this.result = result;
+    }
+    
+    public void addResult(T result) {
+        this.result.add(result);
+    }
+    
+    public void addAllResults(List<T> result) {
+        this.result.addAll(result);
     }
 
     public long getTime() {

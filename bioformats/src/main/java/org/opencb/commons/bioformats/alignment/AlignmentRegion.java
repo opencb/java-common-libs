@@ -1,7 +1,6 @@
 package org.opencb.commons.bioformats.alignment;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -14,7 +13,7 @@ public class AlignmentRegion {
     private long end;
     
     private List<Alignment> alignments;
-    private Map<String, short[]> coverage;
+    private RegionCoverage coverage;
 
     public AlignmentRegion() {
     }
@@ -23,7 +22,7 @@ public class AlignmentRegion {
         this(chromosome, start, end, null, null);
     }
 
-    public AlignmentRegion(String chromosome, long start, long end, List<Alignment> alignments, Map<String, short[]> coverage) {
+    public AlignmentRegion(String chromosome, long start, long end, List<Alignment> alignments, RegionCoverage coverage) {
         this.chromosome = chromosome;
         this.start = start;
         this.end = end;
@@ -47,11 +46,11 @@ public class AlignmentRegion {
         this.chromosome = chromosome;
     }
 
-    public Map<String, short[]> getCoverage() {
+    public RegionCoverage getCoverage() {
         return coverage;
     }
 
-    public void setCoverage(Map<String, short[]> coverage) {
+    public void setCoverage(RegionCoverage coverage) {
         this.coverage = coverage;
     }
 
