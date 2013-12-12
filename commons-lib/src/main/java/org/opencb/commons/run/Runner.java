@@ -19,7 +19,7 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
     protected R reader;
     protected W writer;
     protected Runner prev;
-    protected int batchSize = 1000;
+    protected int batchSize;
 
 
     public Runner(R reader, W writer, Runner prev) {
@@ -30,7 +30,7 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
     public Runner(R reader, W writer) {
         this.reader = reader;
         this.writer = writer;
-
+        this.batchSize = 1000;
     }
 
     public abstract List<E> apply(List<E> batch) throws IOException;
@@ -112,7 +112,6 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
         batch = reader.read(batchSize);
         while (!batch.isEmpty()) {
 
-            System.out.println("Batch: " + cont++);
             batch = this.launch(batch);
             batch.clear();
             batch = reader.read(batchSize);
@@ -129,4 +128,11 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
 
     }
 
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
 }
