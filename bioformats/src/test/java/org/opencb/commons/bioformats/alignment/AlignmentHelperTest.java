@@ -226,8 +226,8 @@ public class AlignmentHelperTest {
          
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.SOFT_CLIPPING, "GT"));
-        expResult.add(new Alignment.AlignmentDifference(20, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
-        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, "GTAAAACCCCGGGGTTTTAAAACC");
 //        for (int i = 0; i < result.size(); i++) {
 //            System.out.println(result.get(i).toString());
 //        }
