@@ -15,16 +15,22 @@ import java.util.Map;
  */
 public class Variant {
     private String chromosome;
-    private long position;
+    private int position;
     private String reference;
     private String alternate;
     private String id;
     private String format;
-    private String sampleRawData;
     private Map<String, Map<String, String>> sampleData;
     private VariantStats stats;
     private List<VariantEffect> effect;
 
+    public Variant(String chromosome, int position, String reference, String alternate){
+        this.chromosome = chromosome;
+        this.position = position;
+        this.reference = reference;
+        this.alternate = alternate;
+
+    }
     public String getChromosome() {
         return chromosome;
     }
@@ -37,7 +43,7 @@ public class Variant {
         return position;
     }
 
-    public void setPosition(long position) {
+    public void setPosition(int position) {
         this.position = position;
     }
 
@@ -71,14 +77,6 @@ public class Variant {
 
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    public String getSampleRawData() {
-        return sampleRawData;
-    }
-
-    public void setSampleRawData(String sampleRawData) {
-        this.sampleRawData = sampleRawData;
     }
 
     public Map<String, Map<String, String>> getSampleData() {
