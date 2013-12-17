@@ -10,12 +10,13 @@ import java.io.FileOutputStream;
 
 public class UniprotParser {
 
-    public final static String UNIPROT_CONTEXT_v135 = "org.bioinfo.formats.parser.uniprot.v135jaxb";
-    public final static String UNIPROT_CONTEXT_v140 = "org.bioinfo.formats.parser.uniprot.v140jaxb";
+    public final static String UNIPROT_CONTEXT_v135 = "org.opencb.commons.bioformats.protein.uniprot.v135jaxb";
+    public final static String UNIPROT_CONTEXT_v140 = "org.opencb.commons.bioformats.protein.uniprot.v140jaxb";
+    public final static String UNIPROT_CONTEXT_v201311 = "org.opencb.commons.bioformats.protein.uniprot.v201311jaxb";
 
     public static void saveXMLInfo(Object obj, String filename) throws FileNotFoundException, JAXBException {
         JAXBContext jaxbContext;
-        jaxbContext = JAXBContext.newInstance(UNIPROT_CONTEXT_v135);
+        jaxbContext = JAXBContext.newInstance(UNIPROT_CONTEXT_v201311);
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.marshal(obj, new FileOutputStream(filename));
     }
@@ -28,7 +29,7 @@ public class UniprotParser {
      */
     public static Object loadXMLInfo(String filename) throws JAXBException {
         Object obj = null;
-        JAXBContext jaxbContext = JAXBContext.newInstance(UNIPROT_CONTEXT_v140);
+        JAXBContext jaxbContext = JAXBContext.newInstance(UNIPROT_CONTEXT_v201311);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         obj = unmarshaller.unmarshal(new File(filename));
         return obj;
