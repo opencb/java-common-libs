@@ -1,5 +1,7 @@
 package org.opencb.commons.test;
 
+
+import junit.framework.TestSuite;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,7 +14,7 @@ import org.junit.rules.TestName;
  * Time: 12:20 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GenericTest {
+public class GenericTest extends TestSuite {
 
     @Rule
     public TestName name = new TestName();
@@ -27,7 +29,8 @@ public class GenericTest {
     @After
     public void tearDown() throws Exception {
         end = System.currentTimeMillis();
-        System.out.println("Time " + name.getMethodName() + ": " + (end - start));
+        float time = (end - start) / (float) 1000;
+        System.out.println("Time " + name.getMethodName() + ": " + String.format("%.4f s", time));
     }
 
 }

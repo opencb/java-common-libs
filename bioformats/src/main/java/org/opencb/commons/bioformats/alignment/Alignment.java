@@ -80,13 +80,13 @@ public class Alignment {
         this.attributes = attributes;
     }
 
-    public Alignment(SAMRecord record, Map<String, String> attributes, String referenceSequence, boolean showSoftClipping) {
+    public Alignment(SAMRecord record, Map<String, String> attributes, String referenceSequence) {
         this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(), 
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(), 
                 record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""), 
                 record.getMateReferenceName(), record.getMateAlignmentStart(), 
                 record.getInferredInsertSize(), record.getFlags(), 
-                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence, showSoftClipping), 
+                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence), 
                 attributes);
     }
 
@@ -272,6 +272,20 @@ public class Alignment {
         public String getSeq() {
             return seq;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof AlignmentDifference)) { return false; }
+            
+            AlignmentDifference other = (AlignmentDifference) obj;
+            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%d: %c %s", pos, op, seq);
+        }
+        
         
     }
     

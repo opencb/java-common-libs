@@ -100,6 +100,31 @@ public class VariantStats {
 
     }
 
+
+    public VariantStats(String chromosome, int position, String allele_ref, String allele_alt, float maf,
+                        float mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
+                        int mendel_err, boolean is_indel, float cases_percent_dominant,
+                        float controls_percent_dominant, float cases_percent_recessive,
+                        float controls_percent_recessive) {
+
+        this.chromosome = chromosome;
+        this.position = position;
+        this.refAllele = allele_ref;
+        this.altAlleles = allele_alt.split(",");
+        this.maf =  maf;
+        this.mgf =  mgf;
+        this.mafAllele = allele_maf;
+        this.mgfAllele = genotype_maf;
+        this.missingAlleles = miss_allele;
+        this.missingGenotypes = miss_gt;
+        this.mendelinanErrors = mendel_err;
+        this.isIndel = is_indel;
+        this.casesPercentDominant = cases_percent_dominant;
+        this.controlsPercentDominant = controls_percent_dominant;
+        this.casesPercentRecessive =  cases_percent_recessive;
+        this.controlsPercentRecessive = controls_percent_recessive;
+
+    }
     @Override
     public String toString() {
         return "VariantStats{" +
