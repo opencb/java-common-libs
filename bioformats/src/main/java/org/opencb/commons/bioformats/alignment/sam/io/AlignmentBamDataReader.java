@@ -11,4 +11,8 @@ public class AlignmentBamDataReader extends AlignmentSamDataReader {
     public AlignmentBamDataReader(String filename) {
         super(filename);
     }
+
+    public AlignmentBamDataReader(String bamFile, boolean enableFileSource) {
+        super(bamFile, enableFileSource);
+    }
 }
