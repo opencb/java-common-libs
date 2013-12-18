@@ -15,6 +15,12 @@ public class Region {
     private long start;
     private long end;
 
+    public Region(String chromosome, long start) {
+        this.chromosome = chromosome;
+        this.start = start;
+        this.end = Long.MAX_VALUE;
+    }
+
     public Region(String chromosome, long start, long end) {
         this.chromosome = chromosome;
         this.start = start;
@@ -22,12 +28,22 @@ public class Region {
     }
 
     public Region(String region) {
-        Pattern pattern = Pattern.compile("(\\w+):(\\d+)-(\\d+)");
+        Pattern pattern = Pattern.compile("((\\w+):(\\d+)-(\\d+)) | ((\\w+):(\\d+)) | (\\w+)");
         Matcher matcher = pattern.matcher(region);
         if (matcher.find()) {
-            this.chromosome = matcher.group(1);
-            this.start = Integer.valueOf(matcher.group(2));
-            this.end = Integer.valueOf(matcher.group(3));
+            if (matcher.groupCount() == 3) {
+                this.chromosome = matcher.group(1);
+                this.start = Long.valueOf(matcher.group(2));
+                this.end = Long.valueOf(matcher.group(3));
+            } else if (matcher.groupCount() == 2) {
+                this.chromosome = matcher.group(1);
+                this.start = Long.valueOf(matcher.group(2));
+                this.end = Long.valueOf(Long.MAX_VALUE);
+            } else if (matcher.groupCount() == 1) {
+                this.chromosome = matcher.group(1);
+                this.start = 0;
+                this.end = Long.valueOf(Long.MAX_VALUE);
+            }
         }
     }
 
@@ -130,5 +146,12 @@ public class Region {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder
+
+        return this.chromosome + ""
     }
 }
