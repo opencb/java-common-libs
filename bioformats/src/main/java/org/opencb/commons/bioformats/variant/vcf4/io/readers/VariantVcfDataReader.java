@@ -143,6 +143,11 @@ public class VariantVcfDataReader implements VariantDataReader {
         return this.vcf4.getSampleNames();
     }
 
+//    @Override
+//    public void setSampleNames(List<String> sampleNames) {
+//        vcf4.setHeaderLine(sampleNames);
+//    }
+
     @Override
     public String getHeader() {
         StringBuilder header = new StringBuilder();
