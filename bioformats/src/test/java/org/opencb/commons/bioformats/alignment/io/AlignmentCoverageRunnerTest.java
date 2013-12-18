@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.alignment.io;
 
 import net.sf.samtools.SAMRecord;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
 import org.opencb.commons.bioformats.alignment.io.writers.AlignmentDataWriter;
@@ -26,7 +27,10 @@ public class AlignmentCoverageRunnerTest extends GenericTest {
         List<SAMRecord> batch;
 
         int cont = 0;
-        reader.open();
+        if(reader.open() == false){
+            System.out.println("File ("+bamFile+") missing. Skipping test.");
+            return;
+        }
         reader.pre();
 
         writer.open();
