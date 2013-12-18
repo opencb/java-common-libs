@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.opencb.commons.test.GenericTest;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +20,7 @@ public class RegionTest extends GenericTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        r = new Region("1:10-20");
+        r = new Region("1", 10, 20);
     }
 
     @After
@@ -74,16 +73,14 @@ public class RegionTest extends GenericTest {
         r1.setEnd(21);
         assertNotEquals(r, r1);
 
-
     }
 
     @Test
     public void testHashCode() throws Exception {
 
-        Region r1 = new Region("1:11-20");
+        Region r1 = new Region("1", 11, 20);
         assertEquals(r.hashCode(), r.hashCode());
         assertNotEquals(r.hashCode(), r1.hashCode());
-
 
     }
 
@@ -93,4 +90,27 @@ public class RegionTest extends GenericTest {
         assertFalse(r.contains("1", 100));
 
     }
+
+    @Test
+    public void testConstructorString1() {
+        Region aux = new Region("1");
+        assertEquals(aux.getChromosome(), "1");
+    }
+
+    @Test
+    public void testConstructorString2() {
+        Region aux = new Region("1:1000");
+        assertEquals(aux.getChromosome(), "1");
+        assertEquals(aux.getStart(), 1000);
+        assertEquals(aux.getEnd(), Long.MAX_VALUE);
+    }
+
+    @Test
+    public void testConstructorString3() {
+        Region aux = new Region("1:1-2");
+        assertEquals(aux.getChromosome(), "1");
+        assertEquals(aux.getStart(), 1);
+        assertEquals(aux.getEnd(), 2);
+    }
+
 }
