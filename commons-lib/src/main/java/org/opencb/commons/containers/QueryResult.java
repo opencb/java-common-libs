@@ -20,13 +20,13 @@ public class QueryResult<T> {
     public QueryResult() {
         this("", -1, -1, -1, "", "", "", "", null);
     }
-    
+
     public QueryResult(String id) {
         this(id, -1, -1, -1, "", "", "", "", new ArrayList<T>());
     }
 
-    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, 
-            String featureType, String resultType, List<T> result) {
+    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg,
+                       String featureType, String resultType, List<T> result) {
         this.id = id;
         this.dbTime = dbTime;
         this.time = time;
@@ -101,11 +101,11 @@ public class QueryResult<T> {
     public void setResult(List<T> result) {
         this.result = result;
     }
-    
+
     public void addResult(T result) {
         this.result.add(result);
     }
-    
+
     public void addAllResults(List<T> result) {
         this.result.addAll(result);
     }
@@ -116,5 +116,21 @@ public class QueryResult<T> {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+
+    @Override
+    public String toString() {
+        return "QueryResult{\n" +
+                "id='" + id + '\'' + "\n" +
+                ", dbTime=" + dbTime + "\n" +
+                ", time=" + time + "\n" +
+                ", numResults=" + numResults + "\n" +
+                ", warningMsg='" + warningMsg + '\'' + "\n" +
+                ", errorMsg='" + errorMsg + '\'' + "\n" +
+                ", featureType='" + featureType + '\'' + "\n" +
+                ", resultType='" + resultType + '\'' + "\n" +
+                ", result=" + result + "\n" +
+                '}';
     }
 }

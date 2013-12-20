@@ -2,8 +2,6 @@ package org.opencb.commons.bioformats.feature;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Alejandro Aleman Ramos
@@ -15,6 +13,12 @@ public class Region {
     private long start;
     private long end;
 
+    public Region(String chromosome, long start) {
+        this.chromosome = chromosome;
+        this.start = start;
+        this.end = Long.MAX_VALUE;
+    }
+
     public Region(String chromosome, long start, long end) {
         this.chromosome = chromosome;
         this.start = start;
@@ -22,12 +26,23 @@ public class Region {
     }
 
     public Region(String region) {
-        Pattern pattern = Pattern.compile("(\\w+):(\\d+)-(\\d+)");
-        Matcher matcher = pattern.matcher(region);
-        if (matcher.find()) {
-            this.chromosome = matcher.group(1);
-            this.start = Integer.valueOf(matcher.group(2));
-            this.end = Integer.valueOf(matcher.group(3));
+        if (region != null && !region.equals("")) {
+            if (region.indexOf(':') != -1) {
+                String[] fields = region.split("[:-]", -1);
+                if (fields.length == 3) {
+                    this.chromosome = fields[0];
+                    this.start = Long.parseLong(fields[1]);
+                    this.end = Long.parseLong(fields[2]);
+                } else if (fields.length == 2) {
+                    this.chromosome = fields[0];
+                    this.start = Long.parseLong(fields[1]);
+                    this.end = Long.MAX_VALUE;
+                }
+            } else {
+                this.chromosome = region;
+                this.start = 0;
+                this.end = Long.MAX_VALUE;
+            }
         }
     }
 
@@ -37,7 +52,9 @@ public class Region {
             if (regionString.indexOf(':') != -1) {
                 String[] fields = regionString.split("[:-]", -1);
                 if (fields.length == 3) {
-                    region = new Region(fields[0], Integer.parseInt(fields[1]), Integer.parseInt(fields[2]));
+                    region = new Region(fields[0], Long.parseLong(fields[1]), Long.parseLong(fields[2]));
+                } else if (fields.length == 2) {
+                    region = new Region(fields[0], Long.parseLong(fields[1]), Long.MAX_VALUE);
                 }
             } else {
                 region = new Region(regionString, 0, Integer.MAX_VALUE);
@@ -130,5 +147,18 @@ public class Region {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(this.chromosome);
+
+        if (this.start != 0 && this.end != Long.MAX_VALUE) {
+            sb.append(":").append(this.start).append("-").append(this.end);
+        } else if (this.start != 0 && this.end == Long.MAX_VALUE) {
+            sb.append(":").append(this.start);
+        }
+
+        return sb.toString();
     }
 }
