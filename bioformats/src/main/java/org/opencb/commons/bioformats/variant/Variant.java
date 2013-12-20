@@ -31,6 +31,7 @@ public class Variant {
         this.alternate = alternate;
 
     }
+
     public String getChromosome() {
         return chromosome;
     }
@@ -101,5 +102,9 @@ public class Variant {
 
     public void setEffect(List<VariantEffect> effect) {
         this.effect = effect;
+    }
+
+    public boolean addEffect(VariantEffect effect) {
+        return this.effect.add(effect);
     }
 }
