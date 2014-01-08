@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.variant;
 
+import java.util.LinkedList;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
@@ -24,12 +25,12 @@ public class Variant {
     private VariantStats stats;
     private List<VariantEffect> effect;
 
-    public Variant(String chromosome, int position, String reference, String alternate){
+    public Variant(String chromosome, int position, String reference, String alternate) {
         this.chromosome = chromosome;
         this.position = position;
         this.reference = reference;
         this.alternate = alternate;
-
+        this.effect = new LinkedList<>();
     }
 
     public String getChromosome() {
@@ -104,7 +105,7 @@ public class Variant {
         this.effect = effect;
     }
 
-    public boolean addEffect(VariantEffect effect) {
-        return this.effect.add(effect);
+    public boolean addEffect(VariantEffect e) {
+        return this.effect.add(e);
     }
 }
