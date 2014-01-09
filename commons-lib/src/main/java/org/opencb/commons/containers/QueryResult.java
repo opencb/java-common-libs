@@ -99,6 +99,9 @@ public class QueryResult<T> {
     }
 
     public void setResult(List<T> result) {
+        if (result.size() > 0) {
+            this.resultType = result.get(0).getClass().getCanonicalName();
+        }
         this.result = result;
     }
 
