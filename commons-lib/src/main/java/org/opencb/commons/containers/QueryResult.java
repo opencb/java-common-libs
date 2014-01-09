@@ -18,15 +18,15 @@ public class QueryResult<T> {
 
 
     public QueryResult() {
-        this("", -1, -1, -1, "", "", "", "", null);
+        this("", -1, -1, -1, "", "", "", null);
     }
 
     public QueryResult(String id) {
-        this(id, -1, -1, -1, "", "", "", "", new ArrayList<T>());
+        this(id, -1, -1, -1, "", "", "", new ArrayList<T>());
     }
 
     public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg,
-                       String featureType, String resultType, List<T> result) {
+                       String featureType, List<T> result) {
         this.id = id;
         this.dbTime = dbTime;
         this.time = time;
@@ -34,7 +34,7 @@ public class QueryResult<T> {
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
         this.featureType = featureType;
-        this.resultType = resultType;
+        this.resultType = result.size() > 0 ? result.get(0).getClass().getCanonicalName() : "";
         this.result = result;
     }
 
@@ -103,10 +103,14 @@ public class QueryResult<T> {
     }
 
     public void addResult(T result) {
+        this.resultType = result.getClass().getCanonicalName();
         this.result.add(result);
     }
 
     public void addAllResults(List<T> result) {
+        if (result.size() > 0) {
+            this.resultType = result.get(0).getClass().getCanonicalName();
+        }
         this.result.addAll(result);
     }
 
