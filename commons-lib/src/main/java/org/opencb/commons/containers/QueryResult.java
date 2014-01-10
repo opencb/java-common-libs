@@ -18,7 +18,7 @@ public class QueryResult<T> {
 
 
     public QueryResult() {
-        this("", -1, -1, -1, "", "", "", null);
+        this("", -1, -1, -1, "", "", "", new ArrayList<T>());
     }
 
     public QueryResult(String id) {
