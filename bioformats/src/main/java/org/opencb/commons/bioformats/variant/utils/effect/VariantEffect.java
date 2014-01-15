@@ -36,6 +36,11 @@ public class VariantEffect {
     private String aminoacidChange;
     private String codonChange;
 
+    private double polyphenScore;
+    private double siftScore;
+    private int polyphenEffect;
+    private int siftEffect;
+
 
     public VariantEffect() {
 
@@ -399,5 +404,37 @@ public class VariantEffect {
         result = 31 * result + (aminoacidChange != null ? aminoacidChange.hashCode() : 0);
         result = 31 * result + (codonChange != null ? codonChange.hashCode() : 0);
         return result;
+    }
+
+    public double getPolyphenScore() {
+        return polyphenScore;
+    }
+
+    public void setPolyphenScore(double polyphenScore) {
+        this.polyphenScore = polyphenScore;
+    }
+
+    public double getSiftScore() {
+        return siftScore;
+    }
+
+    public void setSiftScore(double siftScore) {
+        this.siftScore = siftScore;
+    }
+
+    public int getPolyphenEffect() {
+        return polyphenEffect;
+    }
+
+    public void setPolyphenEffect(int polyphenEffect) {
+        this.polyphenEffect = polyphenEffect;
+    }
+
+    public int getSiftEffect() {
+        return siftEffect;
+    }
+
+    public void setSiftEffect(int siftEffect) {
+        this.siftEffect = siftEffect;
     }
 }

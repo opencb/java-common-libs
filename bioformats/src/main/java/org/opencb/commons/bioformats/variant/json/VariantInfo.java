@@ -4,15 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
-import java.lang.Float;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,7 +63,17 @@ public class VariantInfo {
     private HashMap<String, String> sampleGenotypes;
     @JsonProperty
     private Map<String, Integer> genotypes;
+    @JsonProperty
+    private double polyphen_score;
+    @JsonProperty
+    private double sift_score;
+    @JsonProperty
+    private int polyphen_effect;
+    @JsonProperty
+    private int sift_effect;
 
+    public VariantInfo() {
+    }
 
     public VariantInfo(String chromosome, int position, String ref, String alt) {
         this.chromosome = chromosome;
@@ -371,4 +373,35 @@ public class VariantInfo {
         }
     }
 
+    public double getPolyphen_score() {
+        return polyphen_score;
+    }
+
+    public void setPolyphen_score(double polyphen_score) {
+        this.polyphen_score = polyphen_score;
+    }
+
+    public double getSift_score() {
+        return sift_score;
+    }
+
+    public void setSift_score(double sift_score) {
+        this.sift_score = sift_score;
+    }
+
+    public int getPolyphen_effect() {
+        return polyphen_effect;
+    }
+
+    public void setPolyphen_effect(int polyphen_effect) {
+        this.polyphen_effect = polyphen_effect;
+    }
+
+    public int getSift_effect() {
+        return sift_effect;
+    }
+
+    public void setSift_effect(int sift_effect) {
+        this.sift_effect = sift_effect;
+    }
 }
