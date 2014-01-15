@@ -1,5 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.effect;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -7,9 +9,12 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,16 +30,17 @@ public class EffectCalculator {
         ObjectMapper mapper = new ObjectMapper();
         List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
 
-        if(batch.size() == 0){
+        if (batch.size() == 0) {
             return batchEffect;
         }
 
         StringBuilder chunkVcfRecords = new StringBuilder();
+        StringBuilder effectRecords = new StringBuilder();
         Client client = Client.create();
         WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
-//        Client client = ClientBuilder.newClient();
-//        WebTarget webTarget = client.target("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+        javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
+        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (VcfRecord record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
@@ -56,6 +62,76 @@ public class EffectCalculator {
         } catch (IOException e) {
             System.err.println(chunkVcfRecords.toString());
             e.printStackTrace();
+        }
+
+
+        javax.ws.rs.core.Response newResponse;
+        double ss, ps;
+        int se, pe;
+
+        for (VariantEffect effect : batchEffect) {
+            if (effect.getAaPosition() != -1 && effect.getTranscriptId() != "" && effect.getAminoacidChange().length() == 3) {
+
+                String change = effect.getAminoacidChange().split("/")[1];
+
+                newResponse = webTarget.path(effect.getTranscriptId()).path("function_prediction").queryParam("aaPosition", effect.getAaPosition()).queryParam("aaChange", change).
+                        request(MediaType.APPLICATION_JSON_TYPE).get();
+
+                ObjectMapper mapperNew = new ObjectMapper();
+                JsonNode actualObj;
+
+                String resp = null;
+                try {
+                    resp = newResponse.readEntity(String.class);
+                    actualObj = mapperNew.readTree(resp);
+                    Iterator<JsonNode> it = actualObj.get("response").iterator();
+
+                    while (it.hasNext()) {
+                        JsonNode polyphen = it.next();
+                        if (polyphen.get("numResults").asInt() > 0) {
+                            Iterator<JsonNode> itResults = polyphen.get("result").iterator();
+                            while (itResults.hasNext()) {
+                                JsonNode aa = itResults.next();
+
+                                if (aa.has("aaPositions") && aa.get("aaPositions").has("" + effect.getAaPosition()) && aa.get("aaPositions").get("" + effect.getAaPosition()).has("" + change)) {
+
+                                    JsonNode val = aa.get("aaPositions").get("" + effect.getAaPosition()).get("" + change);
+
+                                    if (val.has("ss") && val.has("ps") && val.has("se") && val.has("pe")) {
+                                        if (!val.get("ss").isNull()) {
+                                            ss = val.get("ss").asDouble();
+                                            effect.setSiftScore(ss);
+                                        }
+
+                                        if (!val.get("ps").isNull()) {
+                                            ps = val.get("ps").asDouble();
+                                            effect.setPolyphenScore(ps);
+                                        }
+
+                                        if (!val.get("se").isNull()) {
+                                            se = val.get("se").asInt();
+                                            effect.setSiftEffect(se);
+                                        }
+                                        if (!val.get("pe").isNull()) {
+                                            pe = val.get("pe").asInt();
+                                            effect.setPolyphenEffect(pe);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } catch (JsonParseException e) {
+                    System.err.println(resp);
+                    e.printStackTrace();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
         }
 
         return batchEffect;
