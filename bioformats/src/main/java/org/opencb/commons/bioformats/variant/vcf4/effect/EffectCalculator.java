@@ -26,6 +26,7 @@ import java.util.List;
  */
 public class EffectCalculator {
 
+    //TODO aaleman: Create a new method with effect & polyphen & Sift (ex. getEffectsWithPolyphenSift). The method "getEffects" will only provide effects (without polyphen/Sift).
     public static List<VariantEffect> getEffects(List<VcfRecord> batch) {
         ObjectMapper mapper = new ObjectMapper();
         List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
