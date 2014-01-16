@@ -34,7 +34,8 @@ public class VcfRecord {
      * @param info
      */
     public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info) {
-        this.chromosome = chromosome;
+
+        this.chromosome = parseChromosome(chromosome);
         this.position = position;
         this.id = id;
         this.reference = reference;
@@ -48,6 +49,12 @@ public class VcfRecord {
         this.sampleOrder = new ArrayList<>();
         this.effects = null;
         this.stats = null;
+    }
+
+    private String parseChromosome(String chromosome) {
+
+        return chromosome.replaceAll("chrom|chr","");
+
     }
 
     /**
