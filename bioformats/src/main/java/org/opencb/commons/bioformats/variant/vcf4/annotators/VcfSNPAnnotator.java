@@ -3,7 +3,7 @@ package org.opencb.commons.bioformats.variant.vcf4.annotators;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.Variant;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -34,10 +34,10 @@ public class VcfSNPAnnotator implements VcfAnnotator {
     }
 
     @Override
-    public void annot(List<VcfRecord> batch) {
+    public void annot(List<Variant> batch) {
 
         StringBuilder positions = new StringBuilder();
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
             positions.append(record.getChromosome()).append(":").append(record.getPosition()).append(",");
         }
 
@@ -61,7 +61,7 @@ public class VcfSNPAnnotator implements VcfAnnotator {
                 if (snp.get("numResults").asInt() > 0) {
                     Iterator<JsonNode> itResults = snp.get("result").iterator();
                     while (itResults.hasNext()) {
-                        batch.get(cont).addSnp(itResults.next().get("id").asText());
+                        batch.get(cont).addId(itResults.next().get("id").asText());
                     }
                 }
                 cont++;
@@ -77,7 +77,7 @@ public class VcfSNPAnnotator implements VcfAnnotator {
     }
 
     @Override
-    public void annot(VcfRecord elem) {
+    public void annot(Variant elem) {
     }
 
 

@@ -1,8 +1,8 @@
 package org.opencb.commons.bioformats.variant.vcf4.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
 
 import java.util.ArrayList;
@@ -31,13 +31,13 @@ public class VcfConsequenceTypeFilter extends VcfFilter {
     }
 
     @Override
-    public boolean apply(VcfRecord vcfRecord) {
+    public boolean apply(Variant variant) {
 
         ObjectMapper mapper = new ObjectMapper();
         boolean res = false;
 
-        List<VcfRecord> batch = new ArrayList<>();
-        batch.add(vcfRecord);
+        List<Variant> batch = new ArrayList<>();
+        batch.add(variant);
 
         List<VariantEffect> batchEffect = EffectCalculator.getEffects(batch);
 

@@ -33,7 +33,15 @@ public class VcfRecord {
      * @param filter
      * @param info
      */
-    public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info) {
+    public VcfRecord(String chromosome,
+                     Integer position,
+                     String id,
+                     String reference,
+                     String alternate,
+
+                     String quality,
+                     String filter,
+                     String info) {
 
         this.chromosome = parseChromosome(chromosome);
         this.position = position;

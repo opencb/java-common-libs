@@ -1,12 +1,17 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
-import java.io.IOException;
-import java.util.*;
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
+import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.VariantFactory;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.stats.StatsCalculator;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
@@ -24,7 +29,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
     private String prefix;
     private boolean single;
 
-    public VcfControlAnnotator(String infoPrefix, String control){
+    public VcfControlAnnotator(String infoPrefix, String control) {
 
         this.prefix = infoPrefix;
         this.tabixFile = control;
@@ -96,7 +101,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
     }
 
     @Override
-    public void annot(List<VcfRecord> batch) {
+    public void annot(List<Variant> batch) {
 
         if (single) {
             singleAnnot(batch);
@@ -105,8 +110,8 @@ public class VcfControlAnnotator implements VcfAnnotator {
         }
     }
 
-    private void singleAnnot(List<VcfRecord> batch) {
-        VcfRecord tabixRecord;
+    private void singleAnnot(List<Variant> batch) {
+        Variant tabixRecord;
 
         long pid = Thread.currentThread().getId();
         TabixReader currentTabix = null;
@@ -123,12 +128,12 @@ public class VcfControlAnnotator implements VcfAnnotator {
             }
         }
 
-        List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
+        List<Variant> controlBatch = new ArrayList<>(batch.size());
         List<VariantStats> statsBatch;
-        Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+        Map<Variant, Integer> map = new LinkedHashMap<>(batch.size());
 
         int cont = 0;
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
 
             if (currentTabix != null) {
 
@@ -141,8 +146,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
                     while (it != null && (line = it.next()) != null) {
 
                         String[] fields = line.split("\t");
-                        tabixRecord = new VcfRecord(fields, samples);
-
+                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
 
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
                             controlBatch.add(tabixRecord);
@@ -161,27 +165,31 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         VariantStats statRecord;
 
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
 
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
-                record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", statRecord.getMaf()));
-                record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
+//                record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
+//                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", statRecord.getMaf()));
+//                record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
+                record.addAttribute(this.prefix + "_gt", StringUtil.join(",", statRecord.getGenotypes()));
+                record.addAttribute(this.prefix + "_maf", String.format("%.4f", statRecord.getMaf()));
+                record.addAttribute(this.prefix + "_amaf", statRecord.getMafAllele());
+
             }
         }
     }
 
-    private void multipleAnnot(List<VcfRecord> batch) {
+    private void multipleAnnot(List<Variant> batch) {
 
-        VcfRecord tabixRecord;
+        Variant tabixRecord;
         TabixReader currentTabix = null;
 
         long pid = Thread.currentThread().getId();
         Map<String, TabixReader> tabixMap;
-        List<VcfRecord> controlBatch = new ArrayList<>(batch.size());
+        List<Variant> controlBatch = new ArrayList<>(batch.size());
         List<VariantStats> statsBatch;
-        Map<VcfRecord, Integer> map = new LinkedHashMap<>(batch.size());
+        Map<Variant, Integer> map = new LinkedHashMap<>(batch.size());
 
 
         if (multipleControlsTabix.containsKey(pid)) {
@@ -193,7 +201,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
 
         int cont = 0;
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
             currentTabix = null;
 
             if (tabixMap.containsKey(record.getChromosome())) {
@@ -218,7 +226,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
                     while (it != null && (line = it.next()) != null) {
 
                         String[] fields = line.split("\t");
-                        tabixRecord = new VcfRecord(fields, samples);
+                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
 
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
 
@@ -240,20 +248,20 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
         VariantStats statRecord;
 
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
 
             if (map.containsKey(record)) {
                 statRecord = statsBatch.get(map.get(record));
-                record.addInfoField(this.prefix + "_gt=" + StringUtil.join(",", statRecord.getGenotypes()));
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", statRecord.getMaf()));
-                record.addInfoField(this.prefix + "_amaf=" + statRecord.getMafAllele());
+                record.addAttribute(this.prefix + "_gt", StringUtil.join(",", statRecord.getGenotypes()));
+                record.addAttribute(this.prefix + "_maf", String.format("%.4f", statRecord.getMaf()));
+                record.addAttribute(this.prefix + "_amaf", statRecord.getMafAllele());
             }
         }
 
     }
 
     @Override
-    public void annot(VcfRecord elem) {
+    public void annot(Variant elem) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

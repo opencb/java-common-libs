@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import java.util.List;
@@ -20,15 +21,16 @@ public class VcfTestAnnotator implements VcfAnnotator {
     }
 
     @Override
-    public void annot(List<VcfRecord> batch) {
-        for (VcfRecord vr : batch) {
+    public void annot(List<Variant> batch) {
+        for (Variant vr : batch) {
             annot(vr);
         }
     }
 
     @Override
-    public void annot(VcfRecord elem) {
-        elem.addInfoField("TEXT=" + text);
+    public void annot(Variant elem) {
+//        elem.addInfoField("TEXT=" + text);
+        elem.addAttribute("TEXT", text);
 
     }
 }

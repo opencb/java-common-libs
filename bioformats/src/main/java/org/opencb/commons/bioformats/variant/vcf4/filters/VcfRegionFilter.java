@@ -2,7 +2,7 @@ package org.opencb.commons.bioformats.variant.vcf4.filters;
 
 
 import org.opencb.commons.bioformats.feature.Region;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.Variant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +52,9 @@ public class VcfRegionFilter extends VcfFilter {
     }
 
     @Override
-    public boolean apply(VcfRecord vcfRecord) {
+    public boolean apply(Variant variant) {
         for (Region r : regionList) {
-            if (r.contains(vcfRecord.getChromosome(), vcfRecord.getPosition())) {
+            if (r.contains(variant.getChromosome(), variant.getPosition())) {
                 return true;
             }
         }

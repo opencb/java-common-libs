@@ -2,7 +2,8 @@ package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.feature.Genotype;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.VariantFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,10 +35,10 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
     }
 
     @Override
-    public void annot(List<VcfRecord> batch) {
-        VcfRecord tabixRecord;
+    public void annot(List<Variant> batch) {
+        Variant tabixRecord;
 
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
             try {
                 TabixReader.Iterator it = this.tabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
 
@@ -45,7 +46,7 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
                     String line = it.next();
                     while (it != null && line != null) {
                         String[] fields = line.split("\t");
-                        tabixRecord = new VcfRecord(fields[0], Integer.valueOf(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
+                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
                         if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
                             parseAndAnnot(record, tabixRecord);
                         }
@@ -61,12 +62,12 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
 
     }
 
-    private void parseAndAnnot(VcfRecord record, VcfRecord tabixRecord) {
+    private void parseAndAnnot(Variant record, Variant tabixRecord) { // TODO aaleman: Check this code (EVS)
 
         if (!tabixRecord.isIndel()) {
             Pattern patternGenot, patternGenotCount, patternAlleleCount;
             Matcher matcherGenot, matcherGenotCount, matcherAlleleCount;
-            String info = tabixRecord.getInfo();
+            String info = ""; //  tabixRecord.getInfo();
             StringBuilder gts = new StringBuilder(this.prefix + "_gt=");
             Genotype g = null;
             int min = Integer.MAX_VALUE;
@@ -76,7 +77,7 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
             patternGenot = Pattern.compile("MAF=(\\d+\\.\\d+),(\\d+\\.\\d+),(\\d+\\.\\d+)");
             matcherGenot = patternGenot.matcher(info);
             if (matcherGenot.find()) {
-                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", Float.valueOf(matcherGenot.group(3)) / 100));
+//                record.addInfoField(this.prefix + "_maf=" + String.format("%.4f", Float.valueOf(matcherGenot.group(3)) / 100));
             }
             patternGenot = Pattern.compile("GTS=(([A-Z]+,?)*)");
             patternAlleleCount = Pattern.compile("TAC=((\\d+,?)*)");
@@ -130,15 +131,15 @@ public class VcfEVSControlAnnotator implements VcfAnnotator {
 
             }
 
-            record.addInfoField(gts.toString());
-            record.addInfoField(this.prefix + "_amaf=" + maf);
+//            record.addInfoField(gts.toString());
+//            record.addInfoField(this.prefix + "_amaf=" + maf);
         }
 
 
     }
 
     @Override
-    public void annot(VcfRecord elem) {
+    public void annot(Variant elem) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

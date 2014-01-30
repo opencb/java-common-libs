@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.io.readers;
 
 
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.io.DataReader;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface VariantReader extends DataReader<VcfRecord> {
+public interface VariantReader extends DataReader<Variant> {
     public List<String> getSampleNames();
 
     public String getHeader();

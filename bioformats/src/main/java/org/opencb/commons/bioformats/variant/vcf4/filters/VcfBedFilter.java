@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.filters;
 
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+
+import org.opencb.commons.bioformats.variant.Variant;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -65,11 +66,11 @@ public class VcfBedFilter extends VcfFilter {
     }
 
     @Override
-    public boolean apply(VcfRecord vcfRecord) {
-        if (regions.containsKey(vcfRecord.getChromosome())) {
-            SortedSet<Region> regionList = regions.get(vcfRecord.getChromosome());
+    public boolean apply(Variant variant) {
+        if (regions.containsKey(variant.getChromosome())) {
+            SortedSet<Region> regionList = regions.get(variant.getChromosome());
             for (Region r : regionList) {
-                if (r.contains(vcfRecord.getPosition())) {
+                if (r.contains(variant.getPosition())) {
                     return true;
                 }
             }

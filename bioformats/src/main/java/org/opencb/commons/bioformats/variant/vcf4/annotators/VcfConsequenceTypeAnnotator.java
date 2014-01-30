@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
 import com.google.common.base.Joiner;
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
@@ -20,18 +21,18 @@ public class VcfConsequenceTypeAnnotator implements VcfAnnotator {
 
 
     @Override
-    public void annot(List<VcfRecord> batch) {
+    public void annot(List<Variant> batch) {
 
         List<VariantEffect> batchEffect = EffectCalculator.getEffects(batch);
 
-        for (VcfRecord variant : batch) {
+        for (Variant variant : batch) {
 
             annotVariantEffect(variant, batchEffect);
         }
 
     }
 
-    private void annotVariantEffect(VcfRecord variant, List<VariantEffect> batchEffect) {
+    private void annotVariantEffect(Variant variant, List<VariantEffect> batchEffect) {
 
         Set<String> ct = new HashSet<>();
         for (VariantEffect effect : batchEffect) {
@@ -49,13 +50,14 @@ public class VcfConsequenceTypeAnnotator implements VcfAnnotator {
         String ct_all = Joiner.on(",").join(ct);
 
         if (ct.size() > 0) {
-            variant.addInfoField("ConsType=" + ct_all);
+//            variant.addInfoField("ConsType=" + ct_all);
+            variant.addAttribute("ConsType", ct_all); // TODO aaleman: Check this code
         }
 
     }
 
     @Override
-    public void annot(VcfRecord elem) {
+    public void annot(Variant elem) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

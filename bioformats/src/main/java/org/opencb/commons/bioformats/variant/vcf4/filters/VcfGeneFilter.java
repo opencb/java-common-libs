@@ -6,7 +6,7 @@ import com.google.common.base.Splitter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import org.opencb.commons.bioformats.feature.Region;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.Variant;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -127,10 +127,10 @@ public class VcfGeneFilter extends VcfFilter {
     }
 
     @Override
-    public boolean apply(VcfRecord vcfRecord) {
+    public boolean apply(Variant variant) {
 
         for (Region r : regionList) {
-            if (r.contains(vcfRecord.getChromosome(), vcfRecord.getPosition())) {
+            if (r.contains(variant.getChromosome(), variant.getPosition())) {
                 return true;
             }
         }

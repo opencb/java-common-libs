@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
@@ -27,7 +28,7 @@ import java.util.List;
 public class EffectCalculator {
 
     //TODO aaleman: Create a new method with effect & polyphen & Sift (ex. getEffectsWithPolyphenSift). The method "getEffects" will only provide effects (without polyphen/Sift).
-    public static List<VariantEffect> getEffects(List<VcfRecord> batch) {
+    public static List<VariantEffect> getEffects(List<Variant> batch) {
         ObjectMapper mapper = new ObjectMapper();
         List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
 
@@ -43,7 +44,7 @@ public class EffectCalculator {
         javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
         WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
             chunkVcfRecords.append(record.getPosition()).append(":");
             chunkVcfRecords.append(record.getReference()).append(":");
@@ -138,13 +139,13 @@ public class EffectCalculator {
         return batchEffect;
     }
 
-    public static List<List<VariantEffect>> getEffectPerVariant(List<VcfRecord> batch) {
+    public static List<List<VariantEffect>> getEffectPerVariant(List<Variant> batch) {
         List<List<VariantEffect>> list = new ArrayList<>(batch.size());
         List<VariantEffect> auxEffect;
         List<VariantEffect> effects = getEffects(batch);
         VariantEffect effect;
 
-        for (VcfRecord record : batch) {
+        for (Variant record : batch) {
             auxEffect = new ArrayList<>(20);
             for (int i = 0; i < effects.size(); i++) {
                 effect = effects.get(i);

@@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import org.opencb.commons.bioformats.commons.exception.FileFormatException;
+import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.VariantFactory;
 import org.opencb.commons.bioformats.variant.vcf4.*;
 
 import java.io.*;
@@ -11,9 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -25,12 +25,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class VariantVcfReader implements VariantReader {
 
-    private static final int DEFAULT_NUMBER_RECORDS = 40000;
     private Vcf4 vcf4;
     private BufferedReader reader;
-    private List<Predicate<VcfRecord>> vcfFilters;
-    private Predicate<VcfRecord> andVcfFilters;
-    private File file;
     private Path path;
     private String filename;
 
@@ -88,7 +84,7 @@ public class VariantVcfReader implements VariantReader {
     }
 
     @Override
-    public VcfRecord read() {
+    public Variant read() {
         String line;
         try {
             while ((line = reader.readLine()) != null && (line.trim().equals("") || line.startsWith("#"))) {
@@ -96,17 +92,31 @@ public class VariantVcfReader implements VariantReader {
             }
             if (line != null) {
                 String[] fields = line.split("\t");
-                VcfRecord vcfRecord = null;
-                if (fields.length == 8) {
-                    vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
+                Variant variant;
+
+
+                if (fields.length >= 8) {
+                    variant = VariantFactory.createVariantFromVcf(vcf4.getSampleNames(), fields);
                 } else {
-                    if (fields.length > 8) {
-                        vcfRecord = new VcfRecord(fields, vcf4.getSampleNames());
-                    }
+                    throw new IOException("Not enough fields in line (min. 8): " + line);
                 }
-                return vcfRecord;
+
+                return variant;
+//                VcfRecord vcfRecord = null;
+//                if (fields.length == 8) {
+//                    vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
+//                } else {
+//                    if (fields.length > 8) {
+//                        vcfRecord = new VcfRecord(fields, vcf4.getSampleNames());
+//                    }
+//                }
+//                return vcfRecord;
             }
-        } catch (IOException e) {
+        } catch (
+                IOException e
+                )
+
+        {
             e.printStackTrace();
         }
 
@@ -114,25 +124,17 @@ public class VariantVcfReader implements VariantReader {
         return null;
     }
 
+
     @Override
-    public List<VcfRecord> read(int batchSize) {
-        List<VcfRecord> listRecords = new ArrayList<>(batchSize);
-        VcfRecord vcfRecord;
+    public List<Variant> read(int batchSize) {
+        List<Variant> listRecords = new ArrayList<>(batchSize);
+        Variant variant;
         int i = 0;
 
-        while ((i < batchSize) && (vcfRecord = this.read()) != null) {
+        while ((i < batchSize) && (variant = this.read()) != null) {
 
-            if (vcfFilters != null && vcfFilters.size() > 0) {
-                if (andVcfFilters.apply(vcfRecord)) {
-                    //vcfRecord.setSampleIndex(vcf4.getSamples());
-                    listRecords.add(vcfRecord);
-                    i++;
-                }
-            } else {
-                //vcfRecord.setSampleIndex(vcf4.getSamples());
-                listRecords.add(vcfRecord);
-                i++;
-            }
+            listRecords.add(variant);
+            i++;
 
         }
         return listRecords;
@@ -142,11 +144,6 @@ public class VariantVcfReader implements VariantReader {
     public List<String> getSampleNames() {
         return this.vcf4.getSampleNames();
     }
-
-//    @Override
-//    public void setSampleNames(List<String> sampleNames) {
-//        vcf4.setHeaderLine(sampleNames);
-//    }
 
     @Override
     public String getHeader() {
@@ -177,7 +174,6 @@ public class VariantVcfReader implements VariantReader {
         }
 
         header.append("#").append(Joiner.on("\t").join(vcf4.getHeaderLine())).append("\n");
-
 
         return header.toString();
     }

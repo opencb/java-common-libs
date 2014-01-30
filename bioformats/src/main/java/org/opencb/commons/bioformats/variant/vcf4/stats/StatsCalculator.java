@@ -8,6 +8,7 @@ import org.opencb.commons.bioformats.pedigree.Condition;
 import org.opencb.commons.bioformats.pedigree.Individual;
 import org.opencb.commons.bioformats.pedigree.Pedigree;
 import org.opencb.commons.bioformats.pedigree.Sex;
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.stats.*;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
@@ -24,10 +25,10 @@ import java.util.concurrent.Callable;
 public class StatsCalculator {
 
 
-    public static List<VariantStats> variantStats(List<VcfRecord> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
+    public static List<VariantStats> variantStats(List<Variant> vcfRecordsList, List<String> sampleNames, Pedigree ped) {
         List<VariantStats> statList = new ArrayList<>(vcfRecordsList.size());
 
-        for (VcfRecord vcfRecord : vcfRecordsList) {
+        for (Variant variant : vcfRecordsList) {
             int transitionsCount = 0, transversionsCount = 0;
 
 
@@ -50,12 +51,12 @@ public class StatsCalculator {
 
             VariantStats vcfStat = new VariantStats();
 
-            vcfStat.setChromosome(vcfRecord.getChromosome());
-            vcfStat.setPosition((long) vcfRecord.getPosition());
-            vcfStat.setRefAllele(vcfRecord.getReference());
-            vcfStat.setId(vcfRecord.getId());
+            vcfStat.setChromosome(variant.getChromosome());
+            vcfStat.setPosition((long) variant.getPosition());
+            vcfStat.setRefAllele(variant.getReference());
+            vcfStat.setId(variant.getId());
 
-            String[] altAlleles = vcfRecord.getAltAlleles();
+            String[] altAlleles = variant.getAltAlleles();
 
             vcfStat.setAltAlleles(altAlleles);
             vcfStat.setNumAlleles(altAlleles.length + 1);
@@ -69,7 +70,8 @@ public class StatsCalculator {
 
             for (String sampleName : sampleNames) {
 
-                Genotype g = vcfRecord.getSampleGenotype(sampleName);
+//                Genotype g = variant.getSampleGenotype(sampleName);
+                Genotype g = new Genotype(variant.getSampleData(sampleName, "GT"));
 
                 Genotypes.addGenotypeToList(vcfStat.getGenotypes(), g);
 
@@ -105,7 +107,7 @@ public class StatsCalculator {
                         try {
                             allelesCount[g.getAllele1()]++;
                         } catch (ArrayIndexOutOfBoundsException e) {
-                            System.out.println("vcfRecord = " + vcfRecord);
+                            System.out.println("vcfRecord = " + variant);
                             System.out.println("g = " + g);
 
                         }
@@ -136,7 +138,7 @@ public class StatsCalculator {
                 if (ped != null) {
                     if (g.getCode() == AllelesCode.ALLELES_OK || g.getCode() == AllelesCode.HAPLOID) {
                         ind = ped.getIndividual(sampleName);
-                        if (isMendelianError(ind, g, vcfRecord)) {
+                        if (isMendelianError(ind, g, variant)) {
                             vcfStat.setMendelinanErrors(vcfStat.getMendelinanErrors() + 1);
 
                         }
@@ -229,11 +231,11 @@ public class StatsCalculator {
          * - The REF allele is . but the ALT is not
          * - The REF field length is different than the ALT field length
          */
-            if ((!vcfStat.getRefAlleles().equals(".") && vcfRecord.getAlternate().equals(".")) ||
-                    (vcfRecord.getAlternate().equals(".") && !vcfStat.getRefAlleles().equals(".")) ||
-                    (vcfRecord.getAlternate().equals("<INS>")) ||
-                    (vcfRecord.getAlternate().equals("<DEL>")) ||
-                    vcfRecord.getReference().length() != vcfRecord.getAlternate().length()) {
+            if ((!vcfStat.getRefAlleles().equals(".") && variant.getAlternate().equals(".")) ||
+                    (variant.getAlternate().equals(".") && !vcfStat.getRefAlleles().equals(".")) ||
+                    (variant.getAlternate().equals("<INS>")) ||
+                    (variant.getAlternate().equals("<DEL>")) ||
+                    variant.getReference().length() != variant.getAlternate().length()) {
                 vcfStat.setIndel(true);
             } else {
                 vcfStat.setIndel(false);
@@ -241,8 +243,8 @@ public class StatsCalculator {
 
             // Transitions and transversions
 
-            String ref = vcfRecord.getReference().toUpperCase();
-            for (String alt : vcfRecord.getAltAlleles()) {
+            String ref = variant.getReference().toUpperCase();
+            for (String alt : variant.getAltAlleles()) {
                 alt = alt.toUpperCase();
 
                 if (ref.length() == 1 && alt.length() == 1) {
@@ -283,15 +285,15 @@ public class StatsCalculator {
             }
 
             // Update variables finally used to update file_stats_t structure
-            if (!vcfRecord.getId().equals(".")) {
+            if (!variant.getId().equals(".")) {
                 vcfStat.setSNP(true);
             }
-            if (vcfRecord.getFilter().toUpperCase().equals("PASS")) {
+            if (variant.getAttribute("FILTER").toUpperCase().equals("PASS")) {
                 vcfStat.setPass(true);
             }
 
-            if (!vcfRecord.getQuality().equals(".")) {
-                float qualAux = Float.valueOf(vcfRecord.getQuality());
+            if (!variant.getAttribute("QUAL").equals(".")) {
+                float qualAux = Float.valueOf(variant.getAttribute("QUAL"));
                 if (qualAux >= 0) {
                     vcfStat.setQual(qualAux);
                 }
@@ -359,7 +361,7 @@ public class StatsCalculator {
 
     }
 
-    public static VariantGroupStats groupStats(List<VcfRecord> vcfRecords, Pedigree ped, String group) {
+    public static VariantGroupStats groupStats(List<Variant> variants, Pedigree ped, String group) {
 
         Set<String> groupValues = getGroupValues(ped, group);
         List<String> sampleList;
@@ -374,7 +376,7 @@ public class StatsCalculator {
 
             for (String val : groupValues) {
                 sampleList = getSamplesValueGroup(val, group, ped);
-                variantStatses = variantStats(vcfRecords, sampleList, ped);
+                variantStatses = variantStats(variants, sampleList, ped);
                 groupStats.getVariantStats().put(val, variantStatses);
             }
 
@@ -382,18 +384,19 @@ public class StatsCalculator {
         return groupStats;
     }
 
-    public static VariantSampleStats sampleStats(List<VcfRecord> vcfRecords, List<String> sampleNames, Pedigree ped) {
+    public static VariantSampleStats sampleStats(List<Variant> variants, List<String> sampleNames, Pedigree ped) {
 
         Genotype g;
         Individual ind;
         VariantSampleStats variantSampleStats = new VariantSampleStats(sampleNames);
 
-        for (VcfRecord record : vcfRecords) {
+        for (Variant record : variants) {
 
             for (String sample : sampleNames) {
 
 
-                g = record.getSampleGenotype(sample);
+//                g = record.getSampleGenotype(sample);
+                g = new Genotype(record.getSampleData(sample, "GT"));
 
                 // Find the missing alleles
                 if (g.getCode() != AllelesCode.ALLELES_OK) {                   // Missing genotype (one or both alleles missing)
@@ -419,7 +422,7 @@ public class StatsCalculator {
         return variantSampleStats;
     }
 
-    public static VariantSampleGroupStats sampleGroupStats(List<VcfRecord> batch, Pedigree ped, String group) {
+    public static VariantSampleGroupStats sampleGroupStats(List<Variant> batch, Pedigree ped, String group) {
 
 
         VariantSampleGroupStats variantSampleGroupStats = new VariantSampleGroupStats();
@@ -490,7 +493,7 @@ public class StatsCalculator {
         return values;  //To change body of created methods use File | Settings | File Templates.
     }
 
-    private static boolean isMendelianError(Individual ind, Genotype g, VcfRecord vcfRecord) {
+    private static boolean isMendelianError(Individual ind, Genotype g, Variant variant) {
 
         Genotype gFather;
         Genotype gMother;
@@ -499,14 +502,16 @@ public class StatsCalculator {
             return false;
         }
 
-        gFather = vcfRecord.getSampleGenotype(ind.getFather().getId());
-        gMother = vcfRecord.getSampleGenotype(ind.getMother().getId());
+//        gFather = variant.getSampleGenotype(ind.getFather().getId());
+//        gMother = variant.getSampleGenotype(ind.getMother().getId());
+        gFather = new Genotype(variant.getSampleData(ind.getFather().getId(), "GT"));
+        gMother = new Genotype(variant.getSampleData(ind.getMother().getId(), "GT"));
 
         if (gFather.getCode() != AllelesCode.ALLELES_OK || gMother.getCode() != AllelesCode.ALLELES_OK) {
             return false;
         }
 
-        if (checkMendel(vcfRecord.getChromosome(), gFather, gMother, g, ind.getSexCode()) > 0) {
+        if (checkMendel(variant.getChromosome(), gFather, gMother, g, ind.getSexCode()) > 0) {
             return true;
         }
 
@@ -682,22 +687,5 @@ public class StatsCalculator {
 
     }
 
-    private static class StatsTask implements Callable<List<VariantStats>> {
-        private List<VcfRecord> list;
-        private List<String> sampleNames;
-        private Pedigree ped;
-        private VariantGlobalStats gs;
 
-        private StatsTask(List<VcfRecord> list, List<String> sampleNames, Pedigree ped, VariantGlobalStats gs) {
-            this.list = list;
-            this.sampleNames = sampleNames;
-            this.ped = ped;
-            this.gs = gs;
-        }
-
-        @Override
-        public List<VariantStats> call() throws Exception {
-            return variantStats(list, sampleNames, ped);
-        }
-    }
 }

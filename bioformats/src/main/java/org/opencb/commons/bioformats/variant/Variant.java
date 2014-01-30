@@ -38,6 +38,7 @@ public class Variant {
         this.position = position;
         this.reference = reference;
         this.alternate = alternate;
+        this.sampleData = new HashMap<>();
         this.effect = new LinkedList<>();
         this.attributes = new HashMap<>();
     }
@@ -118,8 +119,31 @@ public class Variant {
         return this.effect.add(e);
     }
 
+    public void addId(String newId) {
+        if (!this.id.contains(newId)) {
+            if (this.id.equals(".")) {
+                this.id = newId;
+            } else {
+                this.id += ";" + newId;
+            }
+        }
+
+    }
+
     public void addAttribute(String key, String value) {
         this.attributes.put(key, value);
+    }
+
+    public String getAttribute(String key) {
+        return this.attributes.get(key);
+    }
+
+    public void addSampleData(String sampleName, Map<String, String> sampleData) {
+        this.sampleData.put(sampleName, sampleData);
+    }
+
+    public String getSampleData(String sampleName, String field) {
+        return this.sampleData.get(sampleName).get(field.toUpperCase());
     }
 
     @Override
@@ -132,9 +156,18 @@ public class Variant {
                 ", id='" + id + '\'' +
                 ", format='" + format + '\'' +
                 ", sampleData=" + sampleData +
-                ", stats=" + (stats != null) +
+                ", stats=" + stats +
                 ", effect=" + effect +
                 ", attributes=" + attributes +
                 '}';
     }
+
+    public String[] getAltAlleles() {
+        return this.getAlternate().split(",");
+    }
+
+    public boolean isIndel() {
+        return (this.reference.length() > 1 || this.alternate.length() > 1) && (this.reference.length() != this.alternate.length());
+    }
+
 }

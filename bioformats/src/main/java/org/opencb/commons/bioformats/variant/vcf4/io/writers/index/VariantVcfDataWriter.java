@@ -80,7 +80,7 @@ public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
     public boolean writeBatch(List<VcfRecord> batch) {
 
         for (VcfRecord record : batch) {
-            printer.append(record.toString()).append("\n");
+            printer.append(record.toString()).append("\n"); // TODO aaleman: Create a Variant2Vcf converter.
         }
 
         return true;

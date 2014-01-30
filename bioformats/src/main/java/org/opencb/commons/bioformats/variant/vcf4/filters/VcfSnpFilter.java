@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant.vcf4.filters;
 
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+
+import org.opencb.commons.bioformats.variant.Variant;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,8 +22,8 @@ public class VcfSnpFilter extends VcfFilter {
     }
 
     @Override
-    public boolean apply(VcfRecord vcfRecord) {
-        return (!vcfRecord.getId().equalsIgnoreCase(".") && !vcfRecord.getId().equalsIgnoreCase(""));
+    public boolean apply(Variant variant) {
+        return (!variant.getId().equalsIgnoreCase(".") && !variant.getId().equalsIgnoreCase(""));
     }
 
 }
