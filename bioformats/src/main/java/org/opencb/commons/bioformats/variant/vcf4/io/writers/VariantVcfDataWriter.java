@@ -1,9 +1,13 @@
-package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
+package org.opencb.commons.bioformats.variant.vcf4.io.writers;
 
 
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantReader;
+import org.opencb.commons.bioformats.variant.vcf4.io.writers.VariantWriter;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -14,14 +18,15 @@ import java.util.List;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
+public class VariantVcfDataWriter implements VariantWriter {
 
     private PrintWriter printer;
     private String filename;
+    private VariantReader reader;
 
-
-    public VariantVcfDataWriter(String filename) {
+    public VariantVcfDataWriter(VariantReader reader, String filename) {
         this.filename = filename;
+        this.reader = reader;
     }
 
     @Override
@@ -49,6 +54,7 @@ public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
     @Override
     public boolean pre() {
 
+        printer.append(reader.getHeader()).append("\n");
         return true;
     }
 
@@ -58,28 +64,16 @@ public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
     }
 
     @Override
-    public boolean write(Object elem) {
-        return false;
-    }
-
-    @Override
-    public boolean write(List batch) {
-        return false;
-    }
-
-    @Override
-    public boolean writeHeader(String header) {
-
-        printer.append(header);
-
+    public boolean write(Variant elem) {
+        printer.append(elem.toString()).append("\n"); // TODO aaleman: Create a Variant2Vcf converter.
         return true;
-
     }
 
-    @Override
-    public boolean writeBatch(List<VcfRecord> batch) {
 
-        for (VcfRecord record : batch) {
+    @Override
+    public boolean write(List<Variant> batch) {
+
+        for (Variant record : batch) {
             printer.append(record.toString()).append("\n"); // TODO aaleman: Create a Variant2Vcf converter.
         }
 

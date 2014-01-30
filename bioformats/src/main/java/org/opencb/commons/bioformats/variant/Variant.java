@@ -1,13 +1,9 @@
 package org.opencb.commons.bioformats.variant;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,7 +19,7 @@ public class Variant {
     private String alternate;
     private String id;
     private String format;
-    private Map<String, Map<String, String>> sampleData;
+    private Map<String, Map<String, String>> samplesData;
     private VariantStats stats;
     private List<VariantEffect> effect;
 
@@ -38,9 +34,9 @@ public class Variant {
         this.position = position;
         this.reference = reference;
         this.alternate = alternate;
-        this.sampleData = new HashMap<>();
+        this.samplesData = new LinkedHashMap<>();
         this.effect = new LinkedList<>();
-        this.attributes = new HashMap<>();
+        this.attributes = new LinkedHashMap<>();
     }
 
     public String getChromosome() {
@@ -91,12 +87,12 @@ public class Variant {
         this.format = format;
     }
 
-    public Map<String, Map<String, String>> getSampleData() {
-        return sampleData;
+    public Map<String, Map<String, String>> getSamplesData() {
+        return samplesData;
     }
 
-    public void setSampleData(Map<String, Map<String, String>> sampleData) {
-        this.sampleData = sampleData;
+    public Map<String, String> getSampleData(String sampleName) {
+        return samplesData.get(sampleName);
     }
 
     public VariantStats getStats() {
@@ -115,6 +111,14 @@ public class Variant {
         this.effect = effect;
     }
 
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
     public boolean addEffect(VariantEffect e) {
         return this.effect.add(e);
     }
@@ -127,7 +131,6 @@ public class Variant {
                 this.id += ";" + newId;
             }
         }
-
     }
 
     public void addAttribute(String key, String value) {
@@ -139,11 +142,15 @@ public class Variant {
     }
 
     public void addSampleData(String sampleName, Map<String, String> sampleData) {
-        this.sampleData.put(sampleName, sampleData);
+        this.samplesData.put(sampleName, sampleData);
     }
 
     public String getSampleData(String sampleName, String field) {
-        return this.sampleData.get(sampleName).get(field.toUpperCase());
+        return this.samplesData.get(sampleName).get(field.toUpperCase());
+    }
+
+    public Iterable<String> getSampleNames() {
+        return this.samplesData.keySet();
     }
 
     @Override
@@ -155,7 +162,7 @@ public class Variant {
                 ", alternate='" + alternate + '\'' +
                 ", id='" + id + '\'' +
                 ", format='" + format + '\'' +
-                ", sampleData=" + sampleData +
+                ", samplesData=" + samplesData +
                 ", stats=" + stats +
                 ", effect=" + effect +
                 ", attributes=" + attributes +

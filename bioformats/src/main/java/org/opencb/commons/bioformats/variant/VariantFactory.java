@@ -28,6 +28,45 @@ public class VariantFactory {
         return variant;
     }
 
+    public static String getVcfInfo(Variant variant) {
+        StringBuilder info = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : variant.getAttributes().entrySet()) {
+            String key = entry.getKey();
+            if (!key.equalsIgnoreCase("QUAL") && !key.equalsIgnoreCase("FILTER")) {
+                info.append(key);
+
+                String value = entry.getValue();
+                if (value.length() > 0) {
+                    info.append("=");
+                    info.append(value);
+                }
+
+                info.append(";");
+            }
+        }
+
+        return (info.toString().length() == 0) ? "." : info.substring(0, info.length() - 1);
+    }
+
+    public static String getVcfSampleRawData(Variant variant, String sampleName) {
+        if (!variant.getSamplesData().containsKey(sampleName)) {
+            return "";
+        }
+
+        StringBuilder info = new StringBuilder();
+
+        Map<String, String> data = variant.getSampleData(sampleName);
+
+        for (String formatField : variant.getFormat().split(":")) {
+            info.append(data.get(formatField)).append(":");
+        }
+
+        return info.toString().length() > 0 ? info.substring(0, info.length() - 1) : ".";
+
+    }
+
+
     private static void parseSampleData(Variant variant, String[] fields, List<String> sampleNames) {
         String[] formatFields = variant.getFormat().split(":");
 
@@ -61,4 +100,6 @@ public class VariantFactory {
         }
 
     }
+
+
 }

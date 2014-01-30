@@ -83,9 +83,12 @@ public class Runner<T> {
 
             this.launch(batch);
 
+            for (DataWriter<T> dw : writers) {
+                dw.write(batch);
+            }
+
             batch.clear();
             batch = reader.read(batchSize);
-
         }
 
         this.launchPost();

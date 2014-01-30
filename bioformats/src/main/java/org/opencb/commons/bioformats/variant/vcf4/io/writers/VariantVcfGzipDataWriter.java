@@ -1,7 +1,10 @@
-package org.opencb.commons.bioformats.variant.vcf4.io.writers.index;
+package org.opencb.commons.bioformats.variant.vcf4.io.writers;
 
 
+import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
+import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantReader;
+import org.opencb.commons.bioformats.variant.vcf4.io.writers.VariantWriter;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -17,14 +20,16 @@ import java.util.zip.GZIPOutputStream;
  * Time: 3:40 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfGzipDataWriter implements VariantDataWriter<VcfRecord> {
+public class VariantVcfGzipDataWriter implements VariantWriter {
 
+    private VariantReader reader;
     private BufferedWriter printer;
     private String filename;
 
 
-    public VariantVcfGzipDataWriter(String filename) {
+    public VariantVcfGzipDataWriter(VariantReader reader, String filename) {
         this.filename = filename;
+        this.reader = reader;
     }
 
     @Override
@@ -56,7 +61,14 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter<VcfRecord> {
     @Override
     public boolean pre() {
 
-        return true;
+        boolean res = true;
+        try {
+            printer.append(reader.getHeader()).append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            res = false;
+        }
+        return res;
     }
 
     @Override
@@ -65,35 +77,25 @@ public class VariantVcfGzipDataWriter implements VariantDataWriter<VcfRecord> {
     }
 
     @Override
-    public boolean write(Object elem) {
-        return false;
-    }
-
-    @Override
-    public boolean write(List batch) {
-        return false;
-    }
-
-    @Override
-    public boolean writeHeader(String header) {
-
+    public boolean write(Variant elem) {
         boolean res = true;
+
         try {
-            printer.append(header).append("\n");
+            printer.append(elem.toString()).append("\n");
         } catch (IOException e) {
             e.printStackTrace();
             res = false;
+
         }
         return res;
-
     }
 
     @Override
-    public boolean writeBatch(List<VcfRecord> batch) {
+    public boolean write(List<Variant> batch) {
 
         boolean res = true;
         try {
-            for (VcfRecord record : batch) {
+            for (Variant record : batch) {
                 printer.append(record.toString()).append("\n");
             }
         } catch (IOException e) {
