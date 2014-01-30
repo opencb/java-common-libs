@@ -23,7 +23,7 @@ import java.util.zip.GZIPInputStream;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public class VariantVcfDataReader implements VariantDataReader {
+public class VariantVcfReader implements VariantReader {
 
     private static final int DEFAULT_NUMBER_RECORDS = 40000;
     private Vcf4 vcf4;
@@ -34,7 +34,7 @@ public class VariantVcfDataReader implements VariantDataReader {
     private Path path;
     private String filename;
 
-    public VariantVcfDataReader(String filename) {
+    public VariantVcfReader(String filename) {
         this.filename = filename;
     }
 

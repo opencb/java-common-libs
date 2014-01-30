@@ -5,6 +5,7 @@ import org.opencb.commons.bioformats.pedigree.Individual;
 import org.opencb.commons.bioformats.pedigree.Pedigree;
 
 import java.sql.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -110,6 +111,16 @@ public class PedSqliteDataWriter implements PedDataWriter {
         }
 
         return res;
+    }
+
+    @Override
+    public boolean write(Object elem) {
+        return false;
+    }
+
+    @Override
+    public boolean write(List batch) {
+        return false;
     }
 
     @Override

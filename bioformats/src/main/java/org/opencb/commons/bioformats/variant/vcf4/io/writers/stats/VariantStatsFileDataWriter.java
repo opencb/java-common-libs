@@ -94,6 +94,16 @@ public class VariantStatsFileDataWriter implements VariantStatsDataWriter {
     }
 
     @Override
+    public boolean write(Object elem) {
+        return false;
+    }
+
+    @Override
+    public boolean write(List batch) {
+        return writeVariantStats(batch);
+    }
+
+    @Override
     public boolean writeVariantStats(List<VariantStats> data) {
         for (VariantStats v : data) {
             variantPw.append(String.format("%-5s%-10d%-10s%-5s%-10s%-10s%-10s" +

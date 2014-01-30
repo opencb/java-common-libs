@@ -58,6 +58,16 @@ public class VariantVcfDataWriter implements VariantDataWriter<VcfRecord> {
     }
 
     @Override
+    public boolean write(Object elem) {
+        return false;
+    }
+
+    @Override
+    public boolean write(List batch) {
+        return false;
+    }
+
+    @Override
     public boolean writeHeader(String header) {
 
         printer.append(header);

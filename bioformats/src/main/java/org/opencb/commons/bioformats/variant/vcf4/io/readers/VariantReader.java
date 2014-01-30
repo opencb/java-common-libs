@@ -13,10 +13,8 @@ import java.util.List;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface VariantDataReader extends DataReader<VcfRecord> {
+public interface VariantReader extends DataReader<VcfRecord> {
     public List<String> getSampleNames();
-
-//    public void setSampleNames(List<String> sampleNames);
 
     public String getHeader();
 }
