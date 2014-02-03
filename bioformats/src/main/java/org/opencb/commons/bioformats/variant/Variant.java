@@ -1,5 +1,8 @@
 package org.opencb.commons.bioformats.variant;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
@@ -24,13 +27,21 @@ public class Variant {
     private VariantStats stats;
     private List<VariantEffect> effect;
 
-    public Variant(String chromosome, int position, String reference, String alternate){
+    /**
+     * Optional attributes that probably depend on the format of the file the
+     * variant was initially read.
+     */
+    private Map<String, String> attributes;
+
+    public Variant(String chromosome, int position, String reference, String alternate) {
         this.chromosome = chromosome;
         this.position = position;
         this.reference = reference;
         this.alternate = alternate;
-
+        this.effect = new LinkedList<>();
+        this.attributes = new HashMap<>();
     }
+
     public String getChromosome() {
         return chromosome;
     }
@@ -101,5 +112,29 @@ public class Variant {
 
     public void setEffect(List<VariantEffect> effect) {
         this.effect = effect;
+    }
+
+    public boolean addEffect(VariantEffect e) {
+        return this.effect.add(e);
+    }
+
+    public void addAttribute(String key, String value) {
+        this.attributes.put(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return "Variant{" +
+                "chromosome='" + chromosome + '\'' +
+                ", position=" + position +
+                ", reference='" + reference + '\'' +
+                ", alternate='" + alternate + '\'' +
+                ", id='" + id + '\'' +
+                ", format='" + format + '\'' +
+                ", sampleData=" + sampleData +
+                ", stats=" + (stats != null) +
+                ", effect=" + effect +
+                ", attributes=" + attributes +
+                '}';
     }
 }

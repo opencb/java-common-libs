@@ -34,7 +34,8 @@ public class VcfRecord {
      * @param info
      */
     public VcfRecord(String chromosome, Integer position, String id, String reference, String alternate, String quality, String filter, String info) {
-        this.chromosome = chromosome;
+
+        this.chromosome = parseChromosome(chromosome);
         this.position = position;
         this.id = id;
         this.reference = reference;
@@ -81,6 +82,7 @@ public class VcfRecord {
         this(chromosome, position, id, reference, alternate, quality, filter, info, format);
 
     }
+
 
     public VcfRecord(String[] fields, List<String> sampleNames) {
         this(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7], fields[8]);
@@ -364,4 +366,17 @@ public class VcfRecord {
     public boolean isIndel() {
         return this.reference.length() > 1 || this.alternate.length() > 1;
     }
+
+    /**
+     * Erase the prefix 'chr' or 'chrom' from the chromosome.
+     *
+     * @param chromosome
+     * @return String without prefix
+     */
+    private String parseChromosome(String chromosome) {
+
+        return chromosome.replaceAll("chrom|chr", "");
+
+    }
+
 }

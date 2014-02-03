@@ -1,11 +1,10 @@
 package org.opencb.commons.bioformats.variant.utils.stats;
 
 
-import org.opencb.commons.bioformats.feature.Genotype;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.opencb.commons.bioformats.feature.Genotype;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,7 +20,7 @@ public class VariantStats {
     private String[] altAlleles;
     private String id;
     private String mafAllele;
-    private String mgfAllele;
+    private String mgfGenotype;
     private int numAlleles;
     private int[] allelesCount;
     private int[] genotypesCount;
@@ -32,7 +31,7 @@ public class VariantStats {
     private float mgf;
     private int missingAlleles;
     private int missingGenotypes;
-    private int mendelinanErrors;
+    private int mendelianErrors;
     private boolean isIndel;
     private boolean isSNP;
     private boolean pass;
@@ -51,15 +50,16 @@ public class VariantStats {
         this.chromosome = "";
         this.refAllele = "";
         this.altAlleles = null;
+        
         this.mafAllele = "";
-        this.mgfAllele = "";
+        this.mgfGenotype = "";
         this.position = (long) 0;
         this.numAlleles = 0;
         this.allelesCount = null;
         this.genotypesCount = null;
         this.missingAlleles = 0;
         this.missingGenotypes = 0;
-        this.mendelinanErrors = 0;
+        this.mendelianErrors = 0;
         this.allelesFreq = null;
         this.genotypesFreq = null;
         this.maf = 0;
@@ -75,56 +75,40 @@ public class VariantStats {
         this.hw = new VariantHardyWeinbergStats();
     }
 
-    public VariantStats(String chromosome, int position, String allele_ref, String allele_alt, double maf,
-                        double mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
-                        int mendel_err, int is_indel, double cases_percent_dominant,
-                        double controls_percent_dominant, double cases_percent_recessive,
-                        double controls_percent_recessive) {
-
+    public VariantStats(String chromosome, int position, String referenceAllele, String alternateAlleles, double maf,
+                        double mgf, String mafAllele, String mgfGenotype, int numMissingAlleles, int numMissingGenotypes,
+                        int numMendelErrors, boolean isIndel, double percentCasesDominant, double percentControlsDominant, 
+                        double percentCasesRecessive, double percentControlsRecessive) {
         this.chromosome = chromosome;
         this.position = position;
-        this.refAllele = allele_ref;
-        this.altAlleles = allele_alt.split(",");
+        this.refAllele = referenceAllele;
+        this.altAlleles = alternateAlleles.split(",");
+        this.numAlleles = 1 + this.altAlleles.length;
+        
+        this.genotypes = new ArrayList<>((int) Math.pow(this.numAlleles, 2));
+        this.allelesCount = new int[numAlleles];
+        this.allelesFreq = new float[numAlleles];
+        this.genotypesCount = new int[(int) Math.pow(this.numAlleles, 2)];
+        this.genotypesFreq = new float[(int) Math.pow(this.numAlleles, 2)];
+        
         this.maf = (float) maf;
         this.mgf = (float) mgf;
-        this.mafAllele = allele_maf;
-        this.mgfAllele = genotype_maf;
-        this.missingAlleles = miss_allele;
-        this.missingGenotypes = miss_gt;
-        this.mendelinanErrors = mendel_err;
-        this.isIndel = (is_indel == 1);
-        this.casesPercentDominant = (float) cases_percent_dominant;
-        this.controlsPercentDominant = (float) controls_percent_dominant;
-        this.casesPercentRecessive = (float) cases_percent_recessive;
-        this.controlsPercentRecessive = (float) controls_percent_recessive;
+        this.mafAllele = mafAllele;
+        this.mgfGenotype = mgfGenotype;
+        
+        this.missingAlleles = numMissingAlleles;
+        this.missingGenotypes = numMissingGenotypes;
+        this.mendelianErrors = numMendelErrors;
+        this.isIndel = isIndel;
+        
+        this.casesPercentDominant = (float) percentCasesDominant;
+        this.controlsPercentDominant = (float) percentControlsDominant;
+        this.casesPercentRecessive = (float) percentCasesRecessive;
+        this.controlsPercentRecessive = (float) percentControlsRecessive;
 
     }
 
 
-    public VariantStats(String chromosome, int position, String allele_ref, String allele_alt, float maf,
-                        float mgf, String allele_maf, String genotype_maf, int miss_allele, int miss_gt,
-                        int mendel_err, boolean is_indel, float cases_percent_dominant,
-                        float controls_percent_dominant, float cases_percent_recessive,
-                        float controls_percent_recessive) {
-
-        this.chromosome = chromosome;
-        this.position = position;
-        this.refAllele = allele_ref;
-        this.altAlleles = allele_alt.split(",");
-        this.maf =  maf;
-        this.mgf =  mgf;
-        this.mafAllele = allele_maf;
-        this.mgfAllele = genotype_maf;
-        this.missingAlleles = miss_allele;
-        this.missingGenotypes = miss_gt;
-        this.mendelinanErrors = mendel_err;
-        this.isIndel = is_indel;
-        this.casesPercentDominant = cases_percent_dominant;
-        this.controlsPercentDominant = controls_percent_dominant;
-        this.casesPercentRecessive =  cases_percent_recessive;
-        this.controlsPercentRecessive = controls_percent_recessive;
-
-    }
     @Override
     public String toString() {
         return "VariantStats{" +
@@ -133,7 +117,7 @@ public class VariantStats {
                 ", refAllele='" + refAllele + '\'' +
                 ", altAlleles=" + Arrays.toString(altAlleles) +
                 ", mafAllele='" + mafAllele + '\'' +
-                ", mgfAllele='" + mgfAllele + '\'' +
+                ", mgfAllele='" + mgfGenotype + '\'' +
                 ", numAlleles=" + numAlleles +
                 ", allelesCount=" + Arrays.toString(allelesCount) +
                 ", genotypesCount=" + Arrays.toString(genotypesCount) +
@@ -144,7 +128,7 @@ public class VariantStats {
                 ", mgf=" + mgf +
                 ", missingAlleles=" + missingAlleles +
                 ", missingGenotypes=" + missingGenotypes +
-                ", mendelinanErrors=" + mendelinanErrors +
+                ", mendelinanErrors=" + mendelianErrors +
                 ", isIndel=" + isIndel +
                 ", casesPercentDominant=" + casesPercentDominant +
                 ", controlsPercentDominant=" + controlsPercentDominant +
@@ -192,11 +176,11 @@ public class VariantStats {
     }
 
     public String getMgfAllele() {
-        return mgfAllele;
+        return mgfGenotype;
     }
 
     public void setMgfAllele(String mgfAllele) {
-        this.mgfAllele = mgfAllele;
+        this.mgfGenotype = mgfAllele;
     }
 
     public Integer getNumAlleles() {
@@ -276,11 +260,11 @@ public class VariantStats {
     }
 
     public int getMendelinanErrors() {
-        return mendelinanErrors;
+        return mendelianErrors;
     }
 
     public void setMendelinanErrors(int mendelinanErrors) {
-        this.mendelinanErrors = mendelinanErrors;
+        this.mendelianErrors = mendelinanErrors;
     }
 
     public float getCasesPercentDominant() {
