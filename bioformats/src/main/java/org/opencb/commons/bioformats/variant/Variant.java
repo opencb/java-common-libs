@@ -47,7 +47,7 @@ public class Variant {
         this.chromosome = chromosome;
     }
 
-    public long getPosition() {
+    public int getPosition() {
         return position;
     }
 
@@ -139,6 +139,10 @@ public class Variant {
 
     public String getAttribute(String key) {
         return this.attributes.get(key);
+    }
+
+    public boolean containsAttribute(String key) {
+        return this.attributes.containsKey(key);
     }
 
     public void addSampleData(String sampleName, Map<String, String> sampleData) {
