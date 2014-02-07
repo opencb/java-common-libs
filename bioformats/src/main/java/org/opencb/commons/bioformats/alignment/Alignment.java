@@ -25,7 +25,8 @@ public class Alignment {
     private String mateReferenceName;
     private int mateAlignmentStart;
     private int inferredInsertSize;
-    
+    private byte[] readSequence;
+
     /**
      * List of differences between the reference sequence and this alignment. 
      * Each one is defined by its position, type of difference and the changes it
@@ -88,6 +89,7 @@ public class Alignment {
                 record.getInferredInsertSize(), record.getFlags(), 
                 AlignmentHelper.getDifferencesFromCigar(record, referenceSequence), 
                 attributes);
+        readSequence = record.getReadBases();
     }
 
     
@@ -239,8 +241,16 @@ public class Alignment {
     public void setUnclippedStart(long unclippedStart) {
         this.unclippedStart = unclippedStart;
     }
-    
-    
+
+    public byte[] getReadSequence() {
+        return readSequence;
+    }
+
+    public void setReadSequence(byte[] readSequence) {
+        this.readSequence = readSequence;
+    }
+
+
     public static class AlignmentDifference {
         
         private final int pos;
