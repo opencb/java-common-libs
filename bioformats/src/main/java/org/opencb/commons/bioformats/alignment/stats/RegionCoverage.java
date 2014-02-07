@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.alignment;
+package org.opencb.commons.bioformats.alignment.stats;
 
 import java.util.List;
 import java.util.Map;

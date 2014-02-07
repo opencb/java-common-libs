@@ -1,6 +1,8 @@
-package org.opencb.commons.bioformats.alignment;
+package org.opencb.commons.bioformats.alignment.io.readers;
 
 import net.sf.samtools.SAMFileHeader;
+import org.opencb.commons.bioformats.alignment.Alignment;
+import org.opencb.commons.bioformats.alignment.AlignmentRegion;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
 import org.opencb.commons.io.DataReader;
 

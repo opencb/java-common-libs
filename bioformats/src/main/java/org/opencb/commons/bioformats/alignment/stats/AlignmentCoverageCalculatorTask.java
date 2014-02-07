@@ -2,13 +2,11 @@ package org.opencb.commons.bioformats.alignment.stats;
 
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
-import org.opencb.commons.bioformats.alignment.MeanCoverage;
-import org.opencb.commons.bioformats.alignment.RegionCoverage;
+import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
 import org.opencb.commons.run.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -145,7 +143,8 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             }
             if(alignmentRegion.isChromosomeTail()){
                 saveCoverage(alignmentRegion.getEnd()+1);
-                end = alignmentRegion.getEnd();
+                //end = alignmentRegion.getEnd();
+                reset();
             }
 
             /*
@@ -227,7 +226,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         byte[] sequence = alignment.getReadSequence();
 
         for(int i = 0; i < alignment.getLength(); i++){
-//        for(int i = 0; i < sequence.length; i++) {
+//        for(int i = 0; i < sequence.length; i++) {    //TODO jcoll: Maybe this is safer
             switch (sequence[i]) {
                 case 'A':
                     coverage.getA()[(int) ((i + start) & regionCoverageMask)]++;
@@ -242,7 +241,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
                     coverage.getT()[(int) ((i + start) & regionCoverageMask)]++;
                     break;
                 default:
-                    //OMGQUEMELOL!!
+                    //TODO jcoll: Analyze this case
                     break;
             }
         }
