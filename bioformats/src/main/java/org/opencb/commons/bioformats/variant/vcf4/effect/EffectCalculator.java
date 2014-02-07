@@ -66,6 +66,47 @@ public class EffectCalculator {
             e.printStackTrace();
         }
 
+        return batchEffect;
+    }
+
+    public static List<VariantEffect> getEffectsWithPolyPhenAndSift(List<Variant> batch) {
+        ObjectMapper mapper = new ObjectMapper();
+        List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
+
+        if (batch.size() == 0) {
+            return batchEffect;
+        }
+
+        StringBuilder chunkVcfRecords = new StringBuilder();
+        StringBuilder effectRecords = new StringBuilder();
+        Client client = Client.create();
+        WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+
+        javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
+        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
+
+        for (Variant record : batch) {
+            chunkVcfRecords.append(record.getChromosome()).append(":");
+            chunkVcfRecords.append(record.getPosition()).append(":");
+            chunkVcfRecords.append(record.getReference()).append(":");
+            chunkVcfRecords.append(record.getAlternate()).append(",");
+        }
+
+        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
+        formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
+
+//        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(formDataMultiPart.toString(), MediaType.MULTIPART_FORM_DATA_TYPE));
+        String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
+
+        // TODO aaleman: Check the new Web Service
+
+        try {
+            batchEffect = mapper.readValue(response.toString(), mapper.getTypeFactory().constructCollectionType(List.class, VariantEffect.class));
+        } catch (IOException e) {
+            System.err.println(chunkVcfRecords.toString());
+            e.printStackTrace();
+        }
+
 
         javax.ws.rs.core.Response newResponse;
         double ss, ps;

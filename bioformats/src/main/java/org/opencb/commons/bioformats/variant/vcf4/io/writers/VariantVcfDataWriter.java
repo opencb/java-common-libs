@@ -79,4 +79,16 @@ public class VariantVcfDataWriter implements VariantWriter {
 
         return true;
     }
+
+    @Override
+    public void includeStats(boolean stats) {
+    }
+
+    @Override
+    public void includeSamples(boolean samples) {
+    }
+
+    @Override
+    public void includeEffect(boolean effect) {
+    }
 }
