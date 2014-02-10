@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.filters;
+package org.opencb.commons.bioformats.variant.filters;
 
 
 import org.opencb.commons.bioformats.feature.Region;

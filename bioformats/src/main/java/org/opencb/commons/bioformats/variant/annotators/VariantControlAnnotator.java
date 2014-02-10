@@ -1,11 +1,11 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.VariantFactory;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
-import org.opencb.commons.bioformats.variant.vcf4.stats.StatsCalculator;
+import org.opencb.commons.bioformats.variant.stats.StatsCalculator;
 
 import java.io.IOException;
 import java.util.ArrayList;

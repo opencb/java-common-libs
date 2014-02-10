@@ -1,9 +1,9 @@
-package org.opencb.commons.bioformats.variant.vcf4.filters;
+package org.opencb.commons.bioformats.variant.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
+import org.opencb.commons.bioformats.variant.effect.EffectCalculator;
 
 import java.util.ArrayList;
 import java.util.Iterator;

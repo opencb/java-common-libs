@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;

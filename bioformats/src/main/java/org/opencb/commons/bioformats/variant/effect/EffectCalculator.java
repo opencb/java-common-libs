@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.effect;
+package org.opencb.commons.bioformats.variant.effect;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,7 +8,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;

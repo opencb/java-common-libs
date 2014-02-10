@@ -1,8 +1,7 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 
 import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.io.DataAnnotator;
 
 /**

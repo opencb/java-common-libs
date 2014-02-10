@@ -1,9 +1,9 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import com.google.common.base.Joiner;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
+import org.opencb.commons.bioformats.variant.effect.EffectCalculator;
 
 import java.util.HashSet;
 import java.util.List;

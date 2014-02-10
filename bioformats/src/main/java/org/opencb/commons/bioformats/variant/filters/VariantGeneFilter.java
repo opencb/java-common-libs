@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.filters;
+package org.opencb.commons.bioformats.variant.filters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

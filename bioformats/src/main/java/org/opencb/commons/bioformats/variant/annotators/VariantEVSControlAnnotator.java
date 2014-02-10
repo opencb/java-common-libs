@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.feature.Genotype;
