@@ -4,20 +4,16 @@ package org.opencb.commons.bioformats.variant.vcf4.filters;
 import org.opencb.commons.bioformats.variant.Variant;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 8/26/13
- * Time: 10:39 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfSnpFilter extends VcfFilter {
+public class VariantSnpFilter extends VariantFilter {
 
 
-    public VcfSnpFilter(int priority) {
+    public VariantSnpFilter(int priority) {
         super(priority);
     }
 
-    public VcfSnpFilter() {
+    public VariantSnpFilter() {
         super();
     }
 

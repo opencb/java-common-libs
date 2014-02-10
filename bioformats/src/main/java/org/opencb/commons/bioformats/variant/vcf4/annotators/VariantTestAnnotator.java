@@ -1,22 +1,17 @@
 package org.opencb.commons.bioformats.variant.vcf4.annotators;
 
 import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 10/24/13
- * Time: 3:45 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfTestAnnotator implements VcfAnnotator {
+public class VariantTestAnnotator implements VariantAnnotator {
 
     private String text;
 
-    public VcfTestAnnotator(String text) {
+    public VariantTestAnnotator(String text) {
         this.text = text;
     }
 

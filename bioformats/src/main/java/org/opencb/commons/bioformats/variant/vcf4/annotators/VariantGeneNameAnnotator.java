@@ -10,13 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
- * User: javi
- * Date: 26/09/13
- * Time: 18:23
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfGeneNameAnnotator implements VcfAnnotator {
+public class VariantGeneNameAnnotator implements VariantAnnotator {
 
     @Override
     public void annot(List<Variant> batch) {

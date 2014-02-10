@@ -3,7 +3,6 @@ package org.opencb.commons.bioformats.variant.vcf4.annotators;
 import com.google.common.base.Joiner;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 import org.opencb.commons.bioformats.variant.vcf4.effect.EffectCalculator;
 
 import java.util.HashSet;
@@ -11,13 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
- * User: javi
- * Date: 26/09/13
- * Time: 17:57
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfConsequenceTypeAnnotator implements VcfAnnotator {
+public class VariantConsequenceTypeAnnotator implements VariantAnnotator {
 
 
     @Override

@@ -17,18 +17,14 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 9/13/13
- * Time: 11:37 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfSNPAnnotator implements VcfAnnotator {
+public class VariantSNPAnnotator implements VariantAnnotator {
 
     private Client wsRestClient;
     private WebTarget webResource;
 
-    public VcfSNPAnnotator() {
+    public VariantSNPAnnotator() {
         wsRestClient = ClientBuilder.newClient();
         webResource = wsRestClient.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/genomic/position");
     }

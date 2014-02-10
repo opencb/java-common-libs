@@ -8,30 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 8/26/13
- * Time: 10:41 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfRegionFilter extends VcfFilter {
+public class VariantRegionFilter extends VariantFilter {
 
     private List<Region> regionList;
 
-    public VcfRegionFilter(String chromosome, long start, long end) {
+    public VariantRegionFilter(String chromosome, long start, long end) {
         super();
         regionList = new ArrayList<>();
         regionList.add(new Region(chromosome, start, end));
     }
 
-    public VcfRegionFilter(String chromosome, long start, long end, int priority) {
+    public VariantRegionFilter(String chromosome, long start, long end, int priority) {
         super(priority);
         regionList = new ArrayList<>();
         regionList.add(new Region(chromosome, start, end));
 
     }
 
-    public VcfRegionFilter(String regions) {
+    public VariantRegionFilter(String regions) {
         super();
         regionList = new ArrayList<>();
 
@@ -41,7 +37,7 @@ public class VcfRegionFilter extends VcfFilter {
         }
     }
 
-    public VcfRegionFilter(String regions, int priority) {
+    public VariantRegionFilter(String regions, int priority) {
         super(priority);
         regionList = new ArrayList<>();
 

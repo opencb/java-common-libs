@@ -17,24 +17,20 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 10/9/13
- * Time: 5:10 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfGeneFilter extends VcfFilter {
+public class VariantGeneFilter extends VariantFilter {
     private List<Region> regionList;
     private List<String> geneList;
 
 
-    public VcfGeneFilter(String genes) {
+    public VariantGeneFilter(String genes) {
         this.regionList = new ArrayList<>(10);
         this.geneList = Splitter.on(",").splitToList(genes);
         populateRegionList();
     }
 
-    public VcfGeneFilter(String genes, int priority) {
+    public VariantGeneFilter(String genes, int priority) {
         super(priority);
         this.regionList = new ArrayList<>(10);
         this.geneList = Splitter.on(",").splitToList(genes);
@@ -42,14 +38,14 @@ public class VcfGeneFilter extends VcfFilter {
     }
 
 
-    public VcfGeneFilter(File file) {
+    public VariantGeneFilter(File file) {
         this.regionList = new ArrayList<>(10);
         this.geneList = parseFile(file);
         populateRegionList();
 
     }
 
-    public VcfGeneFilter(File file, int priority) {
+    public VariantGeneFilter(File file, int priority) {
         super(priority);
         this.geneList = parseFile(file);
         populateRegionList();

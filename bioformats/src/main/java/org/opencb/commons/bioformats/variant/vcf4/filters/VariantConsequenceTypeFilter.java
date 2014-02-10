@@ -10,22 +10,18 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: javi
- * Date: 26/09/13
- * Time: 18:33
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfConsequenceTypeFilter extends VcfFilter {
+public class VariantConsequenceTypeFilter extends VariantFilter {
 
     private String consequenceType;
 
-    public VcfConsequenceTypeFilter(String consequenceType) {
+    public VariantConsequenceTypeFilter(String consequenceType) {
         this.consequenceType = consequenceType;
 
     }
 
-    public VcfConsequenceTypeFilter(String consequenceType, int priority) {
+    public VariantConsequenceTypeFilter(String consequenceType, int priority) {
         super(priority);
         this.consequenceType = consequenceType;
     }

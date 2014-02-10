@@ -4,15 +4,15 @@ import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.filters.Filter;
 
 /**
- * Created by aaleman on 12/5/13.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public abstract class VcfFilter extends Filter<Variant> {
+public abstract class VariantFilter extends Filter<Variant> {
 
-    public VcfFilter() {
+    public VariantFilter() {
         super(0);
     }
 
-    public VcfFilter(int priority) {
+    public VariantFilter(int priority) {
         super(priority);
     }
 }
