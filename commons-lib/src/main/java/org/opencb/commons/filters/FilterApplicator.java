@@ -16,19 +16,22 @@ import java.util.List;
  */
 public class FilterApplicator {
 
-    public static <E> List<E> filter(List<E> recordList, List<? extends Filter<E>> filters) {
+    public static <E> boolean filter(List<E> recordList, List<? extends Filter<E>> filters) {
 
         Predicate<E> andFilter = Predicates.and(filters);
 
-        return Lists.newArrayList(Iterables.filter(recordList, andFilter));
+        List<E> aux = Lists.newArrayList(Iterables.filter(recordList, andFilter));
+        return Iterables.retainAll(recordList, aux);
+
+//        return Lists.newArrayList(Iterables.filter(recordList, andFilter));
 
     }
-
-    public static <E> boolean filter(E elem, List<Filter<E>> filters) {
-
-        Predicate<E> andFilter = Predicates.and(filters);
-
-        return andFilter.apply(elem);
-
-    }
+//
+//    public static <E> boolean filter(E elem, List<Filter<E>> filters) {
+//
+//        Predicate<E> andFilter = Predicates.and(filters);
+//
+//        return andFilter.apply(elem);
+//
+//    }
 }

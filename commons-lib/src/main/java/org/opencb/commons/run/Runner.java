@@ -1,6 +1,5 @@
 package org.opencb.commons.run;
 
-
 import org.opencb.commons.io.DataReader;
 import org.opencb.commons.io.DataWriter;
 
@@ -8,32 +7,26 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 12/3/13
- * Time: 10:04 AM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
+public class Runner<T> {
 
-    protected R reader;
-    protected W writer;
-    protected Runner prev;
+    protected DataReader<T> reader;
+    protected List<? extends DataWriter<T>> writers;
+    protected List<Task<T>> tasks;
     protected int batchSize;
+    protected int threads;
 
-
-    public Runner(R reader, W writer, Runner prev) {
-        this(reader, writer);
-        this.prev = prev;
-    }
-
-    public Runner(R reader, W writer) {
+    public Runner(DataReader<T> reader, List<? extends DataWriter<T>> writers, List<Task<T>> tasks, int batchSize) {
         this.reader = reader;
-        this.writer = writer;
-        this.batchSize = 1000;
+        this.writers = writers;
+        this.tasks = tasks;
+        this.batchSize = batchSize;
     }
 
-    public abstract List<E> apply(List<E> batch) throws IOException;
+    public Runner(DataReader<T> reader, List<? extends DataWriter<T>> writers, List<Task<T>> tasks) {
+        this(reader, writers, tasks, 1000);
+    }
 
     public void pre() throws IOException {
     }
@@ -41,90 +34,79 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
     public void post() throws IOException {
     }
 
-    public List<E> launch(List<E> batch) throws IOException {
+    public void launch(List<T> batch) throws IOException {
 
-        if (prev != null) {
-            batch = prev.launch(batch);
+        for (Task<T> t : tasks) {
+            t.apply(batch);
         }
 
-        batch = this.apply(batch);
-        return batch;
     }
 
     public void launchPre() throws IOException {
-        if (prev != null) {
-            prev.launchPre();
+        for (Task<T> t : tasks) {
+            t.pre();
         }
-        this.pre();
     }
 
     public void launchPost() throws IOException {
-        if (prev != null) {
-            prev.launchPost();
+        for (Task<T> t : tasks) {
+            t.post();
         }
-        this.post();
     }
 
-    public void writerPre() {
-        if (prev != null) {
-            prev.writerPre();
-        }
-        if (writer != null)
-            writer.pre();
-    }
+    public void writerInit() {
 
-    public void writerOpen() {
-        if (prev != null) {
-            prev.writerOpen();
+        for (DataWriter<T> dw : writers) {
+            dw.open();
+            dw.pre();
         }
-        if (writer != null)
-            writer.open();
-    }
 
-    public void writerPost() {
-        if (prev != null) {
-            prev.writerPost();
-        }
-        if (writer != null)
-            writer.post();
     }
 
     public void writerClose() {
-        if (prev != null) {
-            prev.writerClose();
+        for (DataWriter<T> dw : writers) {
+            dw.post();
+            dw.close();
         }
-        if (writer != null)
-            writer.close();
     }
 
     public void run() throws IOException {
-        List<E> batch;
+        List<T> batch;
 
-        int cont = 0;
-        reader.open();
-        reader.pre();
-
-        this.writerOpen();
-        this.writerPre();
+        this.readerInit();
+        this.writerInit();
 
         this.launchPre();
 
         batch = reader.read(batchSize);
         while (!batch.isEmpty()) {
 
-            batch = this.launch(batch);
+            this.launch(batch);
+
+            for (DataWriter<T> dw : writers) {
+                dw.write(batch);
+            }
+
             batch.clear();
             batch = reader.read(batchSize);
-
         }
 
         this.launchPost();
 
-        reader.post();
-        reader.close();
-
-        this.writerPost();
+        this.readerClose();
         this.writerClose();
+
+    }
+
+    protected void readerClose() {
+        this.reader.post();
+        this.reader.close();
+
+    }
+
+    protected void readerInit() {
+        this.reader.open();
+        this.reader.pre();
 
     }
 
@@ -135,4 +117,5 @@ public abstract class Runner<R extends DataReader<E>, W extends DataWriter, E> {
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
+
 }
