@@ -104,4 +104,16 @@ public class VariantVcfGzipDataWriter implements VariantWriter {
         }
         return res;
     }
+
+    @Override
+    public void includeStats(boolean stats) {
+    }
+
+    @Override
+    public void includeSamples(boolean samples) {
+    }
+
+    @Override
+    public void includeEffect(boolean effect) {
+    }
 }

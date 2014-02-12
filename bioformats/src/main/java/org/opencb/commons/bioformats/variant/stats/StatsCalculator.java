@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.stats;
 
 
 import org.opencb.commons.bioformats.feature.AllelesCode;
@@ -10,10 +10,8 @@ import org.opencb.commons.bioformats.pedigree.Pedigree;
 import org.opencb.commons.bioformats.pedigree.Sex;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.stats.*;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -285,14 +283,14 @@ public class StatsCalculator {
             }
 
             // Update variables finally used to update file_stats_t structure
-            if (!variant.getId().equals(".")) {
+            if (variant.getId() != null && !variant.getId().equals(".")) {
                 vcfStat.setSNP(true);
             }
-            if (variant.getAttribute("FILTER").toUpperCase().equals("PASS")) {
+            if (variant.containsAttribute("FILTER") && variant.getAttribute("FILTER").toUpperCase().equals("PASS")) {
                 vcfStat.setPass(true);
             }
 
-            if (!variant.getAttribute("QUAL").equals(".")) {
+            if (variant.containsAttribute("FILTER") && !variant.getAttribute("QUAL").equals(".")) {
                 float qualAux = Float.valueOf(variant.getAttribute("QUAL"));
                 if (qualAux >= 0) {
                     vcfStat.setQual(qualAux);

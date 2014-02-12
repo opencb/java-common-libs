@@ -10,19 +10,15 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 8/31/13
- * Time: 8:39 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class PedFileDataReader implements PedDataReader {
+public class PedigreePedReader implements PedigreeReader {
 
     private String filename;
     private Pedigree ped;
     private BufferedReader reader;
 
-    public PedFileDataReader(String filename) {
+    public PedigreePedReader(String filename) {
         this.filename = filename;
 
         ped = new Pedigree();
@@ -30,30 +26,41 @@ public class PedFileDataReader implements PedDataReader {
 
     @Override
     public boolean open() {
+        boolean res = true;
         ped = new Pedigree();
 
         try {
             reader = new BufferedReader(new FileReader(this.filename));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            res = false;
         }
 
-        return true;
+        return res;
     }
 
     @Override
     public boolean close() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+
+        boolean res = true;
+
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            res = false;
+        }
+        return res;
     }
 
     @Override
     public boolean pre() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     @Override
     public boolean post() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     @Override
@@ -64,7 +71,6 @@ public class PedFileDataReader implements PedDataReader {
         String[] fields;
         String sampleId, familyId, fatherId, motherId, sex, phenotype;
         Set<Individual> family;
-        Queue<Individual> queue = new LinkedList<>();
         String[] auxFields = null;
 
         try {
@@ -122,8 +128,6 @@ public class PedFileDataReader implements PedDataReader {
 
 
         }
-
-
         return ped;
     }
 

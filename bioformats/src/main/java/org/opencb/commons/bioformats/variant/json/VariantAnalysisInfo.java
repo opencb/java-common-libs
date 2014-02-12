@@ -2,10 +2,7 @@ package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,26 +13,20 @@ import java.util.List;
  */
 public class VariantAnalysisInfo {
 
-    @JsonProperty
     List<String> samples;
-    @JsonProperty
-    HashMap<String, Integer> consequenceTypes;
-    @JsonProperty
-    HashMap<String, Integer> biotypes;
-    @JsonProperty
-    HashMap<String, Double> globalStats;
-    @JsonProperty
-    HashMap<String, SampleStat> sampleStats;
-    @JsonProperty
-    HashMap<String, Integer> chromosomes;
+    Map<String, Integer> consequenceTypes;
+    Map<String, Integer> biotypes;
+    Map<String, Double> globalStats;
+    Map<String, SampleStat> sampleStats;
+    Map<String, Integer> chromosomes;
 
     public VariantAnalysisInfo() {
         samples = new ArrayList<>(5);
-        consequenceTypes = new LinkedHashMap<>(50);
+        consequenceTypes = new HashMap<>(50);
         biotypes = new LinkedHashMap<>(50);
-        globalStats = new LinkedHashMap<>(20);
-        sampleStats = new LinkedHashMap<>(5);
-        chromosomes = new LinkedHashMap<>(25);
+        globalStats = new HashMap<>(20);
+        sampleStats = new HashMap<>(5);
+        chromosomes = new HashMap<>(25);
 
     }
 
@@ -47,19 +38,19 @@ public class VariantAnalysisInfo {
         this.samples = samples;
     }
 
-    public HashMap<String, Integer> getConsequenceTypes() {
+    public Map<String, Integer> getConsequenceTypes() {
         return consequenceTypes;
     }
 
-    public void setConsequenceTypes(HashMap<String, Integer> consequenceTypes) {
+    public void setConsequenceTypes(Map<String, Integer> consequenceTypes) {
         this.consequenceTypes = consequenceTypes;
     }
 
-    public HashMap<String, Integer> getBiotypes() {
+    public Map<String, Integer> getBiotypes() {
         return biotypes;
     }
 
-    public void setBiotypes(HashMap<String, Integer> biotypes) {
+    public void setBiotypes(Map<String, Integer> biotypes) {
         this.biotypes = biotypes;
     }
 
@@ -106,6 +97,9 @@ public class VariantAnalysisInfo {
                 "samples=" + samples +
                 ", consequenceTypes=" + consequenceTypes +
                 ", biotypes=" + biotypes +
+                ", globalStats=" + globalStats +
+                ", sampleStats=" + sampleStats +
+                ", chromosomes=" + chromosomes +
                 '}';
     }
 
@@ -125,12 +119,33 @@ public class VariantAnalysisInfo {
         consequenceTypes.put(ct, count);
     }
 
+    public Map<String, Double> getGlobalStats() {
+        return globalStats;
+    }
+
+    public void setGlobalStats(Map<String, Double> globalStats) {
+        this.globalStats = globalStats;
+    }
+
+    public Map<String, SampleStat> getSampleStats() {
+        return sampleStats;
+    }
+
+    public void setSampleStats(Map<String, SampleStat> sampleStats) {
+        this.sampleStats = sampleStats;
+    }
+
+    public Map<String, Integer> getChromosomes() {
+        return chromosomes;
+    }
+
+    public void setChromosomes(Map<String, Integer> chromosomes) {
+        this.chromosomes = chromosomes;
+    }
+
     private class SampleStat {
-        @JsonProperty
         int mendelianErrors;
-        @JsonProperty
         int missingGenotypes;
-        @JsonProperty
         int homozygotesNumber;
 
         private SampleStat(int mendelianErrors, int missingGenotypes, int homozygotesNumber) {
@@ -138,6 +153,8 @@ public class VariantAnalysisInfo {
             this.missingGenotypes = missingGenotypes;
             this.homozygotesNumber = homozygotesNumber;
         }
-    }
 
+        public SampleStat() {
+        }
+    }
 }
