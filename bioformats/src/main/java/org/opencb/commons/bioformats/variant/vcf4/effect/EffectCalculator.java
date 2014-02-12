@@ -32,7 +32,7 @@ public class EffectCalculator {
         ObjectMapper mapper = new ObjectMapper();
         List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
 
-        if (batch.size() == 0) {
+        if (batch.isEmpty()) {
             return batchEffect;
         }
 
