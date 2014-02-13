@@ -5,6 +5,7 @@ import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
 import org.opencb.commons.bioformats.alignment.Alignment;
+import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
 
 import java.io.File;
@@ -86,7 +87,9 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
                 record.getMappingQuality(), record.getBaseQualityString(),
                 record.getMateReferenceName(), record.getMateAlignmentStart(),
-                record.getInferredInsertSize(), record.getFlags(),null, null); //TODO jcoll: FIXME!
+                record.getInferredInsertSize(), record.getFlags(),
+                AlignmentHelper.getDifferencesFromCigar(record,record.getReadString()), null); //TODO jcoll: FIXME! here should go a web request of the reference sequenceaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+//            Alignment alignment = new Alignment(record, null, record.getReadString());
             alignment.setReadSequence(record.getReadBases());
         }
         return alignment;

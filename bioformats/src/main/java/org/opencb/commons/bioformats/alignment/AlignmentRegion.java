@@ -1,5 +1,8 @@
 package org.opencb.commons.bioformats.alignment;
 
+import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
+import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
+
 import java.util.List;
 
 /**

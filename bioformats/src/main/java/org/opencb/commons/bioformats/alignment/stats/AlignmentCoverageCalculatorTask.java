@@ -7,6 +7,7 @@ import org.opencb.commons.run.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -144,7 +145,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             if(alignmentRegion.isChromosomeTail()){
                 saveCoverage(alignmentRegion.getEnd()+1);
                 //end = alignmentRegion.getEnd();
-                reset();
+                //reset();  // jmml
             }
 
             /*
@@ -171,6 +172,9 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             }
             alignmentRegion.setMeanCoverage(meanCoverageList);
 
+//            if(alignmentRegion.isChromosomeTail()){
+//                reset();
+//            }
         }
         return true;
     }
@@ -225,27 +229,55 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         }
         byte[] sequence = alignment.getReadSequence();
 
-        for(int i = 0; i < alignment.getLength(); i++){
-//        for(int i = 0; i < sequence.length; i++) {    //TODO jcoll: Maybe this is safer
+
+        Iterator<Alignment.AlignmentDifference> diferencesIterator = alignment.getDifferences().iterator();
+        Alignment.AlignmentDifference alignmentDifference = diferencesIterator.hasNext()? diferencesIterator.next():null;
+        int offset = 0;
+        for(int i = 0; i < alignment.getLength(); i++) {
+            //        for(int i = 0; i < sequence.length; i++) {    //TODO jcoll: Analyze this case
+            if (alignmentDifference != null) {  // if there are remaining differences
+                if(alignmentDifference.getPos() == i) {
+                    switch(alignmentDifference.getOp()){
+                        case Alignment.AlignmentDifference.INSERTION:
+                            i += alignmentDifference.getSeq().length();
+                            offset -= alignmentDifference.getSeq().length();
+                            break;
+                        case Alignment.AlignmentDifference.DELETION:
+                            offset += alignmentDifference.getSeq().length();
+                            break;
+                        case Alignment.AlignmentDifference.MISMATCH:
+                        case Alignment.AlignmentDifference.SKIPPED_REGION:
+                        case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                        case Alignment.AlignmentDifference.HARD_CLIPPING:
+                        case Alignment.AlignmentDifference.PADDING:
+                        default:
+                            break;
+                    }
+                    if (diferencesIterator.hasNext()) {
+                        alignmentDifference = diferencesIterator.next();
+                    } else {
+                        alignmentDifference = null;
+                    }
+                }
+            }
             switch (sequence[i]) {
                 case 'A':
-                    coverage.getA()[(int) ((i + start) & regionCoverageMask)]++;
+                    coverage.getA()[(int) ((i + offset + start) & regionCoverageMask)]++;
                     break;
                 case 'C':
-                    coverage.getC()[(int) ((i + start) & regionCoverageMask)]++;
+                    coverage.getC()[(int) ((i + offset + start) & regionCoverageMask)]++;
                     break;
                 case 'G':
-                    coverage.getG()[(int) ((i + start) & regionCoverageMask)]++;
+                    coverage.getG()[(int) ((i + offset + start) & regionCoverageMask)]++;
                     break;
                 case 'T':
-                    coverage.getT()[(int) ((i + start) & regionCoverageMask)]++;
+                    coverage.getT()[(int) ((i + offset + start) & regionCoverageMask)]++;
                     break;
                 default:
                     //TODO jcoll: Analyze this case
                     break;
             }
         }
-
 
         return 0;
     }
@@ -274,7 +306,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         regionCoverageSize = newRegionCoverageSize;
         regionCoverageMask = newRegionCoverageMask;
         coverage = newCoverage;
-        System.out.println("Region Coverage Mask : " + regionCoverageMask);
+//        System.out.println("Region Coverage Mask : " + regionCoverageMask);
     }
 
     public void addMeanCoverageCalculator(int size, String name) {
