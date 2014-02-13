@@ -255,7 +255,8 @@ public class Alignment {
         
         private final int pos;
         private final char op;
-        private final String seq;
+        private final String seq;   // seq might not store the complete sequence: seq.length() will be shorter
+        private final int length;   // this length is the real length of the sequence
 
         public static final char INSERTION = 'I';
         public static final char DELETION = 'D';
@@ -269,6 +270,14 @@ public class Alignment {
             this.pos = pos;
             this.op = op;
             this.seq = seq;
+            this.length = seq.length();
+        }
+
+        public AlignmentDifference(int pos, char op, String seq, int length) {
+            this.pos = pos;
+            this.op = op;
+            this.seq = seq;
+            this.length = length;
         }
 
         public char getOp() {
@@ -283,12 +292,16 @@ public class Alignment {
             return seq;
         }
 
+        public int getLength() {
+            return this.length;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof AlignmentDifference)) { return false; }
             
             AlignmentDifference other = (AlignmentDifference) obj;
-            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq);
+            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
         }
 
         @Override

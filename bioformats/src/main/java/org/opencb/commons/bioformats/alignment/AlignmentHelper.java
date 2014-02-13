@@ -38,7 +38,7 @@ public class AlignmentHelper {
                 case X:
                     AlignmentBlock blk = record.getAlignmentBlocks().get(indexMismatchBlock);
                     int realStart = blk.getReferenceStart() - record.getAlignmentStart();
-                    // Picard ignores hard clipping, the indices could be neccessary
+                    // Picard ignores hard clipping, the indices could be necessary
                     indexRef = realStart >= indexRef ? realStart : indexRef;
                     subref = refStr.substring(indexRef, indexRef + blk.getLength());
                     subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
@@ -54,7 +54,7 @@ public class AlignmentHelper {
                     } else { // Get only first 30 characters in the sequence to copy
                         subread = subread.substring(index, index + 30).concat("...");
                     }
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread);
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread, cigarLen);
                     index = index + cigarLen;
                     break;
                 case D:
@@ -63,7 +63,7 @@ public class AlignmentHelper {
                     } else { // Get only first 30 characters in the sequence to copy
                         subref = refStr.substring(indexRef, indexRef + 30).concat("...");
                     }
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref);
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref, cigarLen);
                     indexRef = indexRef + cigarLen;
                     break;
                 case N:
@@ -72,7 +72,7 @@ public class AlignmentHelper {
                     } else { // Get only first 30 characters in the sequence to copy
                         subref = refStr.substring(indexRef, indexRef + 30).concat("...");
                     }
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref);
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref, cigarLen);
                     indexRef = indexRef + cigarLen;
                     break;
                 case S:

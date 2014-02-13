@@ -232,18 +232,18 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
 
         Iterator<Alignment.AlignmentDifference> diferencesIterator = alignment.getDifferences().iterator();
         Alignment.AlignmentDifference alignmentDifference = diferencesIterator.hasNext()? diferencesIterator.next():null;
-        int offset = 0;
+        int offset = 0; // offset caused by insertions and deletions
         for(int i = 0; i < alignment.getLength(); i++) {
             //        for(int i = 0; i < sequence.length; i++) {    //TODO jcoll: Analyze this case
             if (alignmentDifference != null) {  // if there are remaining differences
                 if(alignmentDifference.getPos() == i) {
                     switch(alignmentDifference.getOp()){
                         case Alignment.AlignmentDifference.INSERTION:
-                            i += alignmentDifference.getSeq().length();
-                            offset -= alignmentDifference.getSeq().length();
+                            i += alignmentDifference.getLength();
+                            offset -= alignmentDifference.getLength();
                             break;
                         case Alignment.AlignmentDifference.DELETION:
-                            offset += alignmentDifference.getSeq().length();
+                            offset += alignmentDifference.getLength();
                             break;
                         case Alignment.AlignmentDifference.MISMATCH:
                         case Alignment.AlignmentDifference.SKIPPED_REGION:
