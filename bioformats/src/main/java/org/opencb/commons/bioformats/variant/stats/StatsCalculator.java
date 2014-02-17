@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.stats;
+package org.opencb.commons.bioformats.variant.stats;
 
 
 import org.opencb.commons.bioformats.feature.AllelesCode;
@@ -10,10 +10,8 @@ import org.opencb.commons.bioformats.pedigree.Pedigree;
 import org.opencb.commons.bioformats.pedigree.Sex;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.stats.*;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 /**
  * Created with IntelliJ IDEA.

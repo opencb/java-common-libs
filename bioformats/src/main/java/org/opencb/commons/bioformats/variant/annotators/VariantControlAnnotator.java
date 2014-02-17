@@ -1,11 +1,11 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.VariantFactory;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
-import org.opencb.commons.bioformats.variant.vcf4.stats.StatsCalculator;
+import org.opencb.commons.bioformats.variant.stats.StatsCalculator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,10 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
- * change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfControlAnnotator implements VcfAnnotator {
+public class VariantControlAnnotator implements VariantAnnotator {
 
     // private TabixReader tabix;
     private String tabixFile;
@@ -29,7 +28,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
     private String prefix;
     private boolean single;
 
-    public VcfControlAnnotator(String infoPrefix, String control) {
+    public VariantControlAnnotator(String infoPrefix, String control) {
 
         this.prefix = infoPrefix;
         this.tabixFile = control;
@@ -59,7 +58,7 @@ public class VcfControlAnnotator implements VcfAnnotator {
 
     }
 
-    public VcfControlAnnotator(String infoPrefix, Map<String, String> controlList) {
+    public VariantControlAnnotator(String infoPrefix, Map<String, String> controlList) {
 
         this.prefix = infoPrefix;
         this.controlList = controlList;

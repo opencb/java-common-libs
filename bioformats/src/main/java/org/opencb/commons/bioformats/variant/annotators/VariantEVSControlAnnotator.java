@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.annotators;
+package org.opencb.commons.bioformats.variant.annotators;
 
 import org.broad.tribble.readers.TabixReader;
 import org.opencb.commons.bioformats.feature.Genotype;
@@ -11,17 +11,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created with IntelliJ IDEA. User: aleman Date: 9/14/13 Time: 1:11 PM To
- * change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfEVSControlAnnotator implements VcfAnnotator {
+public class VariantEVSControlAnnotator implements VariantAnnotator {
 
     private String tabixFile;
     private List<String> samples;
     private TabixReader tabix;
     private String prefix;
 
-    public VcfEVSControlAnnotator(String infoPrefix, String control) {
+    public VariantEVSControlAnnotator(String infoPrefix, String control) {
 
         this.prefix = infoPrefix;
         this.tabixFile = control;

@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.filters;
+package org.opencb.commons.bioformats.variant.filters;
 
 
 import org.opencb.commons.bioformats.variant.Variant;
@@ -12,22 +12,18 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 10/9/13
- * Time: 5:10 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
-public class VcfBedFilter extends VcfFilter {
+public class VariantBedFilter extends VariantFilter {
     private Map<String, SortedSet<Region>> regions;
 
 
-    public VcfBedFilter(String filename) {
+    public VariantBedFilter(String filename) {
         regions = new LinkedHashMap<>(20);
         populateRegionList(filename);
     }
 
-    public VcfBedFilter(String filename, int priority) {
+    public VariantBedFilter(String filename, int priority) {
         super(priority);
         regions = new LinkedHashMap<>(20);
         populateRegionList(filename);

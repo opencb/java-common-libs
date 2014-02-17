@@ -102,6 +102,7 @@ public class QueryResult<T> {
         if (result.size() > 0) {
             this.resultType = result.get(0).getClass().getCanonicalName();
         }
+        this.numResults = result.size();
         this.result = result;
     }
 

@@ -1,11 +1,8 @@
 package org.opencb.commons.bioformats.pedigree;
 
+
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 8/28/13
- * Time: 11:38 AM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public enum Condition {
     MISSING_CONDITION,
