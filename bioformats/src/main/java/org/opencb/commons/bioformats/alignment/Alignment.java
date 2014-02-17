@@ -253,7 +253,7 @@ public class Alignment {
 
     public static class AlignmentDifference {
         
-        private final int pos;
+        private final int pos;  // in the reference sequence
         private final char op;
         private final String seq;   // seq might not store the complete sequence: seq.length() will be shorter
         private final int length;   // this length is the real length of the sequence
