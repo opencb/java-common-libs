@@ -4,6 +4,8 @@ import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
 import net.sf.samtools.SAMRecordIterator;
+import org.opencb.commons.bioformats.alignment.Alignment;
+import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
 
 import java.io.File;
@@ -20,7 +22,7 @@ import java.util.List;
  * Time: 5:12 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AlignmentSamDataReader implements AlignmentDataReader<SAMRecord, SAMFileHeader> {
+public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader> {
 
     private String filename;
     private SAMFileReader reader;
@@ -74,24 +76,33 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMRecord, SA
     }
 
     @Override
-    public SAMRecord read() {
+    public Alignment read() {
 
         SAMRecord record = null;
-
+        Alignment alignment = null;
         if(iterator.hasNext()){
             record = iterator.next();
+//            Alignment alignment = new Alignment(record, null, null);
+            alignment = new Alignment(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
+                record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
+                record.getMappingQuality(), record.getBaseQualityString(),
+                record.getMateReferenceName(), record.getMateAlignmentStart(),
+                record.getInferredInsertSize(), record.getFlags(),
+                AlignmentHelper.getDifferencesFromCigar(record,null), null); //TODO jcoll: FIXME! here should go a web request of the reference sequence. FIXED!
+//            Alignment alignment = new Alignment(record, null, record.getReadString());
+            alignment.setReadSequence(record.getReadBases());
         }
-        return record;
+        return alignment;
 
     }
 
     @Override
-    public List<SAMRecord> read(int batchSize) {
-        List<SAMRecord> listRecords = new ArrayList<>(batchSize);
-        SAMRecord record;
+    public List<Alignment> read(int batchSize) {
+        List<Alignment> listRecords = new ArrayList<>(batchSize);
+        Alignment alignment;
 
-        for (int i = 0; (i < batchSize) && (record = this.read()) != null; i++) {
-            listRecords.add(record);
+        for (int i = 0; (i < batchSize) && (alignment = this.read()) != null; i++) {
+            listRecords.add(alignment);
         }
 
         return listRecords;

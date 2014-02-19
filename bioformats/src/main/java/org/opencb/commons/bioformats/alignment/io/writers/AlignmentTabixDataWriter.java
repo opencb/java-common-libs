@@ -33,7 +33,7 @@ this.reader = (AlignmentSamDataReader) reader;
     }
 
     @Override
-    public boolean writeBatch(List<SAMRecord> batch) {
+    public boolean write(List<SAMRecord> batch) {
 
         for(SAMRecord record: batch){
             indexer.processAlignment(record);

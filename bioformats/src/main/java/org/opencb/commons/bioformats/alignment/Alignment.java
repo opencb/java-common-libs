@@ -25,7 +25,8 @@ public class Alignment {
     private String mateReferenceName;
     private int mateAlignmentStart;
     private int inferredInsertSize;
-    
+    private byte[] readSequence;
+
     /**
      * List of differences between the reference sequence and this alignment. 
      * Each one is defined by its position, type of difference and the changes it
@@ -88,6 +89,7 @@ public class Alignment {
                 record.getInferredInsertSize(), record.getFlags(), 
                 AlignmentHelper.getDifferencesFromCigar(record, referenceSequence), 
                 attributes);
+        readSequence = record.getReadBases();
     }
 
     
@@ -239,13 +241,23 @@ public class Alignment {
     public void setUnclippedStart(long unclippedStart) {
         this.unclippedStart = unclippedStart;
     }
-    
-    
+
+    public byte[] getReadSequence() {
+        return readSequence;
+    }
+
+    public void setReadSequence(byte[] readSequence) {
+        this.readSequence = readSequence;
+    }
+
+
     public static class AlignmentDifference {
         
-        private final int pos;
+        private final int pos;  // in the reference sequence
         private final char op;
-        private final String seq;
+        private final String seq;   // seq might not store the complete sequence: seq.length() will be shorter
+        private final int length;   // this length is the real length of the sequence
+        private final boolean isSeqStored;
 
         public static final char INSERTION = 'I';
         public static final char DELETION = 'D';
@@ -259,6 +271,24 @@ public class Alignment {
             this.pos = pos;
             this.op = op;
             this.seq = seq;
+            this.length = seq.length();
+            this.isSeqStored = true;
+        }
+
+        public AlignmentDifference(int pos, char op, String seq, int length) {
+            this.pos = pos;
+            this.op = op;
+            this.seq = seq;
+            this.length = length;
+            this.isSeqStored = true;
+        }
+
+        public AlignmentDifference(int pos, char op, int length) {
+            this.pos = pos;
+            this.op = op;
+            this.seq = null;
+            this.length = length;
+            this.isSeqStored = false;
         }
 
         public char getOp() {
@@ -273,20 +303,27 @@ public class Alignment {
             return seq;
         }
 
+        public int getLength() {
+            return this.length;
+        }
+
+        public boolean isSequenceStored() {
+            return isSeqStored;
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof AlignmentDifference)) { return false; }
             
             AlignmentDifference other = (AlignmentDifference) obj;
-            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq);
+            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
         }
 
         @Override
         public String toString() {
-            return String.format("%d: %c %s", pos, op, seq);
+            return String.format("%d: %d %c %s", pos, length, op, seq);
         }
-        
-        
+
     }
     
 }

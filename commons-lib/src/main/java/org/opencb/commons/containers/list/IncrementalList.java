@@ -9,10 +9,11 @@ import java.util.*;import java.util.LinkedList;import java.util.List;import java
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
+//TODO: Implement List
 public class IncrementalList  {
 
-    private List<Integer> list;
-    private ListIterator<Integer> iterator;
+    private List<Long> list;
+    private ListIterator<Long> iterator;
     private int totalCount;
 
     public IncrementalList() {
@@ -20,9 +21,9 @@ public class IncrementalList  {
         totalCount = 0;
     }
 
-    public void reverseInsert(int i){
+    public void reverseInsert(long i){
         int count = totalCount;
-        int element = 0;
+        long element = 0;
         iterator = list.listIterator(list.size());
         while(iterator.hasPrevious()){
             if(count < i){
@@ -44,10 +45,10 @@ public class IncrementalList  {
 
     }
 
-    public void insert(int i){
+    public void insert(long i){
         iterator = list.listIterator();
         int count = 0;
-        int element;
+        long element;
         while(iterator.hasNext()){
             element = iterator.next();
             count += element;
@@ -68,7 +69,8 @@ public class IncrementalList  {
     }
 
     public int decrement(){
-        int count, numRemoves = 0;
+        long count;
+        int numRemoves = 0;
         boolean decremented = false;
         iterator = list.listIterator();
 
@@ -87,7 +89,7 @@ public class IncrementalList  {
         return numRemoves;
     }
 
-    public int head(){
+    public long head(){
         if(!list.isEmpty())
             return list.listIterator().next();
         else

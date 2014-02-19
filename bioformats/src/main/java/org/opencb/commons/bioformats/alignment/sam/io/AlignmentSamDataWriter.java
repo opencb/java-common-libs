@@ -61,12 +61,13 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<SAMRecord, SA
     }
 
     @Override
-    public boolean writeBatch(List<SAMRecord> batch) {
+    public boolean write(List<SAMRecord> batch) {
         for(SAMRecord r : batch){
             write(r);
         }
         return true;
     }
+
 
     @Override
     public boolean writeHeader(SAMFileHeader head) {
