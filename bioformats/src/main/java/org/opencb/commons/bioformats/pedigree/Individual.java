@@ -5,11 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 8/27/13
- * Time: 6:36 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class Individual implements Comparable<Individual> {
     private String id;
