@@ -8,14 +8,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: aleman
- * Date: 9/1/13
- * Time: 12:59 PM
- * To change this template use File | Settings | File Templates.
- */
-public class PedSqliteDataWriter implements PedDataWriter {
+public class PedigreePedSqliteWriter implements PedigreeWriter {
 
     private String dbName;
     private Connection con;
@@ -23,7 +16,7 @@ public class PedSqliteDataWriter implements PedDataWriter {
     private PreparedStatement pstmt;
 
 
-    public PedSqliteDataWriter(String dbName) {
+    public PedigreePedSqliteWriter(String dbName) {
         this.dbName = dbName;
         stmt = null;
         pstmt = null;
@@ -111,11 +104,6 @@ public class PedSqliteDataWriter implements PedDataWriter {
         }
 
         return res;
-    }
-
-    @Override
-    public boolean write(Object elem) {
-        return false;
     }
 
     @Override

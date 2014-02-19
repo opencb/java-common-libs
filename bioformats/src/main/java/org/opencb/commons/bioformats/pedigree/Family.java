@@ -4,11 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 9/20/13
- * Time: 9:37 AM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class Family {
 

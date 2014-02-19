@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.variant.vcf4.effect;
+package org.opencb.commons.bioformats.variant.effect;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,7 +8,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.vcf4.VcfRecord;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -19,15 +18,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 10/25/13
- * Time: 1:20 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class EffectCalculator {
 
-    //TODO aaleman: Create a new method with effect & polyphen & Sift (ex. getEffectsWithPolyphenSift). The method "getEffects" will only provide effects (without polyphen/Sift).
     public static List<VariantEffect> getEffects(List<Variant> batch) {
         ObjectMapper mapper = new ObjectMapper();
         List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
@@ -37,12 +31,11 @@ public class EffectCalculator {
         }
 
         StringBuilder chunkVcfRecords = new StringBuilder();
-        StringBuilder effectRecords = new StringBuilder();
         Client client = Client.create();
         WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
         javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
-        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
+//        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (Variant record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
@@ -78,7 +71,6 @@ public class EffectCalculator {
         }
 
         StringBuilder chunkVcfRecords = new StringBuilder();
-        StringBuilder effectRecords = new StringBuilder();
         Client client = Client.create();
         WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
 
