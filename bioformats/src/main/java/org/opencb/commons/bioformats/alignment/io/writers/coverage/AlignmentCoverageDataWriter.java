@@ -12,7 +12,6 @@ import java.util.List;
  * Time: 6:08 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface AlignmentCoverageDataWriter extends DataWriter {
-    public boolean writeBatch(List<AlignmentCoverage> batch);
+public interface AlignmentCoverageDataWriter extends DataWriter<AlignmentCoverage> {
 
 }

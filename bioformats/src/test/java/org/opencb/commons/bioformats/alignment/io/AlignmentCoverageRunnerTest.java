@@ -42,7 +42,7 @@ public class AlignmentCoverageRunnerTest extends GenericTest {
 
             System.out.println("Batch: " + cont++);
 
-            writer.writeBatch(batch);
+//            writer.writeBatch(batch);
 
             batch.clear();
             batch = reader.read(1000);

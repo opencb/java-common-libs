@@ -88,21 +88,75 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
     int  regionCoverageSize;
     long regionCoverageMask;
 
-    List<Short> a;
-    List<Short> c;
-    List<Short> g;
-    List<Short> t;
-    List<Short> all;
+    private class NativeShortArrayList{
+        private short[] array = null;
+        private int size = 0;
+        private int capacity = 0;
+
+        private NativeShortArrayList(int capacity) {
+            this.capacity = capacity;
+            this.array = new short[capacity];
+        }
+
+        private NativeShortArrayList() {
+            this.capacity = 0;
+        }
+
+        public void resize(int newSize){
+            short[] newArray = new short[newSize];
+            for(int i = 0; i < size; i++){
+                newArray[i] = array[i];
+            }
+            array = newArray;
+            capacity = newSize;
+        }
+
+        public void clear(){
+            size = 0;
+        }
+        public void empty(){
+            size = 0;
+            array = null;
+        }
+        public short get(int position){
+            return array[position];
+        }
+
+        public void add(short elem){
+            array[size++] = elem;
+        }
+        private int size() {
+            return size;
+        }
+
+        private short[] getArray() {
+            return array;
+        }
+        private int getCapacity() {
+            return capacity;
+        }
+
+    }
+
+
+    NativeShortArrayList a;
+    NativeShortArrayList c;
+    NativeShortArrayList g;
+    NativeShortArrayList t;
+    NativeShortArrayList all;
+
+
     int savedSize;
 
 
     public AlignmentCoverageCalculatorTask() {
         setRegionCoverageSize(4000);
-        a = new ArrayList<>();
-        c = new ArrayList<>();
-        g = new ArrayList<>();
-        t = new ArrayList<>();
-        all = new ArrayList<>();
+        a = new   NativeShortArrayList();
+        c = new   NativeShortArrayList();
+        g = new   NativeShortArrayList();
+        t = new   NativeShortArrayList();
+        all = new NativeShortArrayList();
+
 
         meanCoverageCalculator = new ArrayList<>();
 
@@ -134,13 +188,24 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
                     aux.init(start);
                 }
             }
+            int totalSize = (int)(alignmentRegion.getEnd()-alignmentRegion.getStart());
+            if(all.getCapacity() < totalSize){
+                totalSize*=1.4;
+                all.resize(totalSize);
+                a.resize(totalSize);
+                c.resize(totalSize);
+                g.resize(totalSize);
+                t.resize(totalSize);
+            }
             savedSize = 0;
 
             /*
                 Calculate Coverage
              */
+            int i2 = 0;
             for(Alignment alignment : alignmentRegion.getAlignments()){
                 coverage(alignment);
+                i2++;
             }
             if(alignmentRegion.isChromosomeTail()){
                 saveCoverage(alignmentRegion.getEnd()+1);
@@ -149,19 +214,52 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             }
 
             /*
-                Create Region Coverage
+                Create Region Coverage  //Todo jcoll: Profile this part
              */
-            RegionCoverage regionCoverage = new RegionCoverage(savedSize);
-            for(int i = 0; i < savedSize; i++){
-                regionCoverage.getA()[i] = a.get(i);
-                regionCoverage.getC()[i] = c.get(i);
-                regionCoverage.getG()[i] = g.get(i);
-                regionCoverage.getT()[i] = t.get(i);
-                regionCoverage.getAll()[i] = all.get(i);
-            }
+            short lala;
+            lala = 134;
+            RegionCoverage regionCoverage = new RegionCoverage();
+            lala = 4;
+//            for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getA()[i] = a.get(i);
+//                regionCoverage.getC()[i] = c.get(i);
+//                regionCoverage.getG()[i] = g.get(i);
+//                regionCoverage.getT()[i] = t.get(i);
+//                regionCoverage.getAll()[i] = all.get(i);
+//            }
+            regionCoverage.setA(a.getArray());
+            regionCoverage.setC(c.getArray());
+            regionCoverage.setG(g.getArray());
+            regionCoverage.setT(t.getArray());
+            regionCoverage.setAll(all.getArray());
+
+
+
+//            lala*=2;
+//            for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getA()[i] = a.get(i);
+//            }for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getC()[i] = c.get(i);
+//            }for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getG()[i] = g.get(i);
+//            }for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getT()[i] = t.get(i);
+//            }for(int i = 0; i < savedSize; i++){
+//                regionCoverage.getAll()[i] = all.get(i);
+//            }
             regionCoverage.setStart(coverageStart);
-            regionCoverage.setEnd(end);
+            regionCoverage.setEnd(coverageStart+savedSize);
+            System.out.println(end-coverageStart);
+            System.out.println(start-coverageStart);
+            System.out.println(savedSize);
+         //   assert start-coverageStart == savedSize;
             alignmentRegion.setCoverage(regionCoverage);
+            savedSize = 0;
+            a.clear();
+            c.clear();
+            g.clear();
+            t.clear();
+            all.clear();
 
             /*
                 Create Mean Coverage List
@@ -172,9 +270,10 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             }
             alignmentRegion.setMeanCoverage(meanCoverageList);
 
-//            if(alignmentRegion.isChromosomeTail()){
-//                reset();
-//            }
+            if(alignmentRegion.isChromosomeTail()){
+                end = alignmentRegion.getEnd();
+                reset();
+            }
         }
         return true;
     }
@@ -186,23 +285,23 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         for(long i = start; i < endP; i++){
             pos = (int)(i & regionCoverageMask);
 
-            a.add(savedSize, coverage.getA()[pos]);
+            a.add(/*savedSize,*/ coverage.getA()[pos]);
             auxAll = coverage.getA()[pos];
             coverage.getA()[pos] = 0;
 
-            c.add(savedSize, coverage.getC()[pos]);
+            c.add(/*savedSize, */coverage.getC()[pos]);
             auxAll += coverage.getC()[pos];
             coverage.getC()[pos] = 0;
 
-            g.add(savedSize, coverage.getG()[pos]);
+            g.add(/*savedSize, */coverage.getG()[pos]);
             auxAll += coverage.getG()[pos];
             coverage.getG()[pos] = 0;
 
-            t.add(savedSize, coverage.getT()[pos]);
+            t.add(/*savedSize, */coverage.getT()[pos]);
             auxAll += coverage.getT()[pos];
             coverage.getT()[pos] = 0;
 
-            all.add(savedSize, auxAll);
+            all.add(/*savedSize, */auxAll);
 
             for(MeanCoverageCalculator aux : meanCoverageCalculator){
                 aux.mean(i,auxAll);
@@ -219,7 +318,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         if(alignment.getStart() > end){
             saveCoverage(end+1);  //Save to the end
             saveCoverage(alignment.getStart());  //Save zeros to the start
-            System.out.println(alignment.getStart());
+            //System.out.println(alignment.getStart());
         } else {
             saveCoverage(alignment.getStart());
         }
@@ -235,6 +334,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
         int offset = 0; // offset caused by insertions and deletions
         for(int i = 0; i < alignment.getLength(); i++) {
             //        for(int i = 0; i < sequence.length; i++) {    //TODO jcoll: Analyze this case
+            assert alignment.getLength() == sequence.length;
             if (alignmentDifference != null) {  // if there are remaining differences
                 if(alignmentDifference.getPos() == i) {
                     switch(alignmentDifference.getOp()){
@@ -260,22 +360,24 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
                     }
                 }
             }
-            switch (sequence[i]) {
-                case 'A':
-                    coverage.getA()[(int) ((i + offset + start) & regionCoverageMask)]++;
-                    break;
-                case 'C':
-                    coverage.getC()[(int) ((i + offset + start) & regionCoverageMask)]++;
-                    break;
-                case 'G':
-                    coverage.getG()[(int) ((i + offset + start) & regionCoverageMask)]++;
-                    break;
-                case 'T':
-                    coverage.getT()[(int) ((i + offset + start) & regionCoverageMask)]++;
-                    break;
-                default:
-                    //TODO jcoll: Analyze this case
-                    break;
+            if(i < alignment.getLength()){ //TODO jj: Write a correct commentary
+                switch (sequence[i]) {
+                    case 'A':
+                        coverage.getA()[(int) ((i + offset + start) & regionCoverageMask)]++;
+                        break;
+                    case 'C':
+                        coverage.getC()[(int) ((i + offset + start) & regionCoverageMask)]++;
+                        break;
+                    case 'G':
+                        coverage.getG()[(int) ((i + offset + start) & regionCoverageMask)]++;
+                        break;
+                    case 'T':
+                        coverage.getT()[(int) ((i + offset + start) & regionCoverageMask)]++;
+                        break;
+                    default:
+                        //TODO jcoll: Analyze this case
+                        break;
+                }
             }
         }
 

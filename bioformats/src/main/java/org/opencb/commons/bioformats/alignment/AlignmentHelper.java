@@ -70,9 +70,9 @@ public class AlignmentHelper {
                     if (cigarLen < 30) {
                         subread = record.getReadString().substring(index, index + cigarLen);
                     } else { // Get only first 30 characters in the sequence to copy
-                        subread = subread.substring(index, index + 30).concat("...");
+                        // subread = subread.substring(index, index + 30).concat("...");
                         // maybe above line was meant to be this?
-                        // subread = record.getReadString().substring(index, index + 30).concat("...");
+                         subread = record.getReadString().substring(index, index + 30).concat("...");
                     }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread, cigarLen);
                     index = index + cigarLen;

@@ -70,24 +70,20 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         chromosome = prevAlignment.getChromosome();
 
 
+        boolean isTail = false;
         int i;
         for(i = 1; i < chunkSize; i++){        //Start in 1 because the prevAlignment is inserted
             prevAlignment = alignmentDataReader.read();
             if(prevAlignment == null || !chromosome.equals(prevAlignment.getChromosome())){
+                isTail = true;
                 break;  //Break when read alignments from other chromosome or if is the last element
             }
             alignmentList.add(prevAlignment);
         }
 
         AlignmentRegion alignmentRegion = new AlignmentRegion(alignmentList);
+        alignmentRegion.setChromosomeTail(isTail);//If we get the last alignment in chromosome or in source
 
-        if(i == chunkSize){    //If we got all the alignments
-            prevAlignment = alignmentDataReader.read();
-            //If the next alignment is in the same chromosome, it isn't the last Chromosome Region
-            alignmentRegion.setChromosomeTail(!chromosome.equals(prevAlignment.getChromosome()));
-        } else {    //If we get the last alignment in chromosome or in source
-            alignmentRegion.setChromosomeTail(true);
-        }
 
 //        for(Alignment al : alignmentList){        //Depuration
 //            for(byte b : al.getReadSequence()){
@@ -95,7 +91,14 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 //            }
 //            System.out.println( " <<< " + al.getStart());
 //        }
-//        System.out.println("Leido un Region de tamaño"+i);
+
+
+        System.out.println("Leidos " + alignmentRegion.getAlignments().size() +
+                " Start: " + alignmentRegion.getAlignments().get(0).getStart() +
+                " End " + alignmentRegion.getAlignments().get(alignmentRegion.getAlignments().size()-1).getStart()  +
+                " Size " +  (alignmentRegion.getAlignments().get(alignmentRegion.getAlignments().size()-1).getStart()-alignmentRegion.getAlignments().get(0).getStart() )
+
+        );
         return alignmentRegion;
     }
 

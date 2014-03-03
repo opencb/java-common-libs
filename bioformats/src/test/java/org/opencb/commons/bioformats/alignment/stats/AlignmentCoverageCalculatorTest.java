@@ -52,9 +52,10 @@ public class AlignmentCoverageCalculatorTest extends GenericTest {
                 return false;
             }
 
+            int size = (int)(elem.getCoverage().getEnd() - elem.getCoverage().getStart());
             short[] all = elem.getCoverage().getAll();
-            System.out.println("ELEMENTOS :" + all.length);
-            for(int i = 0; i < all.length; i++){
+            System.out.println("ELEMENTOS :" + size + " (" + elem.getCoverage().getStart() + " - " + elem.getCoverage().getEnd() + ")");
+           /* for(int i = 0; i < size; i++){
                 System.out.println(
                         "("                                 +
                         (i+elem.getCoverage().getStart())   +
@@ -65,7 +66,7 @@ public class AlignmentCoverageCalculatorTest extends GenericTest {
                         ", " + elem.getCoverage().getT()[i] +
                         ")"
                 );
-            }
+            }*/
 
             float coverage;
             for(MeanCoverage meanCoverage : elem.getMeanCoverage()){
@@ -90,14 +91,17 @@ public class AlignmentCoverageCalculatorTest extends GenericTest {
     @Test
     public void testAlignmentCoverageCalculatorTask(){
 
-        AlignmentBamDataReader alignmentBamDataReader = new AlignmentBamDataReader("/home/jcoll/Documents/alignments_small2.sam");
-        AlignmentRegionDataReader alignmentRegionDataReader = new AlignmentRegionDataReader(alignmentBamDataReader);
+//        AlignmentBamDataReader alignmentBamDataReader = new AlignmentBamDataReader("/home/jcoll/Documents/alignments_small2.sam");
+//        AlignmentBamDataReader alignmentBamDataReader = new AlignmentBamDataReader("/home/jcoll/Documents/alignments_sorted.bam");
+        AlignmentBamDataReader alignmentBamDataReader = new AlignmentBamDataReader("/home/jcoll/Documents/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam");
+        AlignmentRegionDataReader alignmentRegionDataReader = new AlignmentRegionDataReader(alignmentBamDataReader, 5000);
 
         List<Task<AlignmentRegion>> tasks = new LinkedList<>();
         AlignmentCoverageCalculatorTask alignmentCoverageCalculatorTask = new AlignmentCoverageCalculatorTask();
+        alignmentCoverageCalculatorTask.addMeanCoverageCalculator(10000, "10K");
         alignmentCoverageCalculatorTask.addMeanCoverageCalculator(1000, "1K");
-        alignmentCoverageCalculatorTask.addMeanCoverageCalculator(100, ".1K");
-        alignmentCoverageCalculatorTask.addMeanCoverageCalculator(10, "10");
+       // alignmentCoverageCalculatorTask.addMeanCoverageCalculator(100, ".1K");
+       // alignmentCoverageCalculatorTask.addMeanCoverageCalculator(10, "10");
 
         tasks.add(alignmentCoverageCalculatorTask);
 
