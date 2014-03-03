@@ -216,10 +216,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             /*
                 Create Region Coverage  //Todo jcoll: Profile this part
              */
-            short lala;
-            lala = 134;
             RegionCoverage regionCoverage = new RegionCoverage();
-            lala = 4;
 //            for(int i = 0; i < savedSize; i++){
 //                regionCoverage.getA()[i] = a.get(i);
 //                regionCoverage.getC()[i] = c.get(i);
@@ -235,7 +232,6 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
 
 
 
-//            lala*=2;
 //            for(int i = 0; i < savedSize; i++){
 //                regionCoverage.getA()[i] = a.get(i);
 //            }for(int i = 0; i < savedSize; i++){
@@ -249,10 +245,12 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
 //            }
             regionCoverage.setStart(coverageStart);
             regionCoverage.setEnd(coverageStart+savedSize);
-            System.out.println(end-coverageStart);
-            System.out.println(start-coverageStart);
-            System.out.println(savedSize);
-         //   assert start-coverageStart == savedSize;
+            
+//            System.out.println(end-coverageStart);
+//            System.out.println(start-coverageStart);
+//            System.out.println(savedSize);
+
+         //   assert start-coverageStart == savedSize;  //TODO jcoll: Assert this
             alignmentRegion.setCoverage(regionCoverage);
             savedSize = 0;
             a.clear();

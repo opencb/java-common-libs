@@ -14,11 +14,13 @@ public class AlignmentRegion {
     private String chromosome;
     private long start;     //Start of the first Alignment
     private long end;       //End of the last Alignment
-    private boolean chromosomeTail;  //Indicates if the last alignment is the last in the chromosome
+    @Deprecated private boolean chromosomeTail;  //Indicates if the last alignment is the last in the chromosome
+    private boolean overlapEnd;     //Indicates if the last alignment is overlapped with the next alignment
 
     private List<Alignment> alignments;     //Sorted Alignments
     private RegionCoverage coverage;
     private List<MeanCoverage> meanCoverage;
+    //TODO jcoll: private Byte[] referenceSequence;
 
     public AlignmentRegion() {
     }
@@ -88,10 +90,21 @@ public class AlignmentRegion {
         this.start = start;
     }
 
+
+    public boolean isOverlapEnd() {
+        return overlapEnd;
+    }
+
+    public void setOverlapEnd(boolean overlapEnd) {
+        this.overlapEnd = overlapEnd;
+    }
+
+    @Deprecated
     public boolean isChromosomeTail() {
         return chromosomeTail;
     }
 
+    @Deprecated
     public void setChromosomeTail(boolean chromosomeTail) {
         this.chromosomeTail = chromosomeTail;
     }
@@ -104,4 +117,5 @@ public class AlignmentRegion {
 
         this.meanCoverage = meanCoverage;
     }
+
 }
