@@ -71,7 +71,6 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         String chromosome;
         long start;
         long end;   //To have the correct "end" value,
-        boolean isEnd = false;
         boolean overlappedEnd = true;
 
         //First initialisation
@@ -102,7 +101,6 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
             //First stop condition: End of the chromosome or file
             if(prevAlignment == null || !chromosome.equals(prevAlignment.getChromosome())){
-                isEnd = true;
                 overlappedEnd = false;
                 break;  //Break when read alignments from other chromosome or if is the last element
             }
@@ -119,21 +117,19 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
             }
         }
         if(prevAlignment != null){
-            System.out.println("(prevAlignment.getEnd() - start) = " +(prevAlignment.getEnd() - start) + " overlappedEnd = " + overlappedEnd + " isEnd = " + isEnd);
+            System.out.println("(prevAlignment.getEnd() - start) = " +(prevAlignment.getEnd() - start) + " overlappedEnd = " + overlappedEnd);
             //System.out.println("(alignmentList.get(alignmentList(size)-1).getEnd()) = " + (alignmentList.get(alignmentList.size()-1).getEnd()) + " start " + start + " i " + i);
             System.out.println("(alignmentList.get(alignmentList(size)-1).getEnd() - start) = " + (alignmentList.get(alignmentList.size()-1).getEnd() - start));
         }
 
 
         AlignmentRegion alignmentRegion = new AlignmentRegion(alignmentList);
-        alignmentRegion.setChromosomeTail(isEnd);//If we get the last alignment in chromosome or in source
-        alignmentRegion.setChromosomeTail(!overlappedEnd);//If we get the last alignment in chromosome or in source
         alignmentRegion.setOverlapEnd(overlappedEnd);
 
         alignmentRegion.setStart(start);
         alignmentRegion.setEnd(end);
 
-//        for(Alignment al : alignmentList){        //Depuration
+//        for(Alignment al : alignmentList){        //Debug
 //            for(byte b : al.getReadSequence()){
 //                System.out.print((char) b);
 //            }
@@ -141,7 +137,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 //        }
 
 
-//        System.out.println("Leidos " + alignmentRegion.getAlignments().size() +
+//        System.out.println("Read " + alignmentRegion.getAlignments().size() +
 //                " Start: " + alignmentRegion.getAlignments().get(0).getStart() +
 //                " End " + alignmentRegion.getAlignments().get(alignmentRegion.getAlignments().size()-1).getStart()  +
 //                " Size " +  (alignmentRegion.getAlignments().get(alignmentRegion.getAlignments().size()-1).getStart()-alignmentRegion.getAlignments().get(0).getStart() )
@@ -175,5 +171,13 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
     public void setMaxSequenceSize(int maxSequenceSize) {
         this.maxSequenceSize = maxSequenceSize;
+    }
+
+    public int getChunkSize() {
+        return chunkSize;
+    }
+
+    public void setChunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
     }
 }

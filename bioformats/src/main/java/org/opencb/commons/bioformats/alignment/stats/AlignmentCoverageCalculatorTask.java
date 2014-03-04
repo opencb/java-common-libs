@@ -207,7 +207,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
                 coverage(alignment);
                 i2++;
             }
-            if(alignmentRegion.isChromosomeTail()){
+            if(!alignmentRegion.isOverlapEnd()){
                 saveCoverage(alignmentRegion.getEnd()+1);
                 //end = alignmentRegion.getEnd();
                 //reset();  // jmml
@@ -245,7 +245,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
 //            }
             regionCoverage.setStart(coverageStart);
             regionCoverage.setEnd(coverageStart+savedSize);
-            
+
 //            System.out.println(end-coverageStart);
 //            System.out.println(start-coverageStart);
 //            System.out.println(savedSize);
@@ -268,7 +268,7 @@ public class AlignmentCoverageCalculatorTask extends Task<AlignmentRegion> {
             }
             alignmentRegion.setMeanCoverage(meanCoverageList);
 
-            if(alignmentRegion.isChromosomeTail()){
+            if(!alignmentRegion.isOverlapEnd()){
                 end = alignmentRegion.getEnd();
                 reset();
             }
