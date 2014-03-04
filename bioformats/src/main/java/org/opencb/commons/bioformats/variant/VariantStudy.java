@@ -1,6 +1,7 @@
 package org.opencb.commons.bioformats.variant;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class VariantStudy {
     private Map<String, String> metadata;
     private VariantGlobalStats stats;
 
+    // TEST
+    private Map<String, Integer> consequenceTypes;
+
     public VariantStudy(String name, String alias, String description, List<String> authors, List<String> sources) {
         this.name = name;
         this.alias = alias;
@@ -31,6 +35,9 @@ public class VariantStudy {
         this.sources = sources;
         this.metadata = new HashMap<>();
         // TODO initialize pedigree?
+
+        // TEST
+        this.consequenceTypes = new LinkedHashMap<>(20);
     }
 
     public String getAlias() {
@@ -107,6 +114,14 @@ public class VariantStudy {
 
     public void addMetadata(String key, String value) {
         this.metadata.put(key, value);
+    }
+
+    public Map<String, Integer> getConsequenceTypes() {
+        return consequenceTypes;
+    }
+
+    public void setConsequenceTypes(Map<String, Integer> consequenceTypes) {
+        this.consequenceTypes = consequenceTypes;
     }
 
     @Override
