@@ -9,18 +9,9 @@ import java.util.List;
  * Time: 12:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DataWriter<T> {
-
-    public boolean open();
-
-    public boolean close();
-
-    public boolean pre();
-
-    public boolean post();
+public interface DataWriter<T> extends DataManager {
 
     public boolean write(T elem);
 
     public boolean write(List<T> batch);
-
 }
