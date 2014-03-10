@@ -26,7 +26,7 @@ public class VariantInfo {
     @JsonProperty
     private String alt;
     @JsonProperty
-    private String gene_name;
+    private String geneName;
     @JsonProperty
     private double stats_maf;
     @JsonProperty
@@ -52,7 +52,7 @@ public class VariantInfo {
     @JsonProperty
     private double stats_controls_percent_recessive;
     @JsonProperty
-    private String stats_id_snp;
+    private String snpid;
     @JsonProperty
     private Set<String> genes;
     @JsonProperty
@@ -73,6 +73,7 @@ public class VariantInfo {
     private int sift_effect;
 
     public VariantInfo() {
+        this("", -1, "", "");
     }
 
     public VariantInfo(String chromosome, int position, String ref, String alt) {
@@ -111,7 +112,9 @@ public class VariantInfo {
         this.stats_controls_percent_dominant = stat.getControlsPercentDominant();
         this.stats_cases_percent_recessive = stat.getCasesPercentRecessive();
         this.stats_controls_percent_recessive = stat.getControlsPercentRecessive();
-        this.stats_id_snp = stat.getId();
+        if (this.snpid == null && stat.getId() != null) {
+            this.snpid = stat.getId();
+        }
     }
 
     public Set<VariantEffect> getEffect() {
@@ -283,9 +286,7 @@ public class VariantInfo {
             controls.put(controlName, vc);
 
         } else {
-
             vc = controls.get(controlName);
-
         }
 
         switch (controlType) {
@@ -327,7 +328,7 @@ public class VariantInfo {
                 ", position=" + position +
                 ", ref='" + ref + '\'' +
                 ", alt='" + alt + '\'' +
-                ", gene_name='" + gene_name + '\'' +
+                ", geneName='" + geneName + '\'' +
                 ", stats_maf=" + stats_maf +
                 ", stats_mgf=" + stats_mgf +
                 ", stats_allele_maf='" + stats_allele_maf + '\'' +
@@ -340,7 +341,7 @@ public class VariantInfo {
                 ", stats_controls_percent_dominant=" + stats_controls_percent_dominant +
                 ", stats_cases_percent_recessive=" + stats_cases_percent_recessive +
                 ", stats_controls_percent_recessive=" + stats_controls_percent_recessive +
-                ", stats_id_snp='" + stats_id_snp + '\'' +
+                ", snpid='" + snpid + '\'' +
                 ", genes=" + genes +
                 ", controls=" + controls +
                 ", effect=" + effect +
@@ -403,5 +404,21 @@ public class VariantInfo {
 
     public void setSift_effect(int sift_effect) {
         this.sift_effect = sift_effect;
+    }
+
+    public String getSnpid() {
+        return snpid;
+    }
+
+    public void setSnpid(String snpid) {
+        this.snpid = snpid;
+    }
+
+    public String getGeneName() {
+        return geneName;
+    }
+
+    public void setGeneName(String geneName) {
+        this.geneName = geneName;
     }
 }

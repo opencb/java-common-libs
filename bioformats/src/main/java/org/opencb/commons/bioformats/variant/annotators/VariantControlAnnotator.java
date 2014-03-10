@@ -135,8 +135,6 @@ public class VariantControlAnnotator implements VariantAnnotator {
         for (Variant record : batch) {
 
             if (currentTabix != null) {
-
-
                 try {
 
                     TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());

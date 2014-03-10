@@ -102,15 +102,6 @@ public class VariantVcfReader implements VariantReader {
                 }
 
                 return variant;
-//                VcfRecord vcfRecord = null;
-//                if (fields.length == 8) {
-//                    vcfRecord = new VcfRecord(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]);
-//                } else {
-//                    if (fields.length > 8) {
-//                        vcfRecord = new VcfRecord(fields, vcf4.getSampleNames());
-//                    }
-//                }
-//                return vcfRecord;
             }
         } catch (
                 IOException e
