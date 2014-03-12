@@ -12,7 +12,7 @@ import org.opencb.commons.bioformats.variant.utils.stats.VariantGlobalStats;
  * @author Cristina Yenyxe Gonzalez Garcia
  * @todo Add members for date and meta (headers and so on)
  */
-public class VariantStudy {
+public class VariantSource {
 
     private String name;
     private String alias;
@@ -27,7 +27,7 @@ public class VariantStudy {
     // TEST
     private Map<String, Integer> consequenceTypes;
 
-    public VariantStudy(String name, String alias, String description, List<String> authors, List<String> sources) {
+    public VariantSource(String name, String alias, String description, List<String> authors, List<String> sources) {
         this.name = name;
         this.alias = alias;
         this.description = description;
