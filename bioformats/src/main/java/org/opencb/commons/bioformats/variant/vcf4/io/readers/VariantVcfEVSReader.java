@@ -49,7 +49,6 @@ public class VariantVcfEVSReader extends VariantVcfReader implements VariantRead
                         int gtCount = Integer.parseInt(splitsGTC[i]);
                         Genotype g = null;
                         if (gt.length() == 1) {
-                            System.exit(1);
                             g = new Genotype(gt + "/" + gt, variant.getReference(), variant.getAlternate());
                         } else if (gt.length() == 2) {
                             g = new Genotype(gt.charAt(0) + "/" + gt.charAt(1), variant.getReference(), variant.getAlternate());
@@ -73,6 +72,7 @@ public class VariantVcfEVSReader extends VariantVcfReader implements VariantRead
 
             }
             variant.setStats(stats);
+
         }
 
         return variant;
