@@ -30,7 +30,7 @@ public class Variant {
     private Map<String, String> attributes;
 
     public Variant(String chromosome, int position, String reference, String alternate) {
-        this.chromosome = chromosome;
+        this.setChromosome(chromosome);
         this.position = position;
         this.reference = reference;
         this.alternate = alternate;
@@ -44,7 +44,13 @@ public class Variant {
     }
 
     public void setChromosome(String chromosome) {
+
         this.chromosome = chromosome;
+        this.chromosome = this.chromosome.replace("chrm", "");
+        this.chromosome = this.chromosome.replace("chr", "");
+        this.chromosome = this.chromosome.replace("chr", "");
+
+
     }
 
     public int getPosition() {
