@@ -6,11 +6,7 @@ import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 11/20/13
- * Time: 1:19 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class Variant {
     private String chromosome;
@@ -31,9 +27,10 @@ public class Variant {
 
     public Variant(String chromosome, int position, String reference, String alternate) {
         this.setChromosome(chromosome);
-        this.position = position;
-        this.reference = reference;
-        this.alternate = alternate;
+        this.setPosition(position);
+        this.setReference(reference);
+        this.setAlternate(alternate);
+
         this.samplesData = new LinkedHashMap<>();
         this.effect = new LinkedList<>();
         this.attributes = new LinkedHashMap<>();
@@ -44,13 +41,10 @@ public class Variant {
     }
 
     public void setChromosome(String chromosome) {
-
         this.chromosome = chromosome;
         this.chromosome = this.chromosome.replace("chrm", "");
         this.chromosome = this.chromosome.replace("chr", "");
         this.chromosome = this.chromosome.replace("chr", "");
-
-
     }
 
     public int getPosition() {
@@ -58,6 +52,11 @@ public class Variant {
     }
 
     public void setPosition(int position) {
+
+        if (position < 0) {
+            throw new IllegalArgumentException("Position must be positive");
+        }
+
         this.position = position;
     }
 
@@ -90,7 +89,7 @@ public class Variant {
     }
 
     public void setFormat(String format) {
-        this.format = format;
+       this.format = format;
     }
 
     public Map<String, Map<String, String>> getSamplesData() {
