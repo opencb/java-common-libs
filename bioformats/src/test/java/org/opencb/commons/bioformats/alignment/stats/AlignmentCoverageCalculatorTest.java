@@ -87,7 +87,7 @@ public class AlignmentCoverageCalculatorTest extends GenericTest {
         }
     }
 
-
+    @Ignore
     @Test
     public void testAlignmentCoverageCalculatorTask(){
 
