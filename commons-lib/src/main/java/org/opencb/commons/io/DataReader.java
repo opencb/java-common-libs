@@ -9,7 +9,15 @@ import java.util.List;
  * Time: 12:20 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DataReader<T> extends DataManager {
+public interface DataReader<T> {
+
+    public boolean open();
+
+    public boolean close();
+
+    public boolean pre();
+
+    public boolean post();
 
     public T read();
 
