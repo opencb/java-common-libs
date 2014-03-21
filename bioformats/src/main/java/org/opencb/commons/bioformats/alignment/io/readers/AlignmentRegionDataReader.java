@@ -2,10 +2,14 @@ package org.opencb.commons.bioformats.alignment.io.readers;
 
 import net.sf.samtools.SAMFileHeader;
 import org.opencb.commons.bioformats.alignment.Alignment;
+import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
+import org.opencb.commons.bioformats.feature.Region;
+import org.opencb.commons.containers.map.QueryOptions;
 import org.opencb.commons.io.DataReader;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,6 +26,8 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     private Alignment prevAlignment;
     private int chunkSize;  //Max number of alignments in one AlignmentRegion.
     private int maxSequenceSize; //Maximum size for the total sequence. Count from the start of the first alignment to the end of the last alignment.
+    //TODO jj NEXT STEP
+    private boolean referenceFromCellBase = false;
 
     private static final int defaultChunkSize = 2000;
     private static final int defaultMaxSequenceSize = 100000;
@@ -72,6 +78,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         long start;
         long end;   //To have the correct "end" value,
         boolean overlappedEnd = true;
+        String referenceSequence = null;
 
         //First initialisation
         if(prevAlignment == null){
@@ -129,6 +136,19 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         alignmentRegion.setStart(start);
         alignmentRegion.setEnd(end);
 
+
+
+        if(referenceFromCellBase){
+            try {
+                referenceSequence = AlignmentHelper.getSequence(new Region(chromosome, start, start+maxSequenceSize), new QueryOptions());
+                for(Alignment alignment : alignmentRegion.getAlignments()){
+                    alignment.completeDifferences(referenceSequence, (int)(alignment.getStart() - start));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 //        for(Alignment al : alignmentList){        //Debug
 //            for(byte b : al.getReadSequence()){
 //                System.out.print((char) b);
@@ -164,11 +184,6 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     }
 
 
-
-    public int getMaxSequenceSize() {
-        return maxSequenceSize;
-    }
-
     public void setMaxSequenceSize(int maxSequenceSize) {
         this.maxSequenceSize = maxSequenceSize;
     }
@@ -179,5 +194,13 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
+    }
+
+    public boolean isReferenceFromCellBase() {
+        return referenceFromCellBase;
+    }
+
+    public void setReferenceFromCellBase(boolean referenceFromCellBase) {
+        this.referenceFromCellBase = referenceFromCellBase;
     }
 }

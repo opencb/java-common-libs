@@ -18,11 +18,11 @@ public class QueryResult<T> {
 
 
     public QueryResult() {
-        this("", -1, -1, 0, "", "", "", new ArrayList<T>());
+        this("", -1, -1, -1, "", "", "", new ArrayList<T>());
     }
 
     public QueryResult(String id) {
-        this(id, -1, -1, 0, "", "", "", new ArrayList<T>());
+        this(id, -1, -1, -1, "", "", "", new ArrayList<T>());
     }
 
     public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg,
@@ -109,7 +109,7 @@ public class QueryResult<T> {
     public void addResult(T result) {
         this.resultType = result.getClass().getCanonicalName();
         this.result.add(result);
-        this.numResults++;
+        this.numResults = this.result.size();
     }
 
     public void addAllResults(List<T> result) {
@@ -117,7 +117,7 @@ public class QueryResult<T> {
             this.resultType = result.get(0).getClass().getCanonicalName();
         }
         this.result.addAll(result);
-        this.numResults += result.size();
+        this.numResults = this.result.size();
     }
 
     public long getTime() {
