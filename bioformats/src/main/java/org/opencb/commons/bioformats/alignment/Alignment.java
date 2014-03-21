@@ -1,10 +1,11 @@
 package org.opencb.commons.bioformats.alignment;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.istack.internal.Nullable;
+
 import net.sf.samtools.SAMRecord;
 
 /**
@@ -28,7 +29,7 @@ public class Alignment {
     private String mateReferenceName;
     private int mateAlignmentStart;
     private int inferredInsertSize;
-    @Nullable private byte[] readSequence;
+    private byte[] readSequence;    // can be null
 
     /**
      * List of differences between the reference sequence and this alignment. 
@@ -289,6 +290,39 @@ public class Alignment {
         this.readSequence = readSequence;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+
+        Alignment alignment = (Alignment) o;
+
+        if (end != alignment.end) return false;
+        if (flags != alignment.flags) return false;
+        if (inferredInsertSize != alignment.inferredInsertSize) return false;
+        if (length != alignment.length) return false;
+        if (mappingQuality != alignment.mappingQuality) return false;
+        if (mateAlignmentStart != alignment.mateAlignmentStart) return false;
+        if (start != alignment.start) return false;
+        if (unclippedEnd != alignment.unclippedEnd) return false;
+        if (unclippedStart != alignment.unclippedStart) return false;
+        if (!attributes.equals(alignment.attributes)) return false;
+        if (!chromosome.equals(alignment.chromosome)) return false;
+        if (!differences.equals(alignment.differences)) return false;
+        if (!mateReferenceName.equals(alignment.mateReferenceName)) return false;
+        if (!name.equals(alignment.name)) return false;
+        if (!qualities.equals(alignment.qualities)) return false;
+        if (!Arrays.equals(readSequence, alignment.readSequence)) return false;
+//
+//        if (readSequence == null ^ alignment.readSequence == null) { // only one is null
+//            return false;
+//        } else if (readSequence != null && !Arrays.equals(readSequence, alignment.readSequence)) {  // both are not null and different
+//            return false;
+//        }
+
+        return true;
+    }
 
     public static class AlignmentDifference {
         
@@ -304,13 +338,6 @@ public class Alignment {
         public static final char SOFT_CLIPPING = 'S';
         public static final char HARD_CLIPPING = 'H';
         public static final char PADDING = 'P';
-        
-        public AlignmentDifference(int pos, char op, String seq) {
-            this.pos = pos;
-            this.op = op;
-            this.seq = seq;
-            this.length = seq.length();
-        }
 
         public AlignmentDifference(int pos, char op, String seq, int length) {
             this.pos = pos;
@@ -319,11 +346,12 @@ public class Alignment {
             this.length = length;
         }
 
+        public AlignmentDifference(int pos, char op, String seq) {
+            this(pos, op, seq, seq.length());
+        }
+
         public AlignmentDifference(int pos, char op, int length) {
-            this.pos = pos;
-            this.op = op;
-            this.seq = null;
-            this.length = length;
+            this(pos, op, null, length);
         }
 
         public char getOp() {
@@ -357,7 +385,11 @@ public class Alignment {
             if (!(obj instanceof AlignmentDifference)) { return false; }
             
             AlignmentDifference other = (AlignmentDifference) obj;
+            if (isSequenceStored()) {
             return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
+            } else {
+                return pos == other.pos && op == other.op && length == other.length;
+            }
         }
 
         @Override

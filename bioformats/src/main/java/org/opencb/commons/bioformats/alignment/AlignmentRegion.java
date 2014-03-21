@@ -109,12 +109,4 @@ public class AlignmentRegion {
     }
 
 
-    public Byte[] getReferenceSequence() {
-        return referenceSequence;
-    }
-
-    public void setReferenceSequence(Byte[] referenceSequence) {
-        this.referenceSequence = referenceSequence;
-    }
-
 }

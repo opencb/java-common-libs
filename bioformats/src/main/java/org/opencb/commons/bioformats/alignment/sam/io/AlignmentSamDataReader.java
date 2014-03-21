@@ -82,13 +82,15 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader
         Alignment alignment = null;
         if(iterator.hasNext()){
             record = iterator.next();
-//            Alignment alignment = new Alignment(record, null, null);
+            alignment = new Alignment(record, null);
+            /*
             alignment = new Alignment(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
                 record.getMappingQuality(), record.getBaseQualityString(),
                 record.getMateReferenceName(), record.getMateAlignmentStart(),
                 record.getInferredInsertSize(), record.getFlags(),
                 AlignmentHelper.getDifferencesFromCigar(record,null), null);
+                */
 //            Alignment alignment = new Alignment(record, null, record.getReadString());
             alignment.setReadSequence(record.getReadBases());
         }
