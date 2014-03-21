@@ -1,10 +1,14 @@
 package org.opencb.commons.bioformats.alignment;
 
 import static org.junit.Assert.*;
+
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import net.sf.samtools.*;
 import org.junit.*;
+import org.opencb.commons.bioformats.feature.Region;
+import org.opencb.commons.containers.map.QueryOptions;
 
 /**
  *
@@ -272,8 +276,29 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        
-        
-        
     }
+    @Test
+    public void getSequence(){
+
+        try {
+            String sequence = AlignmentHelper.getSequence(new Region("1", 1000000, 1001000), new QueryOptions());
+
+            assertEquals(sequence, "TGGGCACAGCCTCACCCAGGAAAGCAGCTGGGGGTCCACTGGGCTCAGGGAAGACCCCCTGCCAG" +
+                    "GGAGACCCCAGGCGCCTGAATGGCCACGGGAAGGAAAACCTACCAGCCCCTCCGTGTGTCCTCCTGGCACATGGCGACCT" +
+                    "CCATGACCCGACGAGGGTGCGGGGCCCGGGGCAGGGTGGCCAGGTGCGGGGGTGCGGGGCCCGGGGCAGCTGCCCTCGGT" +
+                    "GGGAGGGGTGTGGTGTGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGGTGTGGTC" +
+                    "TGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTG" +
+                    "TGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGGTGTGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGCGGGGCCC" +
+                    "TGGGGGGGTGTGGTGTGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTC" +
+                    "TGCGGGGCCCTGGGGGGGGTGGGGTCTGCGGGGCCCTGGGGGTGTTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGG" +
+                    "TGGGGTCTGCGGTGCCCTCGGGGGGTGTGGTGGGGTCTGCGGGGCCCTGGGGGGGTGTGGTGGGGTCTGGGGGGCCCTAA" +
+                    "GCTTAGATGCAGGTCTCTCCCTGGCAGCCCCTCAAGGCCACGAGGATCAGTGCTCGGAGCCTGGAGGGCTGTGTGCAGGA" +
+                    "GTAGCAGGGCCACTGATGCCAGCGGGAAGGCCAGGCAGGGCTTCTGGGTGGAGTTCAAGGTGCATCCTGACCGCTGTCAC" +
+                    "CTTCAGACTCTGTCCCCTGGGGCTGGGGCAAGTGCCCGATGGGAGCGCAGGGTCTGGGACTGTAGGGTCCAGCCCTACGG" +
+                    "AGCTTAGCAGGTGTTCTCCCCGTGTGTGGAGATGAGAGATTGTAATAAATAAAGAC");
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
 }

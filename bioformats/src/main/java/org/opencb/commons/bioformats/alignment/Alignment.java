@@ -137,6 +137,29 @@ public class Alignment {
         }
         return false;
     }
+
+    public boolean completeDifferences(String referenceSequence){
+        return completeDifferences(referenceSequence, 0);
+    }
+    public boolean completeDifferences(String referenceSequence, int offset){
+        for(AlignmentDifference alignmentDifference : differences){
+            if(alignmentDifference.getSeq() == null || !alignmentDifference.isAllSequenceStored()){
+                try{
+                    alignmentDifference.setSeq(
+                            referenceSequence.substring(
+                                    alignmentDifference.getPos() + offset,
+                                    alignmentDifference.getPos() + offset + alignmentDifference.getLength()
+                            )
+                    );
+                } catch (StringIndexOutOfBoundsException e){
+                    System.out.println("referenceSequence Out of Bounds in \"Alignment.completeDifferences()\"" + e.toString());
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
     
     public long getEnd() {
         return end;
@@ -271,7 +294,7 @@ public class Alignment {
         
         private final int pos;  // in the reference sequence
         private final char op;
-        private final String seq;   // seq might not store the complete sequence: seq.length() will be shorter
+        private String seq;   // seq might not store the complete sequence: seq.length() will be shorter
         private final int length;   // this length is the real length of the sequence
 
         public static final char INSERTION = 'I';
@@ -314,11 +337,17 @@ public class Alignment {
         public String getSeq() {
             return seq;
         }
+        public void setSeq(String seq) {
+            this.seq = seq;
+        }
 
         public int getLength() {
             return this.length;
         }
 
+        public boolean isAllSequenceStored() {  //Maybe is only stored a partial sequence
+            return seq != null && seq.length() == length;
+        }
         public boolean isSequenceStored() {
             return seq != null;
         }

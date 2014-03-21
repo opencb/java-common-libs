@@ -1,10 +1,23 @@
 package org.opencb.commons.bioformats.alignment;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import net.sf.samtools.AlignmentBlock;
 import net.sf.samtools.CigarElement;
 import net.sf.samtools.SAMRecord;
+import org.opencb.commons.bioformats.feature.Region;
+import org.opencb.commons.containers.map.QueryOptions;
 
 /**
  *
@@ -70,9 +83,7 @@ public class AlignmentHelper {
                     if (cigarLen < 30) {
                         subread = record.getReadString().substring(index, index + cigarLen);
                     } else { // Get only first 30 characters in the sequence to copy
-                        // subread = subread.substring(index, index + 30).concat("...");
-                        // maybe above line was meant to be this?
-                         subread = record.getReadString().substring(index, index + 30).concat("...");
+                         subread = record.getReadString().substring(index, index + 27).concat("...");
                     }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread, cigarLen);
                     index = index + cigarLen;
@@ -84,7 +95,7 @@ public class AlignmentHelper {
                         if (cigarLen < 30) {
                             subref = refStr.substring(indexRef, indexRef + cigarLen);
                         } else { // Get only first 30 characters in the sequence to copy
-                            subref = refStr.substring(indexRef, indexRef + 30).concat("...");
+                            subref = refStr.substring(indexRef, indexRef + 27).concat("...");
                         }
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref, cigarLen);
                     }
@@ -97,7 +108,7 @@ public class AlignmentHelper {
                         if (cigarLen < 30) {
                             subref = refStr.substring(indexRef, indexRef + cigarLen);
                         } else { // Get only first 30 characters in the sequence to copy
-                            subref = refStr.substring(indexRef, indexRef + 30).concat("...");
+                            subref = refStr.substring(indexRef, indexRef + 27).concat("...");
                         }
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref, cigarLen);
                     }
@@ -118,14 +129,11 @@ public class AlignmentHelper {
                     }
                     indexRef = indexRef + cigarLen;
                     break;
-                case P:
-                    if (refStr == null) {
-                        currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, cigarLen);
-                    } else {
-//                    subref = refStr.substring(indexRef, indexRef + cigarLen);
-                        currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, "");
-                    }
-//                    indexRef = indexRef + cigarLen;
+                case P: //TODO jj: Check this
+//                  subref = refStr.substring(indexRef, indexRef + cigarLen);
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, "");
+
+//                  indexRef = indexRef + cigarLen;
                     break;
             }
 
@@ -167,5 +175,29 @@ public class AlignmentHelper {
 
         return differences;
     }
+
+
+
+    public static String getSequence(Region region, QueryOptions params) throws IOException {
+        String cellbaseHost = params.getString("cellbasehost", "http://ws.bioinfo.cipf.es/cellbase/rest/latest");
+        String species = params.getString("species", "hsa");
+
+        String urlString = cellbaseHost + "/" + species + "/genomic/region/" + region.toString() + "/sequence?of=json";
+        //System.out.println(urlString);
+
+        URL url = new URL(urlString);
+        InputStream is = url.openConnection().getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonFactory factory = mapper.getFactory();
+        JsonParser jp = factory.createParser(br);
+        JsonNode o = mapper.readTree(jp);
+
+        String sequence = o.get(0).get("sequence").asText();
+        br.close();
+        return sequence;
+    }
+
 
 }

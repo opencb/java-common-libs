@@ -19,7 +19,7 @@ public class AlignmentRegion {
     private List<Alignment> alignments;     //Sorted Alignments
     private RegionCoverage coverage;
     private List<MeanCoverage> meanCoverage;
-    //TODO jcoll: private Byte[] referenceSequence;
+    //private byte[] referenceSequence;
 
     public AlignmentRegion() {
     }
@@ -106,6 +106,15 @@ public class AlignmentRegion {
     public void setMeanCoverage(List<MeanCoverage> meanCoverage) {
 
         this.meanCoverage = meanCoverage;
+    }
+
+
+    public Byte[] getReferenceSequence() {
+        return referenceSequence;
+    }
+
+    public void setReferenceSequence(Byte[] referenceSequence) {
+        this.referenceSequence = referenceSequence;
     }
 
 }
