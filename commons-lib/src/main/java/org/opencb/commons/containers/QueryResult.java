@@ -109,6 +109,7 @@ public class QueryResult<T> {
     public void addResult(T result) {
         this.resultType = result.getClass().getCanonicalName();
         this.result.add(result);
+        this.numResults = this.result.size();
     }
 
     public void addAllResults(List<T> result) {
@@ -116,6 +117,7 @@ public class QueryResult<T> {
             this.resultType = result.get(0).getClass().getCanonicalName();
         }
         this.result.addAll(result);
+        this.numResults = this.result.size();
     }
 
     public long getTime() {

@@ -2,6 +2,8 @@ package org.opencb.commons.bioformats.alignment;
 
 import java.util.List;
 import java.util.Map;
+
+import com.sun.istack.internal.Nullable;
 import net.sf.samtools.SAMRecord;
 
 /**
@@ -25,7 +27,7 @@ public class Alignment {
     private String mateReferenceName;
     private int mateAlignmentStart;
     private int inferredInsertSize;
-    private byte[] readSequence;
+    @Nullable private byte[] readSequence;
 
     /**
      * List of differences between the reference sequence and this alignment. 
@@ -257,7 +259,6 @@ public class Alignment {
         private final char op;
         private final String seq;   // seq might not store the complete sequence: seq.length() will be shorter
         private final int length;   // this length is the real length of the sequence
-        private final boolean isSeqStored;
 
         public static final char INSERTION = 'I';
         public static final char DELETION = 'D';
@@ -272,7 +273,6 @@ public class Alignment {
             this.op = op;
             this.seq = seq;
             this.length = seq.length();
-            this.isSeqStored = true;
         }
 
         public AlignmentDifference(int pos, char op, String seq, int length) {
@@ -280,7 +280,6 @@ public class Alignment {
             this.op = op;
             this.seq = seq;
             this.length = length;
-            this.isSeqStored = true;
         }
 
         public AlignmentDifference(int pos, char op, int length) {
@@ -288,7 +287,6 @@ public class Alignment {
             this.op = op;
             this.seq = null;
             this.length = length;
-            this.isSeqStored = false;
         }
 
         public char getOp() {
@@ -308,7 +306,7 @@ public class Alignment {
         }
 
         public boolean isSequenceStored() {
-            return isSeqStored;
+            return seq != null;
         }
 
         @Override

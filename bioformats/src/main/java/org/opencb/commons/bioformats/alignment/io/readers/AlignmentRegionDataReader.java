@@ -22,6 +22,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     private Alignment prevAlignment;
     private int chunkSize;  //Max number of alignments in one AlignmentRegion.
     private int maxSequenceSize; //Maximum size for the total sequence. Count from the start of the first alignment to the end of the last alignment.
+    //TODO jj NEXT STEP private boolean getReferenceFromCellBase = false;
 
     private static final int defaultChunkSize = 2000;
     private static final int defaultMaxSequenceSize = 100000;

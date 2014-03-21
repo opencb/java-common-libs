@@ -88,7 +88,7 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader
                 record.getMappingQuality(), record.getBaseQualityString(),
                 record.getMateReferenceName(), record.getMateAlignmentStart(),
                 record.getInferredInsertSize(), record.getFlags(),
-                AlignmentHelper.getDifferencesFromCigar(record,null), null); //TODO jcoll: FIXME! here should go a web request of the reference sequence. FIXED!
+                AlignmentHelper.getDifferencesFromCigar(record,null), null);
 //            Alignment alignment = new Alignment(record, null, record.getReadString());
             alignment.setReadSequence(record.getReadBases());
         }
