@@ -57,7 +57,11 @@ public class VariantSNPAnnotator implements VariantAnnotator {
                 if (snp.get("numResults").asInt() > 0) {
                     Iterator<JsonNode> itResults = snp.get("result").iterator();
                     while (itResults.hasNext()) {
-                        batch.get(cont).addId(itResults.next().get("id").asText());
+                        String rs = itResults.next().get("id").asText();
+                        if (rs.startsWith("rs")) {
+                            batch.get(cont).addId(rs);
+                        }
+
                     }
                 }
                 cont++;

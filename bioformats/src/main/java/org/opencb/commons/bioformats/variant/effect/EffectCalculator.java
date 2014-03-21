@@ -32,16 +32,18 @@ public class EffectCalculator {
 
         StringBuilder chunkVcfRecords = new StringBuilder();
         Client client = Client.create();
-        WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+        WebResource webResource = client.resource("http://ws-beta.bioinfo.cipf.es/cellbase-staging/rest/latest/hsa/genomic/variant/");
 
-        javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
+//        javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
 //        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (Variant record : batch) {
-            chunkVcfRecords.append(record.getChromosome()).append(":");
-            chunkVcfRecords.append(record.getPosition()).append(":");
-            chunkVcfRecords.append(record.getReference()).append(":");
-            chunkVcfRecords.append(record.getAlternate()).append(",");
+            for (String alt : record.getAltAlleles()) {
+                chunkVcfRecords.append(record.getChromosome()).append(":");
+                chunkVcfRecords.append(record.getPosition()).append(":");
+                chunkVcfRecords.append(record.getReference()).append(":");
+                chunkVcfRecords.append(alt).append(",");
+            }
         }
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
@@ -72,16 +74,18 @@ public class EffectCalculator {
 
         StringBuilder chunkVcfRecords = new StringBuilder();
         Client client = Client.create();
-        WebResource webResource = client.resource("http://ws.bioinfo.cipf.es/cellbase/rest/latest/hsa/genomic/variant/");
+        WebResource webResource = client.resource("http://ws-beta.bioinfo.cipf.es/cellbase-staging/rest/latest/hsa/genomic/variant/");
 
         javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
         WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (Variant record : batch) {
-            chunkVcfRecords.append(record.getChromosome()).append(":");
-            chunkVcfRecords.append(record.getPosition()).append(":");
-            chunkVcfRecords.append(record.getReference()).append(":");
-            chunkVcfRecords.append(record.getAlternate()).append(",");
+            for (String alt : record.getAltAlleles()) {
+                chunkVcfRecords.append(record.getChromosome()).append(":");
+                chunkVcfRecords.append(record.getPosition()).append(":");
+                chunkVcfRecords.append(record.getReference()).append(":");
+                chunkVcfRecords.append(alt).append(",");
+            }
         }
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
