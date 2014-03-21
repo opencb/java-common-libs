@@ -1,5 +1,6 @@
 package org.opencb.commons.bioformats.alignment;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +94,20 @@ public class Alignment {
                 attributes);
         readSequence = record.getReadBases();
     }
-
+    public Alignment(SAMRecord record, String referenceSequence) {
+        this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
+                record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
+                record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""),
+                record.getMateReferenceName(), record.getMateAlignmentStart(),
+                record.getInferredInsertSize(), record.getFlags(),
+                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence),
+                null);
+        readSequence = record.getReadBases();
+        attributes = new HashMap<>();
+        for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
+            attributes.put(tav.tag, tav.value.toString());
+        }
+    }
     
     public String getChromosome() {
         return chromosome;
