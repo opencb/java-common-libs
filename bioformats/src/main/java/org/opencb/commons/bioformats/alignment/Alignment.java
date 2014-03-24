@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 
+import javafx.util.converter.ByteStringConverter;
+import net.sf.samtools.Cigar;
+import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
 
 /**
@@ -91,7 +94,7 @@ public class Alignment {
                 record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""), 
                 record.getMateReferenceName(), record.getMateAlignmentStart(), 
                 record.getInferredInsertSize(), record.getFlags(), 
-                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence), 
+                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence, Integer.MAX_VALUE),
                 attributes);
         readSequence = record.getReadBases();
     }
@@ -101,13 +104,44 @@ public class Alignment {
                 record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""),
                 record.getMateReferenceName(), record.getMateAlignmentStart(),
                 record.getInferredInsertSize(), record.getFlags(),
-                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence),
+                AlignmentHelper.getDifferencesFromCigar(record, referenceSequence, Integer.MAX_VALUE),
                 null);
         readSequence = record.getReadBases();
         attributes = new HashMap<>();
         for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
             attributes.put(tav.tag, tav.value.toString());
         }
+    }
+
+    SAMRecord createSAMRecord(SAMFileHeader samFileHeader){
+        SAMRecord samRecord = new SAMRecord(samFileHeader);
+
+        samRecord.setReadName(name);
+        samRecord.setReferenceName(chromosome);
+        samRecord.setAlignmentStart((int)start);
+        samRecord.setAlignmentEnd((int)end);
+
+        samRecord.setMappingQuality(mappingQuality);
+        samRecord.setBaseQualities(qualities.getBytes());
+
+        samRecord.setMateReferenceName(mateReferenceName);
+        samRecord.setMateAlignmentStart(mateAlignmentStart);
+
+        samRecord.setInferredInsertSize(inferredInsertSize);
+        samRecord.setFlags(flags);
+
+       // Cigar cigar = AlignmentHelper.getCigarFromDifferences(differences, length, "");
+       // samRecord.setCigar(cigar);
+
+        if(readSequence == null){
+            //getSequenceFromDifferences();
+        }
+        samRecord.setReadBases(readSequence);
+
+        //samRecord.setBaseQualities(qualities);
+
+
+        return samRecord;
     }
     
     public String getChromosome() {

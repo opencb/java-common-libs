@@ -13,9 +13,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import net.sf.samtools.AlignmentBlock;
-import net.sf.samtools.CigarElement;
-import net.sf.samtools.SAMRecord;
+import net.sf.samtools.*;
 import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.containers.map.QueryOptions;
 
@@ -25,15 +23,18 @@ import org.opencb.commons.containers.map.QueryOptions;
  */
 public class AlignmentHelper {
 
+
+
     /**
      * Given a cigar string, returns a list of alignment differences with 
      * the reference sequence.
      *
-     * @param cigar The input cigar string
+     * @param record The input cigar string
      * @param refStr reference sequence. It can be null if it is not needed.
+     * @param maxStoredSequence Max length for stored sequences. Default = 30
      * @return The list of alignment differences
      */
-    public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr) {
+    public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr, int maxStoredSequence) {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
 
         int index = 0, indexRef = 0, indexMismatchBlock = 0, realStart;
@@ -80,10 +81,10 @@ public class AlignmentHelper {
                     indexMismatchBlock++;
                     break;
                 case I:
-                    if (cigarLen < 30) {
+                    if (cigarLen < maxStoredSequence) {
                         subread = record.getReadString().substring(index, index + cigarLen);
                     } else { // Get only first 30 characters in the sequence to copy
-                         subread = record.getReadString().substring(index, index + 27).concat("...");
+                         subread = record.getReadString().substring(index, index + maxStoredSequence-3).concat("...");
                     }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread, cigarLen);
                     index = index + cigarLen;
@@ -92,10 +93,10 @@ public class AlignmentHelper {
                     if (refStr == null) {
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, cigarLen);
                     } else {
-                        if (cigarLen < 30) {
+                        if (cigarLen < maxStoredSequence) {
                             subref = refStr.substring(indexRef, indexRef + cigarLen);
                         } else { // Get only first 30 characters in the sequence to copy
-                            subref = refStr.substring(indexRef, indexRef + 27).concat("...");
+                            subref = refStr.substring(indexRef, indexRef + maxStoredSequence-3).concat("...");
                         }
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.DELETION, subref, cigarLen);
                     }
@@ -105,10 +106,10 @@ public class AlignmentHelper {
                     if (refStr == null) {
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, cigarLen);
                     } else {
-                        if (cigarLen < 30) {
+                        if (cigarLen < maxStoredSequence) {
                             subref = refStr.substring(indexRef, indexRef + cigarLen);
                         } else { // Get only first 30 characters in the sequence to copy
-                            subref = refStr.substring(indexRef, indexRef + 27).concat("...");
+                            subref = refStr.substring(indexRef, indexRef + maxStoredSequence-3).concat("...");
                         }
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SKIPPED_REGION, subref, cigarLen);
                     }
@@ -144,7 +145,9 @@ public class AlignmentHelper {
 
         return differences;
     }
-
+    public static List<Alignment.AlignmentDifference> getDifferencesFromCigar(SAMRecord record, String refStr) {
+        return getDifferencesFromCigar(record, refStr, 30);
+    }
 
     private static List<Alignment.AlignmentDifference> getMismatchDiff(String referenceSequence, String readSequence, int baseIndex) {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
@@ -176,7 +179,89 @@ public class AlignmentHelper {
         return differences;
     }
 
+    public static byte[] getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, String referenceSequence){
 
+
+
+
+        return null;
+    }
+
+    public static Cigar getCigarFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
+        Cigar cigar = new Cigar();
+        String sequence = "";
+        int index = 0;
+        int indexRef = 0;
+
+        for(Alignment.AlignmentDifference alignmentDifference : differences){
+            CigarOperator cigarOperator = null;
+
+            if(index < alignmentDifference.getPos()){
+                System.out.println("Sequence : " + sequence + " + " + (alignmentDifference.getPos()-index) + "M" + " indexRef="+indexRef);
+                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
+                sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getPos()-index);
+                indexRef += alignmentDifference.getPos()-index;
+                index    += alignmentDifference.getPos()-index;
+            } else if(index > alignmentDifference.getPos()) {
+                System.out.println("[ERROR] BAD DIFFERENCES ");
+            }
+            System.out.println("Sequence2: " + sequence + " + " + alignmentDifference.getLength()+alignmentDifference.getOp() + " indexRef="+indexRef);
+
+
+            switch (alignmentDifference.getOp()){
+                case Alignment.AlignmentDifference.INSERTION:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
+                    sequence += alignmentDifference.getSeq();
+                    index += alignmentDifference.getLength();
+                    break;
+                case Alignment.AlignmentDifference.DELETION:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
+                    //sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
+                    indexRef += alignmentDifference.getLength();
+                    break;
+                case Alignment.AlignmentDifference.MISMATCH:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
+                    sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
+
+                    indexRef += alignmentDifference.getLength();
+                    index += alignmentDifference.getLength();
+
+                    break;
+                case Alignment.AlignmentDifference.SKIPPED_REGION:
+                    cigarOperator = CigarOperator.SKIPPED_REGION;
+                    break;
+                case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
+                    sequence += alignmentDifference.getSeq();
+
+                    indexRef += alignmentDifference.getLength();
+                    index += alignmentDifference.getLength();
+                    break;
+                case Alignment.AlignmentDifference.HARD_CLIPPING:
+                    cigarOperator = CigarOperator.HARD_CLIP;
+                    break;
+                case Alignment.AlignmentDifference.PADDING:
+                    cigarOperator = CigarOperator.PADDING;
+                    break;
+            }
+//            cigar.add(new CigarElement(alignmentDifference.getLength(), cigarOperator));
+//            if(alignmentDifference.isAllSequenceStored()){
+//                sequence += alignmentDifference.getSeq();
+//            } else {
+//
+//            }
+
+        }
+
+        if(index < sequenceSize){
+            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
+            sequence += referenceSequence.substring(indexRef, indexRef+sequenceSize-index);
+        } else if(index > sequenceSize) {
+            System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
+        }
+        System.out.println(sequence);
+        return cigar;
+    }
 
     public static String getSequence(Region region, QueryOptions params) throws IOException {
         String cellbaseHost = params.getString("cellbasehost", "http://ws.bioinfo.cipf.es/cellbase/rest/latest");

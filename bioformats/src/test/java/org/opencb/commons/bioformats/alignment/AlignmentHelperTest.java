@@ -278,7 +278,7 @@ public class AlignmentHelperTest {
         }
     }
     @Test
-    public void getSequence(){
+    public void getSequenceTest(){
 
         try {
             String sequence = AlignmentHelper.getSequence(new Region("1", 1000000, 1001000), new QueryOptions());
@@ -299,6 +299,20 @@ public class AlignmentHelperTest {
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+    }
+
+    @Test
+    public void getCigarFromDifferencesTest(){
+        List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
+        differenceList.add(new Alignment.AlignmentDifference(3,'D', 3));
+        differenceList.add(new Alignment.AlignmentDifference(5,'I', "<<insertion>>"));
+        differenceList.add(new Alignment.AlignmentDifference(20,'D', 7));
+        differenceList.add(new Alignment.AlignmentDifference(23,'S', "<<soft>>"));
+
+        
+        System.out.println(AlignmentHelper.getCigarFromDifferences(differenceList, 31,
+                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890").toString());
+
     }
 
 }
