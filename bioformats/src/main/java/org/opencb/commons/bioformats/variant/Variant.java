@@ -40,19 +40,15 @@ public class Variant {
         return chromosome;
     }
 
-    public void setChromosome(String chromosome) {
-        this.chromosome = chromosome;
-        this.chromosome = this.chromosome.replace("chrm", "");
-        this.chromosome = this.chromosome.replace("chr", "");
-        this.chromosome = this.chromosome.replace("chr", "");
+    public final void setChromosome(String chromosome) {
+        this.chromosome = chromosome.replaceAll("chrom | chrm | chr | ch", "");
     }
 
     public int getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
-
+    public final void setPosition(int position) {
         if (position < 0) {
             throw new IllegalArgumentException("Position must be positive");
         }
@@ -64,7 +60,7 @@ public class Variant {
         return reference;
     }
 
-    public void setReference(String reference) {
+    public final void setReference(String reference) {
         this.reference = reference;
     }
 
@@ -72,7 +68,7 @@ public class Variant {
         return alternate;
     }
 
-    public void setAlternate(String alternate) {
+    public final void setAlternate(String alternate) {
         this.alternate = alternate;
     }
 
