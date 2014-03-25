@@ -20,9 +20,8 @@ public class Genotypes {
             auxG = list.get(index);
             auxG.setCount(auxG.getCount() + 1);
         } else {
-            g.setCount(g.getCount() + 1);
+            g.setCount(g.getCount());
             list.add(g);
         }
-
     }
 }
