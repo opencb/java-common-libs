@@ -1,7 +1,6 @@
 package org.opencb.commons.bioformats.variant.annotators;
 
-
-import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.biodata.models.variant.Variant;
 import org.opencb.commons.io.DataAnnotator;
 
 /**

@@ -1,8 +1,5 @@
 package org.opencb.commons.bioformats.variant.filters;
 
-
-import org.opencb.commons.bioformats.variant.Variant;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.opencb.biodata.models.variant.Variant;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -66,7 +64,7 @@ public class VariantBedFilter extends VariantFilter {
         if (regions.containsKey(variant.getChromosome())) {
             SortedSet<Region> regionList = regions.get(variant.getChromosome());
             for (Region r : regionList) {
-                if (r.contains(variant.getPosition())) {
+                if (r.contains(variant.getStart())) {
                     return true;
                 }
             }

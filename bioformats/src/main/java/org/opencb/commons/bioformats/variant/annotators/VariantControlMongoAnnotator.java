@@ -3,7 +3,7 @@ package org.opencb.commons.bioformats.variant.annotators;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
-import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.biodata.models.variant.Variant;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,7 +33,7 @@ public class VariantControlMongoAnnotator implements VariantAnnotator {
         StringBuilder chunkVariants = new StringBuilder();
         for (Variant record : batch) {
             chunkVariants.append(record.getChromosome()).append(":");
-            chunkVariants.append(record.getPosition()).append(":");
+            chunkVariants.append(record.getStart()).append(":");
             chunkVariants.append(record.getReference()).append(":");
             chunkVariants.append(record.getAlternate()).append(",");
         }

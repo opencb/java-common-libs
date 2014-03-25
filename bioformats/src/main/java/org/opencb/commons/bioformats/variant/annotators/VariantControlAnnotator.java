@@ -2,16 +2,16 @@ package org.opencb.commons.bioformats.variant.annotators;
 
 import net.sf.samtools.util.StringUtil;
 import org.broad.tribble.readers.TabixReader;
-import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.VariantFactory;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
-import org.opencb.commons.bioformats.variant.stats.StatsCalculator;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.VariantFactory;
+import org.opencb.biodata.models.variant.stats.VariantStats;
+import org.opencb.biodata.tools.variant.StatsCalculator;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -110,11 +110,8 @@ public class VariantControlAnnotator implements VariantAnnotator {
     }
 
     private void singleAnnot(List<Variant> batch) {
-        Variant tabixRecord;
-
         long pid = Thread.currentThread().getId();
         TabixReader currentTabix = null;
-
 
         if (tabix.containsKey(pid)) {
             currentTabix = tabix.get(pid);
@@ -136,18 +133,18 @@ public class VariantControlAnnotator implements VariantAnnotator {
 
             if (currentTabix != null) {
                 try {
-
-                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
-
+                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getStart()+ "-" + record.getEnd());
                     String line;
+                    
                     while (it != null && (line = it.next()) != null) {
-
                         String[] fields = line.split("\t");
-                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
+                        List <Variant> tabixRecords = VariantFactory.createVariantFromVcf(samples, fields);
 
-                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
-                            controlBatch.add(tabixRecord);
-                            map.put(record, cont++);
+                        for (Variant tabixRecord : tabixRecords) {
+                            if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+                                controlBatch.add(tabixRecord);
+                                map.put(record, cont++);
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -178,8 +175,6 @@ public class VariantControlAnnotator implements VariantAnnotator {
     }
 
     private void multipleAnnot(List<Variant> batch) {
-
-        Variant tabixRecord;
         TabixReader currentTabix = null;
 
         long pid = Thread.currentThread().getId();
@@ -216,19 +211,18 @@ public class VariantControlAnnotator implements VariantAnnotator {
 
             if (currentTabix != null) {
                 try {
-
-                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
-
+                    TabixReader.Iterator it = currentTabix.query(record.getChromosome() + ":" + record.getStart()+ "-" + record.getEnd());
                     String line;
+                    
                     while (it != null && (line = it.next()) != null) {
-
                         String[] fields = line.split("\t");
-                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
+                        List <Variant> tabixRecords = VariantFactory.createVariantFromVcf(samples, fields);
 
-                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
-
-                            controlBatch.add(tabixRecord);
-                            map.put(record, cont++);
+                        for (Variant tabixRecord : tabixRecords) {
+                            if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+                                controlBatch.add(tabixRecord);
+                                map.put(record, cont++);
+                            }
                         }
                     }
                 } catch (IOException e) {

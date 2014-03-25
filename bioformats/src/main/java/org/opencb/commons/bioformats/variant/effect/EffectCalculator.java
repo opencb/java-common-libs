@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -16,6 +14,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.effect.VariantEffect;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -38,12 +38,10 @@ public class EffectCalculator {
 //        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (Variant record : batch) {
-            for (String alt : record.getAltAlleles()) {
-                chunkVcfRecords.append(record.getChromosome()).append(":");
-                chunkVcfRecords.append(record.getPosition()).append(":");
-                chunkVcfRecords.append(record.getReference()).append(":");
-                chunkVcfRecords.append(alt).append(",");
-            }
+            chunkVcfRecords.append(record.getChromosome()).append(":");
+            chunkVcfRecords.append(record.getStart()).append(":");
+            chunkVcfRecords.append(record.getReference()).append(":");
+            chunkVcfRecords.append(record.getAlternate()).append(",");
         }
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
@@ -80,12 +78,10 @@ public class EffectCalculator {
         WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
 
         for (Variant record : batch) {
-            for (String alt : record.getAltAlleles()) {
-                chunkVcfRecords.append(record.getChromosome()).append(":");
-                chunkVcfRecords.append(record.getPosition()).append(":");
-                chunkVcfRecords.append(record.getReference()).append(":");
-                chunkVcfRecords.append(alt).append(",");
-            }
+            chunkVcfRecords.append(record.getChromosome()).append(":");
+            chunkVcfRecords.append(record.getStart()).append(":");
+            chunkVcfRecords.append(record.getReference()).append(":");
+            chunkVcfRecords.append(record.getAlternate()).append(",");
         }
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
@@ -187,7 +183,7 @@ public class EffectCalculator {
             for (int i = 0; i < effects.size(); i++) {
                 effect = effects.get(i);
                 if (record.getChromosome().equals(effect.getChromosome())
-                        && record.getPosition() == effect.getPosition()
+                        && record.getStart()== effect.getPosition()
                         && record.getReference().equals(effect.getReferenceAllele())
                         && record.getAlternate().equals(effect.getAlternativeAllele())) {
                     auxEffect.add(effect);

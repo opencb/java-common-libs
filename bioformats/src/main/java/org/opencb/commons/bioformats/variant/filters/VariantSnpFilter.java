@@ -1,7 +1,7 @@
 package org.opencb.commons.bioformats.variant.filters;
 
+import org.opencb.biodata.models.variant.Variant;
 
-import org.opencb.commons.bioformats.variant.Variant;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>

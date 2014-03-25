@@ -1,14 +1,14 @@
 package org.opencb.commons.bioformats.variant.annotators;
 
 import org.broad.tribble.readers.TabixReader;
-import org.opencb.commons.bioformats.feature.Genotype;
-import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.VariantFactory;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.opencb.biodata.models.feature.Genotype;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.VariantFactory;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -35,19 +35,20 @@ public class VariantEVSControlAnnotator implements VariantAnnotator {
 
     @Override
     public void annot(List<Variant> batch) {
-        Variant tabixRecord;
-
         for (Variant record : batch) {
             try {
-                TabixReader.Iterator it = this.tabix.query(record.getChromosome() + ":" + record.getPosition() + "-" + record.getPosition());
+                TabixReader.Iterator it = this.tabix.query(record.getChromosome() + ":" + record.getStart()+ "-" + record.getEnd());
 
                 if (it != null) {
                     String line = it.next();
-                    while (it != null && line != null) {
+                    while (line != null) {
                         String[] fields = line.split("\t");
-                        tabixRecord = VariantFactory.createVariantFromVcf(samples, fields);
-                        if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
-                            parseAndAnnot(record, tabixRecord);
+                        List <Variant> tabixRecords = VariantFactory.createVariantFromVcf(samples, fields);
+
+                        for (Variant tabixRecord : tabixRecords) {
+                            if (tabixRecord.getReference().equals(record.getReference()) && tabixRecord.getAlternate().equals(record.getAlternate())) {
+                                parseAndAnnot(record, tabixRecord);
+                            }
                         }
                         line = it.next();
                     }

@@ -1,10 +1,10 @@
 package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 import java.util.*;
+import org.opencb.biodata.models.variant.effect.VariantEffect;
+import org.opencb.biodata.models.variant.stats.VariantStats;
 
 /**
  * Created with IntelliJ IDEA.

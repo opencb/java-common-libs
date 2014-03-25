@@ -2,12 +2,12 @@ package org.opencb.commons.bioformats.variant.effect;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.test.GenericTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.effect.VariantEffect;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -19,7 +19,7 @@ public class EffectCalculatorTest extends GenericTest {
     @BeforeClass
     public static void init() {
         variants = new ArrayList<>();
-        variants.add(new Variant("15", 89758364, "A", "A,C"));
+        variants.add(new Variant("15", 89758364, 89758364, "A", "A,C"));
     }
 
     @Test
@@ -30,7 +30,6 @@ public class EffectCalculatorTest extends GenericTest {
         }
     }
 
-
     @Test
     public void testGetEffectsWithPolyPhenAndSift() throws Exception {
 
@@ -38,7 +37,6 @@ public class EffectCalculatorTest extends GenericTest {
 
     @Test
     public void testGetEffectPerVariant() throws Exception {
-
         List<List<VariantEffect>> effects = EffectCalculator.getEffectPerVariant(variants);
         for (List<VariantEffect> ve : effects) {
             System.out.println(ve);

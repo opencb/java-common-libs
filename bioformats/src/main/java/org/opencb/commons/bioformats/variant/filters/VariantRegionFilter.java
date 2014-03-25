@@ -1,11 +1,10 @@
 package org.opencb.commons.bioformats.variant.filters;
 
 
-import org.opencb.commons.bioformats.feature.Region;
-import org.opencb.commons.bioformats.variant.Variant;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.opencb.biodata.models.feature.Region;
+import org.opencb.biodata.models.variant.Variant;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -50,7 +49,7 @@ public class VariantRegionFilter extends VariantFilter {
     @Override
     public boolean apply(Variant variant) {
         for (Region r : regionList) {
-            if (r.contains(variant.getChromosome(), variant.getPosition())) {
+            if (r.contains(variant.getChromosome(), variant.getStart())) {
                 return true;
             }
         }

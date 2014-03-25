@@ -1,13 +1,13 @@
 package org.opencb.commons.bioformats.variant.annotators;
 
 import com.google.common.base.Joiner;
-import org.opencb.commons.bioformats.variant.Variant;
-import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
-import org.opencb.commons.bioformats.variant.effect.EffectCalculator;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.opencb.biodata.models.variant.Variant;
+import org.opencb.biodata.models.variant.effect.VariantEffect;
+import org.opencb.biodata.tools.variant.EffectCalculator;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -32,7 +32,7 @@ public class VariantGeneNameAnnotator implements VariantAnnotator {
         for (VariantEffect effect : batchEffect) {
 
             if (variant.getChromosome().equals(effect.getChromosome()) &&
-                    variant.getPosition() == effect.getPosition() &&
+                    variant.getStart()== effect.getPosition() &&
                     variant.getReference().equals(effect.getReferenceAllele()) &&
                     variant.getAlternate().equals(effect.getAlternativeAllele())) {
 

@@ -9,8 +9,7 @@ import org.opencb.commons.bioformats.pedigree.Pedigree;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantGlobalStats;
 
 /**
- * @author Cristina Yenyxe Gonzalez Garcia
- * @todo Add members for date and meta (headers and so on)
+ * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
 public class VariantSource {
 
