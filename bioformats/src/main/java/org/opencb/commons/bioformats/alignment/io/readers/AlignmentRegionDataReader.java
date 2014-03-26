@@ -2,14 +2,9 @@ package org.opencb.commons.bioformats.alignment.io.readers;
 
 import net.sf.samtools.SAMFileHeader;
 import org.opencb.commons.bioformats.alignment.Alignment;
-import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
-import org.opencb.commons.bioformats.alignment.io.readers.AlignmentDataReader;
-import org.opencb.commons.bioformats.feature.Region;
-import org.opencb.commons.containers.map.QueryOptions;
 import org.opencb.commons.io.DataReader;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,7 +22,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     private int chunkSize;  //Max number of alignments in one AlignmentRegion.
     private int maxSequenceSize; //Maximum size for the total sequence. Count from the start of the first alignment to the end of the last alignment.
     //TODO jj NEXT STEP
-    private boolean referenceFromCellBase = false;
+    //private boolean externalReferenceSequence = false;
 
     private static final int defaultChunkSize = 2000;
     private static final int defaultMaxSequenceSize = 100000;
@@ -90,17 +85,30 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
         //Properties for the whole AlignmentRegion
         chromosome = prevAlignment.getChromosome();
-        start = prevAlignment.getStart();
+        start = prevAlignment.getUnclippedStart();
         if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){
-            end = prevAlignment.getEnd();
+            end = prevAlignment.getUnclippedEnd();
         } else {
             end = start;
         }
 
+
+        /*if(externalReferenceSequence){
+            try {
+                System.out.println("start = " + start);
+                referenceSequence = AlignmentHelper.getSequence(new Region(chromosome, start, start+maxSequenceSize), new QueryOptions());
+                alignmentDataReader.setReferenceSequence(referenceSequence, chromosome, start);
+                System.out.println("RefSeq " + chromosome + " " + start + " -> " + (start + maxSequenceSize));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+
+
         for(int i = 0; i < chunkSize; i++){
             alignmentList.add(prevAlignment);   //The prevAlignment is ready to be added.
             if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){
-                end = prevAlignment.getEnd();  //Update the end only if is a valid segment.
+                end = prevAlignment.getUnclippedEnd();  //Update the end only if is a valid segment.
             }
 
             //Read new alignment.
@@ -114,8 +122,8 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
             //Second stop condition: Too big Region.
             if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){   //If it's a Mapped segment
-                if((prevAlignment.getEnd() - start) > maxSequenceSize ){
-                    if( prevAlignment.getStart() > alignmentList.get(i).getEnd()){
+                if((prevAlignment.getUnclippedEnd() - start) > maxSequenceSize ){
+                    if( prevAlignment.getUnclippedStart() > alignmentList.get(i).getUnclippedEnd()){
                         //The start of the prevAlignment doesn't overlap with the end of the last inserted Alignment
                         overlappedEnd = false;
                     }
@@ -123,10 +131,12 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
                 }
             }
         }
+
         if(prevAlignment != null){
-            System.out.println("(prevAlignment.getEnd() - start) = " +(prevAlignment.getEnd() - start) + " overlappedEnd = " + overlappedEnd);
+            //System.out.println("(prevAlignment.getUnclippedEnd() - start) = " +(prevAlignment.getUnclippedEnd() - start) + " overlappedEnd = " + overlappedEnd);
             //System.out.println("(alignmentList.get(alignmentList(size)-1).getEnd()) = " + (alignmentList.get(alignmentList.size()-1).getEnd()) + " start " + start + " i " + i);
-            System.out.println("(alignmentList.get(alignmentList(size)-1).getEnd() - start) = " + (alignmentList.get(alignmentList.size()-1).getEnd() - start));
+            System.out.println("(alignmentList.get(alignmentList(size)-1).getUnclippedEnd() - start) = " + (alignmentList.get(alignmentList.size()-1).getUnclippedEnd() - start));
+            System.out.println("start = " + start + ", end = " + end + ", size = " + (end - start));
         }
 
 
@@ -137,8 +147,8 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         alignmentRegion.setEnd(end);
 
 
-
-        if(referenceFromCellBase){
+/*
+        if(externalReferenceSequence){
             try {
                 referenceSequence = AlignmentHelper.getSequence(new Region(chromosome, start, start+maxSequenceSize), new QueryOptions());
                 for(Alignment alignment : alignmentRegion.getAlignments()){
@@ -148,7 +158,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
                 e.printStackTrace();
             }
         }
-
+*/
 //        for(Alignment al : alignmentList){        //Debug
 //            for(byte b : al.getReadSequence()){
 //                System.out.print((char) b);
@@ -196,11 +206,11 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         this.chunkSize = chunkSize;
     }
 
-    public boolean isReferenceFromCellBase() {
-        return referenceFromCellBase;
-    }
-
-    public void setReferenceFromCellBase(boolean referenceFromCellBase) {
-        this.referenceFromCellBase = referenceFromCellBase;
-    }
+//    public boolean isExternalReferenceSequence() {
+//        return externalReferenceSequence;
+//    }
+//
+//    public void setExternalReferenceSequence(boolean externalReferenceSequence) {
+//        this.externalReferenceSequence = externalReferenceSequence;
+//    }
 }
