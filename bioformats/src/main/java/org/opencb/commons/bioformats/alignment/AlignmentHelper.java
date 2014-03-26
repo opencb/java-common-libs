@@ -29,8 +29,12 @@ public class AlignmentHelper {
      * Given a cigar string, returns a list of alignment differences with 
      * the reference sequence.
      *
+     * If the reference sequence is null, M tags in the CIGAR can't be assumed to be
+     * correct, so they will be stored as mismatches.
+     *
+     *
      * @param record The input cigar string
-     * @param refStr reference sequence. It can be null if it is not needed.
+     * @param refStr reference sequence.
      * @param maxStoredSequence Max length for stored sequences. Default = 30
      * @return The list of alignment differences
      */
@@ -49,21 +53,17 @@ public class AlignmentHelper {
             Alignment.AlignmentDifference currentDifference = null;
 
             switch (element.getOperator()) {
-                case M:
                 case EQ:
                     blk = record.getAlignmentBlocks().get(indexMismatchBlock);
                     realStart = blk.getReferenceStart() - record.getAlignmentStart();
                     // Picard ignores hard clipping, the indices could be necessary
                     indexRef = realStart >= indexRef ? realStart : indexRef;
-                    if (refStr != null) {
-                        subref = refStr.substring(indexRef, indexRef + blk.getLength());
-                        subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
-                        differences.addAll(getMismatchDiff(subref, subread, indexRef));
-                    }
+
                     index = index + record.getAlignmentBlocks().get(indexMismatchBlock).getLength();
                     indexRef = indexRef + record.getAlignmentBlocks().get(indexMismatchBlock).getLength();
                     indexMismatchBlock++;
                     break;
+                case M:
                 case X:
                     blk = record.getAlignmentBlocks().get(indexMismatchBlock);
                     realStart = blk.getReferenceStart() - record.getAlignmentStart();
@@ -84,7 +84,7 @@ public class AlignmentHelper {
                     if (cigarLen < maxStoredSequence) {
                         subread = record.getReadString().substring(index, index + cigarLen);
                     } else { // Get only first 30 characters in the sequence to copy
-                         subread = record.getReadString().substring(index, index + maxStoredSequence-3).concat("...");
+                        subread = record.getReadString().substring(index, index + maxStoredSequence-3).concat("...");
                     }
                     currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.INSERTION, subread, cigarLen);
                     index = index + cigarLen;
