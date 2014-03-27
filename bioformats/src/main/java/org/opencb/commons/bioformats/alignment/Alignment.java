@@ -113,13 +113,16 @@ public class Alignment {
         }
     }
 
-    SAMRecord createSAMRecord(SAMFileHeader samFileHeader){
+    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence){
+        return createSAMRecord(samFileHeader, referenceSequence, start);
+    }
+    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition){
         SAMRecord samRecord = new SAMRecord(samFileHeader);
 
         samRecord.setReadName(name);
         samRecord.setReferenceName(chromosome);
         samRecord.setAlignmentStart((int)start);
-        samRecord.setAlignmentEnd((int)end);
+        //samRecord.setAlignmentEnd((int)end);
 
         samRecord.setMappingQuality(mappingQuality);
         samRecord.setBaseQualities(qualities.getBytes());
@@ -130,15 +133,18 @@ public class Alignment {
         samRecord.setInferredInsertSize(inferredInsertSize);
         samRecord.setFlags(flags);
 
-       // Cigar cigar = AlignmentHelper.getCigarFromDifferences(differences, length, "");
-       // samRecord.setCigar(cigar);
 
-        if(readSequence == null){
+
+        samRecord.setCigar(AlignmentHelper.getCigarFromDifferences(differences, length));
+        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, (int)(start-referenceSequenceStartPosition)).getBytes();
+
+
+        //if(readSequence == null){
             //getSequenceFromDifferences();
-        }
+        //}
         samRecord.setReadBases(readSequence);
 
-        //samRecord.setBaseQualities(qualities);
+        samRecord.setBaseQualities(qualities.getBytes());
 
 
         return samRecord;

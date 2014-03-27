@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import net.sf.samtools.*;
 import org.junit.*;
+import org.opencb.commons.bioformats.alignment.sam.io.AlignmentSamDataReader;
+import org.opencb.commons.bioformats.alignment.sam.io.AlignmentSamDataWriter;
 import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.containers.map.QueryOptions;
 
@@ -77,7 +79,7 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(1, CigarOperator.I));
         record.setCigar(new Cigar(elements));
         record.setReadString("GGGAAAACCCCGGACGGTTTTAAAAGTGTGCCCCGGGGTTTTAAAACCCCGGGGTTTTAAN");
-        
+
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.INSERTION, "GGG"));
         expResult.add(new Alignment.AlignmentDifference(10, Alignment.AlignmentDifference.INSERTION, "AC"));
@@ -309,10 +311,74 @@ public class AlignmentHelperTest {
         differenceList.add(new Alignment.AlignmentDifference(20,'D', 7));
         differenceList.add(new Alignment.AlignmentDifference(23,'S', "<<soft>>"));
 
-        
-        System.out.println(AlignmentHelper.getCigarFromDifferences(differenceList, 31,
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890").toString());
 
+        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, 31,
+                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+        Cigar cigar = AlignmentHelper.getCigarFromDifferences(differenceList, 31);
+
+        System.out.println(sequenceFromDifferences);
+        System.out.println(cigar.toString());
+    }
+
+
+
+
+    @Test
+    public void AlignmentToSAMTest(){
+        AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/tmp/small.sam");
+        AlignmentSamDataWriter alignmentSamDataWriter = new AlignmentSamDataWriter("/tmp/exit.sam");
+
+        alignmentSamDataWriter.open();
+        alignmentSamDataWriter.pre();
+
+        alignmentSamDataReader.open();
+        alignmentSamDataReader.pre();
+
+        alignmentSamDataWriter.writeHeader(alignmentSamDataReader.getHeader());
+
+        String rSequence;
+        String mRseq = "NNNNNNNNGATCCAGAGGTGGAAGAGGAAGGAAGCTTGGAACCCTATAGAGTTGCTGAGTGCCAGGACCAGATCCTGGCCCTAAACAGGTGGTAAGGAAGGAGAGAGTGAAGGAACTGCCAGGTGACACACTCCCACCATGGACCTCTGGGATCCTAGCTTTAAGAGATCCCATCACCCACATGAACGTTTGAATTGACAGGGGGAGCTGCCTGGAGAGTAGGCAGATGCAGAGCTCAAGCCTGTGCAGAGCCCAGGTTTTGTGAGTGGGACAGTTGCAGCAAAACACAACCATAGGTGCCCATCCACCAAGGCAGGCTCTCCATCTTGCTCAGAGTGGCTCTAGCCCTTGCTGACTGCTGGGCAGGGAGAGAGCAGAGCTAACTTCCTCATGGGACCTGGGTGTGTCTGATCTGTGCACACCACTATCCAACCGATCCCGAGGCTCCACCCTGGCCACTCTTGTGTGCACACAGCACAGCCTCTACTGCTACACCTGAGTACTTTGCCAGTGGCCTGGAAGCACTTTGTCCCCCCTGGCACAAATGGTGCTGGACCACG";
+        int ini = 59900;
+        try {
+            rSequence = AlignmentHelper.getSequence(new Region("20", ini, 62000), null);
+        } catch (IOException e) {
+            System.out.println("Error");
+            e.printStackTrace();
+            return;
+        }
+
+        for(int i = 0; i < 2; i++){
+            Alignment alignment = alignmentSamDataReader.read();
+
+            List<Alignment.AlignmentDifference> differencesFromCigar = AlignmentHelper.getDifferencesFromCigar(alignmentSamDataReader.record,
+                    mRseq);
+            for(Alignment.AlignmentDifference diff : differencesFromCigar){
+                System.out.println("Diff con: " + diff.toString());
+            }
+
+            for(Alignment.AlignmentDifference diff : alignment.getDifferences()){
+                System.out.println("Diff sin: " + diff.toString());
+            }
+
+            System.out.println(mRseq);
+//            System.out.println(alignment.getReadSequence());
+
+            //alignmentSamDataWriter.write(alignmentSamDataReader.record);
+            alignmentSamDataWriter.write(alignment.createSAMRecord(alignmentSamDataReader.getHeader(),
+                    rSequence, ini));
+            //alignment.createSAMRecord(alignmentSamDataReader.getHeader());
+       //     System.out.println(alignmentSamDataReader.record.equals(alignment.createSAMRecord(alignmentSamDataReader.getHeader())));
+
+
+        }
+
+
+        alignmentSamDataReader.post();
+        alignmentSamDataReader.close();
+
+        alignmentSamDataWriter.post();
+        alignmentSamDataWriter.close();
+        System.out.println(rSequence);
     }
 
 }

@@ -179,26 +179,81 @@ public class AlignmentHelper {
         return differences;
     }
 
-    public static byte[] getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, String referenceSequence){
 
 
-
-
-        return null;
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
+        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, 0);
     }
+    public static Cigar getCigarFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize){
 
-    public static Cigar getCigarFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
         Cigar cigar = new Cigar();
-        String sequence = "";
         int index = 0;
-        int indexRef = 0;
 
         for(Alignment.AlignmentDifference alignmentDifference : differences){
-            CigarOperator cigarOperator = null;
+            if(index < alignmentDifference.getPos()){
+                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
+                index    += alignmentDifference.getPos()-index;
+            } else if(index > alignmentDifference.getPos()) {
+                System.out.println("[ERROR] BAD DIFFERENCES ");
+            }
+
+
+
+            switch (alignmentDifference.getOp()){
+                case Alignment.AlignmentDifference.INSERTION:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
+                    index += alignmentDifference.getLength();
+                    break;
+
+                case Alignment.AlignmentDifference.DELETION:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
+                    break;
+
+                case Alignment.AlignmentDifference.MISMATCH:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
+                    index += alignmentDifference.getLength();
+                    break;
+
+                case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
+                    index += alignmentDifference.getLength();
+                    break;
+
+                case Alignment.AlignmentDifference.HARD_CLIPPING:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.HARD_CLIP));
+                    break;
+
+                case Alignment.AlignmentDifference.SKIPPED_REGION:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SKIPPED_REGION));
+                    break;
+
+                case Alignment.AlignmentDifference.PADDING:
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.PADDING));
+                    break;
+            }
+
+        }
+
+        if(index < sequenceSize){
+            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
+        } else if(index > sequenceSize) {
+            System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
+        }
+
+        return cigar;
+    }
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, int offset){
+
+        String sequence = "";
+        int index = 0;
+        int indexRef = offset;
+
+        for(Alignment.AlignmentDifference alignmentDifference : differences){
+           // CigarOperator cigarOperator = null;
 
             if(index < alignmentDifference.getPos()){
                 System.out.println("Sequence : " + sequence + " + " + (alignmentDifference.getPos()-index) + "M" + " indexRef="+indexRef);
-                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
+               // cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
                 sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getPos()-index);
                 indexRef += alignmentDifference.getPos()-index;
                 index    += alignmentDifference.getPos()-index;
@@ -210,38 +265,42 @@ public class AlignmentHelper {
 
             switch (alignmentDifference.getOp()){
                 case Alignment.AlignmentDifference.INSERTION:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
+              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
                     sequence += alignmentDifference.getSeq();
                     index += alignmentDifference.getLength();
                     break;
+
                 case Alignment.AlignmentDifference.DELETION:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
+              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
                     //sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
                     indexRef += alignmentDifference.getLength();
                     break;
+
                 case Alignment.AlignmentDifference.MISMATCH:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
+              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
                     sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
 
                     indexRef += alignmentDifference.getLength();
                     index += alignmentDifference.getLength();
+                    break;
 
-                    break;
-                case Alignment.AlignmentDifference.SKIPPED_REGION:
-                    cigarOperator = CigarOperator.SKIPPED_REGION;
-                    break;
                 case Alignment.AlignmentDifference.SOFT_CLIPPING:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
+              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
                     sequence += alignmentDifference.getSeq();
 
                     indexRef += alignmentDifference.getLength();
                     index += alignmentDifference.getLength();
                     break;
+
                 case Alignment.AlignmentDifference.HARD_CLIPPING:
-                    cigarOperator = CigarOperator.HARD_CLIP;
+              //      cigarOperator = CigarOperator.HARD_CLIP;
+                    break;
+
+                case Alignment.AlignmentDifference.SKIPPED_REGION:
+              //      cigarOperator = CigarOperator.SKIPPED_REGION;
                     break;
                 case Alignment.AlignmentDifference.PADDING:
-                    cigarOperator = CigarOperator.PADDING;
+              //      cigarOperator = CigarOperator.PADDING;
                     break;
             }
 //            cigar.add(new CigarElement(alignmentDifference.getLength(), cigarOperator));
@@ -254,16 +313,21 @@ public class AlignmentHelper {
         }
 
         if(index < sequenceSize){
-            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
+          //  cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
+            System.out.println(indexRef + " " + (indexRef+sequenceSize-index));
             sequence += referenceSequence.substring(indexRef, indexRef+sequenceSize-index);
         } else if(index > sequenceSize) {
             System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
         }
         System.out.println(sequence);
-        return cigar;
+
+        return sequence;
     }
 
     public static String getSequence(Region region, QueryOptions params) throws IOException {
+        if(params == null){
+            params = new QueryOptions();
+        }
         String cellbaseHost = params.getString("cellbasehost", "http://ws.bioinfo.cipf.es/cellbase/rest/latest");
         String species = params.getString("species", "hsa");
 
@@ -283,6 +347,7 @@ public class AlignmentHelper {
         br.close();
         return sequence;
     }
+
 
 
 }
