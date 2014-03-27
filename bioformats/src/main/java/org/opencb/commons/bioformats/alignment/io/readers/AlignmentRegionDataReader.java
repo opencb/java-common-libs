@@ -13,7 +13,6 @@ import java.util.List;
  * User: jcoll
  * Date: 2/3/14
  * Time: 3:58 PM
- * To change this template use File | Settings | File Templates.
  */
 public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
@@ -21,8 +20,6 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     private Alignment prevAlignment;
     private int chunkSize;  //Max number of alignments in one AlignmentRegion.
     private int maxSequenceSize; //Maximum size for the total sequence. Count from the start of the first alignment to the end of the last alignment.
-    //TODO jj NEXT STEP
-    //private boolean externalReferenceSequence = false;
 
     private static final int defaultChunkSize = 2000;
     private static final int defaultMaxSequenceSize = 100000;
@@ -93,18 +90,6 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         }
 
 
-        /*if(externalReferenceSequence){
-            try {
-                System.out.println("start = " + start);
-                referenceSequence = AlignmentHelper.getSequence(new Region(chromosome, start, start+maxSequenceSize), new QueryOptions());
-                alignmentDataReader.setReferenceSequence(referenceSequence, chromosome, start);
-                System.out.println("RefSeq " + chromosome + " " + start + " -> " + (start + maxSequenceSize));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
-
-
         for(int i = 0; i < chunkSize; i++){
             alignmentList.add(prevAlignment);   //The prevAlignment is ready to be added.
             if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){
@@ -123,12 +108,14 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
             }
 
             //Second stop condition: Too big Region.
-            if((end - start) > maxSequenceSize){
-                if(prevAlignment.getUnclippedStart() > end){
-                    //The start of the prevAlignment doesn't overlap with the end of the last inserted Alignment
-                    overlappedEnd = false;
+            if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){
+                if((prevAlignment.getUnclippedEnd() - start) > maxSequenceSize){
+                    if(prevAlignment.getUnclippedStart() > end){
+                        //The start of the prevAlignment doesn't overlap with the end of the last inserted Alignment
+                        overlappedEnd = false;
+                    }
+                    break;
                 }
-                break;
             }
 
         }
@@ -137,8 +124,9 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
             //System.out.println("(prevAlignment.getUnclippedEnd() - start) = " +(prevAlignment.getUnclippedEnd() - start) + " overlappedEnd = " + overlappedEnd);
             //System.out.println("(alignmentList.get(alignmentList(size)-1).getEnd()) = " + (alignmentList.get(alignmentList.size()-1).getEnd()) + " start " + start + " i " + i);
             System.out.println("(alignmentList.get(alignmentList(size)-1).getUnclippedEnd() - start) = " + (alignmentList.get(alignmentList.size()-1).getUnclippedEnd() - start));
-            System.out.println("start = " + start + ", end = " + end + ", size = " + (end - start));
-        }
+         }
+        System.out.println("start = " + start + ", end = " + end + ", size = " + (end - start));
+
 
 
         AlignmentRegion alignmentRegion = new AlignmentRegion(alignmentList);
@@ -207,11 +195,4 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         this.chunkSize = chunkSize;
     }
 
-//    public boolean isExternalReferenceSequence() {
-//        return externalReferenceSequence;
-//    }
-//
-//    public void setExternalReferenceSequence(boolean externalReferenceSequence) {
-//        this.externalReferenceSequence = externalReferenceSequence;
-//    }
 }

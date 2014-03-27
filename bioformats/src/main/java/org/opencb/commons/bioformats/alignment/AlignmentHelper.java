@@ -69,11 +69,12 @@ public class AlignmentHelper {
                     realStart = blk.getReferenceStart() - record.getAlignmentStart();
                     // Picard ignores hard clipping, the indices could be necessary
                     indexRef = realStart >= indexRef ? realStart : indexRef;
+                    subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
                     if (refStr == null) {
                         currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.MISMATCH, cigarLen);
+                        currentDifference.setSeq(subread);
                     } else {
                         subref = refStr.substring(indexRef, indexRef + blk.getLength());
-                        subread = record.getReadString().substring(index, Math.min(index + blk.getLength(), record.getReadString().length()));
                         differences.addAll(getMismatchDiff(subref, subread, indexRef));
                     }
                     index = index + record.getAlignmentBlocks().get(indexMismatchBlock).getLength();
@@ -149,6 +150,76 @@ public class AlignmentHelper {
         return getDifferencesFromCigar(record, refStr, 30);
     }
 
+    public static boolean completeDifferencesFromReference(Alignment alignment, String referenceSequence, long referenceSequenceStart){
+        int offset = (int) (alignment.getUnclippedStart() - referenceSequenceStart);
+        String subRef;
+        String subRead;
+
+        List<Alignment.AlignmentDifference> newDifferences =  new LinkedList<>();
+        for(Alignment.AlignmentDifference alignmentDifference : alignment.getDifferences()){
+            Alignment.AlignmentDifference currentDifference = null;
+            try{
+                switch (alignmentDifference.getOp()){
+                    case Alignment.AlignmentDifference.DELETION:
+                        //If is a deletion, there is no seq.
+                        if(!alignmentDifference.isAllSequenceStored()){
+                            subRef = referenceSequence.substring(
+                                    alignmentDifference.getPos() + offset,
+                                    alignmentDifference.getPos() + offset + alignmentDifference.getLength()
+                            );
+                            alignmentDifference.setSeq( subRef );
+                        }
+                        currentDifference = alignmentDifference;
+                        break;
+                    case Alignment.AlignmentDifference.MISMATCH:
+                        //
+                        subRef = referenceSequence.substring(
+                                alignmentDifference.getPos() + offset,
+                                alignmentDifference.getPos() + offset + alignmentDifference.getLength()
+                        );
+                        subRead = alignmentDifference.getSeq();
+                        newDifferences.addAll(getMismatchDiff(subRef, subRead, alignmentDifference.getPos()));
+                        break;
+                    case Alignment.AlignmentDifference.HARD_CLIPPING:
+                        //
+                        subRef = referenceSequence.substring(
+                                alignmentDifference.getPos() + offset,
+                                alignmentDifference.getPos() + offset + alignmentDifference.getLength()
+                        );
+                        alignmentDifference.setSeq(subRef);
+                        currentDifference = alignmentDifference;
+                        break;
+                    case Alignment.AlignmentDifference.INSERTION:
+                    case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                    case Alignment.AlignmentDifference.PADDING:
+
+
+                    case Alignment.AlignmentDifference.SKIPPED_REGION:
+                        //
+                        currentDifference = alignmentDifference;
+                        break;
+                }
+
+                if(currentDifference != null){
+                    newDifferences.add(currentDifference);
+                }
+            } catch (StringIndexOutOfBoundsException e){
+                System.out.println("referenceSequence Out of Bounds in \"Alignment.completeDifferences()\"" + e.toString());
+                return false;
+            }
+        }
+        alignment.setDifferences(newDifferences);
+
+        return true;
+    }
+
+    /**
+     *
+     * @param referenceSequence
+     * @param readSequence
+     * @param baseIndex Position of the subSequence inside the whole sequence
+     * @return
+     */
     private static List<Alignment.AlignmentDifference> getMismatchDiff(String referenceSequence, String readSequence, int baseIndex) {
         List<Alignment.AlignmentDifference> differences = new LinkedList<>();
         StringBuilder sb = new StringBuilder();

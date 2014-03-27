@@ -13,19 +13,19 @@ import net.sf.samtools.SAMRecord;
 
 /**
  * Information about a sequence alignment.
- * 
+ *
  * @author Cristina Yenyxe Gonzalez Garcia <cgonzalez@cipf.es>
  */
 public class Alignment {
-    
+
     private String name;
-    
+
     private String chromosome;
     private long start;
     private long end;
     private long unclippedStart;
     private long unclippedEnd;
-    
+
     private int length;
     private int mappingQuality;
     private String qualities;   // TODO Find an alternative way to store qualities
@@ -35,24 +35,24 @@ public class Alignment {
     private byte[] readSequence;    // can be null
 
     /**
-     * List of differences between the reference sequence and this alignment. 
+     * List of differences between the reference sequence and this alignment.
      * Each one is defined by its position, type of difference and the changes it
      * introduces.
      */
     private List<AlignmentDifference> differences;
-    
+
     /**
-     * Optional attributes that probably depend on the format of the file the 
+     * Optional attributes that probably depend on the format of the file the
      * alignment was initially read.
      */
     private Map<String, String> attributes;
-    
+
     /**
-     * Bitmask with information about structure, quality and other properties 
+     * Bitmask with information about structure, quality and other properties
      * of the alignment.
      */
     private int flags;
-    
+
     public static final int ALIGNMENT_MULTIPLE_SEGMENTS = 0x01;
     public static final int SEGMENTS_PROPERLY_ALIGNED = 0x02;
     public static final int SEGMENT_UNMAPPED = 0x04;
@@ -67,9 +67,9 @@ public class Alignment {
     public static final int SUPPLEMENTARY_ALIGNMENT = 0x800;
 
     public Alignment() { }
-    
-    public Alignment(String name, String chromosome, long start, long end, long unclippedStart, long unclippedEnd, 
-            int length, int mappingQuality, String qualities, String mateReferenceName, int mateAlignmentStart, 
+
+    public Alignment(String name, String chromosome, long start, long end, long unclippedStart, long unclippedEnd,
+            int length, int mappingQuality, String qualities, String mateReferenceName, int mateAlignmentStart,
             int inferredInsertSize, int flags, List<AlignmentDifference> differences, Map<String, String> attributes) {
         this.name = name;
         this.chromosome = chromosome;
@@ -89,11 +89,11 @@ public class Alignment {
     }
 
     public Alignment(SAMRecord record, Map<String, String> attributes, String referenceSequence) {
-        this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(), 
-                record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(), 
-                record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""), 
-                record.getMateReferenceName(), record.getMateAlignmentStart(), 
-                record.getInferredInsertSize(), record.getFlags(), 
+        this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
+                record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
+                record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""),
+                record.getMateReferenceName(), record.getMateAlignmentStart(),
+                record.getInferredInsertSize(), record.getFlags(),
                 AlignmentHelper.getDifferencesFromCigar(record, referenceSequence, Integer.MAX_VALUE),
                 attributes);
         readSequence = record.getReadBases();
@@ -149,7 +149,7 @@ public class Alignment {
 
         return samRecord;
     }
-    
+
     public String getChromosome() {
         return chromosome;
     }
@@ -169,7 +169,7 @@ public class Alignment {
     public boolean addDifference(AlignmentDifference d) {
         return differences.add(d);
     }
-    
+
     public boolean removeDifference(int position) {
         for (AlignmentDifference d : differences) {
             if (d.getPos() == position) {
@@ -179,34 +179,7 @@ public class Alignment {
         return false;
     }
 
-    public boolean completeDifferences(String referenceSequence){
-        return completeDifferences(referenceSequence, unclippedStart);
-    }
-    public boolean completeDifferences(String referenceSequence, long referenceSequenceStart){
-        int offset = (int) (unclippedStart - referenceSequenceStart);
-        for(AlignmentDifference alignmentDifference : differences){
-            if(alignmentDifference.getSeq() == null
-                    || !alignmentDifference.isAllSequenceStored()
-                    || alignmentDifference.getOp() == AlignmentDifference.MISMATCH
-                    || alignmentDifference.getOp() == AlignmentDifference.SKIPPED_REGION)
-            {
-                try {
-                    alignmentDifference.setSeq(
-                            referenceSequence.substring(
-                                    alignmentDifference.getPos() + offset,
-                                    alignmentDifference.getPos() + offset + alignmentDifference.getLength()
-                            )
-                    );
-                } catch (StringIndexOutOfBoundsException e){
-                    System.out.println("referenceSequence Out of Bounds in \"Alignment.completeDifferences()\"" + e.toString());
-                    return false;
-                }
-            }
-        }
 
-        return true;
-    }
-    
     public long getEnd() {
         return end;
     }
@@ -222,11 +195,11 @@ public class Alignment {
     public void setFlags(int flags) {
         this.flags = flags;
     }
-    
+
     public void addFlag(int flag) {
         this.flags |= flag;
     }
-    
+
     public void removeFlag(int flag) {
         this.flags = this.flags & ~flag;
     }
@@ -242,11 +215,11 @@ public class Alignment {
     public boolean addAttribute(String key, String value) {
         return attributes.put(key, value) != null;
     }
-    
+
     public String removeAttribute(String key) {
         return attributes.remove(key);
     }
-    
+
     public int getInferredInsertSize() {
         return inferredInsertSize;
     }
@@ -370,7 +343,7 @@ public class Alignment {
     }
 
     public static class AlignmentDifference {
-        
+
         private final int pos;  // in the reference sequence
         private final char op;
         private String seq;   // seq might not store the complete sequence: seq.length() will be shorter
@@ -428,7 +401,7 @@ public class Alignment {
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof AlignmentDifference)) { return false; }
-            
+
             AlignmentDifference other = (AlignmentDifference) obj;
             if (isSequenceStored()) {
             return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
@@ -443,5 +416,5 @@ public class Alignment {
         }
 
     }
-    
+
 }

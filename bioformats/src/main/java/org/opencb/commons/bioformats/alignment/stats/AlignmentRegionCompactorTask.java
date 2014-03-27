@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.alignment.stats;
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
+import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.containers.map.QueryOptions;
 import org.opencb.commons.run.Task;
 
@@ -11,16 +12,15 @@ import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
- * User: jacobo
+ * User: jcoll
  * Date: 27/03/14
  * Time: 13:00
- * To change this template use File | Settings | File Templates.
  */
 
 public class AlignmentRegionCompactorTask extends Task<AlignmentRegion> {
 
 
-    private AlignmentRegionCompactorTask(){
+    public AlignmentRegionCompactorTask(){
     }
 
 
@@ -29,12 +29,14 @@ public class AlignmentRegionCompactorTask extends Task<AlignmentRegion> {
 
         for(AlignmentRegion alignmentRegion : batch){
             Long start = alignmentRegion.getStart();
-            String sequence = AlignmentHelper.getSequence(alignmentRegion.getRegion(), new QueryOptions());
-
+            Region region = alignmentRegion.getRegion();
+            String sequence = AlignmentHelper.getSequence(region, new QueryOptions());
+            System.out.println("Pedimos secuencia: " + region.toString() + " size = " + (region.getEnd()-region.getStart()));
             for(Alignment alignment : alignmentRegion.getAlignments()){
-                if(!alignment.completeDifferences(sequence, start)){
+                if(!AlignmentHelper.completeDifferencesFromReference(alignment,sequence, start)){
                     //TODO: Catch this.
                     //The sequence was not enough
+                    System.out.println("[ERROR] NOT ENOUGH REFERENCE SEQUENCE!!");
                 }
             }
         }
