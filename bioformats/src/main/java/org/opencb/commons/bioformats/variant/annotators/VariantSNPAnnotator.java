@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opencb.biodata.models.variant.Variant;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -13,6 +12,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,12 +21,10 @@ import java.util.List;
  */
 public class VariantSNPAnnotator implements VariantAnnotator {
 
-    private Client wsRestClient;
     private WebTarget webResource;
 
     public VariantSNPAnnotator() {
-        wsRestClient = ClientBuilder.newClient();
-        webResource = wsRestClient.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/genomic/position");
+        webResource = ClientBuilder.newClient().target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/genomic/position");
     }
 
     @Override
@@ -81,7 +79,7 @@ public class VariantSNPAnnotator implements VariantAnnotator {
 
     @Override
     public void annot(Variant elem) {
+        annot(Arrays.asList(elem));
     }
-
 
 }
