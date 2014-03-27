@@ -108,7 +108,9 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         for(int i = 0; i < chunkSize; i++){
             alignmentList.add(prevAlignment);   //The prevAlignment is ready to be added.
             if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){
-                end = prevAlignment.getUnclippedEnd();  //Update the end only if is a valid segment.
+                if(end < prevAlignment.getUnclippedEnd()){
+                    end = prevAlignment.getUnclippedEnd();  //Update the end only if is a valid segment.
+                }
             }
 
             //Read new alignment.
@@ -121,15 +123,14 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
             }
 
             //Second stop condition: Too big Region.
-            if((prevAlignment.getFlags() & Alignment.SEGMENT_UNMAPPED) == 0){   //If it's a Mapped segment
-                if((prevAlignment.getUnclippedEnd() - start) > maxSequenceSize ){
-                    if( prevAlignment.getUnclippedStart() > alignmentList.get(i).getUnclippedEnd()){
-                        //The start of the prevAlignment doesn't overlap with the end of the last inserted Alignment
-                        overlappedEnd = false;
-                    }
-                    break;
+            if((end - start) > maxSequenceSize){
+                if(prevAlignment.getUnclippedStart() > end){
+                    //The start of the prevAlignment doesn't overlap with the end of the last inserted Alignment
+                    overlappedEnd = false;
                 }
+                break;
             }
+
         }
 
         if(prevAlignment != null){

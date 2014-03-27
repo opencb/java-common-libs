@@ -180,12 +180,17 @@ public class Alignment {
     }
 
     public boolean completeDifferences(String referenceSequence){
-        return completeDifferences(referenceSequence, 0);
+        return completeDifferences(referenceSequence, unclippedStart);
     }
-    public boolean completeDifferences(String referenceSequence, int offset){
+    public boolean completeDifferences(String referenceSequence, long referenceSequenceStart){
+        int offset = (int) (unclippedStart - referenceSequenceStart);
         for(AlignmentDifference alignmentDifference : differences){
-            if(alignmentDifference.getSeq() == null || !alignmentDifference.isAllSequenceStored()){
-                try{
+            if(alignmentDifference.getSeq() == null
+                    || !alignmentDifference.isAllSequenceStored()
+                    || alignmentDifference.getOp() == AlignmentDifference.MISMATCH
+                    || alignmentDifference.getOp() == AlignmentDifference.SKIPPED_REGION)
+            {
+                try {
                     alignmentDifference.setSeq(
                             referenceSequence.substring(
                                     alignmentDifference.getPos() + offset,

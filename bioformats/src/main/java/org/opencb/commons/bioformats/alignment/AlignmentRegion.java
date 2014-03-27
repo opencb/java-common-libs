@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.alignment;
 
 import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
 import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
+import org.opencb.commons.bioformats.feature.Region;
 
 import java.util.List;
 
@@ -106,6 +107,10 @@ public class AlignmentRegion {
     public void setMeanCoverage(List<MeanCoverage> meanCoverage) {
 
         this.meanCoverage = meanCoverage;
+    }
+
+    public Region getRegion(){
+        return new Region(chromosome, start, end);
     }
 
 
