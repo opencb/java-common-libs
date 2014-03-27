@@ -12,8 +12,8 @@ import java.util.List;
 public class AlignmentRegion {
 
     private String chromosome;
-    private long start;     //Start of the first Alignment
-    private long end;       //End of the last Alignment
+    private long start;     //Unclipped Start of the first Alignment
+    private long end;       //Unclipped End of the last Alignment
     private boolean overlapEnd;     //Indicates if the last alignment is overlapped with the next alignment
 
     private List<Alignment> alignments;     //Sorted Alignments
@@ -35,8 +35,8 @@ public class AlignmentRegion {
         //if(!firstAlignment.getChromosome().equals(lastAlignment.getChromosome())) //TODO jcoll: Limit this
             //System.out.println("All alignments must be in the same chromosome");
         this.chromosome = firstAlignment.getChromosome();
-        this.start = firstAlignment.getStart();
-        this.end = lastAlignment.getEnd();
+        this.start = firstAlignment.getUnclippedStart();
+        this.end = lastAlignment.getUnclippedEnd();
         this.alignments = alignments;
         this.coverage = null;
     }
