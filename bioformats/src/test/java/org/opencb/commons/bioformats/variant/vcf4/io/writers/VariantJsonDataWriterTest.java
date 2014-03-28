@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.variant.vcf4.io.writers;
 import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.VariantSource;
 import org.opencb.commons.bioformats.variant.effect.EffectCalculator;
 import org.opencb.commons.bioformats.variant.stats.StatsCalculator;
 import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantReader;
@@ -24,7 +25,7 @@ public class VariantJsonDataWriterTest {
     public void testName() throws Exception {
 
         VariantReader reader = new VariantVcfReader(inputFile);
-        VariantWriter writer = new VariantJsonDataWriter("/home/aaleman/Documents/pruebas/json/out.json");
+        VariantWriter writer = new VariantJsonDataWriter(new VariantSource("TEST", "ALIAS", "DESC", null, null), "/home/aaleman/Documents/pruebas/json/out.json");
 
         writer.includeStats(true);
         writer.includeSamples(true);

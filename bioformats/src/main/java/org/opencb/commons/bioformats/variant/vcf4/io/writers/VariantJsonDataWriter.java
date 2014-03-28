@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.opencb.commons.bioformats.feature.Genotype;
 import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.VariantSource;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 
 import java.io.*;
@@ -22,20 +23,22 @@ public class VariantJsonDataWriter implements VariantWriter {
     private String filename;
     private JsonFactory f;
     private JsonGenerator g;
-    private boolean gzip;
+    private boolean gzip = true;
 
     private boolean includeSamples = false;
     private boolean includeStats = false;
     private boolean includeEffect = false;
+    private VariantSource source;
 
-    public VariantJsonDataWriter(String filename) {
-        this(filename, false);
+    public VariantJsonDataWriter(VariantSource source, String filename) {
+        this(source, filename, false);
     }
 
-    public VariantJsonDataWriter(String filename, boolean gzip) {
-        this.filename = filename;
+    public VariantJsonDataWriter(VariantSource source, String filename, boolean gzip) {
         this.f = new JsonFactory();
+        this.filename = filename;
         this.gzip = gzip;
+        this.source = source;
     }
 
     @Override
@@ -62,13 +65,10 @@ public class VariantJsonDataWriter implements VariantWriter {
 
         try {
             if (this.gzip) {
-                writer = new PrintWriter(new GZIPOutputStream(new FileOutputStream(this.filename)));
-            } else {
+                writer = new PrintWriter(new Gk
                 writer = new PrintWriter(filename);
             }
-
             g = f.createGenerator(writer);
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             res = false;
@@ -94,7 +94,10 @@ public class VariantJsonDataWriter implements VariantWriter {
     @Override
     public boolean pre() {
         boolean res = true;
-        g.useDefaultPrettyPrinter();
+
+        if (!this.gzip) {
+            g.useDefaultPrettyPrinter();
+        }
         try {
             g.writeStartArray();
         } catch (IOException e) {
@@ -118,11 +121,11 @@ public class VariantJsonDataWriter implements VariantWriter {
 
     @Override
     public boolean write(Variant elem) {
+        return writeJson(elem);
+    }
 
+    private boolean writeJson(Variant elem) {
         boolean res = true;
-
-//        VariantJson v = new VariantJson(elem);
-
 
         try {
             g.writeStartObject();
@@ -148,7 +151,7 @@ public class VariantJsonDataWriter implements VariantWriter {
                     g.writeEndObject();
                 }
 
-                g.writeEndObject();
+                g.writeEndObject(); // Samples
             }
 
             if (this.includeEffect && elem.getEffect() != null) {
@@ -192,29 +195,26 @@ public class VariantJsonDataWriter implements VariantWriter {
                 for (Genotype genotype : elem.getStats().getGenotypes()) {
                     g.writeNumberField(genotype.getGenotype(), genotype.getCount());
                 }
-                g.writeEndObject();
-
-                g.writeEndObject();
+                g.writeEndObject(); // Genotypes
+                g.writeEndObject(); // Stats
             }
 
-
+            g.writeStringField("source", this.source.getAlias());
             g.writeEndObject();
         } catch (IOException e) {
             e.printStackTrace();
             res = false;
         }
-
         return res;
     }
 
     @Override
     public boolean write(List<Variant> batch) {
 
+        boolean res = true;
         for (Variant v : batch) {
-            this.write(v);
+            res &= this.write(v);
         }
-        return true;
+        return res;
     }
-
-
 }
