@@ -182,7 +182,11 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         return alignmentRegionList;
     }
 
-
+    /**
+     * Set maximum size for the AlignmentRegion from the start of the first alignment, to the end of the last alignment.
+     *
+     * @param maxSequenceSize Maximum size
+     */
     public void setMaxSequenceSize(int maxSequenceSize) {
         this.maxSequenceSize = maxSequenceSize;
     }
@@ -191,6 +195,11 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
         return chunkSize;
     }
 
+    /**
+     * Set maximum number of Alignments in the AlignmentRegion result
+     *
+     * @param chunkSize Chunk Size
+     */
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
     }

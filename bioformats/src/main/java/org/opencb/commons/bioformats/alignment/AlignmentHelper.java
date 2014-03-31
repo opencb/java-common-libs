@@ -189,8 +189,9 @@ public class AlignmentHelper {
                         alignmentDifference.setSeq(subRef);
                         currentDifference = alignmentDifference;
                         break;
-                    case Alignment.AlignmentDifference.INSERTION:
                     case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                        offset -= alignmentDifference.getLength();
+                    case Alignment.AlignmentDifference.INSERTION:
                     case Alignment.AlignmentDifference.PADDING:
 
 
