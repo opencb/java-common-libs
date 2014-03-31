@@ -21,6 +21,7 @@ public class AlignmentRegion {
     private RegionCoverage coverage;
     private List<MeanCoverage> meanCoverage;
     //private byte[] referenceSequence;
+    private Alignment modeAlignment;
 
     public AlignmentRegion() {
     }
@@ -113,5 +114,11 @@ public class AlignmentRegion {
         return new Region(chromosome, start, end);
     }
 
+    public Alignment getModeAlignment() {
+        return modeAlignment;
+    }
 
+    public void setModeAlignment(Alignment modeAlignment) {
+        this.modeAlignment = modeAlignment;
+    }
 }
