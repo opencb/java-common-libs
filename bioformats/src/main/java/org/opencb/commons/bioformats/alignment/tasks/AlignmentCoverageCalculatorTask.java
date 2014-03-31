@@ -1,7 +1,8 @@
-package org.opencb.commons.bioformats.alignment.stats;
+package org.opencb.commons.bioformats.alignment.tasks;
 
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
+import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
 import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
 import org.opencb.commons.run.Task;
 

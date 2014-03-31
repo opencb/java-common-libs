@@ -1,4 +1,4 @@
-package org.opencb.commons.bioformats.alignment.stats;
+package org.opencb.commons.bioformats.alignment.tasks;
 
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentHelper;

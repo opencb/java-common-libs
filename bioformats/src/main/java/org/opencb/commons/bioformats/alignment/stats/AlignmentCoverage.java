@@ -7,6 +7,7 @@ package org.opencb.commons.bioformats.alignment.stats;
  * Time: 6:14 PM
  * To change this template use File | Settings | File Templates.
  */
+@Deprecated
 public class AlignmentCoverage {
 
     private String chromosome;

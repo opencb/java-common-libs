@@ -14,6 +14,7 @@ import java.util.List;
  * Time: 5:48 PM
  * To change this template use File | Settings | File Templates.
  */
+@Deprecated
 public class AlignmentCoverageCalculator {
 
     private IncrementalList list;
