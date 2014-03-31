@@ -6,11 +6,7 @@ import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 11/20/13
- * Time: 1:19 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class Variant {
     private String chromosome;
@@ -30,10 +26,11 @@ public class Variant {
     private Map<String, String> attributes;
 
     public Variant(String chromosome, int position, String reference, String alternate) {
-        this.chromosome = chromosome;
-        this.position = position;
-        this.reference = reference;
-        this.alternate = alternate;
+        this.setChromosome(chromosome);
+        this.setPosition(position);
+        this.setReference(reference);
+        this.setAlternate(alternate);
+
         this.samplesData = new LinkedHashMap<>();
         this.effect = new LinkedList<>();
         this.attributes = new LinkedHashMap<>();
@@ -43,15 +40,19 @@ public class Variant {
         return chromosome;
     }
 
-    public void setChromosome(String chromosome) {
-        this.chromosome = chromosome;
+    public final void setChromosome(String chromosome) {
+        this.chromosome = chromosome.replaceAll("chrom | chrm | chr | ch", "");
     }
 
     public int getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
+    public final void setPosition(int position) {
+        if (position < 0) {
+            throw new IllegalArgumentException("Position must be positive");
+        }
+
         this.position = position;
     }
 
@@ -59,7 +60,7 @@ public class Variant {
         return reference;
     }
 
-    public void setReference(String reference) {
+    public final void setReference(String reference) {
         this.reference = reference;
     }
 
@@ -67,7 +68,7 @@ public class Variant {
         return alternate;
     }
 
-    public void setAlternate(String alternate) {
+    public final void setAlternate(String alternate) {
         this.alternate = alternate;
     }
 
@@ -84,7 +85,7 @@ public class Variant {
     }
 
     public void setFormat(String format) {
-        this.format = format;
+       this.format = format;
     }
 
     public Map<String, Map<String, String>> getSamplesData() {
