@@ -104,8 +104,8 @@ public class VariantGeneFilter extends VariantFilter {
                             JsonNode auxNode = aux.next();
 
                             String chr = auxNode.get("chromosome").asText();
-                            long start = auxNode.get("start").asLong();
-                            long end = auxNode.get("end").asLong();
+                            int start = auxNode.get("start").asInt();
+                            int end = auxNode.get("end").asInt();
 
                             Region r = new Region(chr, start, end);
                             regionList.add(r);

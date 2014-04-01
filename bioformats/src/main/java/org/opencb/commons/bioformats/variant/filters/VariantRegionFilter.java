@@ -13,13 +13,13 @@ public class VariantRegionFilter extends VariantFilter {
 
     private List<Region> regionList;
 
-    public VariantRegionFilter(String chromosome, long start, long end) {
+    public VariantRegionFilter(String chromosome, int start, int end) {
         super();
         regionList = new ArrayList<>();
         regionList.add(new Region(chromosome, start, end));
     }
 
-    public VariantRegionFilter(String chromosome, long start, long end, int priority) {
+    public VariantRegionFilter(String chromosome, int start, int end, int priority) {
         super(priority);
         regionList = new ArrayList<>();
         regionList.add(new Region(chromosome, start, end));

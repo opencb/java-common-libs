@@ -103,10 +103,10 @@ public class VariantInfo {
         this.stats_maf = stat.getMaf();
         this.stats_mgf = stat.getMgf();
         this.stats_allele_maf = stat.getMafAllele();
-        this.stats_genotype_maf = stat.getMgfAllele();
+        this.stats_genotype_maf = stat.getMgfGenotype();
         this.stats_miss_allele = stat.getMissingAlleles();
         this.stats_miss_gt = stat.getMissingGenotypes();
-        this.stats_mendel_err = stat.getMendelinanErrors();
+        this.stats_mendel_err = stat.getMendelianErrors();
         this.stats_is_indel = stat.isIndel();
         this.stats_cases_percent_dominant = stat.getCasesPercentDominant();
         this.stats_controls_percent_dominant = stat.getControlsPercentDominant();
