@@ -51,7 +51,7 @@ public class AlignmentHelperTest {
         List<CigarElement> elements = null;
         List expResult = null, result = null;
         String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTT"; // 80 nt
-        
+        String readSequence = "AAAACCCCGGGGTTTTAAAANCCCCGGGGTTTTAAAACCCC";
         // 20M1I20M - middle
         System.out.println("20M1I20M");
         elements = new LinkedList<>();
@@ -59,7 +59,7 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(1, CigarOperator.I));
         elements.add(new CigarElement(20, CigarOperator.M));
         record.setCigar(new Cigar(elements));
-        record.setReadString("AAAACCCCGGGGTTTTAAAANCCCCGGGGTTTTAAAACCCC");
+        record.setReadString(readSequence);
         
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(20, Alignment.AlignmentDifference.INSERTION, "N"));
@@ -71,7 +71,7 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        //CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
 
         // 3I10M2I10M5I30M1I - beginning, middle and end
         System.out.println("3I10M2I10M5I30M1I");
@@ -84,7 +84,8 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(30, CigarOperator.M));
         elements.add(new CigarElement(1, CigarOperator.I));
         record.setCigar(new Cigar(elements));
-        record.setReadString("GGGAAAACCCCGGACGGTTTTAAAAGTGTGCCCCGGGGTTTTAAAACCCCGGGGTTTTAAN");
+        readSequence = "GGGAAAACCCCGGACGGTTTTAAAAGTGTGCCCCGGGGTTTTAAAACCCCGGGGTTTTAAN";
+        record.setReadString(readSequence);
 
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.INSERTION, "GGG"));
@@ -99,7 +100,7 @@ public class AlignmentHelperTest {
                         expResult.get(i).equals(result.get(i)));
         }
 
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
     }
     
     
@@ -112,6 +113,7 @@ public class AlignmentHelperTest {
         List<CigarElement> elements = null;
         List expResult = null, result = null;
         String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCCGGGGTTTT"; // 80 nt
+        String readSequence = "AAAACCCCGGGGTTTTAAAACCGGGGTTTTAAAACCCC";
         
         // 20M2D18M - middle
         System.out.println("20M2D18M");
@@ -120,7 +122,7 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(2, CigarOperator.D));
         elements.add(new CigarElement(18, CigarOperator.M));
         record.setCigar(new Cigar(elements));
-        record.setReadString("AAAACCCCGGGGTTTTAAAACCGGGGTTTTAAAACCCC");
+        record.setReadString(readSequence);
         
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(20, Alignment.AlignmentDifference.DELETION, "CC"));
@@ -131,7 +133,7 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
         
         // 3D10M2D10M5D19M - beginning and middle 
         System.out.println("3D10M2D10M5D19M");
@@ -143,7 +145,8 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(5, CigarOperator.D));
         elements.add(new CigarElement(20, CigarOperator.M));
         record.setCigar(new Cigar(elements));
-        record.setReadString("ACCCCGGGGTTAAAACCCCGTTAAAACCCCGGGGTTTTAA");
+        readSequence = "ACCCCGGGGTTAAAACCCCGTTAAAACCCCGGGGTTTTAA";
+        record.setReadString(readSequence);
         
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.DELETION, "AAA"));
@@ -156,7 +159,7 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
         
         // TODO Test deletion at the end? Does it make sense?
     }
@@ -171,6 +174,7 @@ public class AlignmentHelperTest {
         List<CigarElement> elements = null;
         List expResult = null, result = null;
         String referenceSequence = "AAAACCCCGGGGTTTTAAAACCCCGGGGTTTTAAAACCCC"; // 40 nt
+        String readSequence =      "ACAACGGGTGGGTTTTAAAACCGGGGTTTAAAAACCGT";
         
         // 20M2D18M - middle and end
         System.out.println("20M2D18M");
@@ -179,7 +183,7 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(2, CigarOperator.D));
         elements.add(new CigarElement(18, CigarOperator.M));
         record.setCigar(new Cigar(elements));
-        record.setReadString("ACAACGGGTGGGTTTTAAAACCGGGGTTTAAAAACCGT");
+        record.setReadString(readSequence);
         
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(1, Alignment.AlignmentDifference.MISMATCH, "C"));
@@ -194,7 +198,7 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
     }
 
 
@@ -206,20 +210,50 @@ public class AlignmentHelperTest {
         SAMRecord record = new SAMRecord(new SAMFileHeader());
         List<CigarElement> elements = null;
         List expResult = null, result = null;
-        String referenceSequence = "AAAACCCCGGGGTTTTAAAACC"; // 22 nt
-        
+        String referenceSequence;
+        String readSequence;
+
+
         // 2H20M8S - start (hard) and end (soft)
+        referenceSequence = "AAAACCCCGGGGTTTTAAAACC"; // 22 nt
+        readSequence=         "AACCCCGGGGTTTTAAAACCCCGGGGTT";
         System.out.println("2H20M8S");
         elements = new LinkedList<>();
         elements.add(new CigarElement(2, CigarOperator.H));
         elements.add(new CigarElement(20, CigarOperator.M));
         elements.add(new CigarElement(8, CigarOperator.S));
         record.setCigar(new Cigar(elements));
-        record.setReadString("AACCCCGGGGTTTTAAAACCCCGGGGTT");
+        record.setReadString(readSequence);
 
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.HARD_CLIPPING, "AA"));
         expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.SOFT_CLIPPING, "CCGGGGTT"));
+        result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
+//        for (int i = 0; i < result.size(); i++) {
+//            System.out.println(result.get(i).toString());
+//        }
+//        assertEquals(expResult.size(), result.size());
+
+        for (int i = 0; i < result.size(); i++) {
+            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
+                        expResult.get(i).equals(result.get(i)));
+        }
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
+
+        // 2S20M10H - start (soft) and end (hard)
+        referenceSequence = "GTAAAACCCCGGGGTTTTAAAACC";
+        readSequence = "GTAAAACCCCGGGGTTTTAAAA";
+        System.out.println("2S20M10H");
+        elements = new LinkedList<>();
+        elements.add(new CigarElement(2, CigarOperator.S));
+        elements.add(new CigarElement(20, CigarOperator.M));
+        elements.add(new CigarElement(2, CigarOperator.H));
+        record.setCigar(new Cigar(elements));
+        record.setReadString(readSequence);
+         
+        expResult = new LinkedList<>();
+        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.SOFT_CLIPPING, 2));  //We expect don't save que SoftClipping if it's equal to the reference
+        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
 //        for (int i = 0; i < result.size(); i++) {
 //            System.out.println(result.get(i).toString());
@@ -230,33 +264,9 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
-
-        // 2S20M10H - start (soft) and end (hard)
-        System.out.println("2S20M10H");
-        elements = new LinkedList<>();
-        elements.add(new CigarElement(2, CigarOperator.S));
-        elements.add(new CigarElement(20, CigarOperator.M));
-        elements.add(new CigarElement(2, CigarOperator.H));
-        record.setCigar(new Cigar(elements));
-        record.setReadString("GTAAAACCCCGGGGTTTTAAAA");
-         
-        expResult = new LinkedList<>();
-        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.SOFT_CLIPPING, "GT"));
-        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
-        result = AlignmentHelper.getDifferencesFromCigar(record, "GTAAAACCCCGGGGTTTTAAAACC");
-//        for (int i = 0; i < result.size(); i++) {
-//            System.out.println(result.get(i).toString());
-//        }
-        assertEquals(expResult.size(), result.size());
-        
-        for (int i = 0; i < result.size(); i++) {
-            assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
-                        expResult.get(i).equals(result.get(i)));
-        }
 
 
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
     }
     
     /**
@@ -268,6 +278,7 @@ public class AlignmentHelperTest {
         List<CigarElement> elements = null;
         List expResult = null, result = null;
         String referenceSequence = "AGATAAGATA"; // 10 nt
+        String readSequence = "AGATAAGGATA";
         
         // 6M1P1I4M - middle (padding and insert)
         System.out.println("6M1P1I4M");
@@ -277,7 +288,7 @@ public class AlignmentHelperTest {
         elements.add(new CigarElement(1, CigarOperator.I));
         elements.add(new CigarElement(4, CigarOperator.M));
         record.setCigar(new Cigar(elements));
-        record.setReadString("AGATAAGGATA");
+        record.setReadString(readSequence);
          
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.PADDING, ""));
@@ -292,13 +303,13 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + result.get(i).toString(),
                         expResult.get(i).equals(result.get(i)));
         }
-        CompleteDifferencesFromReferenceTest(record, referenceSequence, expResult); //JJ Added test
+        CompleteDifferencesFromReferenceTest(record, referenceSequence, readSequence, expResult); //JJ Added test
     }
 
 
 
 
-    private void CompleteDifferencesFromReferenceTest(SAMRecord record, String referenceSequence, List<Alignment.AlignmentDifference> expResult){
+    private void CompleteDifferencesFromReferenceTest(SAMRecord record, String referenceSequence, String readSequence, List<Alignment.AlignmentDifference> expResult){
         Alignment alignment = new Alignment(record, null);
         AlignmentHelper.completeDifferencesFromReference(alignment,referenceSequence,alignment.getUnclippedStart());
 
@@ -308,6 +319,9 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + alignment.getDifferences().get(i).toString(),
                     expResult.get(i).equals(alignment.getDifferences().get(i)));
         }
+
+        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(expResult, readSequence.length(), referenceSequence);
+        assertEquals("getSequenceFromDifferences bad result. ", readSequence, sequenceFromDifferences);
     }
 
 
