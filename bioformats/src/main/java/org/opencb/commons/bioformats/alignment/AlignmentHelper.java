@@ -118,7 +118,18 @@ public class AlignmentHelper {
                     break;
                 case S:
                     subread = record.getReadString().substring(index, index + cigarLen);
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
+
+
+                    if (refStr == null || index+cigarLen > refStr.length()) {
+                        currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
+                    } else {
+                        subref = refStr.substring(index, index+cigarLen);
+                        if(subread.equals(subref)){
+                            currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, cigarLen);
+                        } else {
+                            currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.SOFT_CLIPPING, subread);
+                        }
+                    }
                     index = index + cigarLen;
                     indexRef = indexRef + cigarLen;
                     break;
@@ -189,8 +200,18 @@ public class AlignmentHelper {
                         alignmentDifference.setSeq(subRef);
                         currentDifference = alignmentDifference;
                         break;
-                    case Alignment.AlignmentDifference.INSERTION:
                     case Alignment.AlignmentDifference.SOFT_CLIPPING:
+                        if(!alignmentDifference.isAllSequenceStored()){
+                            subRef = referenceSequence.substring(
+                                alignmentDifference.getPos() + offset,
+                                alignmentDifference.getPos() + offset + alignmentDifference.getLength()
+                            );
+                            alignmentDifference.setSeq(subRef);
+                        }
+                        currentDifference = alignmentDifference;
+                        break;
+                        //offset -= alignmentDifference.getLength();
+                    case Alignment.AlignmentDifference.INSERTION:
                     case Alignment.AlignmentDifference.PADDING:
 
 
@@ -252,9 +273,7 @@ public class AlignmentHelper {
 
 
 
-    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
-        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, 0);
-    }
+
     public static Cigar getCigarFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize){
 
         Cigar cigar = new Cigar();
@@ -313,31 +332,44 @@ public class AlignmentHelper {
 
         return cigar;
     }
-    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, int offset){
+
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
+        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, 0);
+    }
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, final int offset){
 
         String sequence = "";
+        String subSeq;
         int index = 0;
         int indexRef = offset;
 
         for(Alignment.AlignmentDifference alignmentDifference : differences){
            // CigarOperator cigarOperator = null;
-
-            if(index < alignmentDifference.getPos()){
-                System.out.println("Sequence : " + sequence + " + " + (alignmentDifference.getPos()-index) + "M" + " indexRef="+indexRef);
+            if(indexRef < alignmentDifference.getPos()){
+                subSeq = referenceSequence.substring(indexRef, offset+alignmentDifference.getPos());
+                //System.out.println("Sequence : " + sequence + " + " + subSeq.length() + "M" +" indexRef="+indexRef + " index="+index + " seq= " + subSeq);
                // cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
-                sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getPos()-index);
-                indexRef += alignmentDifference.getPos()-index;
-                index    += alignmentDifference.getPos()-index;
+                sequence += subSeq;
+                indexRef += subSeq.length();
+                index    += subSeq.length();
             } else if(index > alignmentDifference.getPos()) {
                 System.out.println("[ERROR] BAD DIFFERENCES ");
             }
-            System.out.println("Sequence2: " + sequence + " + " + alignmentDifference.getLength()+alignmentDifference.getOp() + " indexRef="+indexRef);
+            //System.out.println("Sequence2: " + sequence + " + " + alignmentDifference.getLength()+alignmentDifference.getOp() + " indexRef="+indexRef + " index="+index + " seq= " + alignmentDifference.getSeq());
 
 
             switch (alignmentDifference.getOp()){
                 case Alignment.AlignmentDifference.INSERTION:
               //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
-                    sequence += alignmentDifference.getSeq();
+
+                    if(alignmentDifference.isAllSequenceStored()){
+                        sequence += alignmentDifference.getSeq();
+                    } else {
+                        System.out.println("[WARNING] Missing insertion information");
+                        for(int i = 0; i < alignmentDifference.getLength(); i++){
+                            sequence += '*';
+                        }
+                    }
                     index += alignmentDifference.getLength();
                     break;
 
@@ -349,15 +381,23 @@ public class AlignmentHelper {
 
                 case Alignment.AlignmentDifference.MISMATCH:
               //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
-                    sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
 
+                    if(alignmentDifference.isAllSequenceStored()){
+                        sequence += alignmentDifference.getSeq();
+                    } else {
+                        sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
+                    }
                     indexRef += alignmentDifference.getLength();
                     index += alignmentDifference.getLength();
                     break;
 
                 case Alignment.AlignmentDifference.SOFT_CLIPPING:
               //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
-                    sequence += alignmentDifference.getSeq();
+                    if(alignmentDifference.isAllSequenceStored()) {
+                        sequence += alignmentDifference.getSeq();
+                    } else {
+                        sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
+                    }
 
                     indexRef += alignmentDifference.getLength();
                     index += alignmentDifference.getLength();
@@ -365,6 +405,7 @@ public class AlignmentHelper {
 
                 case Alignment.AlignmentDifference.HARD_CLIPPING:
               //      cigarOperator = CigarOperator.HARD_CLIP;
+                    indexRef += alignmentDifference.getLength();    //Increases the position in reference, but not in sequence. Hard clipping is not stored
                     break;
 
                 case Alignment.AlignmentDifference.SKIPPED_REGION:
@@ -383,10 +424,10 @@ public class AlignmentHelper {
 
         }
 
-        if(index < sequenceSize){
+        if(sequence.length() < sequenceSize){
           //  cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
-            System.out.println(indexRef + " " + (indexRef+sequenceSize-index));
-            sequence += referenceSequence.substring(indexRef, indexRef+sequenceSize-index);
+            System.out.println(sequence.length() + " " + sequenceSize);
+            sequence += referenceSequence.substring(indexRef, indexRef + sequenceSize - sequence.length());
         } else if(index > sequenceSize) {
             System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
         }
