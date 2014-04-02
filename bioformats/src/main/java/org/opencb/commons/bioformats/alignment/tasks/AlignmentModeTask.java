@@ -34,7 +34,7 @@ public class AlignmentModeTask extends Task<AlignmentRegion> {
     /**/private int mateAlignmentStart;
     /**/private int inferredInsertSize;
     /**/private List<Alignment.AlignmentDifference> differences;
-    /**/private Map<String, String> attributes;
+    /**/private Map<String, Object> attributes;
     private Map<Integer, Integer> flagsMap;
 
     @Override
