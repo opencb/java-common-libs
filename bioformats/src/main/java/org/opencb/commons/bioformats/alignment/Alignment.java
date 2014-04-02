@@ -113,10 +113,10 @@ public class Alignment {
         }
     }
 
-    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence){
+    public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence){
         return createSAMRecord(samFileHeader, referenceSequence, start);
     }
-    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition){
+    public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition){
         SAMRecord samRecord = new SAMRecord(samFileHeader);
 
         samRecord.setReadName(name);

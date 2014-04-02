@@ -27,7 +27,6 @@ public class AlignmentModeTaskTest extends GenericTest {
         AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/home/josemi/Documents/alignments/small.sam");
         AlignmentRegionDataReader alignmentRegionDataReader = new AlignmentRegionDataReader(alignmentSamDataReader, 900);
 
-
         List<Task<AlignmentRegion>> tasks = new LinkedList<>();
         AlignmentModeTask alignmentModeTask = new AlignmentModeTask();
 

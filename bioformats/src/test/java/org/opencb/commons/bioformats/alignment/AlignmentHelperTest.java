@@ -304,6 +304,24 @@ public class AlignmentHelperTest {
     }
 
     @Test
+    public void getSequenceFromDifferencesTest(){
+        //String cigar = "40S7M1D53M";
+        
+        List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
+        differenceList.add(new Alignment.AlignmentDifference(0,'H', 8));
+        differenceList.add(new Alignment.AlignmentDifference(0,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
+        differenceList.add(new Alignment.AlignmentDifference(47,'D', 1));
+        differenceList.add(new Alignment.AlignmentDifference(53,'I', "XXXX"));
+        String readSequence = "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTGATAAGATTTTTTXXXXTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCA";
+        String referenceSequence = "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTGATAAGATTTTTTTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCAA";
+
+        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, readSequence.length(), referenceSequence);
+        System.out.println("reference: " + referenceSequence);
+        System.out.println("read     : " + readSequence);
+        System.out.println("reconstru: " + sequenceFromDifferences);
+        assertEquals("reconstructed sequence should equal to the read ", sequenceFromDifferences, readSequence);
+    }
+    @Test
     public void getCigarFromDifferencesTest(){
         List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
         differenceList.add(new Alignment.AlignmentDifference(3,'D', 3));
@@ -323,8 +341,10 @@ public class AlignmentHelperTest {
 
 
 
+    @Ignore
     @Test
     public void AlignmentToSAMTest(){
+        /*
         AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/tmp/small.sam");
         AlignmentSamDataWriter alignmentSamDataWriter = new AlignmentSamDataWriter("/tmp/exit.sam");
 
@@ -379,6 +399,6 @@ public class AlignmentHelperTest {
         alignmentSamDataWriter.post();
         alignmentSamDataWriter.close();
         System.out.println(rSequence);
+*/
     }
-
 }
