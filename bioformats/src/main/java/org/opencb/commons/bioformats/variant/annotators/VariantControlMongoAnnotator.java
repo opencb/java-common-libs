@@ -13,6 +13,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,68 +32,63 @@ public class VariantControlMongoAnnotator implements VariantAnnotator {
         WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/controlsws/rest/");
 
         StringBuilder chunkVariants = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#.####");
         for (Variant record : batch) {
             chunkVariants.append(record.getChromosome()).append(":");
             chunkVariants.append(record.getPosition()).append(":");
             chunkVariants.append(record.getReference()).append(":");
-            chunkVariants.append(record.getAlternate()).append(",");
+            chunkVariants.append(record.getAltAlleles()[0]).append(",");
         }
 
         Form form = new Form();
         form.param("positions", chunkVariants.substring(0, chunkVariants.length() - 1));
-
         Response response = webTarget.path("variants").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-
         ObjectMapper mapperNew = new ObjectMapper();
-
         JsonNode actualObj;
-
-        String resp = null;
-
+        String resp;
         try {
             resp = response.readEntity(String.class);
-
             actualObj = mapperNew.readTree(resp);
-
-            Iterator<JsonNode> it = actualObj.get("result").iterator();
-
+            Iterator<JsonNode> it = actualObj.get("response").iterator();
             int i = 0;
             while (it.hasNext()) {
                 JsonNode aa = it.next();
-                System.out.println(aa);
-                if (aa.has("studies")) {
+                int numResult = aa.get("numResults").asInt();
+                if (numResult == 1) {
 
-
-                    Iterator<JsonNode> itStudies = aa.get("studies").iterator();
-
+                    Iterator<JsonNode> itResults = aa.get("result").iterator();
                     Variant v = batch.get(i);
-                    v.addAttribute(aa.get("studies").get("studyId").asText() + "_maf", "" + aa.get("studies").get("stats").get("maf").asDouble());
-                    v.addAttribute(aa.get("studies").get("studyId").asText() + "_amaf", "" + aa.get("studies").get("stats").get("alleleMaf").asText());
+                    while (itResults.hasNext()) {
+                        JsonNode elem = itResults.next();
 
-                    List<String> gts = new ArrayList<>();
-                    Iterator<Map.Entry<String, JsonNode>> gtIt = aa.get("studies").get("stats").get("genotypeCount").fields();
-                    while (gtIt.hasNext()) {
-                        Map.Entry<String, JsonNode> elem = gtIt.next();
-                        String aux = elem.getKey() + ":" + elem.getValue().asInt();
-                        gts.add(aux);
+                        if (elem.has("sources")) {
+                            Iterator<JsonNode> itSources = elem.get("sources").iterator();
+                            while (itSources.hasNext()) {
+                                JsonNode source = itSources.next();
+
+                                List<String> gts = new ArrayList<>();
+                                Iterator<Map.Entry<String, JsonNode>> gtIt = source.get("stats").get("genotypeCount").fields();
+                                while (gtIt.hasNext()) {
+                                    Map.Entry<String, JsonNode> gtElem = gtIt.next();
+                                    String aux = gtElem.getKey() + ":" + gtElem.getValue().asInt();
+                                    gts.add(aux);
+                                }
+                                v.addAttribute(source.get("sourceId").asText() + "_maf", "" + df.format(source.get("stats").get("maf").asDouble()));
+                                v.addAttribute(source.get("sourceId").asText() + "_amaf", "" + source.get("stats").get("alleleMaf").asText());
+                                v.addAttribute(source.get("sourceId").asText() + "_gt", Joiner.on(",").join(gts));
+                            }
+                        }
                     }
-
-                    v.addAttribute(aa.get("studies").get("studyId").asText() + "_gt", Joiner.on(",").join(gts));
-
                 }
-
                 i++;
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
     public void annot(Variant elem) {
-
     }
 }

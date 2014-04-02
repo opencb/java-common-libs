@@ -64,45 +64,20 @@ public class EffectCalculator {
         return batchEffect;
     }
 
-    public static List<VariantEffect> getEffectsWithPolyPhenAndSift(List<Variant> batch) {
-        ObjectMapper mapper = new ObjectMapper();
-        List<VariantEffect> batchEffect = new ArrayList<>(batch.size());
 
-        if (batch.size() == 0) {
-            return batchEffect;
-        }
+    public static List<VariantEffect> getEffectsWithPolyphenAndSift(List<Variant> batch) {
 
-        StringBuilder chunkVcfRecords = new StringBuilder();
-        Client client = Client.create();
-        WebResource webResource = client.resource("http://ws-beta.bioinfo.cipf.es/cellbase-staging/rest/latest/hsa/genomic/variant/");
+        List<VariantEffect> batchEffect = getEffects(batch);
+
+        getPolyphenSift(batchEffect);
+
+        return batchEffect;
+    }
+
+    private static void getPolyphenSift(List<VariantEffect> batchEffect) {
 
         javax.ws.rs.client.Client clientNew = ClientBuilder.newClient();
         WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/cellbase/rest/v3/hsapiens/feature/transcript/");
-
-        for (Variant record : batch) {
-            for (String alt : record.getAltAlleles()) {
-                chunkVcfRecords.append(record.getChromosome()).append(":");
-                chunkVcfRecords.append(record.getPosition()).append(":");
-                chunkVcfRecords.append(record.getReference()).append(":");
-                chunkVcfRecords.append(alt).append(",");
-            }
-        }
-
-        FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
-        formDataMultiPart.field("variants", chunkVcfRecords.substring(0, chunkVcfRecords.length() - 1));
-
-//        Response response = webTarget.path("consequence_type").queryParam("of", "json").request(MediaType.APPLICATION_JSON_TYPE).post(Entity.entity(formDataMultiPart.toString(), MediaType.MULTIPART_FORM_DATA_TYPE));
-        String response = webResource.path("consequence_type").queryParam("of", "json").type(MediaType.MULTIPART_FORM_DATA).post(String.class, formDataMultiPart);
-
-        // TODO aaleman: Check the new Web Service
-
-        try {
-            batchEffect = mapper.readValue(response.toString(), mapper.getTypeFactory().constructCollectionType(List.class, VariantEffect.class));
-        } catch (IOException e) {
-            System.err.println(chunkVcfRecords.toString());
-            e.printStackTrace();
-        }
-
 
         javax.ws.rs.core.Response newResponse;
         double ss, ps;
@@ -173,7 +148,6 @@ public class EffectCalculator {
 
         }
 
-        return batchEffect;
     }
 
     public static List<List<VariantEffect>> getEffectPerVariant(List<Variant> batch) {
@@ -189,12 +163,38 @@ public class EffectCalculator {
                 if (record.getChromosome().equals(effect.getChromosome())
                         && record.getPosition() == effect.getPosition()
                         && record.getReference().equals(effect.getReferenceAllele())
-                        && record.getAlternate().equals(effect.getAlternativeAllele())) {
+                        && record.getAlternate().contains(effect.getAlternativeAllele())) {
                     auxEffect.add(effect);
                 }
             }
             list.add(auxEffect);
         }
         return list;
+    }
+
+    public static void setEffects(List<Variant> batch) {
+        setEffects(batch, false);
+    }
+
+    public static void setEffects(List<Variant> batch, boolean force) {
+        List<Variant> noEffects;
+
+        if (force) {
+            noEffects = batch;
+        } else {
+            noEffects = new ArrayList<>(batch.size());
+            for (Variant v : batch) {
+                if (v.getEffect() == null) {
+                    noEffects.add(v);
+                }
+            }
+        }
+
+        List<List<VariantEffect>> effects = getEffectPerVariant(noEffects);
+
+        for (int i = 0; i < noEffects.size(); i++) {
+            Variant v = noEffects.get(i);
+            v.setEffect(effects.get(i));
+        }
     }
 }

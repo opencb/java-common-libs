@@ -17,35 +17,26 @@ public class VariantGeneNameAnnotator implements VariantAnnotator {
     @Override
     public void annot(List<Variant> batch) {
 
-        List<VariantEffect> batchEffect = EffectCalculator.getEffects(batch);
+        EffectCalculator.setEffects(batch);
 
         for (Variant variant : batch) {
-
-            annotVariantEffect(variant, batchEffect);
+            annotVariantEffect(variant);
         }
 
     }
 
-    private void annotVariantEffect(Variant variant, List<VariantEffect> batchEffect) {
+    private void annotVariantEffect(Variant variant) {
 
         Set<String> geneNames = new HashSet<>();
-        for (VariantEffect effect : batchEffect) {
-
-            if (variant.getChromosome().equals(effect.getChromosome()) &&
-                    variant.getPosition() == effect.getPosition() &&
-                    variant.getReference().equals(effect.getReferenceAllele()) &&
-                    variant.getAlternate().equals(effect.getAlternativeAllele())) {
-
+        for (VariantEffect effect : variant.getEffect()) {
+            if (effect.getGeneName().length() > 0)
                 geneNames.add(effect.getGeneName());
-            }
-
         }
 
         String geneNamesAll = Joiner.on(",").join(geneNames);
 
         if (geneNames.size() > 0) {
             variant.addAttribute("GeneNames", geneNamesAll);
-//            variant.addInfoField("GeneNames=" + geneNamesAll);
         }
 
     }

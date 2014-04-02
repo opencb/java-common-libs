@@ -18,35 +18,26 @@ public class VariantConsequenceTypeAnnotator implements VariantAnnotator {
     @Override
     public void annot(List<Variant> batch) {
 
-        List<VariantEffect> batchEffect = EffectCalculator.getEffects(batch);
+        EffectCalculator.setEffects(batch);
 
         for (Variant variant : batch) {
-
-            annotVariantEffect(variant, batchEffect);
+            annotVariantEffect(variant);
         }
 
     }
 
-    private void annotVariantEffect(Variant variant, List<VariantEffect> batchEffect) {
+    private void annotVariantEffect(Variant variant) {
 
         Set<String> ct = new HashSet<>();
-        for (VariantEffect effect : batchEffect) {
-
-            if (variant.getChromosome().equals(effect.getChromosome()) &&
-                    variant.getPosition() == effect.getPosition() &&
-                    variant.getReference().equals(effect.getReferenceAllele()) &&
-                    variant.getAlternate().equals(effect.getAlternativeAllele())) {
-
+        for (VariantEffect effect : variant.getEffect()) {
+            if (effect.getConsequenceTypeObo().length() > 0)
                 ct.add(effect.getConsequenceTypeObo());
-            }
-
         }
 
         String ct_all = Joiner.on(",").join(ct);
 
         if (ct.size() > 0) {
-//            variant.addInfoField("ConsType=" + ct_all);
-            variant.addAttribute("ConsType", ct_all); // TODO aaleman: Check this code
+            variant.addAttribute("ConsType", ct_all);
         }
 
     }

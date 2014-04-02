@@ -32,7 +32,7 @@ public class Variant {
         this.setAlternate(alternate);
 
         this.samplesData = new LinkedHashMap<>();
-        this.effect = new LinkedList<>();
+//        this.effect = new ArrayList<>();
         this.attributes = new LinkedHashMap<>();
     }
 
@@ -85,7 +85,7 @@ public class Variant {
     }
 
     public void setFormat(String format) {
-       this.format = format;
+        this.format = format;
     }
 
     public Map<String, Map<String, String>> getSamplesData() {
@@ -121,8 +121,13 @@ public class Variant {
     }
 
     public boolean addEffect(VariantEffect e) {
+        if (this.effect == null) {
+            this.effect = new ArrayList<>();
+        }
         return this.effect.add(e);
     }
+
+
 
     public void addId(String newId) {
         if (!this.id.contains(newId)) {

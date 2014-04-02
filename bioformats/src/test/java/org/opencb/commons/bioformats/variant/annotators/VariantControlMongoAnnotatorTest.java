@@ -2,8 +2,12 @@ package org.opencb.commons.bioformats.variant.annotators;
 
 import org.junit.Test;
 import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantReader;
 import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantVcfReader;
+import org.opencb.commons.bioformats.variant.vcf4.io.writers.VariantVcfDataWriter;
+import org.opencb.commons.bioformats.variant.vcf4.io.writers.VariantWriter;
 import org.opencb.commons.io.DataReader;
+import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.test.GenericTest;
 
 import java.util.List;
@@ -17,13 +21,18 @@ public class VariantControlMongoAnnotatorTest extends GenericTest {
     @Test
     public void testAnnot() throws Exception {
 
-        DataReader<Variant> reader = new VariantVcfReader("/home/aaleman/tmp/small.vcf");
+        VariantReader reader = new VariantVcfReader("/home/aaleman/Documents/pruebas/annot/file.vcf");
+        VariantWriter writer = new VariantVcfDataWriter(reader, "/home/aaleman/Documents/pruebas/annot/out.vcf");
 
         VariantAnnotator control = new VariantControlMongoAnnotator();
+        VariantAnnotator gene = new VariantGeneNameAnnotator();
+        VariantConsequenceTypeAnnotator ct = new VariantConsequenceTypeAnnotator();
 
 
         reader.open();
+        writer.open();
         reader.pre();
+        writer.pre();
 
         List<Variant> batch = reader.read(100);
 
@@ -31,23 +40,20 @@ public class VariantControlMongoAnnotatorTest extends GenericTest {
 
 
             control.annot(batch);
+            gene.annot(batch);
+            ct.annot(batch);
 
+            writer.write(batch);
 
-            for (Variant v : batch) {
-                System.out.println(v);
-            }
-
-
-            // break;
             batch.clear();
             batch = reader.read(10);
         }
 
         reader.post();
+        writer.post();
         reader.close();
-
+        writer.close();
 
         assertTrue(1 == 1);
-
     }
 }
