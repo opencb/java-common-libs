@@ -1,10 +1,11 @@
-package org.opencb.commons.bioformats.alignment.stats;
+package org.opencb.commons.bioformats.alignment.tasks;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
 import org.opencb.commons.bioformats.alignment.io.readers.AlignmentRegionDataReader;
 import org.opencb.commons.bioformats.alignment.sam.io.AlignmentBamDataReader;
+import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.run.Runner;
 import org.opencb.commons.run.Task;

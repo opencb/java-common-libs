@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-import javafx.util.converter.ByteStringConverter;
-import net.sf.samtools.Cigar;
+
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
 
