@@ -17,13 +17,15 @@ import java.util.List;
  * Time: 5:33 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AlignmentBamDataWriter implements AlignmentDataWriter<SAMRecord, SAMFileHeader>  {
+public class AlignmentBamDataWriter extends AlignmentSamDataWriter  {
 
-    public BAMFileWriter writer;
-    private String filename;
 
-    public AlignmentBamDataWriter(String filename) {
-        this.filename = filename;
+    public AlignmentBamDataWriter(String filename, SAMFileHeader header) {
+        super(filename, header);
+    }
+
+    public AlignmentBamDataWriter(String filename, AlignmentSamDataReader reader) {
+        super(filename, reader);
     }
 
     @Override
@@ -38,42 +40,4 @@ public class AlignmentBamDataWriter implements AlignmentDataWriter<SAMRecord, SA
         return true;
     }
 
-    @Override
-    public boolean close() {
-        writer.close();
-        return true;
-    }
-
-    @Override
-    public boolean pre() {
-        return true;
-    }
-
-    @Override
-    public boolean post() {
-        return true;
-    }
-
-    @Override
-    public boolean write(SAMRecord element) {
-        writer.addAlignment(element);
-
-        return true;
-    }
-
-    @Override
-    public boolean write(List<SAMRecord> batch) {
-        for(SAMRecord element : batch){
-            write(element);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean writeHeader(SAMFileHeader h) {
-        writer.setSortOrder(h.getSortOrder(), true);
-        writer.setHeader(h);
-
-        return true;
-    }
 }

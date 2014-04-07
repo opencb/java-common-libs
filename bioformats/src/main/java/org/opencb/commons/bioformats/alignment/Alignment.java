@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-import javafx.util.converter.ByteStringConverter;
-import net.sf.samtools.Cigar;
+
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
 
@@ -45,7 +44,7 @@ public class Alignment {
      * Optional attributes that probably depend on the format of the file the
      * alignment was initially read.
      */
-    private Map<String, String> attributes;
+    private Map<String, Object> attributes;
 
     /**
      * Bitmask with information about structure, quality and other properties
@@ -70,7 +69,7 @@ public class Alignment {
 
     public Alignment(String name, String chromosome, long start, long end, long unclippedStart, long unclippedEnd,
             int length, int mappingQuality, String qualities, String mateReferenceName, int mateAlignmentStart,
-            int inferredInsertSize, int flags, List<AlignmentDifference> differences, Map<String, String> attributes) {
+            int inferredInsertSize, int flags, List<AlignmentDifference> differences, Map<String, Object> attributes) {
         this.name = name;
         this.chromosome = chromosome;
         this.start = start;
@@ -88,7 +87,7 @@ public class Alignment {
         this.attributes = attributes;
     }
 
-    public Alignment(SAMRecord record, Map<String, String> attributes, String referenceSequence) {
+    public Alignment(SAMRecord record, Map<String, Object> attributes, String referenceSequence) {
         this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
                 record.getMappingQuality(), record.getBaseQualityString(),//.replace("\\", "\\\\").replace("\"", "\\\""),
@@ -109,14 +108,14 @@ public class Alignment {
         readSequence = record.getReadBases();
         attributes = new HashMap<>();
         for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
-            attributes.put(tav.tag, tav.value.toString());
+            attributes.put(tav.tag, tav.value);
         }
     }
 
-    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence){
+    public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence){
         return createSAMRecord(samFileHeader, referenceSequence, start);
     }
-    SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition){
+    public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition){
         SAMRecord samRecord = new SAMRecord(samFileHeader);
 
         samRecord.setReadName(name);
@@ -125,27 +124,22 @@ public class Alignment {
         //samRecord.setAlignmentEnd((int)end);
 
         samRecord.setMappingQuality(mappingQuality);
-        samRecord.setBaseQualities(qualities.getBytes());
-
+        samRecord.setBaseQualityString(qualities);
         samRecord.setMateReferenceName(mateReferenceName);
         samRecord.setMateAlignmentStart(mateAlignmentStart);
-
         samRecord.setInferredInsertSize(inferredInsertSize);
-        samRecord.setFlags(flags);
 
-
-
-        samRecord.setCigar(AlignmentHelper.getCigarFromDifferences(differences, length));
         readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, (int)(start-referenceSequenceStartPosition)).getBytes();
-
-
-        //if(readSequence == null){
-            //getSequenceFromDifferences();
-        //}
         samRecord.setReadBases(readSequence);
 
-        samRecord.setBaseQualities(qualities.getBytes());
+        samRecord.setCigar(AlignmentHelper.getCigarFromDifferences(differences, length));
+        samRecord.setFlags(flags);
 
+        if (attributes != null) {
+            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+                samRecord.setAttribute(entry.getKey(), entry.getValue());
+            }
+        }
 
         return samRecord;
     }
@@ -204,11 +198,11 @@ public class Alignment {
         this.flags = this.flags & ~flag;
     }
 
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
@@ -216,7 +210,7 @@ public class Alignment {
         return attributes.put(key, value) != null;
     }
 
-    public String removeAttribute(String key) {
+    public Object removeAttribute(String key) {
         return attributes.remove(key);
     }
 

@@ -27,7 +27,6 @@ public class AlignmentRegionSummarizeTaskTest extends GenericTest {
         AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/tmp/small.sam");
         AlignmentRegionDataReader alignmentRegionDataReader = new AlignmentRegionDataReader(alignmentSamDataReader, 900);
 
-
         List<Task<AlignmentRegion>> tasks = new LinkedList<>();
         AlignmentRegionSummarizeTask alignmentRegionSummarizeTask = new AlignmentRegionSummarizeTask();
 
