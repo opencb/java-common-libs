@@ -1,9 +1,11 @@
 package org.opencb.commons.bioformats.alignment;
 
+import org.opencb.commons.bioformats.alignment.stats.AlignmentRegionSummary;
 import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
 import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
 import org.opencb.commons.bioformats.feature.Region;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -20,11 +22,7 @@ public class AlignmentRegion {
     private List<Alignment> alignments;     //Sorted Alignments
     private RegionCoverage coverage;
     private List<MeanCoverage> meanCoverage;
-    //private byte[] referenceSequence;
-    private Alignment modeAlignment;
 
-    public AlignmentRegion() {
-    }
 
     public AlignmentRegion(String chromosome, long start, long end) {
         this(chromosome, start, end, null, null);
@@ -114,11 +112,4 @@ public class AlignmentRegion {
         return new Region(chromosome, start, end);
     }
 
-    public Alignment getModeAlignment() {
-        return modeAlignment;
-    }
-
-    public void setModeAlignment(Alignment modeAlignment) {
-        this.modeAlignment = modeAlignment;
-    }
 }

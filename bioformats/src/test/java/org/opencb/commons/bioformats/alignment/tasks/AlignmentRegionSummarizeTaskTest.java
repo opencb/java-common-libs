@@ -21,17 +21,17 @@ import java.util.List;
  * Time: 7:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AlignmentModeTaskTest extends GenericTest {
+public class AlignmentRegionSummarizeTaskTest extends GenericTest {
     @Test
     public void computeMode () {
-        AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/home/josemi/Documents/alignments/small.sam");
+        AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/tmp/small.sam");
         AlignmentRegionDataReader alignmentRegionDataReader = new AlignmentRegionDataReader(alignmentSamDataReader, 900);
 
 
         List<Task<AlignmentRegion>> tasks = new LinkedList<>();
-        AlignmentModeTask alignmentModeTask = new AlignmentModeTask();
+        AlignmentRegionSummarizeTask alignmentRegionSummarizeTask = new AlignmentRegionSummarizeTask();
 
-        tasks.add(alignmentModeTask);
+        tasks.add(alignmentRegionSummarizeTask);
 
         List<DataWriter<AlignmentRegion>> writers = new LinkedList<>();
         Runner<AlignmentRegion> runner = new Runner<>(alignmentRegionDataReader, writers, tasks, 1);
