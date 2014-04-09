@@ -206,7 +206,7 @@ public class Alignment {
         this.attributes = attributes;
     }
 
-    public boolean addAttribute(String key, String value) {
+    public boolean addAttribute(String key, Object value) {
         return attributes.put(key, value) != null;
     }
 
