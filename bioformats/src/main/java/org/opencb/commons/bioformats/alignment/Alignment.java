@@ -302,31 +302,51 @@ public class Alignment {
         this.readSequence = readSequence;
     }
 
+    /**
+     * Checks that the alignment is the same. This check is stricter than necessary.
+     *
+     * Note that null reads
+     * (e.g. alignment1.read = "acgt" and alignment2.read = null)
+     * doesn't imply that they are different. The read may be implicitly
+     * defined in the alignmentDifferences, retrievable with the reference read.
+     *
+     * Also, the CIGAR may change, having 'M' in alignment1 and 'X or '=' in alignment2.
+     *
+     * *1*
+     * From the sam specs: http://samtools.github.io/hts-specs/SAMv1.pdf
+     * "Bit 0x4 is the only reliable place to tell whether the read is unmapped.
+     * If 0x4 is set, no assumptions can be made about RNAME, POS, CIGAR, MAPQ, bits 0x2, 0x10, 0x100 and 0x800,
+     * and the bit 0x20 of the previous read in the template."
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-
         Alignment alignment = (Alignment) o;
 
-        if (end != alignment.end) return false;
-        if (flags != alignment.flags) return false;
+        if ((flags | 0x2 | 0x10 | 0x100 |0x800) != (alignment.flags | 0x2 | 0x10 | 0x100 |0x800)) return false;
+
+        if ((flags & 0x4) != 0) {   // segment NOT unmapped, see *1* above
+            if (start != alignment.start) return false;
+            if (end != alignment.end) return false;
+            if (unclippedStart != alignment.unclippedStart) return false;
+            if (unclippedEnd != alignment.unclippedEnd) return false;
+            if (!mateReferenceName.equals(alignment.mateReferenceName)) return false;
+            if (!differences.equals(alignment.differences)) return false;
+            if (mappingQuality != alignment.mappingQuality) return false;
+            if (flags != alignment.flags) return false;
+        }
+
         if (inferredInsertSize != alignment.inferredInsertSize) return false;
         if (length != alignment.length) return false;
-        if (mappingQuality != alignment.mappingQuality) return false;
         if (mateAlignmentStart != alignment.mateAlignmentStart) return false;
-        if (start != alignment.start) return false;
-        if (unclippedEnd != alignment.unclippedEnd) return false;
-        if (unclippedStart != alignment.unclippedStart) return false;
         if (!attributes.equals(alignment.attributes)) return false;
         if (!chromosome.equals(alignment.chromosome)) return false;
-        if (!differences.equals(alignment.differences)) return false;
-        if (!mateReferenceName.equals(alignment.mateReferenceName)) return false;
         if (!name.equals(alignment.name)) return false;
         if (!qualities.equals(alignment.qualities)) return false;
         if (!Arrays.equals(readSequence, alignment.readSequence)) return false;
-//
+
 //        if (readSequence == null ^ alignment.readSequence == null) { // only one is null
 //            return false;
 //        } else if (readSequence != null && !Arrays.equals(readSequence, alignment.readSequence)) {  // both are not null and different
