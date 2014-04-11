@@ -2,6 +2,7 @@ package org.opencb.commons.bioformats.variant.vcf4.io.writers;
 
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import org.opencb.commons.bioformats.variant.Variant;
 import org.opencb.commons.bioformats.variant.vcf4.io.readers.VariantReader;
@@ -72,6 +73,7 @@ public class VariantVcfDataWriter implements VariantWriter {
 
         if (format == null) {
             format = getFormatOrder(elem);
+            System.out.println(format);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -131,7 +133,7 @@ public class VariantVcfDataWriter implements VariantWriter {
     }
 
     private List<String> getFormatOrder(Variant elem) {
-        List<String> format = Lists.newArrayList(elem.getSamplesData().entrySet().iterator().next().getValue().keySet());
+        List<String> format = Lists.newArrayList(Splitter.on(":").split(elem.getFormat()));
         return format;
     }
 
