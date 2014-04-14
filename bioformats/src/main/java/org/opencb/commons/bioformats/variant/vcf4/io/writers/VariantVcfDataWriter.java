@@ -73,7 +73,6 @@ public class VariantVcfDataWriter implements VariantWriter {
 
         if (format == null) {
             format = getFormatOrder(elem);
-            System.out.println(format);
         }
 
         StringBuilder sb = new StringBuilder();
