@@ -47,6 +47,14 @@ public class AlignmentHelper {
 //                "\t1st block start = " + record.getAlignmentBlocks().get(0).getReferenceStart() + 
 //                "\n*****\n" + refStr + "\n" + record.getReadString());
 
+        if ((record.getFlags() & Alignment.SEGMENT_UNMAPPED) != 0) {   // umnmapped, return the read as MISMATCH
+            Alignment.AlignmentDifference alignmentDifference = new Alignment.AlignmentDifference(
+                    0, Alignment.AlignmentDifference.MISMATCH, record.getReadString());
+            differences.add(alignmentDifference);
+            return differences;
+        }
+
+
         for (CigarElement element : record.getCigar().getCigarElements()) {
             int cigarLen = element.getLength();
             String subref = null, subread = null;
@@ -281,7 +289,7 @@ public class AlignmentHelper {
 
         for(Alignment.AlignmentDifference alignmentDifference : differences){
             if(index < alignmentDifference.getPos()){
-                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
+                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.EQ));
                 index    += alignmentDifference.getPos()-index;
             } else if(index > alignmentDifference.getPos()) {
                 System.out.println("[ERROR] BAD DIFFERENCES ");
@@ -297,10 +305,11 @@ public class AlignmentHelper {
 
                 case Alignment.AlignmentDifference.DELETION:
                     cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
+                    index += alignmentDifference.getLength();
                     break;
 
                 case Alignment.AlignmentDifference.MISMATCH:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.X));
                     index += alignmentDifference.getLength();
                     break;
 
@@ -325,7 +334,7 @@ public class AlignmentHelper {
         }
 
         if(index < sequenceSize){
-            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
+            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.EQ));
         } else if(index > sequenceSize) {
             System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
         }
