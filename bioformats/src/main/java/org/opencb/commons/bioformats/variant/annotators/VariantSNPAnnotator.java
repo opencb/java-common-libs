@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class VariantSNPAnnotator implements VariantAnnotator {
 
+
     private Client wsRestClient;
     private WebTarget webResource;
 

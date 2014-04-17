@@ -15,6 +15,16 @@ import java.util.Set;
 public class VariantConsequenceTypeAnnotator implements VariantAnnotator {
 
 
+    private String ctTag;
+
+    public VariantConsequenceTypeAnnotator() {
+        this("ConsType");
+    }
+
+    public VariantConsequenceTypeAnnotator(String ctTag) {
+        this.ctTag = ctTag;
+    }
+
     @Override
     public void annot(List<Variant> batch) {
 
@@ -37,7 +47,7 @@ public class VariantConsequenceTypeAnnotator implements VariantAnnotator {
         String ct_all = Joiner.on(",").join(ct);
 
         if (ct.size() > 0) {
-            variant.addAttribute("ConsType", ct_all);
+            variant.addAttribute(this.ctTag, ct_all);
         }
 
     }
