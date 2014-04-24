@@ -14,6 +14,16 @@ import java.util.Set;
  */
 public class VariantGeneNameAnnotator implements VariantAnnotator {
 
+    private String geneNameTag;
+
+    public VariantGeneNameAnnotator() {
+        this("GeneNames");
+    }
+
+    public VariantGeneNameAnnotator(String geneNameTag) {
+        this.geneNameTag = geneNameTag;
+    }
+
     @Override
     public void annot(List<Variant> batch) {
 
@@ -36,7 +46,7 @@ public class VariantGeneNameAnnotator implements VariantAnnotator {
         String geneNamesAll = Joiner.on(",").join(geneNames);
 
         if (geneNames.size() > 0) {
-            variant.addAttribute("GeneNames", geneNamesAll);
+            variant.addAttribute(this.geneNameTag, geneNamesAll);
         }
 
     }

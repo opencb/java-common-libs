@@ -173,10 +173,10 @@ public class EffectCalculator {
     }
 
     public static void setEffects(List<Variant> batch) {
-        setEffects(batch, false);
+        setEffects(batch, false, false);
     }
 
-    public static void setEffects(List<Variant> batch, boolean force) {
+    public static void setEffects(List<Variant> batch, boolean force, boolean withPolyphenSIFT) {
         List<Variant> noEffects;
 
         if (force) {
@@ -191,6 +191,12 @@ public class EffectCalculator {
         }
 
         List<List<VariantEffect>> effects = getEffectPerVariant(noEffects);
+
+        if (withPolyphenSIFT) {
+            for (List<VariantEffect> list : effects) {
+                getPolyphenSift(list);
+            }
+        }
 
         for (int i = 0; i < noEffects.size(); i++) {
             Variant v = noEffects.get(i);

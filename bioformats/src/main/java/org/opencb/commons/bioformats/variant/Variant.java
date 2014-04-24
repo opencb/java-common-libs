@@ -128,15 +128,9 @@ public class Variant {
     }
 
 
-
     public void addId(String newId) {
-        if (!this.id.contains(newId)) {
-            if (this.id.equals(".")) {
-                this.id = newId;
-            } else {
-                this.id += ";" + newId;
-            }
-        }
+        this.id = newId;
+
     }
 
     public void addAttribute(String key, String value) {

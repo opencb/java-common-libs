@@ -39,7 +39,8 @@ public class VariantEffect {
 
 
     public VariantEffect() {
-
+        this.polyphenScore = -1;
+        this.siftScore = -1;
     }
 
     public VariantEffect(String chromosome, int position, String referenceAllele, String alternativeAllele, String featureId, String featureName, String featureType, String featureBiotype, String featureChromosome, int featureStart, int featureEnd, String featureStrand, String snpId, String ancestral, String alternative, String geneId, String transcriptId, String geneName, String consequenceType, String consequenceTypeObo, String consequenceTypeDesc, String consequenceTypeType, int aaPosition, String aminoacidChange, String codonChange) {
@@ -68,6 +69,9 @@ public class VariantEffect {
         this.aaPosition = aaPosition;
         this.aminoacidChange = aminoacidChange;
         this.codonChange = codonChange;
+
+        this.polyphenScore = -1;
+        this.siftScore = -1;
     }
 
     public String getChromosome() {
