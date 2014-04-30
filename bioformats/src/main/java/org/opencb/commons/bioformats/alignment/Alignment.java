@@ -108,6 +108,7 @@ public class Alignment {
         readSequence = record.getReadBases();
         attributes = new HashMap<>();
         for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
+            //if (!tav.tag.equals("BQ"))  // FIXME jj: test purposes only
             attributes.put(tav.tag, tav.value);
         }
     }
@@ -325,9 +326,12 @@ public class Alignment {
 
         Alignment alignment = (Alignment) o;
 
-        if ((flags | 0x2 | 0x10 | 0x100 |0x800) != (alignment.flags | 0x2 | 0x10 | 0x100 |0x800)) return false;
+        if ((flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT |SUPPLEMENTARY_ALIGNMENT)
+                != (alignment.flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT |SUPPLEMENTARY_ALIGNMENT)) {
+            return false;
+        }
 
-        if ((flags & 0x4) != 0) {   // segment NOT unmapped, see *1* above
+        if ((flags & SEGMENT_UNMAPPED) == 0) {   // segment NOT unmapped, we have to check extra fields, see *1* above
             if (start != alignment.start) return false;
             if (end != alignment.end) return false;
             if (unclippedStart != alignment.unclippedStart) return false;
