@@ -1,18 +1,14 @@
 package org.opencb.commons.bioformats.variant;
 
-import com.sun.swing.internal.plaf.metal.resources.metal;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencb.commons.bioformats.commons.exception.exception;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 import org.opencb.commons.test.GenericTest;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -29,9 +25,9 @@ public class VariantTest extends GenericTest {
 
         List<String> sampleNames = Arrays.asList("NA001", "NA002", "NA003");
         String[] fields1 = new String[]{"1", "100000", "rs1100000", "A", "T,G", "40", "PASS",
-                "DP=5;AP=10;H2", "GT:DP", "1/1:4", "1/0:2", "0/0:3"};
+            "DP=5;AP=10;H2", "GT:DP", "1/1:4", "1/0:2", "0/0:3"};
         String[] fields2 = new String[]{"1", "200000", "rs1200000", "G", "T", "30", "LowQual",
-                "DP=2;AP=5", "GT:DP", "1/1:3", "1/1:1", "0/0:5"};
+            "DP=2;AP=5", "GT:DP", "1/1:3", "1/1:1", "0/0:5"};
 
         v1 = VariantFactory.createVariantFromVcf(sampleNames, fields1);
         v2 = VariantFactory.createVariantFromVcf(sampleNames, fields2);
@@ -68,29 +64,24 @@ public class VariantTest extends GenericTest {
 
     @Test
     public void testGetChromosome() throws Exception {
-
         assertEquals(v1.getChromosome(), "1");
-
     }
 
     @Test
     public void testSetChromosome() throws Exception {
         v1.setChromosome("2");
         assertEquals(v1.getChromosome(), "2");
-
     }
 
     @Test
     public void testGetPosition() throws Exception {
         assertEquals(v1.getPosition(), 100000);
-
     }
 
     @Test
     public void testSetPosition() throws Exception {
         v1.setPosition(1);
         assertEquals(v1.getPosition(), 1);
-
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -100,13 +91,11 @@ public class VariantTest extends GenericTest {
 
     @Test
     public void testGetReference() throws Exception {
-
         assertEquals(v2.getReference(), "G");
     }
 
     @Test
     public void testSetReference() throws Exception {
-
         v2.setReference("C");
         assertEquals(v2.getReference(), "C");
     }
@@ -114,12 +103,10 @@ public class VariantTest extends GenericTest {
     @Test
     public void testGetAlternate() throws Exception {
         assertEquals(v2.getAlternate(), "T");
-
     }
 
     @Test
     public void testSetAlternate() throws Exception {
-
         v2.setAlternate("A");
         assertEquals(v2.getAlternate(), "A");
     }
@@ -127,14 +114,12 @@ public class VariantTest extends GenericTest {
     @Test
     public void testGetId() throws Exception {
         assertEquals(v1.getId(), "rs1100000");
-
     }
 
     @Test
     public void testSetId() throws Exception {
         v1.setId("rsTEST");
         assertEquals(v1.getId(), "rsTEST");
-
     }
 
     @Test

@@ -3,11 +3,8 @@ package org.opencb.commons.filters;
 import com.google.common.base.Predicate;
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 8/27/13
- * Time: 5:38 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
+ * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
 public abstract class Filter<E> implements Predicate<E>, Comparable<Filter> {
     private int priority;

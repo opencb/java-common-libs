@@ -1,13 +1,12 @@
 package org.opencb.commons.bioformats.variant.effect;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opencb.commons.test.GenericTest;
-
 import java.util.ArrayList;
 import java.util.List;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.effect.VariantEffect;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
+import org.opencb.commons.test.GenericTest;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -19,7 +18,7 @@ public class EffectCalculatorTest extends GenericTest {
     @BeforeClass
     public static void init() {
         variants = new ArrayList<>();
-        variants.add(new Variant("15", 89758364, 89758364, "A", "A,C"));
+        variants.add(new Variant("15", 89758364, "A", "A,C"));
     }
 
     @Test

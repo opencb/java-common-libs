@@ -1,18 +1,15 @@
 package org.opencb.commons.bioformats.variant;
 
-import org.junit.Test;
-import org.opencb.commons.test.GenericTest;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.opencb.commons.test.GenericTest;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class VariantFactoryTest extends GenericTest {
-
 
     @Test
     public void testCreateVariantFromVcf() throws Exception {
@@ -21,7 +18,6 @@ public class VariantFactoryTest extends GenericTest {
 
     @Test
     public void testGetVcfInfo() throws Exception {
-
         Variant v = new Variant("1", 1, "A", "C");
         v.addAttribute("QUAL", "0.1");
         v.addAttribute("FILTER", "PASS");
@@ -41,7 +37,6 @@ public class VariantFactoryTest extends GenericTest {
 
         System.out.println(VariantFactory.getVcfInfo(v2));
         assertEquals(VariantFactory.getVcfInfo(v2), "DP=5;AP=10;H2");
-
     }
 
     @Test
@@ -73,6 +68,5 @@ public class VariantFactoryTest extends GenericTest {
         assertEquals(VariantFactory.getVcfSampleRawData(v, "sample1"), "0/1:1");
         assertEquals(VariantFactory.getVcfSampleRawData(v, "sample2"), "0/2:2");
         assertEquals(VariantFactory.getVcfSampleRawData(v, "sample3"), "0/3:3");
-
     }
 }

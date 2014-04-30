@@ -6,16 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.FormDataMultiPart;
-
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.opencb.biodata.models.variant.Variant;
-import org.opencb.biodata.models.variant.effect.VariantEffect;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import org.opencb.commons.bioformats.variant.Variant;
+import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -39,7 +38,7 @@ public class EffectCalculator {
 
         for (Variant record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
-            chunkVcfRecords.append(record.getStart()).append(":");
+            chunkVcfRecords.append(record.getPosition()).append(":");
             chunkVcfRecords.append(record.getReference()).append(":");
             chunkVcfRecords.append(record.getAlternate()).append(",");
         }
@@ -79,7 +78,7 @@ public class EffectCalculator {
 
         for (Variant record : batch) {
             chunkVcfRecords.append(record.getChromosome()).append(":");
-            chunkVcfRecords.append(record.getStart()).append(":");
+            chunkVcfRecords.append(record.getPosition()).append(":");
             chunkVcfRecords.append(record.getReference()).append(":");
             chunkVcfRecords.append(record.getAlternate()).append(",");
         }
@@ -183,7 +182,7 @@ public class EffectCalculator {
             for (int i = 0; i < effects.size(); i++) {
                 effect = effects.get(i);
                 if (record.getChromosome().equals(effect.getChromosome())
-                        && record.getStart()== effect.getPosition()
+                        && record.getPosition()== effect.getPosition()
                         && record.getReference().equals(effect.getReferenceAllele())
                         && record.getAlternate().equals(effect.getAlternativeAllele())) {
                     auxEffect.add(effect);
