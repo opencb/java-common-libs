@@ -87,13 +87,13 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<Alignment, SA
             headerWritten = true;
         }
 
-        System.out.println("write");
-        System.out.println("element.getUnclippedStart()" + element.getUnclippedStart());
-        System.out.println("element.getUnclippedEnd() = " + element.getUnclippedEnd());
-        System.out.println("referenceSequenceStart = " + referenceSequenceStart);
-        System.out.println("maxSequenceSize = " + maxSequenceSize);
+  //      System.out.println("write");
+  //      System.out.println("element.getUnclippedStart()" + element.getUnclippedStart());
+  //      System.out.println("element.getUnclippedEnd() = " + element.getUnclippedEnd());
+   //     System.out.println("referenceSequenceStart = " + referenceSequenceStart);
+  //      System.out.println("maxSequenceSize = " + maxSequenceSize);
         if (!validSequence || element.getUnclippedStart() < referenceSequenceStart || element.getUnclippedEnd() > referenceSequenceStart + maxSequenceSize) {
-            System.out.println("pidiendo la referencia...");
+            System.out.println("pidiendo la referencia... " + element.getUnclippedStart() + " - " + element.getUnclippedStart() + maxSequenceSize);
             validSequence = true;
             referenceSequenceStart = element.getUnclippedStart();
             try {

@@ -145,7 +145,7 @@ public class AlignmentRegionSummarizeTask extends Task<AlignmentRegion> {
                 rNextMap.put(alignment.getMateReferenceName(), !rNextMap.containsKey(alignment.getMateReferenceName())? 1: rNextMap.get(alignment.getMateReferenceName())+1);
 
 
-                for(Map.Entry<String, String> entry : alignment.getAttributes().entrySet()){
+                for(Map.Entry<String, Object> entry : alignment.getAttributes().entrySet()){
                     auxs = entry.getKey();
                     if(keyMap.containsKey(auxs)){
                         auxi = keyMap.get(auxs);
@@ -155,7 +155,7 @@ public class AlignmentRegionSummarizeTask extends Task<AlignmentRegion> {
                         keyMap.put(auxs, auxi);
                     } //auxi = IndexTag;
 
-                    Map.Entry<Integer, String> tag = new AbstractMap.SimpleEntry<>(auxi, entry.getValue());
+                    Map.Entry<Integer, String> tag = new AbstractMap.SimpleEntry<>(auxi, entry.getValue().toString());
                     if(tagsMap.containsKey(tag)){
                         auxi = tagsMap.get(tag) + 1;
                     } else {
