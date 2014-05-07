@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-
+import net.sf.samtools.Cigar;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
 
@@ -130,10 +130,11 @@ public class Alignment {
         samRecord.setMateAlignmentStart(mateAlignmentStart);
         samRecord.setInferredInsertSize(inferredInsertSize);
 
-        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, (int)(start-referenceSequenceStartPosition)).getBytes();
+        Cigar cigar = new Cigar();
+        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, cigar, (int)(start-referenceSequenceStartPosition)).getBytes();
         samRecord.setReadBases(readSequence);
 
-        samRecord.setCigar(AlignmentHelper.getCigarFromDifferences(differences, length));
+        samRecord.setCigar(cigar);
         samRecord.setFlags(flags);
 
         if (attributes != null) {

@@ -291,7 +291,7 @@ public class AlignmentHelperTest {
         record.setReadString(readSequence);
          
         expResult = new LinkedList<>();
-        expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.PADDING, ""));
+        expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.PADDING, 1));
         expResult.add(new Alignment.AlignmentDifference(6, Alignment.AlignmentDifference.INSERTION, "G"));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
 //        for (int i = 0; i < result.size(); i++) {
@@ -319,9 +319,12 @@ public class AlignmentHelperTest {
             assertTrue("Expected " + expResult.get(i).toString() + " but got " + alignment.getDifferences().get(i).toString(),
                     expResult.get(i).equals(alignment.getDifferences().get(i)));
         }
-
-        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(expResult, readSequence.length(), referenceSequence);
-        assertEquals("getSequenceFromDifferences bad result. ", readSequence, sequenceFromDifferences);
+        Cigar cigar = new Cigar();
+        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(expResult, readSequence.length(), referenceSequence, cigar);
+        assertEquals("getSequenceFromDifferences bad sequence result. ", readSequence, sequenceFromDifferences);
+        //assertEquals("getSequenceFromDifferences bad cigar result. ", record.getCigar(), cigar);
+        System.out.println("original   : " + record.getCigar()  + "\n" +
+                           "equivalent : " + cigar);
     }
 
 
@@ -357,9 +360,11 @@ public class AlignmentHelperTest {
         differenceList.add(new Alignment.AlignmentDifference(0,'H', 8));
         differenceList.add(new Alignment.AlignmentDifference(0,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
         differenceList.add(new Alignment.AlignmentDifference(47,'D', 1));
-        differenceList.add(new Alignment.AlignmentDifference(53,'I', "XXXX"));
-        String readSequence = "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTGATAAGATTTTTTXXXXTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCA";
-        String referenceSequence = "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTGATAAGATTTTTTTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCAA";
+        differenceList.add(new Alignment.AlignmentDifference(61,'I', "XXXX"));
+
+
+        String readSequence =              "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTATAAGATTTTTTXXXXTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCA";
+        String referenceSequence = "HHHHHHHHAAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT_ATAAGATTTTTTTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCAA";
 
         String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, readSequence.length(), referenceSequence);
         System.out.println("reference: " + referenceSequence);
@@ -371,80 +376,18 @@ public class AlignmentHelperTest {
     public void getCigarFromDifferencesTest(){
         List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
         differenceList.add(new Alignment.AlignmentDifference(3,'D', 3));
-        differenceList.add(new Alignment.AlignmentDifference(5,'I', "<<insertion>>"));
+        differenceList.add(new Alignment.AlignmentDifference(6,'I', "<<insertion>>"));
         differenceList.add(new Alignment.AlignmentDifference(20,'D', 7));
-        differenceList.add(new Alignment.AlignmentDifference(23,'S', "<<soft>>"));
+        differenceList.add(new Alignment.AlignmentDifference(29,'S', "<<soft>>"));
 
+        String expectedCigar = "3=3D13I14=7D2=8S";
 
-        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, 31,
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-        Cigar cigar = AlignmentHelper.getCigarFromDifferences(differenceList, 31);
+        Cigar cigar = new Cigar();
+        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, 40,
+                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", cigar);
 
         System.out.println(sequenceFromDifferences);
-        System.out.println(cigar.toString());
+        assertEquals(expectedCigar, cigar.toString());
     }
-
-
-
-
-    @Ignore
-    @Test
-    public void AlignmentToSAMTest(){
-        /*
-        AlignmentSamDataReader alignmentSamDataReader = new AlignmentSamDataReader("/tmp/small.sam");
-        AlignmentSamDataWriter alignmentSamDataWriter = new AlignmentSamDataWriter("/tmp/exit.sam");
-
-        assertTrue(alignmentSamDataWriter.open());
-        alignmentSamDataWriter.pre();
-
-        assertTrue(alignmentSamDataReader.open());
-        alignmentSamDataReader.pre();
-
-        alignmentSamDataWriter.writeHeader(alignmentSamDataReader.getHeader());
-
-        String rSequence;
-        String mRseq = "NNNNNNNNGATCCAGAGGTGGAAGAGGAAGGAAGCTTGGAACCCTATAGAGTTGCTGAGTGCCAGGACCAGATCCTGGCCCTAAACAGGTGGTAAGGAAGGAGAGAGTGAAGGAACTGCCAGGTGACACACTCCCACCATGGACCTCTGGGATCCTAGCTTTAAGAGATCCCATCACCCACATGAACGTTTGAATTGACAGGGGGAGCTGCCTGGAGAGTAGGCAGATGCAGAGCTCAAGCCTGTGCAGAGCCCAGGTTTTGTGAGTGGGACAGTTGCAGCAAAACACAACCATAGGTGCCCATCCACCAAGGCAGGCTCTCCATCTTGCTCAGAGTGGCTCTAGCCCTTGCTGACTGCTGGGCAGGGAGAGAGCAGAGCTAACTTCCTCATGGGACCTGGGTGTGTCTGATCTGTGCACACCACTATCCAACCGATCCCGAGGCTCCACCCTGGCCACTCTTGTGTGCACACAGCACAGCCTCTACTGCTACACCTGAGTACTTTGCCAGTGGCCTGGAAGCACTTTGTCCCCCCTGGCACAAATGGTGCTGGACCACG";
-        int ini = 59900;
-        try {
-            rSequence = AlignmentHelper.getSequence(new Region("20", ini, 62000), null);
-        } catch (IOException e) {
-            System.out.println("Error");
-            e.printStackTrace();
-            return;
-        }
-
-        for(int i = 0; i < 2; i++){
-            Alignment alignment = alignmentSamDataReader.read();
-
-            List<Alignment.AlignmentDifference> differencesFromCigar = AlignmentHelper.getDifferencesFromCigar(alignmentSamDataReader.record,
-                    mRseq);
-            for(Alignment.AlignmentDifference diff : differencesFromCigar){
-                System.out.println("Diff con: " + diff.toString());
-            }
-
-            for(Alignment.AlignmentDifference diff : alignment.getDifferences()){
-                System.out.println("Diff sin: " + diff.toString());
-            }
-
-            System.out.println(mRseq);
-//            System.out.println(alignment.getReadSequence());
-
-            //alignmentSamDataWriter.write(alignmentSamDataReader.record);
-            alignmentSamDataWriter.write(alignment.createSAMRecord(alignmentSamDataReader.getHeader(),
-                    rSequence, ini));
-            //alignment.createSAMRecord(alignmentSamDataReader.getHeader());
-       //     System.out.println(alignmentSamDataReader.record.equals(alignment.createSAMRecord(alignmentSamDataReader.getHeader())));
-
-
-        }
-
-
-        alignmentSamDataReader.post();
-        alignmentSamDataReader.close();
-
-        alignmentSamDataWriter.post();
-        alignmentSamDataWriter.close();
-        System.out.println(rSequence);
-*/
-    }
+    
 }

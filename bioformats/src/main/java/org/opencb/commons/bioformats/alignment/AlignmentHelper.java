@@ -150,9 +150,9 @@ public class AlignmentHelper {
                     }
                     indexRef = indexRef + cigarLen;
                     break;
-                case P: //TODO jj: Check this
+                case P:
 //                  subref = refStr.substring(indexRef, indexRef + cigarLen);
-                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, "");
+                    currentDifference = new Alignment.AlignmentDifference(indexRef, Alignment.AlignmentDifference.PADDING, cigarLen);
 
 //                  indexRef = indexRef + cigarLen;
                     break;
@@ -281,95 +281,39 @@ public class AlignmentHelper {
 
 
 
-
-    public static Cigar getCigarFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize){
-
-        Cigar cigar = new Cigar();
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
+        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, null , 0);
+    }
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, final int offset){
+        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, null , offset);
+    }
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, Cigar cigar){
+        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, cigar, 0);
+    }
+    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, Cigar cigar, final int offset){
+        String sequence = "";
+        String subSeq;
         int index = 0;
+        int indexRef = offset;
+        if(cigar == null){
+            cigar = new Cigar();    //Will be calculated, but not returned.
+        }
 
         for(Alignment.AlignmentDifference alignmentDifference : differences){
-            if(index < alignmentDifference.getPos()){
-                cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.EQ));
-                index    += alignmentDifference.getPos()-index;
+            if(indexRef < alignmentDifference.getPos()){
+                subSeq = referenceSequence.substring(indexRef, offset+alignmentDifference.getPos());
+                sequence += subSeq;
+                indexRef += subSeq.length();
+                index    += subSeq.length();
+                cigar.add(new CigarElement(subSeq.length(), CigarOperator.EQ));
             } else if(index > alignmentDifference.getPos()) {
                 System.out.println("[ERROR] BAD DIFFERENCES ");
             }
-
 
 
             switch (alignmentDifference.getOp()){
                 case Alignment.AlignmentDifference.INSERTION:
                     cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
-                    index += alignmentDifference.getLength();
-                    break;
-
-                case Alignment.AlignmentDifference.DELETION:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
-                    index += alignmentDifference.getLength();
-                    break;
-
-                case Alignment.AlignmentDifference.MISMATCH:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.X));
-                    index += alignmentDifference.getLength();
-                    break;
-
-                case Alignment.AlignmentDifference.SOFT_CLIPPING:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
-                    index += alignmentDifference.getLength();
-                    break;
-
-                case Alignment.AlignmentDifference.HARD_CLIPPING:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.HARD_CLIP));
-                    break;
-
-                case Alignment.AlignmentDifference.SKIPPED_REGION:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SKIPPED_REGION));
-                    break;
-
-                case Alignment.AlignmentDifference.PADDING:
-                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.PADDING));
-                    break;
-            }
-
-        }
-
-        if(index < sequenceSize){
-            cigar.add(new CigarElement(sequenceSize-index, CigarOperator.EQ));
-        } else if(index > sequenceSize) {
-            System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
-        }
-
-        return cigar;
-    }
-
-    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence){
-        return getSequenceFromDifferences(differences, sequenceSize, referenceSequence, 0);
-    }
-    public static String getSequenceFromDifferences(List<Alignment.AlignmentDifference> differences, int sequenceSize, String referenceSequence, final int offset){
-
-        String sequence = "";
-        String subSeq;
-        int index = 0;
-        int indexRef = offset;
-
-        for(Alignment.AlignmentDifference alignmentDifference : differences){
-           // CigarOperator cigarOperator = null;
-            if(indexRef < alignmentDifference.getPos()){
-                subSeq = referenceSequence.substring(indexRef, offset+alignmentDifference.getPos());
-                //System.out.println("Sequence : " + sequence + " + " + subSeq.length() + "M" +" indexRef="+indexRef + " index="+index + " seq= " + subSeq);
-               // cigar.add(new CigarElement(alignmentDifference.getPos()-index, CigarOperator.MATCH_OR_MISMATCH));
-                sequence += subSeq;
-                indexRef += subSeq.length();
-                index    += subSeq.length();
-            } else if(index > alignmentDifference.getPos()) {
-                System.out.println("[ERROR] BAD DIFFERENCES ");
-            }
-            //System.out.println("Sequence2: " + sequence + " + " + alignmentDifference.getLength()+alignmentDifference.getOp() + " indexRef="+indexRef + " index="+index + " seq= " + alignmentDifference.getSeq());
-
-
-            switch (alignmentDifference.getOp()){
-                case Alignment.AlignmentDifference.INSERTION:
-              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.INSERTION));
 
                     if(alignmentDifference.isAllSequenceStored()){
                         sequence += alignmentDifference.getSeq();
@@ -383,14 +327,12 @@ public class AlignmentHelper {
                     break;
 
                 case Alignment.AlignmentDifference.DELETION:
-              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
-                    //sequence += referenceSequence.substring(indexRef, indexRef+alignmentDifference.getLength());
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.DELETION));
                     indexRef += alignmentDifference.getLength();
                     break;
 
                 case Alignment.AlignmentDifference.MISMATCH:
-              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.MATCH_OR_MISMATCH));
-
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.X));
                     if(alignmentDifference.isAllSequenceStored()){
                         sequence += alignmentDifference.getSeq();
                     } else {
@@ -401,7 +343,7 @@ public class AlignmentHelper {
                     break;
 
                 case Alignment.AlignmentDifference.SOFT_CLIPPING:
-              //      cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SOFT_CLIP));
                     if(alignmentDifference.isAllSequenceStored()) {
                         sequence += alignmentDifference.getSeq();
                     } else {
@@ -413,30 +355,26 @@ public class AlignmentHelper {
                     break;
 
                 case Alignment.AlignmentDifference.HARD_CLIPPING:
-              //      cigarOperator = CigarOperator.HARD_CLIP;
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.HARD_CLIP));
                     indexRef += alignmentDifference.getLength();    //Increases the position in reference, but not in sequence. Hard clipping is not stored
                     break;
 
                 case Alignment.AlignmentDifference.SKIPPED_REGION:
-              //      cigarOperator = CigarOperator.SKIPPED_REGION;
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.SKIPPED_REGION));
+                    indexRef += alignmentDifference.getLength();
                     break;
                 case Alignment.AlignmentDifference.PADDING:
-              //      cigarOperator = CigarOperator.PADDING;
+                    cigar.add(new CigarElement(alignmentDifference.getLength(), CigarOperator.PADDING));
                     break;
             }
-//            cigar.add(new CigarElement(alignmentDifference.getLength(), cigarOperator));
-//            if(alignmentDifference.isAllSequenceStored()){
-//                sequence += alignmentDifference.getSeq();
-//            } else {
-//
-//            }
 
         }
 
         if(sequence.length() < sequenceSize){
-          //  cigar.add(new CigarElement(sequenceSize-index, CigarOperator.MATCH_OR_MISMATCH));
             System.out.println(sequence.length() + " " + sequenceSize);
-            sequence += referenceSequence.substring(indexRef, indexRef + sequenceSize - sequence.length());
+            subSeq = referenceSequence.substring(indexRef, indexRef + sequenceSize - sequence.length());
+            sequence += subSeq;
+            cigar.add(new CigarElement(subSeq.length(), CigarOperator.EQ));
         } else if(index > sequenceSize) {
             System.out.println("[ERROR] TOO MUCH DIFFERENCES ");
         }
