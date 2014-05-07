@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.alignment.sam.io;
 import net.sf.samtools.*;
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentHelper;
+import org.opencb.commons.bioformats.alignment.ShortReferenceSequenceException;
 import org.opencb.commons.bioformats.alignment.io.writers.AlignmentDataWriter;
 import org.opencb.commons.bioformats.feature.Region;
 
@@ -87,28 +88,39 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<Alignment, SA
             headerWritten = true;
         }
 
-  //      System.out.println("write");
-  //      System.out.println("element.getUnclippedStart()" + element.getUnclippedStart());
-  //      System.out.println("element.getUnclippedEnd() = " + element.getUnclippedEnd());
-   //     System.out.println("referenceSequenceStart = " + referenceSequenceStart);
-  //      System.out.println("maxSequenceSize = " + maxSequenceSize);
-        if (!validSequence || element.getUnclippedStart() < referenceSequenceStart || element.getUnclippedEnd() > referenceSequenceStart + maxSequenceSize) {
-            System.out.println("pidiendo la referencia... " + element.getUnclippedStart() + " - " + element.getUnclippedStart() + maxSequenceSize);
-            validSequence = true;
-            referenceSequenceStart = element.getUnclippedStart();
-            try {
-                referenceSequence = AlignmentHelper.getSequence(
-                        new Region(element.getChromosome(), element.getUnclippedStart(), element.getUnclippedStart() + maxSequenceSize)
-                        , null);
-            } catch (IOException e) {
-                System.out.println("could not get reference sequence");
-            }
+        if (!validSequence) {   //element.getUnclippedStart() < referenceSequenceStart
+            getSequence(element.getChromosome(), element.getUnclippedEnd());
         }
         // assert refseq correct
 
-        SAMRecord SamElement = element.createSAMRecord(samFileHeader, referenceSequence, referenceSequenceStart);
+        SAMRecord SamElement = null;
+
+        try {
+            SamElement = element.createSAMRecord(samFileHeader, referenceSequence, referenceSequenceStart);
+        } catch (ShortReferenceSequenceException e) {
+            getSequence(element.getChromosome(), element.getUnclippedEnd());
+        }
+        try {
+            SamElement = element.createSAMRecord(samFileHeader, referenceSequence, referenceSequenceStart);
+        } catch (ShortReferenceSequenceException e) {
+            System.out.println("[ERROR] Can't get the correct reference sequence");
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         writer.addAlignment(SamElement);
         return true;
+    }
+
+    private void getSequence(String chromosome, long pos){
+        System.out.println("Asking for reference... " + pos + " - " + (pos + maxSequenceSize));
+        validSequence = true;
+        referenceSequenceStart = pos;
+        try {
+            referenceSequence = AlignmentHelper.getSequence(
+                    new Region(chromosome, pos, pos + maxSequenceSize)
+                    , null);
+        } catch (IOException e) {
+            System.out.println("could not get reference sequence");
+        }
     }
 
     @Override

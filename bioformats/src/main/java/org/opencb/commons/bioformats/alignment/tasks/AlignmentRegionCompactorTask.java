@@ -3,6 +3,7 @@ package org.opencb.commons.bioformats.alignment.tasks;
 import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentHelper;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
+import org.opencb.commons.bioformats.alignment.ShortReferenceSequenceException;
 import org.opencb.commons.bioformats.feature.Region;
 import org.opencb.commons.containers.map.QueryOptions;
 import org.opencb.commons.run.Task;
@@ -31,12 +32,13 @@ public class AlignmentRegionCompactorTask extends Task<AlignmentRegion> {
             Long start = alignmentRegion.getStart();
             Region region = alignmentRegion.getRegion();
             String sequence = AlignmentHelper.getSequence(region, new QueryOptions());
-            System.out.println("Pedimos secuencia: " + region.toString() + " size = " + (region.getEnd()-region.getStart()));
+            System.out.println("Asking for sequence: " + region.toString() + " size = " + (region.getEnd()-region.getStart()));
             for(Alignment alignment : alignmentRegion.getAlignments()){
-                if(!AlignmentHelper.completeDifferencesFromReference(alignment,sequence, start)){
-                    //TODO: Catch this.
-                    //The sequence was not enough
+                try {
+                    AlignmentHelper.completeDifferencesFromReference(alignment,sequence, start);
+                } catch (ShortReferenceSequenceException e) {
                     System.out.println("[ERROR] NOT ENOUGH REFERENCE SEQUENCE!!");
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
         }

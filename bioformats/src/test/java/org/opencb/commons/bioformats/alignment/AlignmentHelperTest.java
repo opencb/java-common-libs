@@ -311,7 +311,11 @@ public class AlignmentHelperTest {
 
     private void CompleteDifferencesFromReferenceTest(SAMRecord record, String referenceSequence, String readSequence, List<Alignment.AlignmentDifference> expResult){
         Alignment alignment = new Alignment(record, null);
-        AlignmentHelper.completeDifferencesFromReference(alignment,referenceSequence,alignment.getUnclippedStart());
+        try {
+            AlignmentHelper.completeDifferencesFromReference(alignment,referenceSequence,alignment.getUnclippedStart());
+        } catch (ShortReferenceSequenceException e) {
+            assertTrue(e.getMessage(),false);
+        }
 
         assertEquals(expResult.size(), alignment.getDifferences().size());
 
@@ -320,7 +324,12 @@ public class AlignmentHelperTest {
                     expResult.get(i).equals(alignment.getDifferences().get(i)));
         }
         Cigar cigar = new Cigar();
-        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(expResult, readSequence.length(), referenceSequence, cigar);
+        String sequenceFromDifferences = null;
+        try {
+            sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(expResult, readSequence.length(), referenceSequence, cigar);
+        } catch (ShortReferenceSequenceException e) {
+            assertTrue(e.getMessage(), false);
+        }
         assertEquals("getSequenceFromDifferences bad sequence result. ", readSequence, sequenceFromDifferences);
         //assertEquals("getSequenceFromDifferences bad cigar result. ", record.getCigar(), cigar);
         System.out.println("original   : " + record.getCigar()  + "\n" +
@@ -366,7 +375,12 @@ public class AlignmentHelperTest {
         String readSequence =              "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGTATAAGATTTTTTXXXXTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCA";
         String referenceSequence = "HHHHHHHHAAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT_ATAAGATTTTTTTTTTTTTTTGAGACGGAATTTCACTCTTGTCACCCAGGCTGGAGTGCAA";
 
-        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, readSequence.length(), referenceSequence);
+        String sequenceFromDifferences = null;
+        try {
+            sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, readSequence.length(), referenceSequence);
+        } catch (ShortReferenceSequenceException e) {
+            assertTrue(e.getMessage(), false);
+        }
         System.out.println("reference: " + referenceSequence);
         System.out.println("read     : " + readSequence);
         System.out.println("reconstru: " + sequenceFromDifferences);
@@ -383,11 +397,32 @@ public class AlignmentHelperTest {
         String expectedCigar = "3=3D13I14=7D2=8S";
 
         Cigar cigar = new Cigar();
-        String sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, 40,
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", cigar);
+        String sequenceFromDifferences = null;
+        try {
+            sequenceFromDifferences = AlignmentHelper.getSequenceFromDifferences(differenceList, 40,
+                    "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", cigar);
+        } catch (ShortReferenceSequenceException e) {
+            assertTrue(e.getMessage(), false);
+        }
 
         System.out.println(sequenceFromDifferences);
         assertEquals(expectedCigar, cigar.toString());
     }
-    
+
+    @Test(expected = ShortReferenceSequenceException.class)
+    public void ShortReferenceSequenceExceptionTest() throws ShortReferenceSequenceException {
+        List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
+        differenceList.add(new Alignment.AlignmentDifference(0,'H', 8));
+        differenceList.add(new Alignment.AlignmentDifference(0,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
+        differenceList.add(new Alignment.AlignmentDifference(47,'D', 1));
+
+
+        String referenceSequence = "VERY_SHORT_REFERENCE_SEQUENCE";
+
+        AlignmentHelper.getSequenceFromDifferences(differenceList, 100, referenceSequence);
+
+
+
+    }
+
 }
