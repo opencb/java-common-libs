@@ -23,14 +23,14 @@ public class AlignmentRegionSummary {
     private String defaultRNext;
 
     private Map<String, Integer> keyMap;
-    private Map<Map.Entry<Integer, String>, Integer> tagMap;
+    private Map<Map.Entry<Integer, Object>, Integer> tagMap;
 
     public AlignmentRegionSummary() {
         keyMap = new HashMap<>();
         tagMap = new HashMap<>();
     }
 
-    public AlignmentRegionSummary(int defaultLength, int defaultFlag, int defaultMapQ, String defaultRNext, Map<String, Integer> keyMap, Map<Map.Entry<Integer, String>, Integer> tagMap) {
+    public AlignmentRegionSummary(int defaultLength, int defaultFlag, int defaultMapQ, String defaultRNext, Map<String, Integer> keyMap, Map<Map.Entry<Integer, Object>, Integer> tagMap) {
         this.defaultLength = defaultLength;
         this.defaultFlag = defaultFlag;
         this.defaultMapQ = defaultMapQ;
@@ -79,11 +79,11 @@ public class AlignmentRegionSummary {
         this.keyMap = keyMap;
     }
 
-    public Map<Map.Entry<Integer, String>, Integer> getTagMap() {
+    public Map<Map.Entry<Integer, Object>, Integer> getTagMap() {
         return tagMap;
     }
 
-    public void setTagMap(Map<Map.Entry<Integer, String>, Integer> tagMap) {
+    public void setTagMap(Map<Map.Entry<Integer, Object>, Integer> tagMap) {
         this.tagMap = tagMap;
     }
 }

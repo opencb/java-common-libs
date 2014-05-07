@@ -39,7 +39,7 @@ public class AlignmentRegionSummarizeTask extends Task<AlignmentRegion> {
     private Map<String, Integer> rNextMap;
     private List<String> keyList;
     private Map<String, Integer> keyMap;
-    private Map<Map.Entry<Integer, String>, Integer> tagsMap;
+    private Map<Map.Entry<Integer, Object>, Integer> tagsMap;
 
 
     private long start;
@@ -155,7 +155,7 @@ public class AlignmentRegionSummarizeTask extends Task<AlignmentRegion> {
                         keyMap.put(auxs, auxi);
                     } //auxi = IndexTag;
 
-                    Map.Entry<Integer, String> tag = new AbstractMap.SimpleEntry<>(auxi, entry.getValue().toString());
+                    Map.Entry<Integer, Object> tag = new AbstractMap.SimpleEntry<>(auxi, entry.getValue());
                     if(tagsMap.containsKey(tag)){
                         auxi = tagsMap.get(tag) + 1;
                     } else {
@@ -223,7 +223,7 @@ public class AlignmentRegionSummarizeTask extends Task<AlignmentRegion> {
             }
 
             System.out.println("Tags Map:");
-            for (Map.Entry<Map.Entry<Integer, String>, Integer> entry: tagsMap.entrySet()) {
+            for (Map.Entry<Map.Entry<Integer, Object>, Integer> entry: tagsMap.entrySet()) {
                 System.out.print("clave: " + entry.getKey() + ", valor : " + entry.getValue() + "\t");
                 for(int i = 0; i < entry.getValue(); i++){
                     System.out.print('*');
