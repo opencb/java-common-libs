@@ -226,7 +226,7 @@ public class AlignmentHelperTest {
         record.setReadString(readSequence);
 
         expResult = new LinkedList<>();
-        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.HARD_CLIPPING, "AA"));
+        expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.HARD_CLIPPING, 2));
         expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.SOFT_CLIPPING, "CCGGGGTT"));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
 //        for (int i = 0; i < result.size(); i++) {
@@ -253,7 +253,7 @@ public class AlignmentHelperTest {
          
         expResult = new LinkedList<>();
         expResult.add(new Alignment.AlignmentDifference(0, Alignment.AlignmentDifference.SOFT_CLIPPING, 2));  //We expect don't save que SoftClipping if it's equal to the reference
-        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.HARD_CLIPPING, "CC"));
+        expResult.add(new Alignment.AlignmentDifference(22, Alignment.AlignmentDifference.HARD_CLIPPING, 2));
         result = AlignmentHelper.getDifferencesFromCigar(record, referenceSequence);
 //        for (int i = 0; i < result.size(); i++) {
 //            System.out.println(result.get(i).toString());
@@ -367,8 +367,8 @@ public class AlignmentHelperTest {
         
         List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
         differenceList.add(new Alignment.AlignmentDifference(0,'H', 8));
-        differenceList.add(new Alignment.AlignmentDifference(0,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
-        differenceList.add(new Alignment.AlignmentDifference(47,'D', 1));
+        differenceList.add(new Alignment.AlignmentDifference(8,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
+        differenceList.add(new Alignment.AlignmentDifference(48,'D', 1));
         differenceList.add(new Alignment.AlignmentDifference(61,'I', "XXXX"));
 
 
@@ -412,9 +412,9 @@ public class AlignmentHelperTest {
     @Test(expected = ShortReferenceSequenceException.class)
     public void ShortReferenceSequenceExceptionTest() throws ShortReferenceSequenceException {
         List<Alignment.AlignmentDifference> differenceList = new LinkedList<>();
-        differenceList.add(new Alignment.AlignmentDifference(0,'H', 8));
         differenceList.add(new Alignment.AlignmentDifference(0,'S', "AAATATAAACAATACACAATACAGGCTAATGAAGAAGGGT"));
         differenceList.add(new Alignment.AlignmentDifference(47,'D', 1));
+        differenceList.add(new Alignment.AlignmentDifference(48,'H', 8));
 
 
         String referenceSequence = "VERY_SHORT_REFERENCE_SEQUENCE";

@@ -24,33 +24,31 @@ public class AlignmentRegionDataWriter implements DataWriter<AlignmentRegion> {
 
     @Override
     public boolean open() {
-        alignmentDataWriter.open();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return alignmentDataWriter.open();
     }
 
     @Override
     public boolean close() {
-        alignmentDataWriter.close();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return alignmentDataWriter.close();
     }
 
     @Override
     public boolean pre() {
-        alignmentDataWriter.pre();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return alignmentDataWriter.pre();
     }
 
     @Override
     public boolean post() {
-        alignmentDataWriter.post();
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return alignmentDataWriter.post();
     }
 
     @Override
     public boolean write(AlignmentRegion elem) {
         // get reference sequence
         for (Alignment alignment : elem.getAlignments()) {
-            alignmentDataWriter.write(alignment);
+            if(!alignmentDataWriter.write(alignment)){
+                return false;
+            }
         }
 
         return true;

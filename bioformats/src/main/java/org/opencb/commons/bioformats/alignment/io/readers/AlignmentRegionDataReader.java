@@ -41,26 +41,22 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
     @Override
     public boolean open() {
-        alignmentDataReader.open();
-        return true;
+        return alignmentDataReader.open();
     }
 
     @Override
     public boolean close() {
-        alignmentDataReader.close();
-        return true;
+        return alignmentDataReader.close();
     }
 
     @Override
     public boolean pre() {
-        alignmentDataReader.pre();
-        return true;
+        return alignmentDataReader.pre();
     }
 
     @Override
     public boolean post() {
-        alignmentDataReader.post();
-        return true;
+        return alignmentDataReader.post();
     }
 
     @Override
