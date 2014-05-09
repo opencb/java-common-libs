@@ -89,7 +89,7 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<Alignment, SA
         }
 
         if (!validSequence) {   //element.getUnclippedStart() < referenceSequenceStart
-            getSequence(element.getChromosome(), element.getUnclippedEnd());
+            getSequence(element.getChromosome(), element.getUnclippedStart());
         }
         // assert refseq correct
 
@@ -98,13 +98,14 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<Alignment, SA
         try {
             SamElement = element.createSAMRecord(samFileHeader, referenceSequence, referenceSequenceStart);
         } catch (ShortReferenceSequenceException e) {
-            getSequence(element.getChromosome(), element.getUnclippedEnd());
+            getSequence(element.getChromosome(), element.getUnclippedStart());
         }
         try {
             SamElement = element.createSAMRecord(samFileHeader, referenceSequence, referenceSequenceStart);
         } catch (ShortReferenceSequenceException e) {
             System.out.println("[ERROR] Can't get the correct reference sequence");
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
+            return false;
         }
         writer.addAlignment(SamElement);
         return true;
@@ -119,14 +120,15 @@ public class AlignmentSamDataWriter implements AlignmentDataWriter<Alignment, SA
                     new Region(chromosome, pos, pos + maxSequenceSize)
                     , null);
         } catch (IOException e) {
-            System.out.println("could not get reference sequence");
+            System.out.println("Could not get reference sequence");
         }
     }
 
     @Override
     public boolean write(List<Alignment> batch) {
         for(Alignment r : batch){
-            write(r);
+            if(!write(r))
+                return false;
         }
         return true;
     }

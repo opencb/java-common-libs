@@ -31,8 +31,8 @@ public class AlignmentRegionCompactorTask extends Task<AlignmentRegion> {
         for(AlignmentRegion alignmentRegion : batch){
             Long start = alignmentRegion.getStart();
             Region region = alignmentRegion.getRegion();
-            String sequence = AlignmentHelper.getSequence(region, new QueryOptions());
             System.out.println("Asking for sequence: " + region.toString() + " size = " + (region.getEnd()-region.getStart()));
+            String sequence = AlignmentHelper.getSequence(region, new QueryOptions());
             for(Alignment alignment : alignmentRegion.getAlignments()){
                 try {
                     AlignmentHelper.completeDifferencesFromReference(alignment,sequence, start);

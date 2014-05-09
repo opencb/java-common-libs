@@ -31,6 +31,8 @@ public class Alignment {
     private String mateReferenceName;
     private int mateAlignmentStart;
     private int inferredInsertSize;
+
+    @Deprecated // maybe
     private byte[] readSequence;    // can be null
 
     /**
@@ -108,9 +110,11 @@ public class Alignment {
         readSequence = record.getReadBases();
         attributes = new HashMap<>();
         for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
-            //if (!tav.tag.equals("BQ"))  // FIXME jj: test purposes only
             attributes.put(tav.tag, tav.value);
         }
+    }
+    public Alignment(SAMRecord record) {
+        this(record, null);
     }
 
     public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence) throws ShortReferenceSequenceException {
@@ -131,7 +135,7 @@ public class Alignment {
         samRecord.setInferredInsertSize(inferredInsertSize);
 
         Cigar cigar = new Cigar();
-        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, cigar, (int)(start-referenceSequenceStartPosition)).getBytes();
+        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, cigar, (int)(unclippedStart-referenceSequenceStartPosition)).getBytes();
         samRecord.setReadBases(readSequence);
 
         samRecord.setCigar(cigar);
@@ -296,10 +300,12 @@ public class Alignment {
         this.unclippedStart = unclippedStart;
     }
 
+    @Deprecated
     public byte[] getReadSequence() {
         return readSequence;
     }
 
+    @Deprecated
     public void setReadSequence(byte[] readSequence) {
         this.readSequence = readSequence;
     }
@@ -371,6 +377,7 @@ public class Alignment {
         public static final char INSERTION = 'I';
         public static final char DELETION = 'D';
         public static final char MISMATCH = 'X';
+        public static final char MATCH_MISMATCH = 'M';
         public static final char SKIPPED_REGION = 'N';
         public static final char SOFT_CLIPPING = 'S';
         public static final char HARD_CLIPPING = 'H';

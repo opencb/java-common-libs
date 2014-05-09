@@ -12,7 +12,7 @@ import java.util.List;
  * User: jcoll
  * Date: 2/7/14
  * Time: 5:43 PM
- * To change this template use File | Settings | File Templates.
+ *
  */
 public class AlignmentRegionDataWriter implements DataWriter<AlignmentRegion> {
     private AlignmentDataWriter<Alignment, SAMFileHeader> alignmentDataWriter;
@@ -58,6 +58,10 @@ public class AlignmentRegionDataWriter implements DataWriter<AlignmentRegion> {
 
     @Override
     public boolean write(List<AlignmentRegion> batch) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        for(AlignmentRegion r : batch){
+            if(!write(r))
+                return false;
+        }
+        return true;
     }
 }
