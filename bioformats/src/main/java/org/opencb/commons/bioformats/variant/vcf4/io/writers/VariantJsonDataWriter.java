@@ -65,8 +65,7 @@ public class VariantJsonDataWriter implements VariantWriter {
 
         try {
             if (this.gzip) {
-                writer = new PrintWriter(new Gk
-                writer = new PrintWriter(filename);
+                writer = new PrintWriter(new GZIPOutputStream(new FileOutputStream(this.filename)));
             }
             g = f.createGenerator(writer);
         } catch (FileNotFoundException e) {
