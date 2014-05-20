@@ -29,8 +29,7 @@ public class VariantControlMongoAnnotator implements VariantAnnotator {
     public void annot(List<Variant> batch) {
 
         Client clientNew = ClientBuilder.newClient();
-        //WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/controlsws/rest/");
-        WebTarget webTarget = clientNew.target("http://aaleman:8080/controlsws/rest/");
+        WebTarget webTarget = clientNew.target("http://ws-beta.bioinfo.cipf.es/controlsws/rest/");
 
         StringBuilder chunkVariants = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#.####");
