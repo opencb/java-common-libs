@@ -16,7 +16,7 @@ public interface DataReader<T> {
 
     public boolean post();
 
-    public T read();
+    public List<T> read();
 
     public List<T> read(int batchSize);
 }

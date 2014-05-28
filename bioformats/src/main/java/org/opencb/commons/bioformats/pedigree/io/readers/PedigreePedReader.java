@@ -64,8 +64,7 @@ public class PedigreePedReader implements PedigreeReader {
     }
 
     @Override
-    public Pedigree read() {
-
+    public List<Pedigree> read() {
         String line;
         Individual ind, father, mother;
         String[] fields;
@@ -128,7 +127,7 @@ public class PedigreePedReader implements PedigreeReader {
 
 
         }
-        return ped;
+        return Arrays.asList(ped);
     }
 
     @Override
