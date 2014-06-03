@@ -1,5 +1,8 @@
 package org.opencb.commons.containers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class QueryResult<T> {
 
@@ -11,22 +14,19 @@ public class QueryResult<T> {
     private String errorMsg;
     private String featureType;
     private String resultType;
-    private T result;
+    private List<T> result;
 
 
     public QueryResult() {
-        this.id = "";
-        this.dbTime = -1;
-        this.time = -1;
-        this.numResults = -1;
-        this.warningMsg = "";
-        this.errorMsg = "";
-        this.featureType = "";
-        this.resultType = "";
-        this.result = null;
+        this("", -1, -1, 0, "", "", "", new ArrayList<T>());
     }
 
-    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg, String featureType, String resultType, T result) {
+    public QueryResult(String id) {
+        this(id, -1, -1, 0, "", "", "", new ArrayList<T>());
+    }
+
+    public QueryResult(String id, long dbTime, long time, long numResults, String warningMsg, String errorMsg,
+                       String featureType, List<T> result) {
         this.id = id;
         this.dbTime = dbTime;
         this.time = time;
@@ -34,7 +34,7 @@ public class QueryResult<T> {
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
         this.featureType = featureType;
-        this.resultType = resultType;
+        this.resultType = result.size() > 0 ? result.get(0).getClass().getCanonicalName() : "";
         this.result = result;
     }
 
@@ -94,12 +94,30 @@ public class QueryResult<T> {
         this.resultType = resultType;
     }
 
-    public T getResult() {
+    public List<T> getResult() {
         return result;
     }
 
-    public void setResult(T result) {
+    public void setResult(List<T> result) {
+        if (result.size() > 0) {
+            this.resultType = result.get(0).getClass().getCanonicalName();
+        }
+        this.numResults = result.size();
         this.result = result;
+    }
+
+    public void addResult(T result) {
+        this.resultType = result.getClass().getCanonicalName();
+        this.result.add(result);
+        this.numResults++;
+    }
+
+    public void addAllResults(List<T> result) {
+        if (result.size() > 0) {
+            this.resultType = result.get(0).getClass().getCanonicalName();
+        }
+        this.result.addAll(result);
+        this.numResults += result.size();
     }
 
     public long getTime() {
@@ -108,5 +126,21 @@ public class QueryResult<T> {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+
+    @Override
+    public String toString() {
+        return "QueryResult{\n" +
+                "id='" + id + '\'' + "\n" +
+                ", dbTime=" + dbTime + "\n" +
+                ", time=" + time + "\n" +
+                ", numResults=" + numResults + "\n" +
+                ", warningMsg='" + warningMsg + '\'' + "\n" +
+                ", errorMsg='" + errorMsg + '\'' + "\n" +
+                ", featureType='" + featureType + '\'' + "\n" +
+                ", resultType='" + resultType + '\'' + "\n" +
+                ", result=" + result + "\n" +
+                '}';
     }
 }

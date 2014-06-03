@@ -1,18 +1,11 @@
 package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.*;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
-import java.lang.Float;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +27,7 @@ public class VariantInfo {
     @JsonProperty
     private String alt;
     @JsonProperty
-    private String gene_name;
+    private String geneName;
     @JsonProperty
     private double stats_maf;
     @JsonProperty
@@ -60,7 +53,7 @@ public class VariantInfo {
     @JsonProperty
     private double stats_controls_percent_recessive;
     @JsonProperty
-    private String stats_id_snp;
+    private String snpid;
     @JsonProperty
     private Set<String> genes;
     @JsonProperty
@@ -71,7 +64,18 @@ public class VariantInfo {
     private HashMap<String, String> sampleGenotypes;
     @JsonProperty
     private Map<String, Integer> genotypes;
+    @JsonProperty
+    private double polyphen_score;
+    @JsonProperty
+    private double sift_score;
+    @JsonProperty
+    private int polyphen_effect;
+    @JsonProperty
+    private int sift_effect;
 
+    public VariantInfo() {
+        this("", -1, "", "");
+    }
 
     public VariantInfo(String chromosome, int position, String ref, String alt) {
         this.chromosome = chromosome;
@@ -91,12 +95,9 @@ public class VariantInfo {
     public VariantInfo(String chromosome, int position, String ref, String alt, VariantStats stats) {
         this(chromosome, position, ref, alt);
         this.addStats(stats);
-
-
     }
 
-    public void addStats(VariantStats stat) {
-
+    public final void addStats(VariantStats stat) {
         this.stats_maf = stat.getMaf();
         this.stats_mgf = stat.getMgf();
         this.stats_allele_maf = stat.getMafAllele();
@@ -109,7 +110,10 @@ public class VariantInfo {
         this.stats_controls_percent_dominant = stat.getControlsPercentDominant();
         this.stats_cases_percent_recessive = stat.getCasesPercentRecessive();
         this.stats_controls_percent_recessive = stat.getControlsPercentRecessive();
-        this.stats_id_snp = stat.getId();
+        // TODO Is this necessary?
+//        if (this.snpid == null && stat.getId() != null) {
+//            this.snpid = stat.getId();
+//        }
     }
 
     public Set<VariantEffect> getEffect() {
@@ -281,9 +285,7 @@ public class VariantInfo {
             controls.put(controlName, vc);
 
         } else {
-
             vc = controls.get(controlName);
-
         }
 
         switch (controlType) {
@@ -325,7 +327,7 @@ public class VariantInfo {
                 ", position=" + position +
                 ", ref='" + ref + '\'' +
                 ", alt='" + alt + '\'' +
-                ", gene_name='" + gene_name + '\'' +
+                ", geneName='" + geneName + '\'' +
                 ", stats_maf=" + stats_maf +
                 ", stats_mgf=" + stats_mgf +
                 ", stats_allele_maf='" + stats_allele_maf + '\'' +
@@ -338,7 +340,7 @@ public class VariantInfo {
                 ", stats_controls_percent_dominant=" + stats_controls_percent_dominant +
                 ", stats_cases_percent_recessive=" + stats_cases_percent_recessive +
                 ", stats_controls_percent_recessive=" + stats_controls_percent_recessive +
-                ", stats_id_snp='" + stats_id_snp + '\'' +
+                ", snpid='" + snpid + '\'' +
                 ", genes=" + genes +
                 ", controls=" + controls +
                 ", effect=" + effect +
@@ -371,4 +373,51 @@ public class VariantInfo {
         }
     }
 
+    public double getPolyphen_score() {
+        return polyphen_score;
+    }
+
+    public void setPolyphen_score(double polyphen_score) {
+        this.polyphen_score = polyphen_score;
+    }
+
+    public double getSift_score() {
+        return sift_score;
+    }
+
+    public void setSift_score(double sift_score) {
+        this.sift_score = sift_score;
+    }
+
+    public int getPolyphen_effect() {
+        return polyphen_effect;
+    }
+
+    public void setPolyphen_effect(int polyphen_effect) {
+        this.polyphen_effect = polyphen_effect;
+    }
+
+    public int getSift_effect() {
+        return sift_effect;
+    }
+
+    public void setSift_effect(int sift_effect) {
+        this.sift_effect = sift_effect;
+    }
+
+    public String getSnpid() {
+        return snpid;
+    }
+
+    public void setSnpid(String snpid) {
+        this.snpid = snpid;
+    }
+
+    public String getGeneName() {
+        return geneName;
+    }
+
+    public void setGeneName(String geneName) {
+        this.geneName = geneName;
+    }
 }

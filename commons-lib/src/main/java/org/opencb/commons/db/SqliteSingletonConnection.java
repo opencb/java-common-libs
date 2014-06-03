@@ -38,4 +38,23 @@ public class SqliteSingletonConnection {
         }
         return con;
     }
+
+    public static boolean closeConnection() {
+        boolean res = false;
+        if (con != null) {
+            try {
+                con.close();
+                con = null;
+                res = true;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    public static String getDbName() {
+        return dbName;
+    }
 }

@@ -2,11 +2,7 @@ package org.opencb.commons.bioformats.variant.utils.effect;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: aaleman
- * Date: 9/10/13
- * Time: 2:38 PM
- * To change this template use File | Settings | File Templates.
+ * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
 public class VariantEffect {
 
@@ -36,41 +32,22 @@ public class VariantEffect {
     private String aminoacidChange;
     private String codonChange;
 
+    private double polyphenScore;
+    private double siftScore;
+    private int polyphenEffect;
+    private int siftEffect;
+
 
     public VariantEffect() {
-
+        this.polyphenScore = -1;
+        this.siftScore = -1;
     }
 
-    public VariantEffect(String chromosome,
-                         int position,
-                         String referenceAllele,
-                         String alternativeAllele,
-                         String featureId,
-                         String featureName,
-                         String featureType,
-                         String featureBiotype,
-                         String featureChromosome,
-                         int featureStart,
-                         int featureEnd,
-                         String featureStrand,
-                         String snpId,
-                         String ancestral,
-                         String alternative,
-                         String geneId,
-                         String transcriptId,
-                         String geneName,
-                         String consequenceType,
-                         String consequenceTypeObo,
-                         String consequenceTypeDesc,
-                         String consequenceTypeType,
-                         int aaPosition,
-                         String aminoacidChange,
-                         String codonChange
-    ) {
-        this.chromosome = chromosome;
-        this.position = position;
-        this.referenceAllele = referenceAllele;
-        this.alternativeAllele = alternativeAllele;
+    public VariantEffect(String chromosome, int position, String referenceAllele, String alternativeAllele, String featureId, String featureName, String featureType, String featureBiotype, String featureChromosome, int featureStart, int featureEnd, String featureStrand, String snpId, String ancestral, String alternative, String geneId, String transcriptId, String geneName, String consequenceType, String consequenceTypeObo, String consequenceTypeDesc, String consequenceTypeType, int aaPosition, String aminoacidChange, String codonChange) {
+        this.setChromosome(chromosome);
+        this.setPosition(position);
+        this.setReferenceAllele(referenceAllele);
+        this.setAlternativeAllele(alternativeAllele);
         this.featureId = featureId;
         this.featureName = featureName;
         this.featureType = featureType;
@@ -92,6 +69,9 @@ public class VariantEffect {
         this.aaPosition = aaPosition;
         this.aminoacidChange = aminoacidChange;
         this.codonChange = codonChange;
+
+        this.polyphenScore = -1;
+        this.siftScore = -1;
     }
 
     public String getChromosome() {
@@ -100,6 +80,9 @@ public class VariantEffect {
 
     public void setChromosome(String chromosome) {
         this.chromosome = chromosome;
+        this.chromosome = this.chromosome.replace("chrm", "");
+        this.chromosome = this.chromosome.replace("chr", "");
+        this.chromosome = this.chromosome.replace("chr", "");
     }
 
     public int getPosition() {
@@ -107,6 +90,9 @@ public class VariantEffect {
     }
 
     public void setPosition(int position) {
+        if (position < 0) {
+            throw new IllegalArgumentException("Position must be positive");
+        }
         this.position = position;
     }
 
@@ -399,5 +385,37 @@ public class VariantEffect {
         result = 31 * result + (aminoacidChange != null ? aminoacidChange.hashCode() : 0);
         result = 31 * result + (codonChange != null ? codonChange.hashCode() : 0);
         return result;
+    }
+
+    public double getPolyphenScore() {
+        return polyphenScore;
+    }
+
+    public void setPolyphenScore(double polyphenScore) {
+        this.polyphenScore = polyphenScore;
+    }
+
+    public double getSiftScore() {
+        return siftScore;
+    }
+
+    public void setSiftScore(double siftScore) {
+        this.siftScore = siftScore;
+    }
+
+    public int getPolyphenEffect() {
+        return polyphenEffect;
+    }
+
+    public void setPolyphenEffect(int polyphenEffect) {
+        this.polyphenEffect = polyphenEffect;
+    }
+
+    public int getSiftEffect() {
+        return siftEffect;
+    }
+
+    public void setSiftEffect(int siftEffect) {
+        this.siftEffect = siftEffect;
     }
 }

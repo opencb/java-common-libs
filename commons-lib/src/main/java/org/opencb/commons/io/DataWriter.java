@@ -1,5 +1,7 @@
 package org.opencb.commons.io;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: aaleman
@@ -7,7 +9,7 @@ package org.opencb.commons.io;
  * Time: 12:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface DataWriter {
+public interface DataWriter<T> {
 
     public boolean open();
 
@@ -16,5 +18,9 @@ public interface DataWriter {
     public boolean pre();
 
     public boolean post();
+
+    public boolean write(T elem);
+
+    public boolean write(List<T> batch);
 
 }

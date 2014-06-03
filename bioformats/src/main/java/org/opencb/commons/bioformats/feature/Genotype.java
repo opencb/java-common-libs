@@ -110,6 +110,12 @@ public class Genotype {
 
     public void setAllele1(Integer allele1) {
         this.allele1 = allele1;
+        if (allele1 == null) {
+            this.setCode(AllelesCode.FIRST_ALLELE_MISSING);
+        }
+        if (allele2 == null) {
+            this.setCode(AllelesCode.ALL_ALLELES_MISSING);
+        }
     }
 
     public Integer getAllele2() {
@@ -118,6 +124,12 @@ public class Genotype {
 
     public void setAllele2(Integer allele2) {
         this.allele2 = allele2;
+        if (allele2 == null) {
+            this.setCode(AllelesCode.FIRST_ALLELE_MISSING);
+        }
+        if (allele1 == null) {
+            this.setCode(AllelesCode.ALL_ALLELES_MISSING);
+        }
     }
 
     public AllelesCode getCode() {
