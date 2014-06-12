@@ -1,10 +1,11 @@
 package org.opencb.commons.bioformats.variant.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.*;
 import org.opencb.commons.bioformats.variant.utils.effect.VariantEffect;
 import org.opencb.commons.bioformats.variant.utils.stats.VariantStats;
 
-import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -94,12 +95,9 @@ public class VariantInfo {
     public VariantInfo(String chromosome, int position, String ref, String alt, VariantStats stats) {
         this(chromosome, position, ref, alt);
         this.addStats(stats);
-
-
     }
 
-    public void addStats(VariantStats stat) {
-
+    public final void addStats(VariantStats stat) {
         this.stats_maf = stat.getMaf();
         this.stats_mgf = stat.getMgf();
         this.stats_allele_maf = stat.getMafAllele();
@@ -112,9 +110,10 @@ public class VariantInfo {
         this.stats_controls_percent_dominant = stat.getControlsPercentDominant();
         this.stats_cases_percent_recessive = stat.getCasesPercentRecessive();
         this.stats_controls_percent_recessive = stat.getControlsPercentRecessive();
-        if (this.snpid == null && stat.getId() != null) {
-            this.snpid = stat.getId();
-        }
+        // TODO Is this necessary?
+//        if (this.snpid == null && stat.getId() != null) {
+//            this.snpid = stat.getId();
+//        }
     }
 
     public Set<VariantEffect> getEffect() {

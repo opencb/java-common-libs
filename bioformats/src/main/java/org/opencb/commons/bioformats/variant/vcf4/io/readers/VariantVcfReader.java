@@ -84,7 +84,7 @@ public class VariantVcfReader implements VariantReader {
     }
 
     @Override
-    public Variant read() {
+    public List<Variant> read() {
         String line;
         try {
             while ((line = reader.readLine()) != null && (line.trim().equals("") || line.startsWith("#"))) {
@@ -101,13 +101,9 @@ public class VariantVcfReader implements VariantReader {
                     throw new IOException("Not enough fields in line (min. 8): " + line);
                 }
 
-                return variant;
+                return Arrays.asList(variant);
             }
-        } catch (
-                IOException e
-                )
-
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -119,12 +115,11 @@ public class VariantVcfReader implements VariantReader {
     @Override
     public List<Variant> read(int batchSize) {
         List<Variant> listRecords = new ArrayList<>(batchSize);
-        Variant variant;
+        List<Variant> variants;
         int i = 0;
 
-        while ((i < batchSize) && (variant = this.read()) != null) {
-
-            listRecords.add(variant);
+        while ((i < batchSize) && (variants = this.read()) != null) {
+            listRecords.addAll(variants);
             i++;
 
         }

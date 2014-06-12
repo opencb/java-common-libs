@@ -6,7 +6,6 @@ import org.opencb.commons.utils.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,7 @@ public class GtfReader {
             }
             if (line != null) {
                 String[] fields = line.split("\t");
-                Map<String, String> attributes = new HashMap<String, String>();
+                Map<String, String> attributes = new HashMap<>();
                 String[] attrFields = fields[8].split(";");
                 String attr, k, v;
                 String[] kv;
@@ -56,7 +55,7 @@ public class GtfReader {
     }
 
     public List<Gtf> read(int numberLines) throws FileFormatException {
-        List<Gtf> records = new ArrayList<Gtf>(numberLines);
+        List<Gtf> records = new ArrayList<>(numberLines);
         try {
             int cont = 0;
             Gtf gtf;
@@ -71,7 +70,7 @@ public class GtfReader {
     }
 
     public List<Gtf> readAll() throws FileFormatException {
-        List<Gtf> records = new ArrayList<Gtf>();
+        List<Gtf> records = new ArrayList<>();
         try {
             Gtf gtf;
             while ((gtf = read()) != null) {
