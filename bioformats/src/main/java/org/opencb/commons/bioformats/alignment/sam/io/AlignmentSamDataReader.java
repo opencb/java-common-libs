@@ -75,10 +75,12 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader
     }
 
     @Override
-    public Alignment read() {
+    public List<Alignment> read() {
+        Alignment alignment = null;
+        List<Alignment> alignments = null;
+
 
         SAMRecord record = null;
-        Alignment alignment = null;
         if(iterator.hasNext()){
             record = iterator.next();
             alignment = new Alignment(record, null);
@@ -92,18 +94,19 @@ public class AlignmentSamDataReader implements AlignmentDataReader<SAMFileHeader
                 */
 //            Alignment alignment = new Alignment(record, null, record.getReadString());
             alignment.setReadSequence(record.getReadBases());
+            alignments = new ArrayList<>(1);
+            alignments.add(alignment);
         }
-        return alignment;
-
+        return alignments;
     }
 
     @Override
     public List<Alignment> read(int batchSize) {
         List<Alignment> listRecords = new ArrayList<>(batchSize);
-        Alignment alignment;
+        List<Alignment> auxList;
 
-        for (int i = 0; (i < batchSize) && (alignment = this.read()) != null; i++) {
-            listRecords.add(alignment);
+        for (int i = 0; (i < batchSize) && (auxList = this.read()) != null; i++) {
+            listRecords.add(auxList.get(0));
         }
 
         return listRecords;

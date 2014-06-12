@@ -5,6 +5,7 @@ import org.opencb.commons.bioformats.alignment.Alignment;
 import org.opencb.commons.bioformats.alignment.AlignmentRegion;
 import org.opencb.commons.io.DataReader;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
     }
 
     @Override
-    public AlignmentRegion read() {
+    public List<AlignmentRegion> read() {
         List<Alignment> alignmentList = new LinkedList<>();
         String chromosome;
         long start;
@@ -70,7 +71,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 
         //First initialisation
         if(prevAlignment == null){
-            prevAlignment = alignmentDataReader.read();
+            prevAlignment = alignmentDataReader.read().get(0);
             if(prevAlignment == null){  //Empty source
                 return null;
             }
@@ -95,7 +96,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
             }
 
             //Read new alignment.
-            prevAlignment = alignmentDataReader.read();
+            prevAlignment = alignmentDataReader.read().get(0);
 
             //First stop condition: End of the chromosome or file
             if(prevAlignment == null || !chromosome.equals(prevAlignment.getChromosome())){
@@ -158,7 +159,9 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 //                " Size " +  (alignmentRegion.getAlignments().get(alignmentRegion.getAlignments().size()-1).getStart()-alignmentRegion.getAlignments().get(0).getStart() )
 //
 //        );
-        return alignmentRegion;
+        ArrayList<AlignmentRegion> alignmentRegions = new ArrayList<>();
+        alignmentRegions.add(alignmentRegion);
+        return alignmentRegions;
     }
 
 
@@ -170,7 +173,7 @@ public class AlignmentRegionDataReader implements DataReader<AlignmentRegion> {
 //        }
         AlignmentRegion alignmentRegion;
         for(int i = 0; i < batchSize; i++){
-            alignmentRegion = read();
+            alignmentRegion = read().get(0);
             if(alignmentRegion != null){
                 alignmentRegionList.add(alignmentRegion);
             }
