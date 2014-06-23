@@ -1,12 +1,10 @@
 package org.opencb.commons.bioformats.alignment;
 
-import org.opencb.commons.bioformats.alignment.stats.AlignmentRegionSummary;
+import java.util.List;
+
 import org.opencb.commons.bioformats.alignment.stats.MeanCoverage;
 import org.opencb.commons.bioformats.alignment.stats.RegionCoverage;
 import org.opencb.commons.bioformats.feature.Region;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
@@ -23,17 +21,15 @@ public class AlignmentRegion {
     private RegionCoverage coverage;
     private List<MeanCoverage> meanCoverage;
 
-
     public AlignmentRegion(String chromosome, long start, long end) {
         this(chromosome, start, end, null, null);
     }
 
-
     public AlignmentRegion(List<Alignment> alignments) {
         Alignment firstAlignment = alignments.get(0);
-        Alignment lastAlignment = alignments.get(alignments.size()-1);
+        Alignment lastAlignment = alignments.get(alignments.size() - 1);
         //if(!firstAlignment.getChromosome().equals(lastAlignment.getChromosome())) //TODO jcoll: Limit this
-            //System.out.println("All alignments must be in the same chromosome");
+        //System.out.println("All alignments must be in the same chromosome");
         this.chromosome = firstAlignment.getChromosome();
         this.start = firstAlignment.getUnclippedStart();
         this.end = lastAlignment.getUnclippedEnd();
@@ -89,7 +85,6 @@ public class AlignmentRegion {
         this.start = start;
     }
 
-
     public boolean isOverlapEnd() {
         return overlapEnd;
     }
@@ -97,7 +92,6 @@ public class AlignmentRegion {
     public void setOverlapEnd(boolean overlapEnd) {
         this.overlapEnd = overlapEnd;
     }
-
 
     public List<MeanCoverage> getMeanCoverage() {
         return meanCoverage;
@@ -108,7 +102,7 @@ public class AlignmentRegion {
         this.meanCoverage = meanCoverage;
     }
 
-    public Region getRegion(){
+    public Region getRegion() {
         return new Region(chromosome, start, end);
     }
 

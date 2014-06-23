@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import net.sf.samtools.Cigar;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMRecord;
@@ -37,8 +36,8 @@ public class Alignment {
 
     /**
      * List of differences between the reference sequence and this alignment.
-     * Each one is defined by its position, type of difference and the changes it
-     * introduces.
+     * Each one is defined by its position, type of difference and the changes
+     * it introduces.
      */
     private List<AlignmentDifference> differences;
 
@@ -49,8 +48,8 @@ public class Alignment {
     private Map<String, Object> attributes;
 
     /**
-     * Bitmask with information about structure, quality and other properties
-     * of the alignment.
+     * Bitmask with information about structure, quality and other properties of
+     * the alignment.
      */
     private int flags;
 
@@ -67,7 +66,8 @@ public class Alignment {
     public static final int PCR_OR_OPTICAL_DUPLICATE = 0x400;
     public static final int SUPPLEMENTARY_ALIGNMENT = 0x800;
 
-    public Alignment() { }
+    public Alignment() {
+    }
 
     public Alignment(String name, String chromosome, long start, long end, long unclippedStart, long unclippedEnd,
             int length, int mappingQuality, String qualities, String mateReferenceName, int mateAlignmentStart,
@@ -99,6 +99,7 @@ public class Alignment {
                 attributes);
         readSequence = record.getReadBases();
     }
+
     public Alignment(SAMRecord record, String referenceSequence) {
         this(record.getReadName(), record.getReferenceName(), record.getAlignmentStart(), record.getAlignmentEnd(),
                 record.getUnclippedStart(), record.getUnclippedEnd(), record.getReadLength(),
@@ -109,10 +110,11 @@ public class Alignment {
                 null);
         readSequence = record.getReadBases();
         attributes = new HashMap<>();
-        for(SAMRecord.SAMTagAndValue tav : record.getAttributes()){
+        for (SAMRecord.SAMTagAndValue tav : record.getAttributes()) {
             attributes.put(tav.tag, tav.value);
         }
     }
+
     public Alignment(SAMRecord record) {
         this(record, null);
     }
@@ -120,12 +122,13 @@ public class Alignment {
     public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence) throws ShortReferenceSequenceException {
         return createSAMRecord(samFileHeader, referenceSequence, start);
     }
+
     public SAMRecord createSAMRecord(SAMFileHeader samFileHeader, String referenceSequence, long referenceSequenceStartPosition) throws ShortReferenceSequenceException {
         SAMRecord samRecord = new SAMRecord(samFileHeader);
 
         samRecord.setReadName(name);
         samRecord.setReferenceName(chromosome);
-        samRecord.setAlignmentStart((int)start);
+        samRecord.setAlignmentStart((int) start);
         //samRecord.setAlignmentEnd((int)end);
 
         samRecord.setMappingQuality(mappingQuality);
@@ -135,7 +138,7 @@ public class Alignment {
         samRecord.setInferredInsertSize(inferredInsertSize);
 
         Cigar cigar = new Cigar();
-        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, cigar, (int)(unclippedStart-referenceSequenceStartPosition)).getBytes();
+        readSequence = AlignmentHelper.getSequenceFromDifferences(differences, length, referenceSequence, cigar, (int) (unclippedStart - referenceSequenceStartPosition)).getBytes();
         samRecord.setReadBases(readSequence);
 
         samRecord.setCigar(cigar);
@@ -178,7 +181,6 @@ public class Alignment {
         }
         return false;
     }
-
 
     public long getEnd() {
         return end;
@@ -311,59 +313,95 @@ public class Alignment {
     }
 
     /**
-     * Checks that the alignment is the same. This check is stricter than necessary.
+     * Checks that the alignment is the same. This check is stricter than
+     * necessary.
      *
-     * Note that null reads
-     * (e.g. alignment1.read = "acgt" and alignment2.read = null)
-     * doesn't imply that they are different. The read may be implicitly
+     * Note that null reads (e.g. alignment1.read = "acgt" and alignment2.read =
+     * null) doesn't imply that they are different. The read may be implicitly
      * defined in the alignmentDifferences, retrievable with the reference read.
      *
-     * Also, the CIGAR may change, having 'M' in alignment1 and 'X or '=' in alignment2.
+     * Also, the CIGAR may change, having 'M' in alignment1 and 'X or '=' in
+     * alignment2.
      *
-     * *1*
-     * From the sam specs: http://samtools.github.io/hts-specs/SAMv1.pdf
+     * *1* From the sam specs: http://samtools.github.io/hts-specs/SAMv1.pdf
      * "Bit 0x4 is the only reliable place to tell whether the read is unmapped.
-     * If 0x4 is set, no assumptions can be made about RNAME, POS, CIGAR, MAPQ, bits 0x2, 0x10, 0x100 and 0x800,
-     * and the bit 0x20 of the previous read in the template."
+     * If 0x4 is set, no assumptions can be made about RNAME, POS, CIGAR, MAPQ,
+     * bits 0x2, 0x10, 0x100 and 0x800, and the bit 0x20 of the previous read in
+     * the template."
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Alignment alignment = (Alignment) o;
 
-        if ((flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT |SUPPLEMENTARY_ALIGNMENT)
-                != (alignment.flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT |SUPPLEMENTARY_ALIGNMENT)) {
+        if ((flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT | SUPPLEMENTARY_ALIGNMENT)
+                != (alignment.flags | SEGMENTS_PROPERLY_ALIGNED | SEQUENCE_REVERSE_COMPLEMENTED | SECONDARY_ALIGNMENT | SUPPLEMENTARY_ALIGNMENT)) {
             return false;
         }
 
         if ((flags & SEGMENT_UNMAPPED) == 0) {   // segment NOT unmapped, we have to check extra fields, see *1* above
-            if (start != alignment.start) return false;
-            if (end != alignment.end) return false;
-            if (unclippedStart != alignment.unclippedStart) return false;
-            if (unclippedEnd != alignment.unclippedEnd) return false;
-            if (!mateReferenceName.equals(alignment.mateReferenceName)) return false;
-            if (!differences.equals(alignment.differences)) return false;
-            if (mappingQuality != alignment.mappingQuality) return false;
-            if (flags != alignment.flags) return false;
+            if (start != alignment.start) {
+                return false;
+            }
+            if (end != alignment.end) {
+                return false;
+            }
+            if (unclippedStart != alignment.unclippedStart) {
+                return false;
+            }
+            if (unclippedEnd != alignment.unclippedEnd) {
+                return false;
+            }
+            if (!mateReferenceName.equals(alignment.mateReferenceName)) {
+                return false;
+            }
+            if (!differences.equals(alignment.differences)) {
+                return false;
+            }
+            if (mappingQuality != alignment.mappingQuality) {
+                return false;
+            }
+            if (flags != alignment.flags) {
+                return false;
+            }
         }
 
-        if (inferredInsertSize != alignment.inferredInsertSize) return false;
-        if (length != alignment.length) return false;
-        if (mateAlignmentStart != alignment.mateAlignmentStart) return false;
-        if (!attributes.equals(alignment.attributes)) return false;
-        if (!chromosome.equals(alignment.chromosome)) return false;
-        if (!name.equals(alignment.name)) return false;
-        if (!qualities.equals(alignment.qualities)) return false;
-        if (!Arrays.equals(readSequence, alignment.readSequence)) return false;
+        if (inferredInsertSize != alignment.inferredInsertSize) {
+            return false;
+        }
+        if (length != alignment.length) {
+            return false;
+        }
+        if (mateAlignmentStart != alignment.mateAlignmentStart) {
+            return false;
+        }
+        if (!attributes.equals(alignment.attributes)) {
+            return false;
+        }
+        if (!chromosome.equals(alignment.chromosome)) {
+            return false;
+        }
+        if (!name.equals(alignment.name)) {
+            return false;
+        }
+        if (!qualities.equals(alignment.qualities)) {
+            return false;
+        }
+        if (!Arrays.equals(readSequence, alignment.readSequence)) {
+            return false;
+        }
 
 //        if (readSequence == null ^ alignment.readSequence == null) { // only one is null
 //            return false;
 //        } else if (readSequence != null && !Arrays.equals(readSequence, alignment.readSequence)) {  // both are not null and different
 //            return false;
 //        }
-
         return true;
     }
 
@@ -409,6 +447,7 @@ public class Alignment {
         public String getSeq() {
             return seq;
         }
+
         public void setSeq(String seq) {
             this.seq = seq;
         }
@@ -420,17 +459,20 @@ public class Alignment {
         public boolean isAllSequenceStored() {  //Maybe is only stored a partial sequence
             return seq != null && seq.length() == length;
         }
+
         public boolean isSequenceStored() {
             return seq != null;
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof AlignmentDifference)) { return false; }
+            if (!(obj instanceof AlignmentDifference)) {
+                return false;
+            }
 
             AlignmentDifference other = (AlignmentDifference) obj;
             if (isSequenceStored()) {
-            return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
+                return pos == other.pos && op == other.op && seq.equalsIgnoreCase(other.seq) && length == other.length;
             } else {
                 return pos == other.pos && op == other.op && length == other.length;
             }
