@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@Deprecated
 public class QueryResult<T> {
 
     private String id;

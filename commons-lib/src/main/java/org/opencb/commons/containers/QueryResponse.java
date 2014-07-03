@@ -8,6 +8,7 @@ import org.opencb.commons.containers.map.QueryOptions;
  *
  * @author Cristina Yenyxe Gonzalez Garcia <cgonzalez@cipf.es>
  */
+@Deprecated
 public class QueryResponse {//extends ObjectMap {
 
     private static final long serialVersionUID = -2978952531219554024L;

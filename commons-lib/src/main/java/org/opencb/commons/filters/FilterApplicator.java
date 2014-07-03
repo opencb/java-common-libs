@@ -23,15 +23,13 @@ public class FilterApplicator {
         List<E> aux = Lists.newArrayList(Iterables.filter(recordList, andFilter));
         return Iterables.retainAll(recordList, aux);
 
-//        return Lists.newArrayList(Iterables.filter(recordList, andFilter));
+    }
+
+    public static <E> boolean filter(List<E> recordList, Filter<E> filter) {
+
+        List<E> aux = Lists.newArrayList(Iterables.filter(recordList, filter));
+        return Iterables.retainAll(recordList, aux);
 
     }
-//
-//    public static <E> boolean filter(E elem, List<Filter<E>> filters) {
-//
-//        Predicate<E> andFilter = Predicates.and(filters);
-//
-//        return andFilter.apply(elem);
-//
-//    }
+
 }
