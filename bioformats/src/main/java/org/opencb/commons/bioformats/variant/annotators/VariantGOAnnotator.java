@@ -24,7 +24,7 @@ public class VariantGOAnnotator implements VariantAnnotator {
     private Client wsRestClient;
     private String wsServer;
     private WebTarget webResource;
-    private Map<String,Set<String>> geneGOs;
+    private Map<String, Set<String>> geneGOs;
     private int batchGeneSize;
     private String tag;
 
@@ -58,11 +58,11 @@ public class VariantGOAnnotator implements VariantAnnotator {
             }
         }
 
-        for(int i = 0; i < genes.size(); i += batchGeneSize){
+        for (int i = 0; i < genes.size(); i += batchGeneSize) {
             int startIdx = i;
             int endIdx = i + batchGeneSize;
 
-            if( endIdx > genes.size())
+            if (endIdx > genes.size())
                 endIdx = genes.size();
             System.out.println(startIdx + " - " + endIdx);
             String geneLine = Joiner.on(",").join(genes.subList(startIdx, endIdx));
@@ -89,10 +89,10 @@ public class VariantGOAnnotator implements VariantAnnotator {
                     }
                     geneGOs.put(geneName, gos);
                 }
-            }catch(JsonParseException e){
+            } catch (JsonParseException e) {
                 System.err.println(resp);
                 e.printStackTrace();
-            }catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -100,11 +100,13 @@ public class VariantGOAnnotator implements VariantAnnotator {
         for (Variant record : batch) {
             Set<String> goTerms = new HashSet<>();
             for (VariantEffect ve : record.getEffect()) {
-                if(ve.getGeneName().equalsIgnoreCase(""))
+                if (ve.getGeneName().equalsIgnoreCase(""))
                     continue;
                 goTerms.addAll(geneGOs.get(ve.getGeneName()));
             }
-            record.addAttribute(tag, Joiner.on(",").join(goTerms));
+            if (goTerms.size() > 0) {
+                record.addAttribute(tag, Joiner.on(",").join(goTerms));
+            }
         }
     }
 
