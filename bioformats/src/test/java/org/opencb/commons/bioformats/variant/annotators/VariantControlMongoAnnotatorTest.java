@@ -21,15 +21,13 @@ public class VariantControlMongoAnnotatorTest extends GenericTest {
     @Test
     public void testAnnot() throws Exception {
 
-        String inputFile = getClass().getResource("/variant-test-file.vcf.gz").getFile();
-        String output = "/tmp/out.vcf";
-
-        VariantReader reader = new VariantVcfReader(inputFile);
-        VariantWriter writer = new VariantVcfDataWriter(reader, output);
+        VariantReader reader = new VariantVcfReader("/home/aaleman/Documents/pruebas/annot/file.vcf");
+        VariantWriter writer = new VariantVcfDataWriter(reader, "/home/aaleman/Documents/pruebas/annot/out.vcf");
 
         VariantAnnotator control = new VariantControlMongoAnnotator();
         VariantAnnotator gene = new VariantGeneNameAnnotator();
         VariantConsequenceTypeAnnotator ct = new VariantConsequenceTypeAnnotator();
+
 
         reader.open();
         writer.open();
