@@ -54,7 +54,7 @@
     
     <properties>
         <opencb.commons.version>2.0.0</opencb.commons.version>
-        <compileSource>1.7</compileSource>
+        <compileSource>1.8</compileSource>
     </properties>
 
     <dependencyManagement>
