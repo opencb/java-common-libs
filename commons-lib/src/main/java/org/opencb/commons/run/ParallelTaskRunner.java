@@ -12,8 +12,8 @@ import java.util.function.Function;
  */
 public class ParallelTaskRunner<I,O> {
 
-//    @FunctionalInterface
-    static public interface BatchFunction<T, R> extends Function<List<T>, List<R>> {
+    @FunctionalInterface
+    static public interface Task<T, R> {
         default public void pre() {}
         List<R> apply(List<T> t);
         default public void post() {}
@@ -23,7 +23,7 @@ public class ParallelTaskRunner<I,O> {
 
     private final DataReader<I> reader;
     private final DataWriter<O> writer;
-    private final List<BatchFunction<I, O>> tasks;
+    private final List<Task<I, O>> tasks;
     private final Config config;
     private int finishedTasks = 0;
     private ExecutorService executorService;
@@ -62,11 +62,11 @@ public class ParallelTaskRunner<I,O> {
         }
     }
 
-    public ParallelTaskRunner(DataReader<I> reader, BatchFunction<I, O> task, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, Task<I, O> task, DataWriter<O> writer, Config config) throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
-        this.tasks = new ArrayList<>(config.capacity);
+        this.tasks = new ArrayList<>(config.numTasks);
         for (int i = 0; i < config.numTasks; i++) {
             tasks.add(task);
         }
@@ -74,7 +74,7 @@ public class ParallelTaskRunner<I,O> {
         check();
     }
 
-    public ParallelTaskRunner(DataReader<I> reader, List<BatchFunction<I, O>> tasks, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, List<Task<I, O>> tasks, DataWriter<O> writer, Config config) throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -114,11 +114,11 @@ public class ParallelTaskRunner<I,O> {
             writer.pre();
         }
 
-        for (BatchFunction<I, O> task : tasks) {
+        for (Task<I, O> task : tasks) {
             task.pre();
         }
 
-        for (BatchFunction<I,O> task : tasks) {
+        for (Task<I,O> task : tasks) {
             TaskRunnable taskRunnable = new TaskRunnable(task);
             executorService.submit(taskRunnable);
         }
@@ -127,7 +127,7 @@ public class ParallelTaskRunner<I,O> {
         }
 
 //        executorService.submit(new ReaderRunnable(reader)); //Run reader in a separated thread
-        new ReaderRunnable(reader).run();                     //Use the main thread for reading
+        new ReaderRunnable().run();                           //Use the main thread for reading
 
         executorService.shutdown();
         try {
@@ -136,7 +136,7 @@ public class ParallelTaskRunner<I,O> {
             e.printStackTrace();
         }
 
-        for (BatchFunction<I, O> task : tasks) {
+        for (Task<I, O> task : tasks) {
             task.post();
         }
 
@@ -151,15 +151,11 @@ public class ParallelTaskRunner<I,O> {
     }
     class ReaderRunnable implements Runnable {
 
-        final DataReader<I> dataReader;
         int numBatches = 0;
-        ReaderRunnable(DataReader<I> dataReader) {
-            this.dataReader = dataReader;
-        }
 
         @Override
         public void run() {
-            Batch<I> batch = new Batch<>(dataReader.read(config.batchSize), numBatches++);
+            Batch<I> batch = new Batch<>(reader.read(config.batchSize), numBatches++);
 //            System.out.println("reader: batch.size = " + batch.size());
 
             while (batch.batch != null && !batch.batch.isEmpty()) {
@@ -171,7 +167,7 @@ public class ParallelTaskRunner<I,O> {
                     e.printStackTrace();
                 }
 //                System.out.println("reader: preRead");
-                batch = new Batch<>(dataReader.read(config.batchSize), numBatches++);
+                batch = new Batch<>(reader.read(config.batchSize), numBatches++);
 //                System.out.println("reader: batch.size = " + batch.size());
             }
             try {
@@ -188,9 +184,9 @@ public class ParallelTaskRunner<I,O> {
         private long timeBlockedAtSendWrite;
         private long timeTaskApply;
 
-        final BatchFunction<I,O> task;
+        final Task<I,O> task;
 
-        TaskRunnable(BatchFunction<I,O> task) {
+        TaskRunnable(Task<I,O> task) {
             this.task = task;
         }
 

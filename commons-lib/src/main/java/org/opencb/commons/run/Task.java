@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  */
+@Deprecated
 public abstract class Task<T> implements Comparable<Task<T>> {
 
     private int priority;
