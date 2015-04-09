@@ -12,17 +12,20 @@ import java.util.function.Function;
  */
 public class ParallelTaskRunner<I,O> {
 
-    @FunctionalInterface
-    static public interface BatchFunction<T, R> {
+//    @FunctionalInterface
+    static public interface BatchFunction<T, R> extends Function<List<T>, List<R>> {
+        default public void pre() {}
         List<R> apply(List<T> t);
+        default public void post() {}
     }
 
     final Batch POISON_PILL = new Batch(Collections.emptyList(), -1);
 
     private final DataReader<I> reader;
     private final DataWriter<O> writer;
-    private final List<Function<List<I>, List<O>>> tasks;
+    private final List<BatchFunction<I, O>> tasks;
     private final Config config;
+    private int finishedTasks = 0;
     private ExecutorService executorService;
     BlockingQueue<Batch<I>> readBlockingQueue;
     BlockingQueue<Batch<O>> writeBlockingQueue;
@@ -59,7 +62,7 @@ public class ParallelTaskRunner<I,O> {
         }
     }
 
-    public ParallelTaskRunner(DataReader<I> reader, Function<List<I>, List<O>> task, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, BatchFunction<I, O> task, DataWriter<O> writer, Config config) throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -71,7 +74,7 @@ public class ParallelTaskRunner<I,O> {
         check();
     }
 
-    public ParallelTaskRunner(DataReader<I> reader, List<Function<List<I>, List<O>>> tasks, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, List<BatchFunction<I, O>> tasks, DataWriter<O> writer, Config config) throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -89,15 +92,15 @@ public class ParallelTaskRunner<I,O> {
         }
     }
 
-    public void init(){
-
+    public void init() {
+        finishedTasks = 0;
         readBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
 
         if (writer != null) {
             writeBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
         }
 
-        executorService = Executors.newFixedThreadPool(1 + tasks.size() + (writer == null? 0 : 1));
+        executorService = Executors.newFixedThreadPool(1 + tasks.size() + (writer == null ? 0 : 1));
     }
 
     public void run() {
@@ -111,11 +114,11 @@ public class ParallelTaskRunner<I,O> {
             writer.pre();
         }
 
-//        for (Function task : tasks) {
-//            task.pre();
-//        }
+        for (BatchFunction<I, O> task : tasks) {
+            task.pre();
+        }
 
-        for (Function<List<I>, List<O>> task : tasks) {
+        for (BatchFunction<I,O> task : tasks) {
             TaskRunnable taskRunnable = new TaskRunnable(task);
             executorService.submit(taskRunnable);
         }
@@ -133,9 +136,9 @@ public class ParallelTaskRunner<I,O> {
             e.printStackTrace();
         }
 
-//        for (Function task : tasks) {
-//            task.post();
-//        }
+        for (BatchFunction<I, O> task : tasks) {
+            task.post();
+        }
 
         reader.post();
         reader.close();
@@ -185,9 +188,9 @@ public class ParallelTaskRunner<I,O> {
         private long timeBlockedAtSendWrite;
         private long timeTaskApply;
 
-        final Function<List<I>, List<O>> task;
+        final BatchFunction<I,O> task;
 
-        TaskRunnable(Function<List<I>, List<O>> task) {
+        TaskRunnable(BatchFunction<I,O> task) {
             this.task = task;
         }
 
@@ -240,7 +243,7 @@ public class ParallelTaskRunner<I,O> {
 
 
         }
-        private int finishedTasks = 0;
+
         private Batch<I> getBatch() throws InterruptedException {
             Batch<I> batch;
             batch = readBlockingQueue.take();
