@@ -222,9 +222,7 @@ public class ParallelTaskRunner<I, O> {
         long start;
         Batch<I> batch;
 
-        start = System.nanoTime();
-        batch = new Batch<>(reader.read(config.batchSize), numBatches++);
-        timeReading += System.nanoTime() - start;
+        batch = readBatch();
 
         while (batch.batch != null && !batch.batch.isEmpty()) {
             try {
@@ -237,9 +235,7 @@ public class ParallelTaskRunner<I, O> {
                 e.printStackTrace();
             }
             //System.out.println("reader: preRead");
-            start = System.nanoTime();
-            batch = new Batch<>(reader.read(config.batchSize), numBatches++);
-            timeReading += System.nanoTime() - start;
+            batch = readBatch();
             //System.out.println("reader: batch.size = " + batch.size());
         }
         try {
@@ -248,6 +244,22 @@ public class ParallelTaskRunner<I, O> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private Batch<I> readBatch() {
+        long start;
+        Batch<I> batch;
+        start = System.nanoTime();
+        int position = numBatches++;
+        try {
+            batch = new Batch<I>(reader.read(config.batchSize), position);
+        } catch (Exception e) {
+            System.err.println("Error reading batch " + position + "" + e.toString());
+            e.printStackTrace();
+            batch = POISON_PILL;
+        }
+        timeReading += System.nanoTime() - start;
+        return batch;
     }
 
     class TaskRunnable implements Runnable {
@@ -276,7 +288,13 @@ public class ParallelTaskRunner<I, O> {
                     long start;
                     //System.out.println("task: apply");
                     start = System.nanoTime();
-                    batchResult = task.apply(batch.batch);
+                    try {
+                        batchResult = task.apply(batch.batch);
+                    } catch (Exception e) {
+                        System.err.println("Error processing batch " + batch.position + "");
+                        e.printStackTrace();
+                        batchResult = null;
+                    }
                     threadTimeTaskApply += System.nanoTime() - start;
                     //System.out.println("task: apply done " + writeBlockingQueue.size());
 
@@ -347,7 +365,12 @@ public class ParallelTaskRunner<I, O> {
                 try {
                     start = System.nanoTime();
 //                    System.out.println("writer: write");
-                    dataWriter.write(batch.batch);
+                    try {
+                        dataWriter.write(batch.batch);
+                    } catch (Exception e) {
+                        System.err.println("Error writing batch " + batch.position + "");
+                        e.printStackTrace();
+                    }
 //                    System.out.println("writer: wrote");
                     timeWriting += System.nanoTime() - start;
                     batch = getBatch();
