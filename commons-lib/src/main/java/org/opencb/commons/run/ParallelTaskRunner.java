@@ -5,14 +5,13 @@ import org.opencb.commons.io.DataWriter;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * Created by hpccoll1 on 26/02/15.
  */
-public class ParallelTaskRunner<I,O> {
+public class ParallelTaskRunner<I, O> {
+
 
     @FunctionalInterface
     static public interface Task<T, R> {
@@ -21,18 +20,26 @@ public class ParallelTaskRunner<I,O> {
         default public void post() {}
     }
 
-    final Batch POISON_PILL = new Batch(Collections.emptyList(), -1);
+    private final static Batch POISON_PILL = new Batch(Collections.emptyList(), -1);
 
     private final DataReader<I> reader;
     private final DataWriter<O> writer;
     private final List<Task<I, O>> tasks;
     private final Config config;
-    private int finishedTasks = 0;
+
     private ExecutorService executorService;
-    BlockingQueue<Batch<I>> readBlockingQueue;
-    BlockingQueue<Batch<O>> writeBlockingQueue;
-    private long timeBlockedAtSendWrite;
-    private long timeTaskApply;
+    private BlockingQueue<Batch<I>> readBlockingQueue;
+    private BlockingQueue<Batch<O>> writeBlockingQueue;
+
+    private int numBatches = 0;
+    private int finishedTasks = 0;
+    private long timeBlockedAtPutRead = 0;
+    private long timeBlockedAtTakeRead = 0;
+    private long timeBlockedAtPutWrite = 0;
+    private long timeBlockedAtTakeWrite = 0;
+    private long timeReading = 0;
+    private long timeTaskApply = 0;
+    private long timeWriting;
 
 //    protected static Logger logger = LoggerFactory.getLogger(SimpleThreadRunner.class);
 
@@ -134,13 +141,15 @@ public class ParallelTaskRunner<I,O> {
 
     public void init() {
         finishedTasks = 0;
-        readBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
+        if (reader != null) {
+            readBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
+        }
 
         if (writer != null) {
             writeBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
         }
 
-        executorService = Executors.newFixedThreadPool(1 + tasks.size() + (writer == null ? 0 : 1));
+        executorService = Executors.newFixedThreadPool(tasks.size() + (writer == null ? 0 : 1));
     }
 
     public void run() {
@@ -160,7 +169,7 @@ public class ParallelTaskRunner<I,O> {
             task.pre();
         }
 
-        for (Task<I,O> task : tasks) {
+        for (Task<I, O> task : tasks) {
             TaskRunnable taskRunnable = new TaskRunnable(task);
             executorService.submit(taskRunnable);
         }
@@ -168,8 +177,9 @@ public class ParallelTaskRunner<I,O> {
             executorService.submit(new WriterRunnable(writer));
         }
 
-//        executorService.submit(new ReaderRunnable(reader)); //Run reader in a separated thread
-        new ReaderRunnable().run();                           //Use the main thread for reading
+        if (reader != null) {
+            readLoop();  //Use the main thread for reading
+        }
 
         executorService.shutdown();
         try {
@@ -192,44 +202,51 @@ public class ParallelTaskRunner<I,O> {
             writer.close();
         }
 
+
+        if (reader != null) {
+            System.err.println("read:  timeReading                  = " + timeReading / 1000000000.0 + "s");
+            System.err.println("read:  timeBlockedAtPutRead         = " + timeBlockedAtPutRead / 1000000000.0 + "s");
+            System.err.println("task;  timeBlockedAtTakeRead        = " + timeBlockedAtTakeRead / 1000000000.0 + "s");
+        }
+
+            System.err.println("task;  timeTaskApply                = " + timeTaskApply / 1000000000.0 + "s");
+
+        if (writer != null) {
+            System.err.println("task;  timeBlockedAtPutWrite        = " + timeBlockedAtPutWrite / 1000000000.0 + "s");
+            System.err.println("write: timeBlockedWatingDataToWrite = " + timeBlockedAtTakeWrite / 1000000000.0 + "s");
+            System.err.println("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
+        }
     }
-    class ReaderRunnable implements Runnable {
 
-        int numBatches = 0;
+    private void readLoop() {
+        long start;
+        Batch<I> batch;
 
-        @Override
-        public void run() {
-            if (reader == null) {
-                //If reader is null, produce empty batches until all tasks have finished.
-                while (finishedTasks != tasks.size()) {
-                    try {
-                        readBlockingQueue.put(new Batch<>(Collections.<I>emptyList(), numBatches++));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                readBlockingQueue.clear();
-            } else {
-                Batch<I> batch = new Batch<>(reader.read(config.batchSize), numBatches++);
-                while (batch.batch != null && !batch.batch.isEmpty()) {
-                    try {
-                        //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
-                        readBlockingQueue.put(batch);
-                        //System.out.println("reader: postPut");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    //System.out.println("reader: preRead");
-                    batch = new Batch<>(reader.read(config.batchSize), numBatches++);
-                    //System.out.println("reader: batch.size = " + batch.size());
-                }
-            }
+        start = System.nanoTime();
+        batch = new Batch<>(reader.read(config.batchSize), numBatches++);
+        timeReading += System.nanoTime() - start;
+
+        while (batch.batch != null && !batch.batch.isEmpty()) {
             try {
-                //logger.debug("reader: POISON_PILL");
-                readBlockingQueue.put(POISON_PILL);
+                //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
+                start = System.nanoTime();
+                readBlockingQueue.put(batch);
+                timeBlockedAtPutRead += System.nanoTime() - start;
+                //System.out.println("reader: postPut");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            //System.out.println("reader: preRead");
+            start = System.nanoTime();
+            batch = new Batch<>(reader.read(config.batchSize), numBatches++);
+            timeReading += System.nanoTime() - start;
+            //System.out.println("reader: batch.size = " + batch.size());
+        }
+        try {
+            //logger.debug("reader: POISON_PILL");
+            readBlockingQueue.put(POISON_PILL);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -237,15 +254,17 @@ public class ParallelTaskRunner<I,O> {
 
         final Task<I,O> task;
 
+        long threadTimeBlockedAtTakeRead = 0;
+        long threadTimeBlockedAtSendWrite = 0;
+        long threadTimeTaskApply = 0;
+
         TaskRunnable(Task<I,O> task) {
             this.task = task;
         }
-
         @Override
         public void run() {
             Batch<I> batch = POISON_PILL;
-            long timeBlockedAtSendWrite = 0;
-            long timeTaskApply = 0;
+
             try {
                 batch = getBatch();
             } catch (InterruptedException e) {
@@ -254,31 +273,30 @@ public class ParallelTaskRunner<I,O> {
             List<O> batchResult = null;
             while (batch != POISON_PILL && (batchResult == null || !batchResult.isEmpty())) {
                 try {
-                    long s;
+                    long start;
                     //System.out.println("task: apply");
-                    s = System.nanoTime();
+                    start = System.nanoTime();
                     batchResult = task.apply(batch.batch);
-                    timeTaskApply += s - System.nanoTime();
+                    threadTimeTaskApply += System.nanoTime() - start;
                     //System.out.println("task: apply done " + writeBlockingQueue.size());
 
-                    s = System.nanoTime();
+                    start = System.nanoTime();
                     if (writeBlockingQueue != null) {
                         writeBlockingQueue.put(new Batch<O>(batchResult, batch.position));
                     }
                     //System.out.println("task: apply done");
-                    timeBlockedAtSendWrite += s - System.nanoTime();
+                    threadTimeBlockedAtSendWrite += System.nanoTime() - start;
                     batch = getBatch();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
             synchronized (tasks) {
-                timeBlockedAtSendWrite += timeBlockedAtSendWrite;
-                timeTaskApply += timeTaskApply;
+                timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
+                timeTaskApply += threadTimeTaskApply;
+                timeBlockedAtTakeRead += threadTimeBlockedAtTakeRead;
                 finishedTasks++;
                 if (tasks.size() == finishedTasks) {
-                    //logger.debug("task; timeBlockedAtSendWrite = " + timeBlockedAtSendWrite / -1000000000.0 + "s");
-                    //logger.debug("task; timeTaskApply = " + timeTaskApply / -1000000000.0 + "s");
                     if (writeBlockingQueue != null) {
                         try {
                             writeBlockingQueue.put(POISON_PILL);
@@ -288,25 +306,28 @@ public class ParallelTaskRunner<I,O> {
                     }
                 }
             }
-
-
         }
 
         private Batch<I> getBatch() throws InterruptedException {
             Batch<I> batch;
-            batch = readBlockingQueue.take();
-            //System.out.println("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : " + batch.size() + " : " + batchSize);
-            if (batch == POISON_PILL) {
-                //logger.debug("task: POISON_PILL");
-                readBlockingQueue.put(POISON_PILL);
+            if (readBlockingQueue == null) {
+                return new Batch<>(Collections.<I>emptyList(), numBatches++);
+            } else {
+                long start = System.nanoTime();
+                batch = readBlockingQueue.take();
+                threadTimeBlockedAtTakeRead += start - System.currentTimeMillis();
+                //System.out.println("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : " + batch.size() + " : " + batchSize);
+                if (batch == POISON_PILL) {
+                    //logger.debug("task: POISON_PILL");
+                    readBlockingQueue.put(POISON_PILL);
+                }
+                return batch;
             }
-            return batch;
         }
     }
 
     class WriterRunnable implements Runnable {
 
-        long timeBlockedWaitingDataToWrite = 0;
         final DataWriter<O> dataWriter;
 
         WriterRunnable(DataWriter<O> dataWriter) {
@@ -321,28 +342,26 @@ public class ParallelTaskRunner<I,O> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            long start, timeWriting = 0;
+            long start;
             while (batch != POISON_PILL) {
                 try {
                     start = System.nanoTime();
 //                    System.out.println("writer: write");
                     dataWriter.write(batch.batch);
 //                    System.out.println("writer: wrote");
-                    timeWriting += start - System.nanoTime();
+                    timeWriting += System.nanoTime() - start;
                     batch = getBatch();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-//            logger.debug("write: timeWriting = " + timeWriting / -1000000000.0 + "start");
-//            logger.debug("write: timeBlockedWatingDataToWrite = " + timeBlockedWatingDataToWrite / -1000000000.0 + "start");
         }
 
         private Batch<O> getBatch() throws InterruptedException {
 //                System.out.println("writer: writeBlockingQueue = " + writeBlockingQueue.size());
-            long s = System.nanoTime();
+            long start = System.nanoTime();
             Batch<O> batch = writeBlockingQueue.take();
-            timeBlockedWaitingDataToWrite += s - System.nanoTime();
+            timeBlockedAtTakeWrite += System.nanoTime() - start;
             if (batch == POISON_PILL) {
 //                logger.debug("writer: POISON_PILL");
                 writeBlockingQueue.put(POISON_PILL);
