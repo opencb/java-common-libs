@@ -6,17 +6,18 @@ import java.util.List;
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
+@FunctionalInterface
 public interface DataReader<T> {
 
-    public boolean open();
+    default public boolean open() {return true;}
 
-    public boolean close();
+    default public boolean close() {return true;}
 
-    public boolean pre();
+    default public boolean pre() {return true;}
 
-    public boolean post();
+    default public boolean post() {return true;}
 
-    public List<T> read();
+    default public List<T> read() {return read(1);}
 
     public List<T> read(int batchSize);
 }

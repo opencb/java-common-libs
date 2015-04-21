@@ -1,5 +1,6 @@
 package org.opencb.commons.io;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,17 +10,18 @@ import java.util.List;
  * Time: 12:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@FunctionalInterface
 public interface DataWriter<T> {
 
-    public boolean open();
+    default public boolean open() {return true;}
 
-    public boolean close();
+    default public boolean close() {return true;}
 
-    public boolean pre();
+    default public boolean pre() {return true;}
 
-    public boolean post();
+    default public boolean post() {return true;}
 
-    public boolean write(T elem);
+    default public boolean write(T elem) {return write(Collections.singletonList(elem));}
 
     public boolean write(List<T> batch);
 
