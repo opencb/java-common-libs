@@ -276,10 +276,10 @@ public class ParallelTaskRunner<I, O> {
 		for (int i = 0; i < fList.size(); i++) {
 			Future f = fList.get(i);
 			if(f.isCancelled()){
-				this.futureTasks.remove(i);
+				this.futureTasks.remove(f);
 			} else if(f.isDone()){
+				this.futureTasks.remove(f);
 				f.get(); // check for exceptions
-				this.futureTasks.remove(i);
 			}
 		}
 	}
