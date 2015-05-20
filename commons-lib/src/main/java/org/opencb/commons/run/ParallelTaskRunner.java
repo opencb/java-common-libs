@@ -233,19 +233,21 @@ public class ParallelTaskRunner<I, O> {
 	}
 
     private void readLoop() throws TimeoutException, ExecutionException {
-        long start;
-        Batch<I> batch;
-
-        batch = readBatch();
-
-        while (batch.batch != null && !batch.batch.isEmpty()) {
-            try {
+        try {
+	        long start;
+	        Batch<I> batch;
+	
+	        batch = readBatch();
+	
+	        while (batch.batch != null && !batch.batch.isEmpty()) {
                 //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
                 start = System.nanoTime();
                 int cntloop = 0;
                 // continues lock of queue if jobs fail - check what's happening!!!
                 while(!readBlockingQueue.offer(batch, 5, TimeUnit.SECONDS)){
-                	checkJobs();
+                	if(!isJobsRunning()){
+                		throw new IllegalStateException(String.format("No runners but queue with %s items!!!", readBlockingQueue.size()));
+                	}
                 	// check if something failed
                 	if((cntloop++) > 10){
                 		// something went wrong!!!
@@ -255,14 +257,10 @@ public class ParallelTaskRunner<I, O> {
                 }
                 timeBlockedAtPutRead += System.nanoTime() - start;
                 //System.out.println("reader: postPut");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             //System.out.println("reader: preRead");
-            batch = readBatch();
+                batch = readBatch();
             //System.out.println("reader: batch.size = " + batch.size());
-        }
-        try {
+	        }
             //logger.debug("reader: POISON_PILL");
             readBlockingQueue.put(POISON_PILL);
         } catch (InterruptedException e) {
@@ -270,7 +268,7 @@ public class ParallelTaskRunner<I, O> {
         }
     }
 
-    private void checkJobs() throws InterruptedException, ExecutionException {
+    private boolean isJobsRunning() throws InterruptedException, ExecutionException {
     	
     	List<Future> fList = new ArrayList<Future>(this.futureTasks);
 		for (int i = 0; i < fList.size(); i++) {
@@ -282,6 +280,7 @@ public class ParallelTaskRunner<I, O> {
 				f.get(); // check for exceptions
 			}
 		}
+		return !this.futureTasks.isEmpty();
 	}
 
 	private Batch<I> readBatch() {
