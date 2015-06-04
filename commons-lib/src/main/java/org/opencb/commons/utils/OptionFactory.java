@@ -3,6 +3,7 @@ package org.opencb.commons.utils;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 
+@Deprecated
 public class OptionFactory {
 
     public static Option createOption(String name, String description) {
