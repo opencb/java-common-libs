@@ -52,7 +52,18 @@ public class FileUtils {
             throw new IOException("Path '" + path.toAbsolutePath() + "' must be a file");
         }
     }
-    
+
+    public static void checkDirectory(Path path) throws IOException {
+        checkDirectory(path, false);
+    }
+
+    public static void checkDirectory(Path path, boolean writable) throws IOException {
+        checkPath(path, writable);
+
+        if(!Files.isDirectory(path)) {
+            throw new IOException("Path '" + path.toAbsolutePath() + "' must be a directory");
+        }
+    }
 
     /**
      * This method is able to determine whether a file is GZipped and return a BufferedReader in any case

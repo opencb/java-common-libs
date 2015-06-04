@@ -1,6 +1,10 @@
 package org.opencb.commons.utils;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -12,6 +16,29 @@ import java.util.zip.GZIPOutputStream;
  * To change this template use File | Settings | File Templates.
  */
 public class StringUtils {
+
+    public static String randomString() {
+        return RandomStringUtils.random(10);
+    }
+
+    public static String randomString(int length) {
+        return RandomStringUtils.random(length);
+    }
+
+    public static String sha1(String text) throws NoSuchAlgorithmException {
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+        byte[] digest = sha1.digest((text).getBytes());
+        return bytes2String(digest);
+    }
+
+    public static String bytes2String(byte[] bytes) {
+        StringBuilder string = new StringBuilder();
+        for (byte b : bytes) {
+            String hexString = Integer.toHexString(0x00FF & b);
+            string.append(hexString.length() == 1 ? "0" + hexString : hexString);
+        }
+        return string.toString();
+    }
 
     public static byte[] gzip(String text) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

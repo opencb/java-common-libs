@@ -1,8 +1,10 @@
 package org.opencb.commons.run;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.math.RandomUtils;
-import org.junit.*;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.io.StringDataReader;
 
@@ -13,8 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ParallelTaskRunnerTest {
@@ -30,9 +30,9 @@ public class ParallelTaskRunnerTest {
 
         for (int l = 0; l < lines; l++) {
             fileOutputStream.write(new StringBuilder()
-                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append(" ")
-                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append(" ")
-                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append("\n")
+                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append(" ")
+                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append(" ")
+                    .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append("\n")
                     .toString().getBytes());
         }
     }
@@ -115,9 +115,9 @@ public class ParallelTaskRunnerTest {
             strings = new ArrayList<>(linesToGenerate);
             for (int i = 0; i < linesToGenerate; i++) {
                 strings.add(new StringBuilder()
-                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append(" ")
-                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append(" ")
-                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(16))).append("\n")
+                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append(" ")
+                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append(" ")
+                        .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append("\n")
                         .toString());
             }
             return wc.apply(strings);

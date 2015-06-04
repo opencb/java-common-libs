@@ -1,7 +1,6 @@
 package org.opencb.commons.test;
 
 
-import junit.framework.TestSuite;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,10 +13,11 @@ import org.junit.rules.TestName;
  * Time: 12:20 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GenericTest extends TestSuite {
+public class GenericTest {
 
     @Rule
     public TestName name = new TestName();
+
     private long start;
     private long end;
 
