@@ -253,7 +253,7 @@ public class ParallelTaskRunner<I, O> {
                 		// something went wrong!!!
                 		throw new TimeoutException(String.format("Queue got stuck with %s items!!!", readBlockingQueue.size()));
                 	}
-                	
+
                 }
                 timeBlockedAtPutRead += System.nanoTime() - start;
                 //System.out.println("reader: postPut");
@@ -321,7 +321,12 @@ public class ParallelTaskRunner<I, O> {
 	                e.printStackTrace();
 	            }
 	            List<O> batchResult = null;
-	            while (batch != POISON_PILL && (batchResult == null || !batchResult.isEmpty())) {
+                /**
+                 *  Exit situations:
+                 *      batch == POISON_PILL    -> The reader thread finish reading. Send poison pill.
+                 *      batchResult.isEmpty()   -> If there is no reader thread, and the last batch was empty.
+                 */
+                while (batch != POISON_PILL) {
                     long start;
                     //System.out.println("task: apply");
                     start = System.nanoTime();
@@ -333,7 +338,11 @@ public class ParallelTaskRunner<I, O> {
                         batchResult = null;
                     }
                     threadTimeTaskApply += System.nanoTime() - start;
-                    //System.out.println("task: apply done " + writeBlockingQueue.size());
+
+                    if (readBlockingQueue == null && batchResult != null && batchResult.isEmpty()) {
+                        //There is no readers and the last batch is empty
+                        break;
+                    }
 
                     start = System.nanoTime();
                     if (writeBlockingQueue != null) {
