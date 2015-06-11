@@ -41,6 +41,8 @@ public class ParallelTaskRunner<I, O> {
     private long timeTaskApply = 0;
     private long timeWriting;
 
+	private List<Future> futureTasks;
+
 //    protected static Logger logger = LoggerFactory.getLogger(SimpleThreadRunner.class);
 
     public static class Config {
@@ -150,9 +152,10 @@ public class ParallelTaskRunner<I, O> {
         }
 
         executorService = Executors.newFixedThreadPool(tasks.size() + (writer == null ? 0 : 1));
+        futureTasks = new ArrayList<Future>(); // assume no parallel access to this list
     }
 
-    public void run() {
+    public void run() throws ExecutionException {
         init();
 
         if (reader != null) {
@@ -170,22 +173,28 @@ public class ParallelTaskRunner<I, O> {
         }
 
         for (Task<I, O> task : tasks) {
-            TaskRunnable taskRunnable = new TaskRunnable(task);
-            executorService.submit(taskRunnable);
+            doSubmit(new TaskRunnable(task));
         }
         if (writer != null) {
-            executorService.submit(new WriterRunnable(writer));
+            doSubmit(new WriterRunnable(writer));
         }
-
-        if (reader != null) {
-            readLoop();  //Use the main thread for reading
-        }
-
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        try{
+	        if (reader != null) {
+	            readLoop();  //Use the main thread for reading
+	        }
+	
+	        executorService.shutdown();
+	        try {
+	            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); // TODO further action - this is not good!!!
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+        } catch (TimeoutException e) {
+			e.printStackTrace();
+		} finally{
+        	if(!executorService.isShutdown()){
+        		executorService.shutdownNow(); // shut down now if not done so (e.g. execption)
+        	}
         }
 
         for (Task<I, O> task : tasks) {
@@ -218,27 +227,40 @@ public class ParallelTaskRunner<I, O> {
         }
     }
 
-    private void readLoop() {
-        long start;
-        Batch<I> batch;
+	private void doSubmit(Runnable taskRunnable) {
+		Future ftask = executorService.submit(taskRunnable);
+		futureTasks.add(ftask);
+	}
 
-        batch = readBatch();
-
-        while (batch.batch != null && !batch.batch.isEmpty()) {
-            try {
+    private void readLoop() throws TimeoutException, ExecutionException {
+        try {
+	        long start;
+	        Batch<I> batch;
+	
+	        batch = readBatch();
+	
+	        while (batch.batch != null && !batch.batch.isEmpty()) {
                 //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
                 start = System.nanoTime();
-                readBlockingQueue.put(batch);
+                int cntloop = 0;
+                // continues lock of queue if jobs fail - check what's happening!!!
+                while(!readBlockingQueue.offer(batch, 5, TimeUnit.SECONDS)){
+                	if(!isJobsRunning()){
+                		throw new IllegalStateException(String.format("No runners but queue with %s items!!!", readBlockingQueue.size()));
+                	}
+                	// check if something failed
+                	if((cntloop++) > 10){
+                		// something went wrong!!!
+                		throw new TimeoutException(String.format("Queue got stuck with %s items!!!", readBlockingQueue.size()));
+                	}
+                	
+                }
                 timeBlockedAtPutRead += System.nanoTime() - start;
                 //System.out.println("reader: postPut");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             //System.out.println("reader: preRead");
-            batch = readBatch();
+                batch = readBatch();
             //System.out.println("reader: batch.size = " + batch.size());
-        }
-        try {
+	        }
             //logger.debug("reader: POISON_PILL");
             readBlockingQueue.put(POISON_PILL);
         } catch (InterruptedException e) {
@@ -246,7 +268,22 @@ public class ParallelTaskRunner<I, O> {
         }
     }
 
-    private Batch<I> readBatch() {
+    private boolean isJobsRunning() throws InterruptedException, ExecutionException {
+    	
+    	List<Future> fList = new ArrayList<Future>(this.futureTasks);
+		for (int i = 0; i < fList.size(); i++) {
+			Future f = fList.get(i);
+			if(f.isCancelled()){
+				this.futureTasks.remove(f);
+			} else if(f.isDone()){
+				this.futureTasks.remove(f);
+				f.get(); // check for exceptions
+			}
+		}
+		return !this.futureTasks.isEmpty();
+	}
+
+	private Batch<I> readBatch() {
         long start;
         Batch<I> batch;
         start = System.nanoTime();
@@ -275,16 +312,16 @@ public class ParallelTaskRunner<I, O> {
         }
         @Override
         public void run() {
-            Batch<I> batch = POISON_PILL;
-
             try {
-                batch = getBatch();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            List<O> batchResult = null;
-            while (batch != POISON_PILL && (batchResult == null || !batchResult.isEmpty())) {
-                try {
+	            Batch<I> batch = POISON_PILL;
+	
+	            try {
+	                batch = getBatch();
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+	            List<O> batchResult = null;
+	            while (batch != POISON_PILL && (batchResult == null || !batchResult.isEmpty())) {
                     long start;
                     //System.out.println("task: apply");
                     start = System.nanoTime();
@@ -305,24 +342,21 @@ public class ParallelTaskRunner<I, O> {
                     //System.out.println("task: apply done");
                     threadTimeBlockedAtSendWrite += System.nanoTime() - start;
                     batch = getBatch();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            synchronized (tasks) {
-                timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
-                timeTaskApply += threadTimeTaskApply;
-                timeBlockedAtTakeRead += threadTimeBlockedAtTakeRead;
-                finishedTasks++;
-                if (tasks.size() == finishedTasks) {
-                    if (writeBlockingQueue != null) {
-                        try {
+	            }
+	            synchronized (tasks) {
+	                timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
+	                timeTaskApply += threadTimeTaskApply;
+	                timeBlockedAtTakeRead += threadTimeBlockedAtTakeRead;
+	                finishedTasks++;
+	                if (tasks.size() == finishedTasks) {
+	                    if (writeBlockingQueue != null) {
                             writeBlockingQueue.put(POISON_PILL);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+	                    }
+	                }
+	            }
+            } catch (InterruptedException e) { // move to this position - stop any other calculations !!!
+                e.printStackTrace(); 
+                Thread.currentThread().interrupt(); // set to flag issue
             }
         }
 
