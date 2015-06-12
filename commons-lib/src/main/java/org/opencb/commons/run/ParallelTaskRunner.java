@@ -42,6 +42,7 @@ public class ParallelTaskRunner<I, O> {
     private long timeWriting;
 
 	private List<Future> futureTasks;
+    private List<Exception> exceptions;
 
 //    protected static Logger logger = LoggerFactory.getLogger(SimpleThreadRunner.class);
 
@@ -53,9 +54,18 @@ public class ParallelTaskRunner<I, O> {
             this.sorted = sorted;
         }
 
+        public Config(int numTasks, int batchSize, int capacity, boolean abortOnFail, boolean sorted) {
+            this.numTasks = numTasks;
+            this.batchSize = batchSize;
+            this.capacity = capacity;
+            this.abortOnFail = abortOnFail;
+            this.sorted = sorted;
+        }
+
         int numTasks;
         int batchSize;
         int capacity;
+        boolean abortOnFail = true;
         boolean sorted;
 //        int timeout;
     }
@@ -132,7 +142,7 @@ public class ParallelTaskRunner<I, O> {
         check();
     }
 
-    public void check() throws Exception {
+    private void check() throws Exception {
         if (tasks == null || tasks.isEmpty()) {
             throw new Exception("Must provide at least one task");
         }
@@ -141,7 +151,7 @@ public class ParallelTaskRunner<I, O> {
         }
     }
 
-    public void init() {
+    private void init() {
         finishedTasks = 0;
         if (reader != null) {
             readBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
@@ -153,6 +163,7 @@ public class ParallelTaskRunner<I, O> {
 
         executorService = Executors.newFixedThreadPool(tasks.size() + (writer == null ? 0 : 1));
         futureTasks = new ArrayList<Future>(); // assume no parallel access to this list
+        exceptions = Collections.synchronizedList(new LinkedList<>());
     }
 
     public void run() throws ExecutionException {
@@ -225,9 +236,17 @@ public class ParallelTaskRunner<I, O> {
             System.err.println("write: timeBlockedWatingDataToWrite = " + timeBlockedAtTakeWrite / 1000000000.0 + "s");
             System.err.println("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
         }
+
+        if (config.abortOnFail && !exceptions.isEmpty()) {
+            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.", exceptions.get(0));
+        }
     }
 
-	private void doSubmit(Runnable taskRunnable) {
+    public List<Exception> getExceptions() {
+        return exceptions;
+    }
+
+    private void doSubmit(Runnable taskRunnable) {
 		Future ftask = executorService.submit(taskRunnable);
 		futureTasks.add(ftask);
 	}
@@ -256,10 +275,14 @@ public class ParallelTaskRunner<I, O> {
 
                 }
                 timeBlockedAtPutRead += System.nanoTime() - start;
-                //System.out.println("reader: postPut");
-            //System.out.println("reader: preRead");
+                if (config.abortOnFail && !exceptions.isEmpty()) {
+                    //Some error happen. Abort
+                    System.err.println("Abort task thread on fail");
+                    break;
+                }
+                //System.out.println("reader: preRead");
                 batch = readBatch();
-            //System.out.println("reader: batch.size = " + batch.size());
+                //System.out.println("reader: batch.size = " + batch.size());
 	        }
             //logger.debug("reader: POISON_PILL");
             readBlockingQueue.put(POISON_PILL);
@@ -294,6 +317,7 @@ public class ParallelTaskRunner<I, O> {
             System.err.println("Error reading batch " + position + "" + e.toString());
             e.printStackTrace();
             batch = POISON_PILL;
+            exceptions.add(e);
         }
         timeReading += System.nanoTime() - start;
         return batch;
@@ -325,6 +349,7 @@ public class ParallelTaskRunner<I, O> {
                  *  Exit situations:
                  *      batch == POISON_PILL    -> The reader thread finish reading. Send poison pill.
                  *      batchResult.isEmpty()   -> If there is no reader thread, and the last batch was empty.
+                 *      !exceptions.isEmpty()   -> If there is any exception, abort. Requires Config.abortOnFail == true
                  */
                 while (batch != POISON_PILL) {
                     long start;
@@ -336,11 +361,17 @@ public class ParallelTaskRunner<I, O> {
                         System.err.println("Error processing batch " + batch.position + "");
                         e.printStackTrace();
                         batchResult = null;
+                        exceptions.add(e);
                     }
                     threadTimeTaskApply += System.nanoTime() - start;
 
                     if (readBlockingQueue == null && batchResult != null && batchResult.isEmpty()) {
                         //There is no readers and the last batch is empty
+                        break;
+                    }
+                    if (config.abortOnFail && !exceptions.isEmpty()) {
+                        //Some error happen. Abort
+                        System.err.println("Abort task thread on fail");
                         break;
                     }
 
@@ -413,7 +444,15 @@ public class ParallelTaskRunner<I, O> {
                     } catch (Exception e) {
                         System.err.println("Error writing batch " + batch.position + "");
                         e.printStackTrace();
+                        exceptions.add(e);
                     }
+
+                    if (config.abortOnFail && !exceptions.isEmpty()) {
+                        //Some error happen. Abort
+                        System.err.println("Abort writing thread on fail");
+                        break;
+                    }
+
 //                    System.out.println("writer: wrote");
                     timeWriting += System.nanoTime() - start;
                     batch = getBatch();
