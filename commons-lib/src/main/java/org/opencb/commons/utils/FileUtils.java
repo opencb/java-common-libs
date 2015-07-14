@@ -1,13 +1,11 @@
 package org.opencb.commons.utils;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -72,13 +70,14 @@ public class FileUtils {
      * @throws java.io.IOException
      */
     public static BufferedReader newBufferedReader(Path path) throws IOException {
-        BufferedReader br = null;
+        FileUtils.checkFile(path);
+        BufferedReader bufferedReader;
         if(path.toFile().getName().endsWith(".gz")) {
-            br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
+            bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
         }else {
-            br = Files.newBufferedReader(path, Charset.defaultCharset());
+            bufferedReader = Files.newBufferedReader(path, Charset.defaultCharset());
         }
-        return br;
+        return bufferedReader;
     }
 
     /**
@@ -88,13 +87,48 @@ public class FileUtils {
      * @throws java.io.IOException
      */
     public static BufferedReader newBufferedReader(Path path, Charset charset) throws IOException {
-        BufferedReader br = null;
+        FileUtils.checkFile(path);
+        BufferedReader bufferedReader;
         if(path.toFile().getName().endsWith(".gz")) {
-            br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
+            bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
         }else {
-            br = Files.newBufferedReader(path, charset);
+            bufferedReader = Files.newBufferedReader(path, charset);
         }
-        return br;
+        return bufferedReader;
+    }
+
+    /**
+     * This method is able to determine whether a file is GZipped and return a BufferedWriter in any case
+     * @param path to be write
+     * @return BufferedWriter object
+     * @throws java.io.IOException
+     */
+    public static BufferedWriter newBufferedWriter(Path path) throws IOException {
+        FileUtils.checkDirectory(path.getParent());
+        BufferedWriter bufferedWriter;
+        if(path.toFile().getName().endsWith(".gz")) {
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path.toFile()))));
+        }else {
+            bufferedWriter = Files.newBufferedWriter(path, Charset.defaultCharset());
+        }
+        return bufferedWriter;
+    }
+
+    /**
+     * This method is able to determine whether a file is GZipped and return a BufferedWriter in any case
+     * @param path to be write
+     * @return BufferedWriter object
+     * @throws java.io.IOException
+     */
+    public static BufferedWriter newBufferedWriter(Path path, Charset charset) throws IOException {
+        FileUtils.checkDirectory(path.getParent());
+        BufferedWriter bufferedWriter;
+        if(path.toFile().getName().endsWith(".gz")) {
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path.toFile()))));
+        }else {
+            bufferedWriter = Files.newBufferedWriter(path, charset);
+        }
+        return bufferedWriter;
     }
 
 }
