@@ -19,16 +19,15 @@ public class GenericTest {
     public TestName name = new TestName();
 
     private long start;
-    private long end;
 
     @Before
-    public void setUp() throws Exception {
+    final public void setStartTime() {
         start = System.currentTimeMillis();
     }
 
     @After
-    public void tearDown() throws Exception {
-        end = System.currentTimeMillis();
+    final public void printEndTime() {
+        long end = System.currentTimeMillis();
         float time = (end - start) / (float) 1000;
         System.out.println("Time " + name.getMethodName() + ": " + String.format("%.4f s", time));
     }
