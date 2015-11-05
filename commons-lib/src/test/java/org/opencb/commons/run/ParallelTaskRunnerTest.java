@@ -4,7 +4,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.io.StringDataReader;
 
@@ -15,7 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParallelTaskRunnerTest {
 
@@ -23,6 +28,9 @@ public class ParallelTaskRunnerTest {
     protected static final int lines = 10000;
     protected static final String fileName = "/tmp/dummyFile.txt";
     protected static final String outputFileName = "/tmp/output.log";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -39,8 +47,12 @@ public class ParallelTaskRunnerTest {
 
     @AfterClass
     public static void afterClass() throws IOException {
-        Files.delete(Paths.get(fileName));
-        Files.delete(Paths.get(outputFileName));
+        if (Files.exists(Paths.get(fileName))) {
+            Files.delete(Paths.get(fileName));
+        }
+        if (Files.exists(Paths.get(outputFileName))) {
+            Files.delete(Paths.get(outputFileName));
+        }
     }
 
     final Long[] l = {0l, 0l, 0l};
@@ -66,6 +78,7 @@ public class ParallelTaskRunnerTest {
         }
         return list;
     };
+
     @Test
     public void test() throws Exception {
         ParallelTaskRunner.Config config = new ParallelTaskRunner.Config(8, 100, 10, false);
@@ -143,4 +156,34 @@ public class ParallelTaskRunnerTest {
         os.close();
 
     }
+
+
+    @Test
+    public void testTimeOut() throws Exception {
+        final AtomicInteger i = new AtomicInteger(0);
+        ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
+                (size) -> {
+                    return Collections.singletonList(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16)));
+                },
+                (batch) -> {
+                    try {
+                        if (i.addAndGet(1) > 100) {
+                            System.out.println(Thread.currentThread().getName() + " -- sleeping 5s");
+                            Thread.sleep(5000L);
+                        } else {
+                            System.out.println(Thread.currentThread().getName() + " -- don't sleep! " + i.get());
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                },
+                null,
+                new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
+        );
+
+        thrown.expect(ExecutionException.class);
+        runner.run();
+    }
+
 }

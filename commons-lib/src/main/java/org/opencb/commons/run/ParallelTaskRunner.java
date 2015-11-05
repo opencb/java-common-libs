@@ -13,13 +13,18 @@ import java.util.function.Supplier;
 public class ParallelTaskRunner<I, O> {
 
 
+    public static final int TIMEOUT_CHECK = 1;
+
     @FunctionalInterface
-    static public interface Task<T, R> {
-        default public void pre() {}
-        List<R> apply(List<T> t);
-        default public void post() {}
+    public interface Task<T, R> {
+        default void pre() {}
+
+        List<R> apply(List<T> batch);
+
+        default void post() {}
     }
 
+    @SuppressWarnings("unchecked")
     private final static Batch POISON_PILL = new Batch(Collections.emptyList(), -1);
 
     private final DataReader<I> reader;
@@ -48,26 +53,28 @@ public class ParallelTaskRunner<I, O> {
 
     public static class Config {
         public Config(int numTasks, int batchSize, int capacity, boolean sorted) {
-            this.numTasks = numTasks;
-            this.batchSize = batchSize;
-            this.capacity = capacity;
-            this.sorted = sorted;
+            this(numTasks, batchSize, capacity, true, sorted);
         }
 
         public Config(int numTasks, int batchSize, int capacity, boolean abortOnFail, boolean sorted) {
+            this(numTasks, batchSize, capacity, abortOnFail, sorted, 500);
+        }
+
+        public Config(int numTasks, int batchSize, int capacity, boolean abortOnFail, boolean sorted, int readQueuePutTimeout) {
             this.numTasks = numTasks;
             this.batchSize = batchSize;
             this.capacity = capacity;
             this.abortOnFail = abortOnFail;
             this.sorted = sorted;
+            this.readQueuePutTimeout = readQueuePutTimeout;
         }
 
-        int numTasks;
-        int batchSize;
-        int capacity;
-        boolean abortOnFail = true;
-        boolean sorted;
-//        int timeout;
+        final int numTasks;
+        final int batchSize;
+        final int capacity;
+        final boolean abortOnFail;
+        final boolean sorted;
+        final int readQueuePutTimeout;
     }
 
     private static class Batch<T> implements Comparable<Batch<T>> {
@@ -167,6 +174,7 @@ public class ParallelTaskRunner<I, O> {
     }
 
     public void run() throws ExecutionException {
+        long start = System.nanoTime();
         init();
 
         if (reader != null) {
@@ -201,11 +209,12 @@ public class ParallelTaskRunner<I, O> {
 	            e.printStackTrace();
 	        }
         } catch (TimeoutException e) {
-			e.printStackTrace();
-		} finally{
-        	if(!executorService.isShutdown()){
-        		executorService.shutdownNow(); // shut down now if not done so (e.g. execption)
-        	}
+            exceptions.add(e);
+            e.printStackTrace();
+		} finally {
+            if (!executorService.isShutdown()) {
+                executorService.shutdownNow(); // shut down now if not done so (e.g. execption)
+            }
         }
 
         for (Task<I, O> task : tasks) {
@@ -237,6 +246,8 @@ public class ParallelTaskRunner<I, O> {
             System.err.println("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
         }
 
+            System.err.println("total:                              = " + (System.nanoTime() - start) / 1000000000.0 + "s");
+
         if (config.abortOnFail && !exceptions.isEmpty()) {
             throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.", exceptions.get(0));
         }
@@ -263,12 +274,12 @@ public class ParallelTaskRunner<I, O> {
                 start = System.nanoTime();
                 int cntloop = 0;
                 // continues lock of queue if jobs fail - check what's happening!!!
-                while(!readBlockingQueue.offer(batch, 5, TimeUnit.SECONDS)){
-                	if(!isJobsRunning()){
+                while(!readBlockingQueue.offer(batch, TIMEOUT_CHECK, TimeUnit.SECONDS)){
+                    if(!isJobsRunning()){
                 		throw new IllegalStateException(String.format("No runners but queue with %s items!!!", readBlockingQueue.size()));
                 	}
                 	// check if something failed
-                	if((cntloop++) > 10){
+                	if((++cntloop) > config.readQueuePutTimeout / TIMEOUT_CHECK){
                 		// something went wrong!!!
                 		throw new TimeoutException(String.format("Queue got stuck with %s items!!!", readBlockingQueue.size()));
                 	}
