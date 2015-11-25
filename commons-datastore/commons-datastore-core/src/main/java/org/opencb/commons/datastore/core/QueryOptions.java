@@ -44,7 +44,7 @@ public class QueryOptions extends ObjectMap {
 
     public QueryOptions(final Map<String, ?> inputOptions, boolean pickFirstValue) {
         if (pickFirstValue) {
-            for (Map.Entry<String, ?> option : inputOptions.entrySet()) {
+            for (Entry<String, ?> option : inputOptions.entrySet()) {
                 if (option.getValue() instanceof List) {
                     this.put(option.getKey(), ((List) option.getValue()).get(0));
                 }

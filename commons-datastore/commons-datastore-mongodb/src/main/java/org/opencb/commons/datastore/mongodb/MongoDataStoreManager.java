@@ -16,16 +16,13 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.mongodb.*;
-import org.opencb.commons.datastore.core.config.DataStoreServerAddress;
+import com.mongodb.client.MongoDatabase;
+import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Created by imedina on 22/03/14.
@@ -35,7 +32,7 @@ public class MongoDataStoreManager {
     private static Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
     private List<DataStoreServerAddress> dataStoreServerAddresses;
 
-//    private MongoDBConfiguration mongoDBConfiguration;
+    //    private MongoDBConfiguration mongoDBConfiguration;
     private MongoDBConfiguration.ReadPreference readPreference;
     private String writeConcern;
 
@@ -71,16 +68,16 @@ public class MongoDataStoreManager {
 
 
     public final void addServerAddress(DataStoreServerAddress dataStoreServerAddress) {
-        if(dataStoreServerAddress != null) {
-            if(this.dataStoreServerAddresses != null) {
+        if (dataStoreServerAddress != null) {
+            if (this.dataStoreServerAddresses != null) {
                 this.dataStoreServerAddresses.add(dataStoreServerAddress);
             }
         }
     }
 
     public final void addServerAddresses(List<DataStoreServerAddress> dataStoreServerAddresses) {
-        if(dataStoreServerAddresses != null) {
-            if(this.dataStoreServerAddresses != null) {
+        if (dataStoreServerAddresses != null) {
+            if (this.dataStoreServerAddresses != null) {
                 this.dataStoreServerAddresses.addAll(dataStoreServerAddresses);
             }
         }
@@ -92,11 +89,11 @@ public class MongoDataStoreManager {
     }
 
     public MongoDataStore get(String database, MongoDBConfiguration mongoDBConfiguration) {
-        if(!mongoDataStores.containsKey(database)) {
+        if (!mongoDataStores.containsKey(database)) {
             MongoDataStore mongoDataStore = create(database, mongoDBConfiguration);
             logger.debug("MongoDataStoreManager: new MongoDataStore database '{}' created", database);
             mongoDataStores.put(database, mongoDataStore);
-        } 
+        }
         return mongoDataStores.get(database);
     }
 
@@ -105,54 +102,71 @@ public class MongoDataStoreManager {
         MongoClient mc = null;
         logger.debug("MongoDataStoreManager: creating a MongoDataStore object for database: '" + database + "' ...");
         long t0 = System.currentTimeMillis();
-        if(database != null && !database.trim().equals("")) {
+        if (database != null && !database.trim().equals("")) {
             // read DB configuration for that SPECIES.VERSION, by default
             // PRIMARY_DB is selected
 //            String dbPrefix = applicationProperties.getProperty(speciesVersionPrefix + ".DB", "PRIMARY_DB");
-            try {
-                MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
-                        .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
-                        .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
-                        .build();
+            // We create the MongoClientOptions
+            MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
+                    .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
+                    .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
+                    .build();
 
-                assert(dataStoreServerAddresses != null);
-                
-                if(dataStoreServerAddresses.size() == 1) {
-                    mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()), mongoClientOptions);
+            assert (dataStoreServerAddresses != null);
+
+            // We create the MongoCredential object
+            String user = mongoDBConfiguration.getString("username", "");
+            String pass = mongoDBConfiguration.getString("password", "");
+            MongoCredential mongoCredential = null;
+            if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
+//                final DB authenticationDatabase;
+                if (mongoDBConfiguration.get("authenticationDatabase") != null
+                        && !mongoDBConfiguration.getString("authenticationDatabase").isEmpty()) {
+//                        authenticationDatabase = mc.getDB(mongoDBConfiguration.getString("authenticationDatabase"));
+                    mongoCredential = MongoCredential.createScramSha1Credential(user,
+                            mongoDBConfiguration.getString("authenticationDatabase"), pass.toCharArray());
                 } else {
-                    List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
-                    for(DataStoreServerAddress serverAddress: dataStoreServerAddresses) {
-                        serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-                    }
+//                        authenticationDatabase = db;
+                    mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
+                }
+//                    authenticationDatabase.authenticate(user, pass.toCharArray());
+            }
+
+
+            if (dataStoreServerAddresses.size() == 1) {
+                if (mongoCredential != null) {
+                    mc = new MongoClient(
+                            new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
+                            Arrays.asList(mongoCredential),
+                            mongoClientOptions);
+                } else {
+                    mc = new MongoClient(
+                            new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
+                            mongoClientOptions);
+                }
+            } else {
+                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+                for (DataStoreServerAddress serverAddress : dataStoreServerAddresses) {
+                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+                }
+                if (mongoCredential != null) {
+                    mc = new MongoClient(serverAddresses, Arrays.asList(mongoCredential), mongoClientOptions);
+                } else {
                     mc = new MongoClient(serverAddresses, mongoClientOptions);
                 }
-                    
+            }
+
 //                mc.setReadPreference(ReadPreference.secondary(new BasicDBObject("dc", "PG")));
 //                mc.setReadPreference(ReadPreference.primary());
 //                System.out.println("Replica Status: "+mc.getReplicaSetStatus());
-                logger.debug(mongoDBConfiguration.toString());
-                DB db = mc.getDB(database);
+            logger.debug(mongoDBConfiguration.toString());
+            MongoDatabase db = mc.getDatabase(database);
 //                db.setReadPreference(ReadPreference.secondary(new BasicDBObject("dc", "PG")));
 //                db.setReadPreference(ReadPreference.primary());
-                String user = mongoDBConfiguration.getString("username", "");
-                String pass = mongoDBConfiguration.getString("password", "");
-                if((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
-                    final DB authenticationDatabase;
-                    if (mongoDBConfiguration.get("authenticationDatabase") != null
-                            && !mongoDBConfiguration.getString("authenticationDatabase").isEmpty()) {
-                        authenticationDatabase = mc.getDB(mongoDBConfiguration.getString("authenticationDatabase"));
-                    } else {
-                        authenticationDatabase = db;
-                    }
-                    authenticationDatabase.authenticate(user, pass.toCharArray());
-                }
 
-                long t1 = System.currentTimeMillis();
-                logger.debug("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in " + (t0 - t1) + "ms");
-                mongoDataStore = new MongoDataStore(mc, db, mongoDBConfiguration);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
+            long t1 = System.currentTimeMillis();
+            logger.debug("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in " + (t0 - t1) + "ms");
+            mongoDataStore = new MongoDataStore(mc, db, mongoDBConfiguration);
         } else {
             logger.debug("MongoDB database is null or empty");
         }
@@ -161,56 +175,49 @@ public class MongoDataStoreManager {
 
     public void drop(String database) {
         MongoClient mc = null;
-        if(database != null && !database.trim().equals("")) {
-            try {
-//                MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
+        if (database != null && !database.trim().equals("")) {
+            //                MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
 //                        .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
 //                        .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
 //                        .build();
 
-                if(dataStoreServerAddresses.size() == 1) {
-                    mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()));
-                } else {
-                    List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
-                    for(ServerAddress serverAddress: serverAddresses) {
-                        serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-                    }
-                    mc = new MongoClient(serverAddresses);
+            if (dataStoreServerAddresses.size() == 1) {
+                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()));
+            } else {
+                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+                for (ServerAddress serverAddress : serverAddresses) {
+                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
                 }
+                mc = new MongoClient(serverAddresses);
+            }
 
 //                logger.debug(mongoDBConfiguration.toString());
-                DB db = mc.getDB(database);
+            MongoDatabase db = mc.getDatabase(database);
 //                String user = mongoDBConfiguration.getString("username", "");
 //                String pass = mongoDBConfiguration.getString("password", "");
 //                if((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
 //                    db.authenticate(user, pass.toCharArray());
 //                }
-                db.dropDatabase();
+            db.drop();
 
-                long t1 = System.currentTimeMillis();
-                logger.debug("MongoDataStoreManager: remove MongoDataStore object for database");
-                mongoDataStores.remove(database);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
+            long t1 = System.currentTimeMillis();
+            logger.debug("MongoDataStoreManager: remove MongoDataStore object for database");
+            mongoDataStores.remove(database);
         } else {
             logger.debug("MongoDB database is null or empty");
         }
     }
 
     public void close(String database) {
-        if(mongoDataStores.containsKey(database)) {
+        if (mongoDataStores.containsKey(database)) {
             mongoDataStores.get(database).close();
             mongoDataStores.remove(database);
         }
     }
 
 
-
     /**
-     *
      * GETTERS AND SETTERS
-     *
      **/
 
     public List<DataStoreServerAddress> getDataStoreServerAddresses() {

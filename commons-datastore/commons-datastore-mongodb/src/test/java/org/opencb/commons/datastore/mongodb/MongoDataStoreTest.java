@@ -16,7 +16,9 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,13 +34,15 @@ public class MongoDataStoreTest {
     @BeforeClass
     public static void setUp() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("localhost", 27017);
-        mongoDataStore = mongoDataStoreManager.get("test");
+
+        mongoDataStoreManager.drop("datastore_test");
+        mongoDataStore = mongoDataStoreManager.get("datastore_test");
         mongoDataStore.createCollection("JUnitTest");
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
-        mongoDataStoreManager.close("test");
+        mongoDataStoreManager.close("datastore_test");
     }
 
 

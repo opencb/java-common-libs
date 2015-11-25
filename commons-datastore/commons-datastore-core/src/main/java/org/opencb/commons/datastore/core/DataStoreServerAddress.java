@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opencb.commons.datastore.core.config;
+package org.opencb.commons.datastore.core;
 
 /**
  * Created by imedina on 23/03/14.

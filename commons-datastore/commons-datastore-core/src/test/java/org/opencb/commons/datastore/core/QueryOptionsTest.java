@@ -67,7 +67,7 @@ public class QueryOptionsTest {
         include.add("value1");
         include.add("value2");
         QueryOptions options = new QueryOptions("include", Collections.unmodifiableList(include));
-        thrown.expect(UnsupportedOperationException.class);
         options.addToListOption("include", "value1");
+        Assert.assertEquals(3, options.getAsList("include").size());
     }
 }

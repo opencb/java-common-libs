@@ -16,14 +16,18 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import java.util.*;
-import com.mongodb.*;
+import com.mongodb.CommandResult;
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
 /**
  * Created by imedina on 22/03/14.
- *
+ * <p>
  * This class models and configure a physical connection to a specific database of a MongoDB server, notice this is
  * different from the Java driver where all databases from a single MongoDB server share the same configuration.
  * Therefore, different configurations can be applied to different databases.
@@ -37,25 +41,26 @@ public class MongoDataStore {
     private Map<String, MongoDBCollection> mongoDBCollections = new HashMap<>();
 
     private MongoClient mongoClient;
-    private DB db;
+    private MongoDatabase db;
     private MongoDBConfiguration mongoDBConfiguration;
 
     protected Logger logger = LoggerFactory.getLogger(MongoDataStore.class);
 
-    MongoDataStore(MongoClient mongoClient, DB db, MongoDBConfiguration mongoDBConfiguration) {
+    MongoDataStore(MongoClient mongoClient, MongoDatabase db, MongoDBConfiguration mongoDBConfiguration) {
         this.mongoClient = mongoClient;
         this.db = db;
         this.mongoDBConfiguration = mongoDBConfiguration;
     }
 
     public boolean testConnection() {
-        CommandResult commandResult = db.getStats();
-        return commandResult != null && commandResult.getBoolean("ok");
+//        CommandResult commandResult = db.getStats();
+//        return commandResult != null && commandResult.getBoolean("ok");
+        return true;
     }
 
 
     public MongoDBCollection getCollection(String collection) {
-        if(!mongoDBCollections.containsKey(collection)) {
+        if (!mongoDBCollections.containsKey(collection)) {
             MongoDBCollection mongoDBCollection = new MongoDBCollection(db.getCollection(collection));
             mongoDBCollections.put(collection, mongoDBCollection);
             logger.debug("MongoDataStore: new MongoDB collection '{}' created", collection);
@@ -64,30 +69,31 @@ public class MongoDataStore {
     }
 
     public MongoDBCollection createCollection(String collectionName) {
-        if(!db.getCollectionNames().contains(collectionName)) {
-            db.createCollection(collectionName, null);
+        if (!Arrays.asList(db.listCollectionNames()).contains(collectionName)) {
+            db.createCollection(collectionName);
         }
         return getCollection(collectionName);
     }
 
     public void dropCollection(String collectionName) {
-        if(db.getCollectionNames().contains(collectionName)) {
+        if (Arrays.asList(db.listCollectionNames()).contains(collectionName)) {
             db.getCollection(collectionName).drop();
             mongoDBCollections.remove(collectionName);
         }
     }
 
     public List<String> getCollectionNames() {
-        Iterator<String> iterator = db.getCollectionNames().iterator();
+        Iterator<String> iterator = db.listCollectionNames().iterator();
         List<String> list = new ArrayList<>();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             list.add(iterator.next());
         }
         return list;
     }
 
     public Map<String, Object> getStats(String collectionName) {
-        return new HashMap<>(db.getStats());
+//        return new HashMap<>(db.getStats());
+        return null;
     }
 
 
@@ -105,7 +111,7 @@ public class MongoDataStore {
         return mongoDBCollections;
     }
 
-    public DB getDb() {
+    public MongoDatabase getDb() {
         return db;
     }
 

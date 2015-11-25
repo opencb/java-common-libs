@@ -16,13 +16,22 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.*;
+import com.mongodb.WriteConcern;
+import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.*;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+import org.bson.Document;
+import org.opencb.commons.datastore.core.QueryOptions;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import org.opencb.commons.datastore.core.QueryOptions;
 
 
 /**
@@ -30,196 +39,260 @@ import org.opencb.commons.datastore.core.QueryOptions;
  */
 public class MongoDBNativeQuery {
 
-    private final DBCollection dbCollection;
+    private final MongoCollection<Document> dbCollection;
 
-    MongoDBNativeQuery(DBCollection dbCollection) {
+    MongoDBNativeQuery(MongoCollection<Document> dbCollection) {
         this.dbCollection = dbCollection;
     }
 
     public long count() {
-        long result = dbCollection.count();
-        return result;
+        return dbCollection.count();
     }
 
-    public long count(DBObject query) {
-        long result = dbCollection.count(query);
-        return result;
+    public long count(Document query) {
+//        CountOptions c = new CountOptions().
+        return dbCollection.count(query);
     }
 
-    public List distinct(String key) {
-        return distinct(key, null);
+
+    public DistinctIterable<Document> distinct(String key) {
+        return distinct(key, null, Document.class);
     }
 
-    public List distinct(String key, DBObject query) {
-        List result = dbCollection.distinct(key, query);
-        return result;
+    public <T> DistinctIterable distinct(String key, Class<T> resultClass) {
+        return distinct(key, null, resultClass);
     }
 
-    public DBCursor find(DBObject query, QueryOptions options) {
+    public <T> DistinctIterable<T> distinct(String key, Document query, Class<T> resultClass) {
+        return dbCollection.distinct(key, query, resultClass);
+    }
+
+
+    public FindIterable<Document> find(Document query, QueryOptions options) {
         return find(query, null, options);
     }
 
-    public DBCursor find(DBObject query, DBObject projection, QueryOptions options) {
-        DBCursor cursor;
+    public FindIterable<Document> find(Document query, Document projection, QueryOptions options) {
+//        DBCursor cursor;
 
-        if(projection == null) {
+        if (projection == null) {
             projection = getProjection(projection, options);
         }
-        cursor = dbCollection.find(query, projection);
+//        cursor = dbCollection.find(query, projection);
+        FindIterable<Document> findIterable = dbCollection.find(query).projection(projection);
 
         int limit = (options != null) ? options.getInt(MongoDBCollection.LIMIT, 0) : 0;
         if (limit > 0) {
-            cursor.limit(limit);
+//            cursor.limit(limit);
+            findIterable.limit(limit);
         }
 
         int skip = (options != null) ? options.getInt(MongoDBCollection.SKIP, 0) : 0;
         if (skip > 0) {
-            cursor.skip(skip);
+//            cursor.skip(skip);
+            findIterable.skip(skip);
         }
 
-        BasicDBObject sort = (options != null) ? (BasicDBObject) options.get(MongoDBCollection.SORT) : null;
+        Document sort = (options != null) ? (Document) options.get(MongoDBCollection.SORT) : null;
         if (sort != null) {
-            cursor.sort(sort);
+//            cursor.sort(sort);
+            findIterable.sort(sort);
         }
 
         if (options != null && options.containsKey(MongoDBCollection.BATCH_SIZE)) {
-            cursor.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
+//            cursor.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
+            findIterable.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
         }
 
         if (options != null && options.containsKey(MongoDBCollection.TIMEOUT)) {
-            cursor.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
+//            cursor.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
+            findIterable.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
-        return cursor;
+        return findIterable;
     }
 
-    public AggregationOutput aggregate(List<DBObject> operations, QueryOptions options) {
+    public AggregateIterable aggregate(List<Document> operations, QueryOptions options) {
         return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
     }
 
     /**
      * This method insert a single document into a collection. Params w and wtimeout are read from QueryOptions.
-     * @param dbObject
+     *
+     * @param document
      * @param options
      * @return
      */
-    public WriteResult insert(DBObject dbObject, QueryOptions options) {
-        if(options != null && (options.containsKey("w") || options.containsKey("wtimeout"))) {
+    public void insert(Document document, QueryOptions options) {
+        int writeConcern = 1;
+        int ms = 0;
+        if (options != null && (options.containsKey("w") || options.containsKey("wtimeout"))) {
             // Some info about params: http://api.mongodb.org/java/current/com/mongodb/WriteConcern.html
-            return dbCollection.insert(dbObject, new WriteConcern(options.getInt("w", 1),
-                    options.getInt("wtimeout", 0)));
-        }else {
-            return dbCollection.insert(dbObject);
+//            return dbCollection.insert(dbObject, new WriteConcern(options.getInt("w", 1), options.getInt("wtimeout", 0)));
+            writeConcern = options.getInt("w", 1);
+            ms = options.getInt("wtimeout", 0);
         }
+        dbCollection.withWriteConcern(new WriteConcern(writeConcern, ms));
+        dbCollection.insertOne(document);
     }
 
     /**
      * This method insert a list of documents into a collection. Params w and wtimeout are read from QueryOptions.
-     * @param dbObjectList
+     *
+     * @param documentList
      * @param options
      * @return
      */
-    public BulkWriteResult insert(List<DBObject> dbObjectList, QueryOptions options) {
-        // Let's prepare the Bulk object
-        BulkWriteOperation bulk = dbCollection.initializeUnorderedBulkOperation();
-        for (DBObject document : dbObjectList) {
-            bulk.insert(document);
+    public BulkWriteResult insert(List<Document> documentList, QueryOptions options) {
+        List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
+        for (Document document : documentList) {
+            actions.add(new InsertOneModel<>(document));
         }
 
-        if(options != null && (options.containsKey("w") || options.containsKey("wtimeout"))) {
-            // Some info about params: http://api.mongodb.org/java/current/com/mongodb/WriteConcern.html
-            return bulk.execute(new WriteConcern(options.getInt("w", 1), options.getInt("wtimeout", 0)));
-        }else {
-            return bulk.execute();
+        int writeConcern = 1;
+        int ms = 0;
+        if (options != null && (options.containsKey("w") || options.containsKey("wtimeout"))) {
+            writeConcern = options.getInt("w", 1);
+            ms = options.getInt("wtimeout", 0);
+        }
+        dbCollection.withWriteConcern(new WriteConcern(writeConcern, ms));
+
+        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+    }
+
+
+    public UpdateResult update(Document query, Document updates, boolean upsert, boolean multi) {
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        if (multi) {
+            return dbCollection.updateMany(query, updates, updateOptions);
+        } else {
+            return dbCollection.updateOne(query, updates, updateOptions);
         }
     }
 
-    public WriteResult update(DBObject object, DBObject updates, boolean upsert, boolean multi) {
-        return dbCollection.update(object, updates, upsert, multi);
-    }
-
-    public BulkWriteResult update(List<DBObject> queryList, List<DBObject> updatesList, boolean upsert, boolean multi) {
-        if (queryList.size() != updatesList.size()) {
+    public BulkWriteResult update(List<Document> documentList, List<Document> updatesList, boolean upsert, boolean multi) {
+        if (documentList.size() != updatesList.size()) {
             throw new IndexOutOfBoundsException("QueryList.size and UpdatesList must be the same size");
         }
 
-        BulkWriteOperation bulk = dbCollection.initializeUnorderedBulkOperation();
-        Iterator<DBObject> queryIterator = queryList.iterator();
-        Iterator<DBObject> updateIterator = updatesList.iterator();
+        Iterator<Document> queryIterator = documentList.iterator();
+        Iterator<Document> updateIterator = updatesList.iterator();
+
+        List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
 
         while (queryIterator.hasNext()) {
-            DBObject query = queryIterator.next();
-            DBObject update = updateIterator.next();
+            Document query = queryIterator.next();
+            Document update = updateIterator.next();
 
-            BulkWriteRequestBuilder builder = bulk.find(query);
-            if (upsert) {
-                if (multi) {
-                    builder.upsert().update(update);
-                } else {
-                    builder.upsert().updateOne(update);
-                }
-            } else {
-                if (multi) {
-                    builder.update(update);
-                } else {
-                    builder.updateOne(update);
-                }
-            }
-        }
-        return bulk.execute();
-    }
-
-    public WriteResult remove(DBObject query) {
-        return dbCollection.remove(query);
-    }
-
-    public BulkWriteResult remove(List<DBObject> queryList, boolean multi) {
-        BulkWriteOperation bulk = dbCollection.initializeUnorderedBulkOperation();
-        for (DBObject query : queryList) {
-            BulkWriteRequestBuilder builder = bulk.find(query);
             if (multi) {
-                builder.remove();
+                actions.add(new UpdateManyModel<>(query, update, updateOptions));
             } else {
-                builder.removeOne();
+                actions.add(new UpdateOneModel<>(query, update, updateOptions));
             }
+
+
+//        BulkWriteOperation bulk = dbCollection.initializeUnorderedBulkOperation();
+//            BulkWriteRequestBuilder builder = bulk.find(query);
+//            if (upsert) {
+//                if (multi) {
+////                    builder.upsert().update(update);
+//
+//                } else {
+////                    builder.upsert().updateOne(update);
+//                }
+//            } else {
+//                if (multi) {
+////                    builder.update(update);
+//                } else {
+////                    builder.updateOne(update);
+//                }
+//            }
+
+
         }
-        return bulk.execute();
+//        return bulk.execute();
+        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
     }
 
-    public DBObject findAndModify(DBObject query, DBObject projection, DBObject sort, DBObject update, QueryOptions options) {
-        boolean remove = false;
-        boolean returnNew = false;
-        boolean upsert = false;
 
-        if(options != null) {
-            if(projection == null) {
+    public DeleteResult remove(Document query) {
+        return dbCollection.deleteMany(query);
+    }
+
+    public DeleteResult remove(Document query, boolean multi) {
+        if (multi) {
+            return dbCollection.deleteMany(query);
+        } else {
+            return dbCollection.deleteOne(query);
+        }
+    }
+
+    public BulkWriteResult remove(List<Document> queryList, boolean multi) {
+        List<WriteModel<Document>> actions = new ArrayList<>(queryList.size());
+        if (multi) {
+            for (Document document : queryList) {
+                actions.add(new DeleteManyModel<>(document));
+            }
+        } else {
+            for (Document document : queryList) {
+                actions.add(new DeleteOneModel<>(document));
+            }
+        }
+        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+    }
+
+
+    public Document findAndModify(Document query, Document projection, Document sort, Document update, QueryOptions options) {
+        boolean remove = false;
+        boolean upsert = false;
+        boolean returnNew = false;
+
+        if (options != null) {
+            if (projection == null) {
                 projection = getProjection(projection, options);
             }
             remove = options.getBoolean("remove", false);
-            returnNew = options.getBoolean("returnNew", false);
             upsert = options.getBoolean("upsert", false);
+            returnNew = options.getBoolean("returnNew", false);
         }
-        return dbCollection.findAndModify(query, projection, sort, remove, update, returnNew, upsert);
+
+        if (remove) {
+            FindOneAndReplaceOptions findOneAndReplaceOptions = new FindOneAndReplaceOptions()
+                    .sort(sort)
+                    .projection(projection)
+                    .upsert(upsert)
+                    .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
+            return dbCollection.findOneAndReplace(query, update, findOneAndReplaceOptions);
+        } else {
+            FindOneAndUpdateOptions findOneAndUpdateOptions = new FindOneAndUpdateOptions()
+                    .sort(sort)
+                    .projection(projection)
+                    .upsert(upsert)
+                    .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
+            return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+        }
+//        return dbCollection.findOneAndUpdate(query, projection, sort, remove, update, returnNew, upsert);
     }
 
-    public void createIndex(DBObject keys, DBObject options) {
+
+    public void createIndex(Document keys, IndexOptions options) {
         dbCollection.createIndex(keys, options);
     }
 
-    public List<DBObject> getIndex() {
-        return dbCollection.getIndexInfo();
+    public List<Document> getIndex() {
+        return dbCollection.listIndexes().into(new ArrayList<>());
     }
 
-    public void dropIndex(DBObject keys) {
+    public void dropIndex(Document keys) {
         dbCollection.dropIndex(keys);
     }
 
-    private DBObject getProjection(DBObject projection, QueryOptions options) {
+
+    private Document getProjection(Document projection, QueryOptions options) {
         // Select which fields are excluded and included in the query
-//      DBObject returnFields = null;
-//      returnFields = new BasicDBObject("_id", 0);
-        if(projection == null) {
-            projection = new BasicDBObject();
+        if (projection == null) {
+            projection = new Document();
         }
         projection.put("_id", 0);
 
@@ -238,7 +311,7 @@ public class MongoDBNativeQuery {
                     }
                 }
             }
-            BasicDBObject elemMatch  = (BasicDBObject) options.get(MongoDBCollection.ELEM_MATCH);
+            Document elemMatch = (Document) options.get(MongoDBCollection.ELEM_MATCH);
             if (elemMatch != null) {
                 String field = (String) elemMatch.keySet().toArray()[0];
                 projection.put(field, elemMatch.get(field));

@@ -16,8 +16,8 @@
 
 package org.opencb.commons.datastore.mongodb;
 
+import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.opencb.commons.datastore.core.ObjectMap;
-import org.opencb.commons.datastore.core.config.DataStoreServerAddress;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -47,6 +47,7 @@ public class MongoDBConfiguration extends ObjectMap {
         NEAREST("nearest");
 
         private String value;
+
         private ReadPreference(String value) {
             this.value = value;
         }
@@ -54,7 +55,9 @@ public class MongoDBConfiguration extends ObjectMap {
         public String getValue() {
             return value;
         }
-    };
+    }
+
+    ;
 
     MongoDBConfiguration(final Map<String, Object> inputOptions) {
         super(inputOptions);

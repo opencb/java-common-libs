@@ -1,6 +1,8 @@
 package org.opencb.commons.datastore.core;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,7 @@ public class Query extends ObjectMap {
         Objects.requireNonNull(enumType);
         Map<String, E> enumFields = Arrays.asList(enumType.getEnumConstants()).stream().collect(
                 Collectors.toMap(queryParam -> queryParam.key(), Function.<E>identity()));
-        for (Entry<String, Object> entry : entrySet()) {
+        for (Map.Entry<String, Object> entry : entrySet()) {
             if (!enumFields.containsKey(entry.getKey())) {
                 throw new EnumConstantNotPresentException(enumType, entry.getKey());
             } else {

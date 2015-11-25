@@ -23,10 +23,10 @@ import java.io.IOException;
  */
 public interface QueryResultWriter<T> {
 
-    public void open() throws IOException;
+    void open() throws IOException;
 
-    public void write(T elem) throws IOException;
+    void write(T elem) throws IOException;
 
-    public void close() throws IOException;
+    void close() throws IOException;
 
 }
