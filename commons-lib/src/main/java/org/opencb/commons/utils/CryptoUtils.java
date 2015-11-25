@@ -14,10 +14,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- *
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
-public class CryptoUtils {
+public final class CryptoUtils {
 
     private CryptoUtils() {
     }
@@ -52,5 +51,4 @@ public class CryptoUtils {
     public static byte[] encryptSha1(String strToEncrypt) {
         return DigestUtils.sha1(strToEncrypt);
     }
-    
 }

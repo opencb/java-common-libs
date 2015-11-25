@@ -72,12 +72,10 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         Iterator<String> iter = objectMap.keySet().iterator();
         String key;
         StringBuilder sb = new StringBuilder("{\n");
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             key = iter.next();
-            if(!key.equals("result")) {
-                sb.append("\t"+key+": " + objectMap.get(key)+",\n");
-            }else {
-//				sb.append("\t"+key+": " + objectMap.getString(key).substring(0, 10)+"...\n");
+            if (!key.equals("result")) {
+                sb.append("\t" + key + ": " + objectMap.get(key) + ",\n");
             }
         }
         sb.append("}");
@@ -90,8 +88,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public String getString(String field, String defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
-            if(objectMap.get(field) != null) {
+        if (field != null && objectMap.containsKey(field)) {
+            if (objectMap.get(field) != null) {
                 return objectMap.get(field).toString();
             } else {
                 return null;
@@ -106,14 +104,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public int getInt(String field, int defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).intValue();
             } else if (obj instanceof String) {
                 try {
                     return Integer.parseInt((String) obj);
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                    ignored.printStackTrace();
+                }
             }
         }
         return defaultValue;
@@ -124,14 +124,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public long getLong(String field, long defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).longValue();
             } else if (obj instanceof String) {
                 try {
                     return Long.parseLong((String) obj);
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                    ignored.printStackTrace();
+                }
             }
         }
         return defaultValue;
@@ -143,14 +145,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public float getFloat(String field, float defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).floatValue();
             } else if (obj instanceof String) {
                 try {
                     return Float.parseFloat((String) obj);
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                    ignored.printStackTrace();
+                }
             }
         }
         return defaultValue;
@@ -162,14 +166,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public double getDouble(String field, double defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).doubleValue();
             } else if (obj instanceof String) {
                 try {
                     return Double.parseDouble((String) obj);
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                    ignored.printStackTrace();
+                }
             }
         }
         return defaultValue;
@@ -181,7 +187,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public boolean getBoolean(String field, boolean defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (obj instanceof Boolean) {
                 return ((Boolean) obj);
@@ -198,7 +204,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
      * in client code, though the effect is the same.  So to get the value of a key that is of type String, you would write
      * {@code String name = doc.get("name", String.class)} instead of {@code String name = (String) doc.get("x") }.
      *
-     * @param field   the field
+     * @param field the field
      * @param clazz the class to cast the value to
      * @param <T>   the type of the class
      * @return the value of the given key, or null if the instance does not contain this key, or defaultValue if the object
@@ -209,7 +215,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public <T> T get(final String field, final Class<T> clazz, T defaultValue) {
-        if(objectMap.containsKey(field)) {
+        if (objectMap.containsKey(field)) {
             Object obj = objectMap.get(field);
             if (clazz.isInstance(obj)) {
                 return clazz.cast(obj);
@@ -219,8 +225,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     /**
-     * Some fields can be a List, this method cast the Object to List of generic Objects
-     * @param field
+     * Some fields can be a List, this method cast the Object to List of generic Objects.
+     *
+     * @param field List field name
      * @return A List representation of the field
      */
     public List<Object> getList(String field) {
@@ -228,7 +235,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public List<Object> getList(String field, final List<Object> defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             return (List<Object>) objectMap.get(field);
         }
         return defaultValue;
@@ -245,7 +252,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         } else {
             List<String> stringList = new ArrayList<>(list.size());
             for (Object o : list) {
-                stringList.add(o == null? null : o.toString());
+                stringList.add(o == null ? null : o.toString());
             }
             return stringList;
         }
@@ -297,23 +304,23 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     public List<Double> getAsDoubleList(String field, String separator) {
         return getAsNumberList(field, Double.class, Double::parseDouble, separator);
     }
-    
+
     public List<Short> getAsShortList(String field) {
         return getAsNumberList(field, Short.class, Short::parseShort, ",");
     }
-    
+
     public List<Short> getAsShortList(String field, String separator) {
         return getAsNumberList(field, Short.class, Short::parseShort, separator);
     }
-    
+
     public List<Byte> getAsByteList(String field) {
         return getAsNumberList(field, Byte.class, Byte::parseByte, ",");
     }
-    
+
     public List<Byte> getAsByteList(String field, String separator) {
         return getAsNumberList(field, Byte.class, Byte::parseByte, separator);
     }
-    
+
     protected <N extends Number> List<N> getAsNumberList(String field, Class<N> clazz, Function<String, N> parser, String separator) {
         List list = getAsList(field, separator);
 
@@ -346,11 +353,14 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     /**
-     * Some fields can be a List, this method cast the Object to aList of type T. Gets the value of the given key, casting it to the given {@code Class<T>}.  This is useful to avoid having casts
+     * Some fields can be a List, this method cast the Object to aList of type T. Gets the value of the given key, casting it to the given
+     * {@code Class<T>}.  This is useful to avoid having casts
      * in client code, though the effect is the same.  So to get the value of a key that is of type String, you would write
      * {@code String name = doc.get("name", String.class)} instead of {@code String name = (String) doc.get("x") }.
-     * @param field
-     * @param clazz
+     *
+     * @param field List field name
+     * @param clazz Class to be returned
+     * @param <T> Element class
      * @return A List representation of the field
      */
     @Deprecated
@@ -360,7 +370,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> List<T> getAsList(String field, final Class<T> clazz, List<T> defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             return (List<T>) objectMap.get(field);
         }
         return defaultValue;
@@ -374,9 +384,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
      * Get the field as List. If field was not a list, returns an UnmodifiableList.
      * Do not modify the ObjectMap content.
      *
-     * @param field
-     * @param separator
-     * @return
+     * @param field List field name
+     * @param separator Item separator
+     * @return A list of objects
      */
     public List<Object> getAsList(String field, String separator) {
         Object value = get(field);
@@ -393,8 +403,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
 
     /**
-     * Some fields can be also a Map, this method cast the Object to Map
-     * @param field
+     * Some fields can be also a Map, this method cast the Object to Map.
+     *
+     * @param field List field name
      * @return A Map representation of the field
      */
     public Map<String, Object> getMap(String field) {
@@ -403,17 +414,21 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
 
     public Map<String, Object> getMap(String field, Map<String, Object> defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             return (Map<String, Object>) objectMap.get(field);
         }
         return defaultValue;
     }
 
     /**
-     * Some fields can be a Map, this method cast the Object to Map of type T. Gets the value of the given key, casting it to the given {@code Class<T>}.  This is useful to avoid having casts
+     * Some fields can be a Map, this method cast the Object to Map of type T. Gets the value of the given key, casting it to the given
+     * {@code Class<T>}.  This is useful to avoid having casts
      * in client code, though the effect is the same.  So to get the value of a key that is of type String, you would write
      * {@code String name = doc.get("name", String.class)} instead of {@code String name = (String) doc.get("x") }.
-     * @param field
+     *
+     * @param field List field name
+     * @param clazz Class to be returned
+     * @param <T> Element class
      * @return A Map representation of the field
      */
     @Deprecated
@@ -423,7 +438,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> Map<String, T> getMapAs(String field, final Class<T> clazz, Map<String, T> defaultValue) {
-        if(field != null && objectMap.containsKey(field)) {
+        if (field != null && objectMap.containsKey(field)) {
             return (Map<String, T>) objectMap.get(field);
         }
         return defaultValue;

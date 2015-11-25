@@ -119,9 +119,8 @@ public class MongoDBNativeQuery {
     /**
      * This method insert a single document into a collection. Params w and wtimeout are read from QueryOptions.
      *
-     * @param document
-     * @param options
-     * @return
+     * @param document The new document to be inserted
+     * @param options Some options like timeout
      */
     public void insert(Document document, QueryOptions options) {
         int writeConcern = 1;
@@ -139,9 +138,9 @@ public class MongoDBNativeQuery {
     /**
      * This method insert a list of documents into a collection. Params w and wtimeout are read from QueryOptions.
      *
-     * @param documentList
-     * @param options
-     * @return
+     * @param documentList The new list of documents to be inserted
+     * @param options Some options like timeout
+     * @return A BulkWriteResult from MongoDB API
      */
     public BulkWriteResult insert(List<Document> documentList, QueryOptions options) {
         List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());

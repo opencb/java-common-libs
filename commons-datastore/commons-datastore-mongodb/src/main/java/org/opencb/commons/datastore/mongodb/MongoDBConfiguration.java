@@ -57,8 +57,6 @@ public class MongoDBConfiguration extends ObjectMap {
         }
     }
 
-    ;
-
     MongoDBConfiguration(final Map<String, Object> inputOptions) {
         super(inputOptions);
         this.putAll(inputOptions);

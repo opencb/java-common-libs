@@ -13,16 +13,26 @@ import java.util.List;
 @FunctionalInterface
 public interface DataWriter<T> {
 
-    default public boolean open() {return true;}
+    default boolean open() {
+        return true;
+    }
 
-    default public boolean close() {return true;}
+    default boolean close() {
+        return true;
+    }
 
-    default public boolean pre() {return true;}
+    default boolean pre() {
+        return true;
+    }
 
-    default public boolean post() {return true;}
+    default boolean post() {
+        return true;
+    }
 
-    default public boolean write(T elem) {return write(Collections.singletonList(elem));}
+    default boolean write(T elem) {
+        return write(Collections.singletonList(elem));
+    }
 
-    public boolean write(List<T> batch);
+    boolean write(List<T> batch);
 
 }

@@ -119,6 +119,4 @@ public class DataRW<R, W> {
     public void setContinueProducing(boolean continueProducing) {
         this.continueProducing = continueProducing;
     }
-
-
 }

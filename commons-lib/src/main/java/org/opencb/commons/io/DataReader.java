@@ -9,15 +9,25 @@ import java.util.List;
 @FunctionalInterface
 public interface DataReader<T> {
 
-    default public boolean open() {return true;}
+    default boolean open() {
+        return true;
+    }
 
-    default public boolean close() {return true;}
+    default boolean close() {
+        return true;
+    }
 
-    default public boolean pre() {return true;}
+    default boolean pre() {
+        return true;
+    }
 
-    default public boolean post() {return true;}
+    default boolean post() {
+        return true;
+    }
 
-    default public List<T> read() {return read(1);}
+    default List<T> read() {
+        return read(1);
+    }
 
-    public List<T> read(int batchSize);
+    List<T> read(int batchSize);
 }

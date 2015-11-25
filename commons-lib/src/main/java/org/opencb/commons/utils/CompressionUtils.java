@@ -9,14 +9,13 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
- *
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
-public class CompressionUtils {
+public final class CompressionUtils {
 
     private CompressionUtils() {
     }
-    
+
     public static byte[] compress(byte[] data) throws IOException {
         Deflater deflater = new Deflater();
         deflater.setInput(data);
@@ -26,7 +25,7 @@ public class CompressionUtils {
         deflater.finish();
         byte[] buffer = new byte[1024];
         while (!deflater.finished()) {
-            int count = deflater.deflate(buffer); // returns the generated code... index  
+            int count = deflater.deflate(buffer); // returns the generated code... index
             outputStream.write(buffer, 0, count);
         }
         outputStream.close();

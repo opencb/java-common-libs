@@ -63,8 +63,8 @@ public class QueryOptions extends ObjectMap {
      * This method safely add new options. If the key already exists it does not overwrite the current value.
      * You can use put for overwritten the value.
      *
-     * @param key
-     * @param value
+     * @param key The new option name
+     * @param value The new value
      * @return null if the key was not present, or the existing object if the key exists.
      */
     public Object add(String key, Object value) {
@@ -78,8 +78,8 @@ public class QueryOptions extends ObjectMap {
     /**
      * This method safely add a new Object to an exiting option which type is List.
      *
-     * @param key
-     * @param value
+     * @param key The new option name
+     * @param value The new value
      * @return the list with the new Object inserted.
      */
     public Object addToListOption(String key, Object value) {
@@ -97,7 +97,8 @@ public class QueryOptions extends ObjectMap {
                     this.put(key, list);
                 }
             } else {
-                List<Object> list = new ArrayList<>();  //New List instead of "Arrays.asList" or "Collections.singletonList" to avoid unmodifiable list.
+                //New List instead of "Arrays.asList" or "Collections.singletonList" to avoid unmodifiable list.
+                List<Object> list = new ArrayList<>();
                 list.add(value);
                 this.put(key, list);
             }

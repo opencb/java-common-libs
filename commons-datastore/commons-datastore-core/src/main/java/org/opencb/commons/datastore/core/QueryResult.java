@@ -36,15 +36,15 @@ public class QueryResult<T> {
     private String featureType;
 
     private String resultType;
-    public Class<T> clazz;
+    private Class<T> clazz;
     private List<T> result;
 
     public QueryResult() {
-        this("", -1, -1, -1, "", "", new ArrayList<T>());
+        this("", -1, -1, -1, "", "", new ArrayList<>());
     }
 
     public QueryResult(String id) {
-        this(id, -1, -1, -1, "", "", new ArrayList<T>());
+        this(id, -1, -1, -1, "", "", new ArrayList<>());
     }
 
     public QueryResult(String id, int dbTime, int numResults, long numTotalResults, String warningMsg, String errorMsg, List<T> result) {
@@ -59,24 +59,28 @@ public class QueryResult<T> {
     }
 
     public T first() {
-        if(result != null && result.size() > 0) {
+        if (result != null && result.size() > 0) {
             return result.get(0);
         }
         return null;
     }
 
-
     @Override
     public String toString() {
-        return "QueryResult{\n" +
-                "id='" + id + '\'' + "\n" +
-                ", dbTime=" + dbTime + "\n" +
-                ", numResults=" + numResults + "\n" +
-                ", warningMsg='" + warningMsg + '\'' + "\n" +
-                ", errorMsg='" + errorMsg + '\'' + "\n" +
-                ", resultType='" + resultType + '\'' + "\n" +
-                ", result=" + result + "\n" +
-                '}';
+        final StringBuilder sb = new StringBuilder("QueryResult{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", time=").append(time);
+        sb.append(", dbTime=").append(dbTime);
+        sb.append(", numResults=").append(numResults);
+        sb.append(", numTotalResults=").append(numTotalResults);
+        sb.append(", warningMsg='").append(warningMsg).append('\'');
+        sb.append(", errorMsg='").append(errorMsg).append('\'');
+        sb.append(", featureType='").append(featureType).append('\'');
+        sb.append(", resultType='").append(resultType).append('\'');
+        sb.append(", clazz=").append(clazz);
+        sb.append(", result=").append(result);
+        sb.append('}');
+        return sb.toString();
     }
 
     public String getId() {
@@ -153,6 +157,14 @@ public class QueryResult<T> {
 
     public void setResultType(String resultType) {
         this.resultType = resultType;
+    }
+
+    public Class<T> getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(Class<T> clazz) {
+        this.clazz = clazz;
     }
 
     public List<T> getResult() {

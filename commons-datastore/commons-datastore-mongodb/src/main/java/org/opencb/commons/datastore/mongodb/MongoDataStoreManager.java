@@ -16,7 +16,10 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.*;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
@@ -182,7 +185,8 @@ public class MongoDataStoreManager {
 //                        .build();
 
             if (dataStoreServerAddresses.size() == 1) {
-                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()));
+                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
+                        dataStoreServerAddresses.get(0).getPort()));
             } else {
                 List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
                 for (ServerAddress serverAddress : serverAddresses) {
@@ -216,9 +220,9 @@ public class MongoDataStoreManager {
     }
 
 
-    /**
+    /*
      * GETTERS AND SETTERS
-     **/
+     */
 
     public List<DataStoreServerAddress> getDataStoreServerAddresses() {
         return dataStoreServerAddresses;

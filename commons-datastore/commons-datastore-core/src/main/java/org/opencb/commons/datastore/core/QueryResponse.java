@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Created by imedina on 20/03/14.
  */
-public class QueryResponse<T>{
+public class QueryResponse<T> {
 
     private static final long serialVersionUID = -2978952531219554024L;
 

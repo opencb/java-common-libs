@@ -59,7 +59,8 @@ public class CommandLineUtils {
 
     private static String getType(ParameterDescription parameterDescription) {
         String type = "";
-        if (parameterDescription.getParameterized().getParameter() != null && parameterDescription.getParameterized().getParameter().arity() != 0) {
+        if (parameterDescription.getParameterized().getParameter() != null
+                && parameterDescription.getParameterized().getParameter().arity() != 0) {
             type = parameterDescription.getParameterized().getGenericType().getTypeName();
             type = type.substring(1 + Math.max(type.lastIndexOf("."), type.lastIndexOf("$")));
             type = Arrays.asList(org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(type)).stream()

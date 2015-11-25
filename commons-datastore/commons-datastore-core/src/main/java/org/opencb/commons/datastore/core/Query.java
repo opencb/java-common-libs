@@ -30,7 +30,7 @@ public class Query extends ObjectMap {
         super(json);
     }
 
-    public <E extends Enum<E> & QueryParam> void validate (Class<E> enumType)
+    public <E extends Enum<E> & QueryParam> void validate(Class<E> enumType)
             throws EnumConstantNotPresentException, NumberFormatException {
         Objects.requireNonNull(enumType);
         Map<String, E> enumFields = Arrays.asList(enumType.getEnumConstants()).stream().collect(
@@ -61,6 +61,8 @@ public class Query extends ObjectMap {
                         break;
                     case BOOLEAN:
                         put(queryParam.key(), getBoolean(queryParam.key()));
+                        break;
+                    default:
                         break;
                 }
             }

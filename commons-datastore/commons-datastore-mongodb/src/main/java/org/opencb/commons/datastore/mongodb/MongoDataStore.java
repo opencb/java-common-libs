@@ -16,8 +16,6 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;

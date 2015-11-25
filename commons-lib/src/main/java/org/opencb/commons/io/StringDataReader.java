@@ -23,8 +23,9 @@ public class StringDataReader implements DataReader<String> {
 
     protected BufferedReader reader;
     protected final Path path;
-//    protected static Logger logger = LoggerFactory.getLogger(StringDataReader.class);
-    protected long readLines = 0l;
+    //    protected static Logger logger = LoggerFactory.getLogger(StringDataReader.class);
+    protected long readLines = 0L;
+
     public StringDataReader(Path path) {
         this.path = path;
     }

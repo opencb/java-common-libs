@@ -10,7 +10,9 @@ public interface QueryParam {
     }
 
     String key();
+
     String description();
+
     Type type();
 
 }

@@ -159,20 +159,20 @@ public class MongoDBCollection {
 //
 
     public QueryResult<Document> find(Document query, QueryOptions options) {
-        return _find(query, null, Document.class, null, options);
+        return privateFind(query, null, Document.class, null, options);
     }
 
     public QueryResult<Document> find(Document query, Document projection, QueryOptions options) {
-        return _find(query, projection, Document.class, null, options);
+        return privateFind(query, projection, Document.class, null, options);
     }
 
     public <T> QueryResult<T> find(Document query, Document projection, Class<T> clazz, QueryOptions options) {
-        return _find(query, projection, clazz, null, options);
+        return privateFind(query, projection, clazz, null, options);
     }
 
     public <T> QueryResult<T> find(Document query, Document projection, ComplexTypeConverter<T, Object> converter,
                                    QueryOptions options) {
-        return _find(query, projection, null, converter, options);
+        return privateFind(query, projection, null, converter, options);
     }
 
 
@@ -181,31 +181,31 @@ public class MongoDBCollection {
     }
 
     public List<QueryResult<Document>> find(List<Document> queries, Document projection, QueryOptions options) {
-        return _find(queries, projection, null, null, options);
+        return privateFind(queries, projection, null, null, options);
     }
 
     public <T> List<QueryResult<T>> find(List<Document> queries, Document projection, Class<T> clazz,
                                          QueryOptions options) {
-        return _find(queries, projection, clazz, null, options);
+        return privateFind(queries, projection, clazz, null, options);
     }
 
     public <T> List<QueryResult<T>> find(List<Document> queries, Document projection,
                                          ComplexTypeConverter<T, Object> converter, QueryOptions options) {
-        return _find(queries, projection, null, converter, options);
+        return privateFind(queries, projection, null, converter, options);
     }
 
-    public <T> List<QueryResult<T>> _find(List<Document> queries, Document projection, Class<T> clazz,
-                                          ComplexTypeConverter<T, Object> converter, QueryOptions options) {
+    public <T> List<QueryResult<T>> privateFind(List<Document> queries, Document projection, Class<T> clazz,
+                                                ComplexTypeConverter<T, Object> converter, QueryOptions options) {
         List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
         for (Document query : queries) {
-            QueryResult<T> queryResult = _find(query, projection, clazz, converter, options);
+            QueryResult<T> queryResult = privateFind(query, projection, clazz, converter, options);
             queryResultList.add(queryResult);
         }
         return queryResultList;
     }
 
-    private <T> QueryResult<T> _find(Document query, Document projection, Class<T> clazz, ComplexTypeConverter<T, Object> converter,
-                                     QueryOptions options) {
+    private <T> QueryResult<T> privateFind(Document query, Document projection, Class<T> clazz, ComplexTypeConverter<T, Object> converter,
+                                           QueryOptions options) {
         startQuery();
 
         /**
@@ -379,21 +379,21 @@ public class MongoDBCollection {
 
 
     public QueryResult<Document> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options) {
-        return _findAndModify(query, fields, sort, update, options, null, null);
+        return privateFindAndModify(query, fields, sort, update, options, null, null);
     }
 
     public <T> QueryResult<T> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
                                             Class<T> clazz) {
-        return _findAndModify(query, fields, sort, update, options, clazz, null);
+        return privateFindAndModify(query, fields, sort, update, options, clazz, null);
     }
 
     public <T> QueryResult<T> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
                                             ComplexTypeConverter<T, Document> converter) {
-        return _findAndModify(query, fields, sort, update, options, null, converter);
+        return privateFindAndModify(query, fields, sort, update, options, null, converter);
     }
 
-    private <T> QueryResult<T> _findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
-                                              Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
+    private <T> QueryResult<T> privateFindAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
+                                                    Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
         startQuery();
         Object result = mongoDBNativeQuery.findAndModify(query, fields, sort, update, options);
         QueryResult<T> queryResult = endQuery(Arrays.asList(result));

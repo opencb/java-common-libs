@@ -7,6 +7,7 @@ import com.google.common.base.Predicate;
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
 public abstract class Filter<E> implements Predicate<E>, Comparable<Filter> {
+
     private int priority;
 
     protected Filter() {
@@ -32,7 +33,20 @@ public abstract class Filter<E> implements Predicate<E>, Comparable<Filter> {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Filter)) {
+            return false;
+        }
+        Filter<?> filter = (Filter<?>) o;
+        return priority == filter.priority;
     }
+
+    @Override
+    public int hashCode() {
+        return priority;
+    }
+
 }
