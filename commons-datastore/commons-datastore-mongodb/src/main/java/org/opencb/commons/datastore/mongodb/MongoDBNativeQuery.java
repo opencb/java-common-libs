@@ -26,6 +26,7 @@ import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.QueryOptions;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class MongoDBNativeQuery {
         return dbCollection.count();
     }
 
-    public long count(Document query) {
+    public long count(Bson query) {
 //        CountOptions c = new CountOptions().
         return dbCollection.count(query);
     }
@@ -63,56 +64,50 @@ public class MongoDBNativeQuery {
         return distinct(key, null, resultClass);
     }
 
-    public <T> DistinctIterable<T> distinct(String key, Document query, Class<T> resultClass) {
+    public <T> DistinctIterable<T> distinct(String key, Bson query, Class<T> resultClass) {
         return dbCollection.distinct(key, query, resultClass);
     }
 
 
-    public FindIterable<Document> find(Document query, QueryOptions options) {
+    public FindIterable<Document> find(Bson query, QueryOptions options) {
         return find(query, null, options);
     }
 
-    public FindIterable<Document> find(Document query, Document projection, QueryOptions options) {
-//        DBCursor cursor;
+    public FindIterable<Document> find(Bson query, Bson projection, QueryOptions options) {
 
         if (projection == null) {
             projection = getProjection(projection, options);
         }
-//        cursor = dbCollection.find(query, projection);
+
         FindIterable<Document> findIterable = dbCollection.find(query).projection(projection);
 
         int limit = (options != null) ? options.getInt(MongoDBCollection.LIMIT, 0) : 0;
         if (limit > 0) {
-//            cursor.limit(limit);
             findIterable.limit(limit);
         }
 
         int skip = (options != null) ? options.getInt(MongoDBCollection.SKIP, 0) : 0;
         if (skip > 0) {
-//            cursor.skip(skip);
             findIterable.skip(skip);
         }
 
-        Document sort = (options != null) ? (Document) options.get(MongoDBCollection.SORT) : null;
+        Bson sort = (options != null) ? (Bson) options.get(MongoDBCollection.SORT) : null;
         if (sort != null) {
-//            cursor.sort(sort);
             findIterable.sort(sort);
         }
 
         if (options != null && options.containsKey(MongoDBCollection.BATCH_SIZE)) {
-//            cursor.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
             findIterable.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
         }
 
         if (options != null && options.containsKey(MongoDBCollection.TIMEOUT)) {
-//            cursor.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
             findIterable.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
         return findIterable;
     }
 
-    public AggregateIterable aggregate(List<Document> operations, QueryOptions options) {
+    public AggregateIterable aggregate(List<Bson> operations, QueryOptions options) {
         return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
     }
 
@@ -120,7 +115,7 @@ public class MongoDBNativeQuery {
      * This method insert a single document into a collection. Params w and wtimeout are read from QueryOptions.
      *
      * @param document The new document to be inserted
-     * @param options Some options like timeout
+     * @param options  Some options like timeout
      */
     public void insert(Document document, QueryOptions options) {
         int writeConcern = 1;
@@ -139,7 +134,7 @@ public class MongoDBNativeQuery {
      * This method insert a list of documents into a collection. Params w and wtimeout are read from QueryOptions.
      *
      * @param documentList The new list of documents to be inserted
-     * @param options Some options like timeout
+     * @param options      Some options like timeout
      * @return A BulkWriteResult from MongoDB API
      */
     public BulkWriteResult insert(List<Document> documentList, QueryOptions options) {
@@ -160,7 +155,7 @@ public class MongoDBNativeQuery {
     }
 
 
-    public UpdateResult update(Document query, Document updates, boolean upsert, boolean multi) {
+    public UpdateResult update(Bson query, Bson updates, boolean upsert, boolean multi) {
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
         if (multi) {
             return dbCollection.updateMany(query, updates, updateOptions);
@@ -169,20 +164,20 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult update(List<Document> documentList, List<Document> updatesList, boolean upsert, boolean multi) {
+    public BulkWriteResult update(List<Bson> documentList, List<Bson> updatesList, boolean upsert, boolean multi) {
         if (documentList.size() != updatesList.size()) {
             throw new IndexOutOfBoundsException("QueryList.size and UpdatesList must be the same size");
         }
 
-        Iterator<Document> queryIterator = documentList.iterator();
-        Iterator<Document> updateIterator = updatesList.iterator();
+        Iterator<Bson> queryIterator = documentList.iterator();
+        Iterator<Bson> updateIterator = updatesList.iterator();
 
         List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
 
         while (queryIterator.hasNext()) {
-            Document query = queryIterator.next();
-            Document update = updateIterator.next();
+            Bson query = queryIterator.next();
+            Bson update = updateIterator.next();
 
             if (multi) {
                 actions.add(new UpdateManyModel<>(query, update, updateOptions));
@@ -215,11 +210,11 @@ public class MongoDBNativeQuery {
     }
 
 
-    public DeleteResult remove(Document query) {
+    public DeleteResult remove(Bson query) {
         return dbCollection.deleteMany(query);
     }
 
-    public DeleteResult remove(Document query, boolean multi) {
+    public DeleteResult remove(Bson query, boolean multi) {
         if (multi) {
             return dbCollection.deleteMany(query);
         } else {
@@ -227,14 +222,14 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult remove(List<Document> queryList, boolean multi) {
+    public BulkWriteResult remove(List<Bson> queryList, boolean multi) {
         List<WriteModel<Document>> actions = new ArrayList<>(queryList.size());
         if (multi) {
-            for (Document document : queryList) {
+            for (Bson document : queryList) {
                 actions.add(new DeleteManyModel<>(document));
             }
         } else {
-            for (Document document : queryList) {
+            for (Bson document : queryList) {
                 actions.add(new DeleteOneModel<>(document));
             }
         }
@@ -242,7 +237,7 @@ public class MongoDBNativeQuery {
     }
 
 
-    public Document findAndModify(Document query, Document projection, Document sort, Document update, QueryOptions options) {
+    public Document findAndModify(Bson query, Bson projection, Bson sort, Document update, QueryOptions options) {
         boolean remove = false;
         boolean upsert = false;
         boolean returnNew = false;
@@ -275,48 +270,51 @@ public class MongoDBNativeQuery {
     }
 
 
-    public void createIndex(Document keys, IndexOptions options) {
+    public void createIndex(Bson keys, IndexOptions options) {
         dbCollection.createIndex(keys, options);
     }
 
-    public List<Document> getIndex() {
+    public List<Bson> getIndex() {
         return dbCollection.listIndexes().into(new ArrayList<>());
     }
 
-    public void dropIndex(Document keys) {
+    public void dropIndex(Bson keys) {
         dbCollection.dropIndex(keys);
     }
 
 
-    private Document getProjection(Document projection, QueryOptions options) {
+    private Bson getProjection(Bson projection, QueryOptions options) {
         // Select which fields are excluded and included in the query
-        if (projection == null) {
-            projection = new Document();
-        }
-        projection.put("_id", 0);
-
+//        if (projection == null) {
+//            projection = new Bson();
+//        }
+//        projection.put("_id", 0);
+        Bson proj = projection;
         if (options != null) {
             // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
             List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
             if (includeStringList != null && includeStringList.size() > 0) {
-                for (Object field : includeStringList) {
-                    projection.put(field.toString(), 1);
-                }
+                proj = Projections.include(includeStringList);
+//                for (Object field : includeStringList) {
+//                    projection.put(field.toString(), 1);
+//                }
             } else {
                 List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
                 if (excludeStringList != null && excludeStringList.size() > 0) {
-                    for (Object field : excludeStringList) {
-                        projection.put(field.toString(), 0);
-                    }
+                    proj = Projections.exclude(excludeStringList);
+//                    for (Object field : excludeStringList) {
+//                        projection.put(field.toString(), 0);
+//                    }
                 }
             }
-            Document elemMatch = (Document) options.get(MongoDBCollection.ELEM_MATCH);
-            if (elemMatch != null) {
-                String field = (String) elemMatch.keySet().toArray()[0];
-                projection.put(field, elemMatch.get(field));
-            }
+//            Bson elemMatch = (Bson) options.get(MongoDBCollection.ELEM_MATCH);
+//            if (elemMatch != null) {
+//                String field = (String) elemMatch.keySet().toArray()[0];
+////                projection.put(field, elemMatch.get(field));
+//                Projections.elemMatch(field, elemMatch);
+//            }
         }
-        return projection;
+        return proj;
     }
 
 }

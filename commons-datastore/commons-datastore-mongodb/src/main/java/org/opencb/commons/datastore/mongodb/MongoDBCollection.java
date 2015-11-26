@@ -29,6 +29,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryResult;
@@ -57,7 +58,7 @@ public class MongoDBCollection {
     public static final String UPSERT = "upsert";
     public static final String MULTI = "multi";
 
-    private MongoCollection dbCollection;
+    private MongoCollection<Document> dbCollection;
 
     private long start;
     private long end;
@@ -118,18 +119,18 @@ public class MongoDBCollection {
         return endQuery(Arrays.asList(l));
     }
 
-    public QueryResult<Long> count(Document query) {
+    public QueryResult<Long> count(Bson query) {
         startQuery();
         long l = mongoDBNativeQuery.count(query);
         return endQuery(Arrays.asList(l));
     }
 
 
-    public QueryResult<String> distinct(String key, Document query) {
+    public QueryResult<String> distinct(String key, Bson query) {
         return distinct(key, query, String.class);
     }
 
-    public <T> QueryResult<T> distinct(String key, Document query, Class<T> clazz) {
+    public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
         startQuery();
         List<T> l = new ArrayList<>();
         MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
@@ -139,7 +140,7 @@ public class MongoDBCollection {
         return endQuery(l);
     }
 //
-//    public <DataModelType, StorageType> QueryResult<DataModelType> distinct(String key, Document query, Class<StorageType> clazz,
+//    public <DataModelType, StorageType> QueryResult<DataModelType> distinct(String key, Bson query, Class<StorageType> clazz,
 //                                                                            ComplexTypeConverter<DataModelType, StorageType> converter) {
 //        startQuery();
 //
@@ -158,53 +159,42 @@ public class MongoDBCollection {
 //    }
 //
 
-    public QueryResult<Document> find(Document query, QueryOptions options) {
+    public QueryResult<Document> find(Bson query, QueryOptions options) {
         return privateFind(query, null, Document.class, null, options);
     }
 
-    public QueryResult<Document> find(Document query, Document projection, QueryOptions options) {
+    public QueryResult<Document> find(Bson query, Bson projection, QueryOptions options) {
         return privateFind(query, projection, Document.class, null, options);
     }
 
-    public <T> QueryResult<T> find(Document query, Document projection, Class<T> clazz, QueryOptions options) {
+    public <T> QueryResult<T> find(Bson query, Bson projection, Class<T> clazz, QueryOptions options) {
         return privateFind(query, projection, clazz, null, options);
     }
 
-    public <T> QueryResult<T> find(Document query, Document projection, ComplexTypeConverter<T, Object> converter,
-                                   QueryOptions options) {
+    public <T> QueryResult<T> find(Bson query, Bson projection, ComplexTypeConverter<T, Object> converter, QueryOptions options) {
         return privateFind(query, projection, null, converter, options);
     }
 
 
-    public List<QueryResult<Document>> find(List<Document> queries, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<Bson> queries, QueryOptions options) {
         return find(queries, null, options);
     }
 
-    public List<QueryResult<Document>> find(List<Document> queries, Document projection, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<Bson> queries, Bson projection, QueryOptions options) {
         return privateFind(queries, projection, null, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Document> queries, Document projection, Class<T> clazz,
-                                         QueryOptions options) {
+    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, Class<T> clazz, QueryOptions options) {
         return privateFind(queries, projection, clazz, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Document> queries, Document projection,
-                                         ComplexTypeConverter<T, Object> converter, QueryOptions options) {
+    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, ComplexTypeConverter<T, Object> converter,
+                                         QueryOptions options) {
         return privateFind(queries, projection, null, converter, options);
     }
 
-    public <T> List<QueryResult<T>> privateFind(List<Document> queries, Document projection, Class<T> clazz,
-                                                ComplexTypeConverter<T, Object> converter, QueryOptions options) {
-        List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
-        for (Document query : queries) {
-            QueryResult<T> queryResult = privateFind(query, projection, clazz, converter, options);
-            queryResultList.add(queryResult);
-        }
-        return queryResultList;
-    }
 
-    private <T> QueryResult<T> privateFind(Document query, Document projection, Class<T> clazz, ComplexTypeConverter<T, Object> converter,
+    private <T> QueryResult<T> privateFind(Bson query, Bson projection, Class<T> clazz, ComplexTypeConverter<T, Object> converter,
                                            QueryOptions options) {
         startQuery();
 
@@ -240,7 +230,6 @@ public class MongoDBCollection {
                         Document document;
                         while (cursor.hasNext()) {
                             document = cursor.next();
-                            System.out.println("document = " + document);
                             try {
                                 list.add(objectMapper.readValue(document.toJson(), clazz));
                             } catch (IOException e) {
@@ -279,13 +268,23 @@ public class MongoDBCollection {
         return queryResult;
     }
 
+    public <T> List<QueryResult<T>> privateFind(List<Bson> queries, Bson projection, Class<T> clazz,
+                                                ComplexTypeConverter<T, Object> converter, QueryOptions options) {
+        List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
+        for (Bson query : queries) {
+            QueryResult<T> queryResult = privateFind(query, projection, clazz, converter, options);
+            queryResultList.add(queryResult);
+        }
+        return queryResultList;
+    }
 
-    public QueryResult<Document> aggregate(List<Document> operations, QueryOptions options) {
+
+    public QueryResult<Document> aggregate(List<Bson> operations, QueryOptions options) {
         startQuery();
         QueryResult<Document> queryResult;
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
-        Iterator<Document> iterator = output.iterator();
-        List<Document> list = new LinkedList<>();
+        Iterator<Bson> iterator = output.iterator();
+        List<Bson> list = new LinkedList<>();
         if (queryResultWriter != null) {
             try {
                 queryResultWriter.open();
@@ -311,20 +310,18 @@ public class MongoDBCollection {
     public QueryResult<WriteResult> insert(Document object, QueryOptions options) {
         startQuery();
         mongoDBNativeQuery.insert(object, options);
-        QueryResult<WriteResult> queryResult = endQuery(Arrays.asList(Collections.EMPTY_LIST));
-        return queryResult;
+        return endQuery(Collections.singletonList(Collections.EMPTY_LIST));
     }
 
     //Bulk insert
     public QueryResult<BulkWriteResult> insert(List<Document> objects, QueryOptions options) {
         startQuery();
-        com.mongodb.bulk.BulkWriteResult writeResult = mongoDBNativeQuery.insert(objects, options);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Collections.singletonList(writeResult));
-        return queryResult;
+        BulkWriteResult writeResult = mongoDBNativeQuery.insert(objects, options);
+        return endQuery(Collections.singletonList(writeResult));
     }
 
 
-    public QueryResult<UpdateResult> update(Document query, Document update, QueryOptions options) {
+    public QueryResult<UpdateResult> update(Bson query, Bson update, QueryOptions options) {
         startQuery();
 
         boolean upsert = false;
@@ -334,13 +331,12 @@ public class MongoDBCollection {
             multi = options.getBoolean(MULTI);
         }
 
-        UpdateResult wr = mongoDBNativeQuery.update(query, update, upsert, multi);
-        QueryResult<UpdateResult> queryResult = endQuery(Arrays.asList(wr));
-        return queryResult;
+        UpdateResult updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
+        return endQuery(Collections.singletonList(updateResult));
     }
 
     //Bulk update
-    public QueryResult<BulkWriteResult> update(List<Document> queries, List<Document> updates, QueryOptions options) {
+    public QueryResult<BulkWriteResult> update(List<Bson> queries, List<Bson> updates, QueryOptions options) {
         startQuery();
 
         boolean upsert = false;
@@ -356,7 +352,7 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult<DeleteResult> remove(Document query, QueryOptions options) {
+    public QueryResult<DeleteResult> remove(Bson query, QueryOptions options) {
         startQuery();
         DeleteResult wr = mongoDBNativeQuery.remove(query);
         QueryResult<DeleteResult> queryResult = endQuery(Arrays.asList(wr));
@@ -364,7 +360,7 @@ public class MongoDBCollection {
     }
 
     //Bulk remove
-    public QueryResult<BulkWriteResult> remove(List<Document> query, QueryOptions options) {
+    public QueryResult<BulkWriteResult> remove(List<Bson> query, QueryOptions options) {
         startQuery();
 
         boolean multi = false;
@@ -378,22 +374,22 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult<Document> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options) {
+    public QueryResult<Document> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options) {
         return privateFindAndModify(query, fields, sort, update, options, null, null);
     }
 
-    public <T> QueryResult<T> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
+    public <T> QueryResult<T> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
                                             Class<T> clazz) {
         return privateFindAndModify(query, fields, sort, update, options, clazz, null);
     }
 
-    public <T> QueryResult<T> findAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
-                                            ComplexTypeConverter<T, Document> converter) {
+    public <T> QueryResult<T> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
+                                            ComplexTypeConverter<T, Bson> converter) {
         return privateFindAndModify(query, fields, sort, update, options, null, converter);
     }
 
-    private <T> QueryResult<T> privateFindAndModify(Document query, Document fields, Document sort, Document update, QueryOptions options,
-                                                    Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
+    private <T> QueryResult<T> privateFindAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
+                                                    Class<T> clazz, ComplexTypeConverter<T, Bson> converter) {
         startQuery();
         Object result = mongoDBNativeQuery.findAndModify(query, fields, sort, update, options);
         QueryResult<T> queryResult = endQuery(Arrays.asList(result));
@@ -402,7 +398,7 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult createIndex(Document keys, Document options) {
+    public QueryResult createIndex(Bson keys, Bson options) {
         startQuery();
         IndexOptions i = new IndexOptions();
         mongoDBNativeQuery.createIndex(keys, i);
@@ -410,17 +406,17 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public QueryResult dropIndex(Document keys) {
+    public QueryResult dropIndex(Bson keys) {
         startQuery();
         mongoDBNativeQuery.dropIndex(keys);
         QueryResult queryResult = endQuery(Collections.emptyList());
         return queryResult;
     }
 
-    public QueryResult<Document> getIndex() {
+    public QueryResult<Bson> getIndex() {
         startQuery();
-        List<Document> index = mongoDBNativeQuery.getIndex();
-        QueryResult<Document> queryResult = endQuery(index);
+        List<Bson> index = mongoDBNativeQuery.getIndex();
+        QueryResult<Bson> queryResult = endQuery(index);
         return queryResult;
     }
 

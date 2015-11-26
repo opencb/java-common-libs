@@ -16,13 +16,14 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.datastore.core.QueryOptions;
@@ -235,10 +236,12 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testFind4() throws Exception {
-        List<Document> dbObjectList = new ArrayList<>(10);
+        List<Bson> dbObjectList = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            dbObjectList.add(new Document("id", i));
+//            dbObjectList.add(new Document("id", i));
+            dbObjectList.add(Filters.eq("id", i));
         }
+
         QueryOptions queryOptions = new QueryOptions("include", Arrays.asList("id"));
         List<QueryResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, queryOptions);
         assertEquals("List must contain 10 results", 10, queryResultList.size());
@@ -248,9 +251,10 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testFind5() throws Exception {
-        List<Document> dbObjectList = new ArrayList<>(10);
+        List<Bson> dbObjectList = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            dbObjectList.add(new Document("id", i));
+//            dbObjectList.add(new Document("id", i));
+            dbObjectList.add(Filters.eq("id", i));
         }
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
@@ -263,9 +267,10 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testFind6() throws Exception {
-        List<Document> dbObjectList = new ArrayList<>(10);
+        List<Bson> dbObjectList = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            dbObjectList.add(new Document("id", i));
+//            dbObjectList.add(new Document("id", i));
+            dbObjectList.add(Filters.eq("id", i));
         }
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
@@ -303,7 +308,7 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testAggregate() throws Exception {
-        List<Document> dbObjectList = new ArrayList<>();
+        List<Bson> dbObjectList = new ArrayList<>();
         Document match = new Document("$match", new Document("age", new BasicDBObject("$gt", 2)));
         Document group = new Document("$group", new Document("_id", "$age"));
 
@@ -397,8 +402,8 @@ public class MongoDBCollectionTest {
     public void testUpdate3() throws Exception {
         int count = mongoDBCollectionUpdateTest.count().first().intValue();
         int modifiedDocuments = count / 2;
-        ArrayList<Document> queries = new ArrayList<>(modifiedDocuments);
-        ArrayList<Document> updates = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
 
         for (int i = 0; i < modifiedDocuments; i++) {
             queries.add(new Document("id", i));
@@ -412,8 +417,8 @@ public class MongoDBCollectionTest {
     public void testUpdate4() throws Exception {
         int count = mongoDBCollectionUpdateTest.count().first().intValue();
         int modifiedDocuments = count / 2;
-        ArrayList<Document> queries = new ArrayList<>(modifiedDocuments);
-        ArrayList<Document> updates = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
 
         for (int i = 0; i < modifiedDocuments; i++) {
             queries.add(new Document("id", i));
@@ -440,7 +445,7 @@ public class MongoDBCollectionTest {
         int count = mongoDBCollectionRemoveTest.count().first().intValue();
 
         int numDeletions = 10;
-        List<Document> remove = new ArrayList<>(numDeletions);
+        List<Bson> remove = new ArrayList<>(numDeletions);
         for (int i = 0; i < numDeletions; i++) {
             remove.add(new Document("name", "John"));
         }
