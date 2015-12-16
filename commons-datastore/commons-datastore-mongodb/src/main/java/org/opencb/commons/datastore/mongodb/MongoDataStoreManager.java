@@ -16,10 +16,7 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
@@ -110,10 +107,17 @@ public class MongoDataStoreManager {
             // PRIMARY_DB is selected
 //            String dbPrefix = applicationProperties.getProperty(speciesVersionPrefix + ".DB", "PRIMARY_DB");
             // We create the MongoClientOptions
-            MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
+            MongoClientOptions mongoClientOptions;
+            MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
                     .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
                     .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
-                    .build();
+                    .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString("readPreference", "primary")));
+
+            if (mongoDBConfiguration.getString("replicaSet") != null && !mongoDBConfiguration.getString("replicaSet").isEmpty()) {
+                System.out.println("Setting replicaSet to " + mongoDBConfiguration.getString("replicaSet"));
+                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString("replicaSet"));
+            }
+            mongoClientOptions = builder.build();
 
             assert (dataStoreServerAddresses != null);
 

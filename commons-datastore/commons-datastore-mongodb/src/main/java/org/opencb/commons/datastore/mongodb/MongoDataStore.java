@@ -96,7 +96,7 @@ public class MongoDataStore {
 
 
     void close() {
-        logger.info("MongoDataStore: connection closed");
+        logger.debug("MongoDataStore: connection closed");
         mongoClient.close();
     }
 
