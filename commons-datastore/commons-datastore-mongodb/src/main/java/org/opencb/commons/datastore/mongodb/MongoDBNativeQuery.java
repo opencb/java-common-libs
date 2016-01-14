@@ -237,6 +237,26 @@ public class MongoDBNativeQuery {
     }
 
 
+    public Document findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
+        boolean upsert = false;
+        boolean returnNew = false;
+
+        if (options != null) {
+            if (projection == null) {
+                projection = getProjection(projection, options);
+            }
+            upsert = options.getBoolean("upsert", false);
+            returnNew = options.getBoolean("returnNew", false);
+        }
+
+        FindOneAndUpdateOptions findOneAndUpdateOptions = new FindOneAndUpdateOptions()
+                .sort(sort)
+                .projection(projection)
+                .upsert(upsert)
+                .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
+        return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+    }
+
     public Document findAndModify(Bson query, Bson projection, Bson sort, Document update, QueryOptions options) {
         boolean remove = false;
         boolean upsert = false;
@@ -268,7 +288,6 @@ public class MongoDBNativeQuery {
         }
 //        return dbCollection.findOneAndUpdate(query, projection, sort, remove, update, returnNew, upsert);
     }
-
 
     public void createIndex(Bson keys, IndexOptions options) {
         dbCollection.createIndex(keys, options);

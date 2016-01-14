@@ -227,6 +227,7 @@ public class MongoDBCollection {
                     }
                 } else {
                     if (clazz != null && !clazz.equals(Document.class)) {
+                        System.out.println("privateFindAndUpdate: converting to " + clazz);
                         Document document;
                         while (cursor.hasNext()) {
                             document = cursor.next();
@@ -373,13 +374,35 @@ public class MongoDBCollection {
         return queryResult;
     }
 
+    public QueryResult<Document> findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
+        return privateFindAndUpdate(query, projection, sort, update, options, null, null);
+    }
+
+    public <T> QueryResult<T> findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, Class<T> clazz, QueryOptions options) {
+        return privateFindAndUpdate(query, projection, sort, update, options, clazz, null);
+    }
+
+    private <T> QueryResult<T> privateFindAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options,
+                                                    Class<T> clazz, ComplexTypeConverter<T, Bson> converter) {
+        startQuery();
+        Document result = mongoDBNativeQuery.findAndUpdate(query, projection, sort, update, options);
+        if (clazz != null && !clazz.equals(Document.class)) {
+            try {
+                System.out.println("privateFindAndUpdate: converting to " + clazz);
+                return endQuery(Collections.singletonList(objectMapper.readValue(result.toJson(), clazz)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return endQuery(Collections.singletonList(result));
+    }
+
 
     public QueryResult<Document> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options) {
         return privateFindAndModify(query, fields, sort, update, options, null, null);
     }
 
-    public <T> QueryResult<T> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
-                                            Class<T> clazz) {
+    public <T> QueryResult<T> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options, Class<T> clazz) {
         return privateFindAndModify(query, fields, sort, update, options, clazz, null);
     }
 
@@ -392,9 +415,7 @@ public class MongoDBCollection {
                                                     Class<T> clazz, ComplexTypeConverter<T, Bson> converter) {
         startQuery();
         Object result = mongoDBNativeQuery.findAndModify(query, fields, sort, update, options);
-        QueryResult<T> queryResult = endQuery(Arrays.asList(result));
-
-        return queryResult;
+        return endQuery(Collections.singletonList(result));
     }
 
 
