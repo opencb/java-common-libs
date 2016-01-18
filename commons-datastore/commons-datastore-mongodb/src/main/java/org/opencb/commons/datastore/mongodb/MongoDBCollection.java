@@ -19,7 +19,6 @@ package org.opencb.commons.datastore.mongodb;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.MongoExecutionTimeoutException;
-import com.mongodb.WriteResult;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -308,7 +307,7 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult<WriteResult> insert(Document object, QueryOptions options) {
+    public QueryResult insert(Document object, QueryOptions options) {
         startQuery();
         mongoDBNativeQuery.insert(object, options);
         return endQuery(Collections.singletonList(Collections.EMPTY_LIST));
