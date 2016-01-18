@@ -283,7 +283,7 @@ public class MongoDBCollection {
         startQuery();
         QueryResult<Document> queryResult;
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
-        Iterator<Bson> iterator = output.iterator();
+        MongoCursor<Document> iterator = output.iterator();
         List<Bson> list = new LinkedList<>();
         if (queryResultWriter != null) {
             try {
@@ -306,6 +306,38 @@ public class MongoDBCollection {
         return queryResult;
     }
 
+    public <T> QueryResult<T> aggregate(List<Bson> operations, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        startQuery();
+        QueryResult<T> queryResult;
+        AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
+        MongoCursor<Document> iterator = output.iterator();
+        List<T> list = new LinkedList<>();
+        if (queryResultWriter != null) {
+            try {
+                queryResultWriter.open();
+                while (iterator.hasNext()) {
+                    queryResultWriter.write(iterator.next());
+                }
+                queryResultWriter.close();
+            } catch (IOException e) {
+                queryResult = endQuery(list);
+                queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
+                return queryResult;
+            }
+        } else {
+            if (converter != null) {
+                while (iterator.hasNext()) {
+                    list.add(converter.convertToDataModelType(iterator.next()));
+                }
+            } else {
+                while (iterator.hasNext()) {
+                    list.add((T) iterator.next());
+                }
+            }
+        }
+        queryResult = endQuery(list);
+        return queryResult;
+    }
 
     public QueryResult insert(Document object, QueryOptions options) {
         startQuery();
