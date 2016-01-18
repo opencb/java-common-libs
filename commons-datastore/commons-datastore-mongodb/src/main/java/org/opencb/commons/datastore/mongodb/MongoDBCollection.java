@@ -170,7 +170,7 @@ public class MongoDBCollection {
         return privateFind(query, projection, clazz, null, options);
     }
 
-    public <T> QueryResult<T> find(Bson query, Bson projection, ComplexTypeConverter<T, Object> converter, QueryOptions options) {
+    public <T> QueryResult<T> find(Bson query, Bson projection, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         return privateFind(query, projection, null, converter, options);
     }
 
@@ -187,13 +187,13 @@ public class MongoDBCollection {
         return privateFind(queries, projection, clazz, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, ComplexTypeConverter<T, Object> converter,
+    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
                                          QueryOptions options) {
         return privateFind(queries, projection, null, converter, options);
     }
 
 
-    private <T> QueryResult<T> privateFind(Bson query, Bson projection, Class<T> clazz, ComplexTypeConverter<T, Object> converter,
+    private <T> QueryResult<T> privateFind(Bson query, Bson projection, Class<T> clazz, ComplexTypeConverter<T, Document> converter,
                                            QueryOptions options) {
         startQuery();
 
@@ -269,7 +269,7 @@ public class MongoDBCollection {
     }
 
     public <T> List<QueryResult<T>> privateFind(List<Bson> queries, Bson projection, Class<T> clazz,
-                                                ComplexTypeConverter<T, Object> converter, QueryOptions options) {
+                                                ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
         for (Bson query : queries) {
             QueryResult<T> queryResult = privateFind(query, projection, clazz, converter, options);
@@ -382,7 +382,7 @@ public class MongoDBCollection {
     }
 
     private <T> QueryResult<T> privateFindAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options,
-                                                    Class<T> clazz, ComplexTypeConverter<T, Bson> converter) {
+                                                    Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
         startQuery();
         Document result = mongoDBNativeQuery.findAndUpdate(query, projection, sort, update, options);
         if (clazz != null && !clazz.equals(Document.class)) {
@@ -406,12 +406,12 @@ public class MongoDBCollection {
     }
 
     public <T> QueryResult<T> findAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
-                                            ComplexTypeConverter<T, Bson> converter) {
+                                            ComplexTypeConverter<T, Document> converter) {
         return privateFindAndModify(query, fields, sort, update, options, null, converter);
     }
 
     private <T> QueryResult<T> privateFindAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
-                                                    Class<T> clazz, ComplexTypeConverter<T, Bson> converter) {
+                                                    Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
         startQuery();
         Object result = mongoDBNativeQuery.findAndModify(query, fields, sort, update, options);
         return endQuery(Collections.singletonList(result));
