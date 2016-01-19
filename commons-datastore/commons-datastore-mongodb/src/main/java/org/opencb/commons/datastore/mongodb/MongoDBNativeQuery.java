@@ -303,24 +303,26 @@ public class MongoDBNativeQuery {
 
 
     private Bson getProjection(Bson projection, QueryOptions options) {
+        Bson projectionResult = null;
         // Select which fields are excluded and included in the query
-//        if (projection == null) {
-//            projection = new Bson();
-//        }
-//        projection.put("_id", 0);
-        Bson proj = projection;
+        List<Bson> projections = new ArrayList<>();
+        if (projection != null) {
+            projections.add(projection);
+        }
+        //projections.add(Projections.excludeId());
+
         if (options != null) {
             // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
             List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
             if (includeStringList != null && includeStringList.size() > 0) {
-                proj = Projections.include(includeStringList);
+                projections.add(Projections.include(includeStringList));
 //                for (Object field : includeStringList) {
 //                    projection.put(field.toString(), 1);
 //                }
             } else {
                 List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
                 if (excludeStringList != null && excludeStringList.size() > 0) {
-                    proj = Projections.exclude(excludeStringList);
+                    projections.add(Projections.exclude(excludeStringList));
 //                    for (Object field : excludeStringList) {
 //                        projection.put(field.toString(), 0);
 //                    }
@@ -333,7 +335,12 @@ public class MongoDBNativeQuery {
 //                Projections.elemMatch(field, elemMatch);
 //            }
         }
-        return proj;
+
+        if (projections.size() > 0) {
+            projectionResult = Projections.fields(projections);
+        }
+
+        return projectionResult;
     }
 
 }
