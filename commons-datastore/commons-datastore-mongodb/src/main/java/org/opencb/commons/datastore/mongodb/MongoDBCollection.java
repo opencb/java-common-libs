@@ -170,6 +170,10 @@ public class MongoDBCollection {
         return privateFind(query, projection, clazz, null, options);
     }
 
+    public <T> QueryResult<T> find(Bson query, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        return privateFind(query, null, null, converter, options);
+    }
+
     public <T> QueryResult<T> find(Bson query, Bson projection, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         return privateFind(query, projection, null, converter, options);
     }
