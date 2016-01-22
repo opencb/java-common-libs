@@ -34,7 +34,6 @@ public class MongoDBQueryUtils {
         IN,
         NOT_IN,
         ALL,
-        AUTO,
 
         // String comparators
         EQUAL_IGNORE_CASE,
@@ -53,10 +52,6 @@ public class MongoDBQueryUtils {
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
         return createFilter(mongoDbField, queryParam, query, ParamType.STRING, ComparisonOperator.EQUAL, LogicalOperator.OR);
-    }
-
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, LogicalOperator operator) {
-        return createFilter(mongoDbField, queryParam, query, ParamType.STRING, ComparisonOperator.EQUAL, operator);
     }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query, ParamType type) {
@@ -89,6 +84,54 @@ public class MongoDBQueryUtils {
     }
 
 
+
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type) {
+        return createAutoFilter(mongoDbField, queryParam, query, type, LogicalOperator.OR);
+    }
+
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type, LogicalOperator operator) {
+        Bson filter = null;
+
+        if (query != null && query.containsKey(queryParam)) {
+            List<String> queryParamList = query.getAsStringList(queryParam);
+
+            List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+            for (String queryItem : queryParamList) {
+                String op = queryItem.substring(0, 2);
+                ComparisonOperator comparator = getComparisonOperator(op);
+
+                String queryValueString = queryItem.replaceFirst(op, "");
+                switch (type) {
+                    case STRING:
+                        bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                        break;
+                    case INTEGER:
+                        bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
+                        break;
+                    case DOUBLE:
+                        bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (bsonList.size() == 1) {
+                filter = bsonList.get(0);
+            } else {
+                if (operator.equals(LogicalOperator.OR)) {
+                    filter = Filters.or(bsonList);
+                } else {
+                    filter = Filters.and(bsonList);
+                }
+            }
+        }
+
+        return filter;
+    }
+
+
+
     public static <T> Bson createFilter(String mongoDbField, T queryValue) {
         return createFilter(mongoDbField, queryValue, ComparisonOperator.EQUAL);
     }
@@ -97,42 +140,6 @@ public class MongoDBQueryUtils {
         Bson filter = null;
 
         if (queryValue != null) {
-
-//            if (comparator.equals(COMPARISON_OPERATOR.AUTO)) {
-//                String queryValueString = String.valueOf(queryValue);
-//                String op = queryValueString.substring(0, 2);
-//                op = op.replaceFirst("[a-zA-Z0-9]", "");
-//                if (op.isEmpty()) {
-//                    comparator = COMPARISON_OPERATOR.EQUAL;
-//                } else {
-//                    switch(op) {
-//                        case "=":
-//                        case "==":
-//                            comparator = COMPARISON_OPERATOR.EQUAL;
-//                            break;
-//                        case ">":
-//                            comparator = COMPARISON_OPERATOR.GREATER_THAN;
-//                            break;
-//                        case ">=":
-//                            comparator = COMPARISON_OPERATOR.GREATER_THAN_EQUAL;
-//                            break;
-//                        case "<":
-//                            comparator = COMPARISON_OPERATOR.LESS_THAN;
-//                            break;
-//                        case "<=":
-//                            comparator = COMPARISON_OPERATOR.LESS_THAN_EQUAL;
-//                            break;
-//                        case "!=":
-//                            comparator = COMPARISON_OPERATOR.NOT_EQUAL;
-//                            break;
-//                        case "~=":
-//                            comparator = COMPARISON_OPERATOR.REGEX;
-//                            break;
-//                    }
-//                    queryValue = queryValueString.replaceFirst(op, "");
-//                }
-//            }
-
             if (queryValue instanceof String) {
                 switch (comparator) {
                     case EQUAL:
@@ -188,6 +195,7 @@ public class MongoDBQueryUtils {
     }
 
 
+
     public static <T> Bson createFilter(String mongoDbField, List<T> queryValues) {
         return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUAL, LogicalOperator.OR);
     }
@@ -200,12 +208,10 @@ public class MongoDBQueryUtils {
         return createFilter(mongoDbField, queryValues, comparator, LogicalOperator.OR);
     }
 
-    public static <T> Bson createFilter(String mongoDbField, List<T> queryValues, ComparisonOperator comparator,
-                                        LogicalOperator operator) {
+    public static <T> Bson createFilter(String mongoDbField, List<T> queryValues, ComparisonOperator comparator, LogicalOperator operator) {
         Bson filter = null;
 
         if (queryValues != null && queryValues.size() > 0) {
-            List<Bson> bsonList = new ArrayList<>(queryValues.size());
 
             if (comparator.equals(ComparisonOperator.IN) || comparator.equals(ComparisonOperator.NOT_IN)
                     || comparator.equals(ComparisonOperator.ALL)) {
@@ -223,26 +229,31 @@ public class MongoDBQueryUtils {
                         break;
                 }
             } else {
-                for (T queryItem : queryValues) {
-                    Bson filter1 = createFilter(mongoDbField, queryItem, comparator);
-                    if (filter1 != null) {
-                        bsonList.add(filter1);
+                // If there is only on element in the array then it does not make sense to create an OR or AND filter
+                if (queryValues.size() == 1) {
+                    filter = createFilter(mongoDbField, queryValues.get(0), comparator);
+                } else {
+                    List<Bson> bsonList = new ArrayList<>(queryValues.size());
+                    for (T queryItem : queryValues) {
+                        Bson filter1 = createFilter(mongoDbField, queryItem, comparator);
+                        if (filter1 != null) {
+                            bsonList.add(filter1);
+                        }
+                    }
+
+                    if (operator.equals(LogicalOperator.OR)) {
+                        filter = Filters.or(bsonList);
+                    } else {
+                        filter = Filters.and(bsonList);
                     }
                 }
 
-                if (operator.equals(LogicalOperator.OR)) {
-                    filter = Filters.or(bsonList);
-                } else {
-                    filter = Filters.and(bsonList);
-                }
             }
         }
-//        else {
-//
-//        }
 
         return filter;
     }
+
 
 
     public static List<Bson> createGroupBy(Bson query, String groupByField, String idField, boolean count) {
@@ -296,4 +307,43 @@ public class MongoDBQueryUtils {
             return Arrays.asList(match, project, group);
         }
     }
+
+
+    public static ComparisonOperator getComparisonOperator(String op) {
+        ComparisonOperator comparator;
+        op = op.replaceFirst("[a-zA-Z0-9]", "");
+        if (op.isEmpty()) {
+            comparator = ComparisonOperator.EQUAL;
+        } else {
+            switch(op) {
+                case "=":
+                case "==":
+                    comparator = ComparisonOperator.EQUAL;
+                    break;
+                case ">":
+                    comparator = ComparisonOperator.GREATER_THAN;
+                    break;
+                case ">=":
+                    comparator = ComparisonOperator.GREATER_THAN_EQUAL;
+                    break;
+                case "<":
+                    comparator = ComparisonOperator.LESS_THAN;
+                    break;
+                case "<=":
+                    comparator = ComparisonOperator.LESS_THAN_EQUAL;
+                    break;
+                case "!=":
+                    comparator = ComparisonOperator.NOT_EQUAL;
+                    break;
+                case "~=":
+                    comparator = ComparisonOperator.REGEX;
+                    break;
+                default:
+                    comparator = ComparisonOperator.EQUAL;
+                    break;
+            }
+        }
+        return comparator;
+    }
+
 }
