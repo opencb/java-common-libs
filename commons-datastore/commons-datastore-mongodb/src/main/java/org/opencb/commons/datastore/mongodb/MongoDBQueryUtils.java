@@ -335,6 +335,7 @@ public class MongoDBQueryUtils {
                 case "!=":
                     comparator = ComparisonOperator.NOT_EQUAL;
                     break;
+                case "~":
                 case "~=":
                     comparator = ComparisonOperator.REGEX;
                     break;
