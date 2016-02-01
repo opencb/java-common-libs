@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class MongoDBQueryUtils {
 
+    private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
+
     public enum LogicalOperator {
         AND,
         OR;
@@ -97,7 +99,7 @@ public class MongoDBQueryUtils {
 
             List<Bson> bsonList = new ArrayList<>(queryParamList.size());
             for (String queryItem : queryParamList) {
-                String op = queryItem.substring(0, 2);
+                String op = queryItem.substring(0, 2).replaceFirst(REGEX_SEPARATOR, "");
                 ComparisonOperator comparator = getComparisonOperator(op);
 
                 String queryValueString = queryItem.replaceFirst(op, "");
@@ -149,16 +151,16 @@ public class MongoDBQueryUtils {
                         filter = Filters.ne(mongoDbField, queryValue);
                         break;
                     case EQUAL_IGNORE_CASE:
-                        filter = Filters.regex(mongoDbField, "/" + queryValue + "/i");
+                        filter = Filters.regex(mongoDbField, queryValue.toString(), "i");
                         break;
                     case START_WITH:
-                        filter = Filters.regex(mongoDbField, "/^" + queryValue + "*/");
+                        filter = Filters.regex(mongoDbField, "^" + queryValue + "*");
                         break;
                     case END_WITH:
-                        filter = Filters.regex(mongoDbField, "/*" + queryValue + "$/");
+                        filter = Filters.regex(mongoDbField, "*" + queryValue + "$");
                         break;
                     case REGEX:
-                        filter = Filters.regex(mongoDbField, "/" + queryValue + "/");
+                        filter = Filters.regex(mongoDbField, queryValue.toString());
                         break;
                     case TEXT:
                         filter = Filters.text(String.valueOf(queryValue));
@@ -311,7 +313,7 @@ public class MongoDBQueryUtils {
 
     public static ComparisonOperator getComparisonOperator(String op) {
         ComparisonOperator comparator;
-        op = op.replaceFirst("[a-zA-Z0-9]", "");
+        op = op.replaceFirst(REGEX_SEPARATOR, "");
         if (op.isEmpty()) {
             comparator = ComparisonOperator.EQUAL;
         } else {
