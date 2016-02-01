@@ -27,7 +27,8 @@ public class MongoDBQueryUtils {
     public enum ParamType {
         STRING,
         INTEGER,
-        DOUBLE;
+        DOUBLE,
+        BOOLEAN;
     }
 
     public enum ComparisonOperator {
@@ -85,13 +86,12 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
-
-
-    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type) {
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type) throws NumberFormatException {
         return createAutoFilter(mongoDbField, queryParam, query, type, LogicalOperator.OR);
     }
 
-    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type, LogicalOperator operator) {
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type, LogicalOperator operator)
+    throws NumberFormatException {
         Bson filter = null;
 
         if (query != null && query.containsKey(queryParam)) {
@@ -113,6 +113,9 @@ public class MongoDBQueryUtils {
                     case DOUBLE:
                         bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
                         break;
+                    case BOOLEAN:
+                        bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                        break;
                     default:
                         break;
                 }
@@ -128,7 +131,6 @@ public class MongoDBQueryUtils {
                 }
             }
         }
-
         return filter;
     }
 
