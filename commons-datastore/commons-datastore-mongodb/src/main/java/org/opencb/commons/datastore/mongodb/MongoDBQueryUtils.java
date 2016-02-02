@@ -21,7 +21,9 @@ import java.util.regex.Pattern;
 public class MongoDBQueryUtils {
 
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    public static final Pattern OPERATION_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
 
     public enum LogicalOperator {
         AND,
@@ -104,7 +106,7 @@ public class MongoDBQueryUtils {
 
             List<Bson> bsonList = new ArrayList<>(queryParamList.size());
             for (String queryItem : queryParamList) {
-                Matcher matcher = OPERATION_PATTERN.matcher(queryItem);
+                Matcher matcher = getPattern(type).matcher(queryItem);
                 String op;
                 String queryValueString;
                 if (!matcher.find()) {
@@ -114,7 +116,7 @@ public class MongoDBQueryUtils {
                     op = matcher.group(1);
                     queryValueString = matcher.group(2);
                 }
-                ComparisonOperator comparator = getComparisonOperator(op);
+                ComparisonOperator comparator = getComparisonOperator(op, type);
                 switch (type) {
                     case TEXT:
                     case TEXT_ARRAY:
@@ -323,39 +325,94 @@ public class MongoDBQueryUtils {
         }
     }
 
+    private static Pattern getPattern(QueryParam.Type type) {
+        Pattern pattern = null;
+        switch (type) {
+            case TEXT:
+            case TEXT_ARRAY:
+                pattern = OPERATION_STRING_PATTERN;
+                break;
+            case INTEGER:
+            case INTEGER_ARRAY:
+            case DECIMAL:
+            case DECIMAL_ARRAY:
+                pattern = OPERATION_NUMERIC_PATTERN;
+                break;
+            case BOOLEAN:
+                pattern = OPERATION_BOOLEAN_PATTERN;
+                break;
+            default:
+                break;
+        }
+        return pattern;
+    }
 
-    public static ComparisonOperator getComparisonOperator(String op) {
-        ComparisonOperator comparator;
-        op = op.replaceFirst(REGEX_SEPARATOR, "");
+    public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
+        ComparisonOperator comparator = null;
         if (op.isEmpty()) {
             comparator = ComparisonOperator.EQUAL;
         } else {
-            switch(op) {
-                case "=":
-                case "==":
-                    comparator = ComparisonOperator.EQUAL;
+            switch (type) {
+                case TEXT:
+                case TEXT_ARRAY:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        case "~":
+                        case "=~":
+                            comparator = ComparisonOperator.REGEX;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown string query operation " + op);
+                    }
                     break;
-                case ">":
-                    comparator = ComparisonOperator.GREATER_THAN;
+                case INTEGER:
+                case INTEGER_ARRAY:
+                case DECIMAL:
+                case DECIMAL_ARRAY:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case ">":
+                            comparator = ComparisonOperator.GREATER_THAN;
+                            break;
+                        case ">=":
+                            comparator = ComparisonOperator.GREATER_THAN_EQUAL;
+                            break;
+                        case "<":
+                            comparator = ComparisonOperator.LESS_THAN;
+                            break;
+                        case "<=":
+                            comparator = ComparisonOperator.LESS_THAN_EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown numerical query operation " + op);
+                    }
                     break;
-                case ">=":
-                    comparator = ComparisonOperator.GREATER_THAN_EQUAL;
-                    break;
-                case "<":
-                    comparator = ComparisonOperator.LESS_THAN;
-                    break;
-                case "<=":
-                    comparator = ComparisonOperator.LESS_THAN_EQUAL;
-                    break;
-                case "!=":
-                    comparator = ComparisonOperator.NOT_EQUAL;
-                    break;
-                case "~":
-                case "~=":
-                    comparator = ComparisonOperator.REGEX;
+                case BOOLEAN:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown boolean query operation " + op);
+                    }
                     break;
                 default:
-                    comparator = ComparisonOperator.EQUAL;
                     break;
             }
         }
