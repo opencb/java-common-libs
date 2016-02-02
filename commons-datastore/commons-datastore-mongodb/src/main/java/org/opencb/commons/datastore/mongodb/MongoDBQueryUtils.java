@@ -12,6 +12,8 @@ import org.opencb.commons.datastore.core.QueryParam;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by imedina on 17/01/16.
@@ -19,7 +21,8 @@ import java.util.List;
 public class MongoDBQueryUtils {
 
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    
+    public static final Pattern OPERATION_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+
     public enum LogicalOperator {
         AND,
         OR;
@@ -101,10 +104,17 @@ public class MongoDBQueryUtils {
 
             List<Bson> bsonList = new ArrayList<>(queryParamList.size());
             for (String queryItem : queryParamList) {
-                String op = queryItem.substring(0, 2).replaceFirst(REGEX_SEPARATOR, "");
+                Matcher matcher = OPERATION_PATTERN.matcher(queryItem);
+                String op;
+                String queryValueString;
+                if (!matcher.find()) {
+                    op = "";
+                    queryValueString = queryItem;
+                } else {
+                    op = matcher.group(1);
+                    queryValueString = matcher.group(2);
+                }
                 ComparisonOperator comparator = getComparisonOperator(op);
-
-                String queryValueString = queryItem.replaceFirst(op, "");
                 switch (type) {
                     case TEXT:
                     case TEXT_ARRAY:
