@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  */
 public class MongoDBQueryUtils {
 
+    @Deprecated
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
@@ -60,13 +61,13 @@ public class MongoDBQueryUtils {
         return createFilter(mongoDbField, queryParam, query, type, ComparisonOperator.EQUAL, LogicalOperator.OR);
     }
 
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, ComparisonOperator
-            comparator) {
+    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type,
+                                    ComparisonOperator comparator) {
         return createFilter(mongoDbField, queryParam, query, type, comparator, LogicalOperator.OR);
     }
 
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, ComparisonOperator
-            comparator, LogicalOperator operator) {
+    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type,
+                                    ComparisonOperator comparator, LogicalOperator operator) {
         Bson filter = null;
         if (query != null && query.containsKey(queryParam)) {
             switch (type) {
@@ -92,13 +93,15 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
-    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type) throws
-            NumberFormatException {
+
+
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type)
+            throws NumberFormatException {
         return createAutoFilter(mongoDbField, queryParam, query, type, LogicalOperator.OR);
     }
 
     public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, LogicalOperator operator)
-    throws NumberFormatException {
+            throws NumberFormatException {
         Bson filter = null;
 
         if (query != null && query.containsKey(queryParam)) {
@@ -107,17 +110,15 @@ public class MongoDBQueryUtils {
             List<Bson> bsonList = new ArrayList<>(queryParamList.size());
             for (String queryItem : queryParamList) {
                 Matcher matcher = getPattern(type).matcher(queryItem);
-                String op;
-                String queryValueString;
-                if (!matcher.find()) {
-                    op = "";
-                    queryValueString = queryItem;
-                } else {
+                String op = "";
+                String queryValueString = queryItem;
+                if (matcher.find()) {
                     op = matcher.group(1);
                     queryValueString = matcher.group(2);
                 }
                 ComparisonOperator comparator = getComparisonOperator(op, type);
                 switch (type) {
+                    case STRING:
                     case TEXT:
                     case TEXT_ARRAY:
                         bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
@@ -126,6 +127,7 @@ public class MongoDBQueryUtils {
                     case INTEGER_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
                         break;
+                    case DOUBLE:
                     case DECIMAL:
                     case DECIMAL_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
@@ -150,6 +152,8 @@ public class MongoDBQueryUtils {
         }
         return filter;
     }
+
+
 
     public static <T> Bson createFilter(String mongoDbField, T queryValue) {
         return createFilter(mongoDbField, queryValue, ComparisonOperator.EQUAL);
@@ -325,34 +329,14 @@ public class MongoDBQueryUtils {
         }
     }
 
-    private static Pattern getPattern(QueryParam.Type type) {
-        Pattern pattern = null;
-        switch (type) {
-            case TEXT:
-            case TEXT_ARRAY:
-                pattern = OPERATION_STRING_PATTERN;
-                break;
-            case INTEGER:
-            case INTEGER_ARRAY:
-            case DECIMAL:
-            case DECIMAL_ARRAY:
-                pattern = OPERATION_NUMERIC_PATTERN;
-                break;
-            case BOOLEAN:
-                pattern = OPERATION_BOOLEAN_PATTERN;
-                break;
-            default:
-                break;
-        }
-        return pattern;
-    }
 
     public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
         ComparisonOperator comparator = null;
-        if (op.isEmpty()) {
+        if (op != null && op.isEmpty()) {
             comparator = ComparisonOperator.EQUAL;
         } else {
             switch (type) {
+                case STRING:
                 case TEXT:
                 case TEXT_ARRAY:
                     switch(op) {
@@ -373,6 +357,7 @@ public class MongoDBQueryUtils {
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
+                case DOUBLE:
                 case DECIMAL:
                 case DECIMAL_ARRAY:
                     switch(op) {
@@ -417,6 +402,30 @@ public class MongoDBQueryUtils {
             }
         }
         return comparator;
+    }
+
+    private static Pattern getPattern(QueryParam.Type type) {
+        Pattern pattern = null;
+        switch (type) {
+            case STRING:
+            case TEXT:
+            case TEXT_ARRAY:
+                pattern = OPERATION_STRING_PATTERN;
+                break;
+            case INTEGER:
+            case INTEGER_ARRAY:
+            case DOUBLE:
+            case DECIMAL:
+            case DECIMAL_ARRAY:
+                pattern = OPERATION_NUMERIC_PATTERN;
+                break;
+            case BOOLEAN:
+                pattern = OPERATION_BOOLEAN_PATTERN;
+                break;
+            default:
+                break;
+        }
+        return pattern;
     }
 
 }
