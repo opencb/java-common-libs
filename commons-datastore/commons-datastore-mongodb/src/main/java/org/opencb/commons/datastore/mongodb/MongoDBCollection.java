@@ -24,6 +24,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -286,6 +287,12 @@ public class MongoDBCollection {
     public QueryResult<Document> aggregate(List<Bson> operations, QueryOptions options) {
         startQuery();
         QueryResult<Document> queryResult;
+
+        if (options.containsKey("limit")) {
+            // we need to be sure that the List is mutable
+            operations = new ArrayList<>(operations);
+            operations.add(Aggregates.limit(options.getInt("limit")));
+        }
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
         MongoCursor<Document> iterator = output.iterator();
         List<Bson> list = new LinkedList<>();
