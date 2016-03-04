@@ -288,7 +288,7 @@ public class MongoDBCollection {
         startQuery();
         QueryResult<Document> queryResult;
 
-        if (options.containsKey("limit")) {
+        if (options != null && options.containsKey("limit")) {
             // we need to be sure that the List is mutable
             operations = new ArrayList<>(operations);
             operations.add(Aggregates.limit(options.getInt("limit")));
