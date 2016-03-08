@@ -231,7 +231,6 @@ public class MongoDBCollection {
                     }
                 } else {
                     if (clazz != null && !clazz.equals(Document.class)) {
-                        System.out.println("privateFindAndUpdate: converting to " + clazz);
                         Document document;
                         while (cursor.hasNext()) {
                             document = cursor.next();
@@ -430,7 +429,6 @@ public class MongoDBCollection {
         Document result = mongoDBNativeQuery.findAndUpdate(query, projection, sort, update, options);
         if (clazz != null && !clazz.equals(Document.class)) {
             try {
-                System.out.println("privateFindAndUpdate: converting to " + clazz);
                 return endQuery(Collections.singletonList(objectMapper.readValue(result.toJson(), clazz)));
             } catch (IOException e) {
                 e.printStackTrace();
