@@ -2,6 +2,7 @@ package org.opencb.commons.run;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParallelTaskRunnerTest {
@@ -167,14 +169,32 @@ public class ParallelTaskRunnerTest {
                 },
                 (batch) -> {
                     try {
-                        if (i.addAndGet(1) > 100) {
+                        if (i.addAndGet(1) > 10) {
                             System.out.println(Thread.currentThread().getName() + " -- sleeping 5s");
                             Thread.sleep(5000L);
                         } else {
                             System.out.println(Thread.currentThread().getName() + " -- don't sleep! " + i.get());
                         }
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        boolean exit = false;
+                        while(!exit) {
+                            try {
+                                System.err.println("Sleep! No ok!");
+                                Thread.sleep(2000L);
+                                exit = true;
+                            } catch (InterruptedException ee) {
+//                                exit = true;
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    try {
+                        System.out.println("[" + Thread.currentThread().getName() + "] Start Sleep");
+                        long start = System.currentTimeMillis();
+                        Thread.sleep(1000);
+                        System.out.println("[" + Thread.currentThread().getName() + "] Finish Sleep : " + (System.currentTimeMillis() - start));
+                    } catch (Exception e) {
+                        System.out.println("[" + Thread.currentThread().getName() + "] Sleep interrupted!! ###### ");
                     }
                     return null;
                 },
@@ -183,7 +203,13 @@ public class ParallelTaskRunnerTest {
         );
 
         thrown.expect(ExecutionException.class);
-        runner.run();
+        try {
+            runner.run();
+        } finally {
+            System.out.println("Sleep 10s");
+            Thread.sleep(10000);
+        }
+
     }
 
 }

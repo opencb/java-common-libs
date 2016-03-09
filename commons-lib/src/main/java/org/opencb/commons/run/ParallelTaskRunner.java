@@ -14,6 +14,7 @@ public class ParallelTaskRunner<I, O> {
 
 
     public static final int TIMEOUT_CHECK = 1;
+    private static final int MAX_SHUTDOWN_RETRIES = 30;
 
     @FunctionalInterface
     public interface Task<T, R> {
@@ -176,6 +177,8 @@ public class ParallelTaskRunner<I, O> {
 
     public void run() throws ExecutionException {
         long start = System.nanoTime();
+        //If there is any InterruptionException, finish as quick as possible.
+        boolean interrupted = false;
         init();
 
         if (reader != null) {
@@ -200,13 +203,14 @@ public class ParallelTaskRunner<I, O> {
         }
         try {
             if (reader != null) {
-                readLoop();  //Use the main thread for reading
+                interrupted = readLoop();  //Use the main thread for reading
             }
 
             executorService.shutdown();
             try {
                 executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); // TODO further action - this is not good!!!
             } catch (InterruptedException e) {
+                interrupted = true;
                 e.printStackTrace();
             }
         } catch (TimeoutException e) {
@@ -215,6 +219,27 @@ public class ParallelTaskRunner<I, O> {
         } finally {
             if (!executorService.isShutdown()) {
                 executorService.shutdownNow(); // shut down now if not done so (e.g. execption)
+            }
+        }
+
+
+        //Avoid execute POST and CLOSE if the threads are still alive.
+        if (!interrupted) {
+            int shutdownRetries = 0;
+            try {
+                while(!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
+                    shutdownRetries++;
+                    Thread.sleep(1000);
+                    System.err.println("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
+                    executorService.shutdownNow();
+                    for (Future future : futureTasks) {
+                        future.cancel(true);
+                    }
+                }
+            } catch (InterruptedException e) {
+                // Stop trying to stop the ExecutorService
+                interrupted = true;
+                e.printStackTrace();
             }
         }
 
@@ -264,7 +289,13 @@ public class ParallelTaskRunner<I, O> {
         futureTasks.add(ftask);
     }
 
-    private void readLoop() throws TimeoutException, ExecutionException {
+    /**
+     *
+     * @return Returns if the tread has been interrupted
+     * @throws TimeoutException
+     * @throws ExecutionException
+     */
+    private boolean readLoop() throws TimeoutException, ExecutionException {
         try {
             long start;
             Batch<I> batch;
@@ -301,7 +332,9 @@ public class ParallelTaskRunner<I, O> {
             readBlockingQueue.put(POISON_PILL);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return true;
         }
+        return false;
     }
 
     private boolean isJobsRunning() throws InterruptedException, ExecutionException {
