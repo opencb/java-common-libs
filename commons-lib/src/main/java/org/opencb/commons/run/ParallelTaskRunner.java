@@ -227,7 +227,7 @@ public class ParallelTaskRunner<I, O> {
         if (!interrupted) {
             int shutdownRetries = 0;
             try {
-                while(!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
+                while (!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
                     shutdownRetries++;
                     Thread.sleep(1000);
                     System.err.println("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
