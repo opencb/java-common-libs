@@ -7,25 +7,28 @@ import com.mongodb.client.model.Projections;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
+import org.opencb.commons.datastore.core.QueryParam;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by imedina on 17/01/16.
  */
 public class MongoDBQueryUtils {
 
+    @Deprecated
+    private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
+    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
+
     public enum LogicalOperator {
         AND,
         OR;
-    }
-
-    public enum ParamType {
-        STRING,
-        INTEGER,
-        DOUBLE;
     }
 
     public enum ComparisonOperator {
@@ -51,30 +54,37 @@ public class MongoDBQueryUtils {
 
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
-        return createFilter(mongoDbField, queryParam, query, ParamType.STRING, ComparisonOperator.EQUAL, LogicalOperator.OR);
+        return createFilter(mongoDbField, queryParam, query, QueryParam.Type.TEXT, ComparisonOperator.EQUAL, LogicalOperator.OR);
     }
 
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, ParamType type) {
+    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type) {
         return createFilter(mongoDbField, queryParam, query, type, ComparisonOperator.EQUAL, LogicalOperator.OR);
     }
 
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, ParamType type, ComparisonOperator comparator) {
+    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type,
+                                    ComparisonOperator comparator) {
         return createFilter(mongoDbField, queryParam, query, type, comparator, LogicalOperator.OR);
     }
 
-    public static Bson createFilter(String mongoDbField, String queryParam, Query query, ParamType type, ComparisonOperator comparator,
-                                    LogicalOperator operator) {
+    public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type,
+                                    ComparisonOperator comparator, LogicalOperator operator) {
         Bson filter = null;
         if (query != null && query.containsKey(queryParam)) {
             switch (type) {
-                case STRING:
+                case TEXT:
+                case TEXT_ARRAY:
                     filter = createFilter(mongoDbField, query.getAsStringList(queryParam), comparator, operator);
                     break;
                 case INTEGER:
+                case INTEGER_ARRAY:
                     filter = createFilter(mongoDbField, query.getAsIntegerList(queryParam), comparator, operator);
                     break;
-                case DOUBLE:
+                case DECIMAL:
+                case DECIMAL_ARRAY:
                     filter = createFilter(mongoDbField, query.getAsDoubleList(queryParam), comparator, operator);
+                    break;
+                case BOOLEAN:
+                    filter = createFilter(mongoDbField, query.getBoolean(queryParam), comparator);
                     break;
                 default:
                     break;
@@ -85,11 +95,13 @@ public class MongoDBQueryUtils {
 
 
 
-    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type) {
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type)
+            throws NumberFormatException {
         return createAutoFilter(mongoDbField, queryParam, query, type, LogicalOperator.OR);
     }
 
-    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, ParamType type, LogicalOperator operator) {
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, LogicalOperator operator)
+            throws NumberFormatException {
         Bson filter = null;
 
         if (query != null && query.containsKey(queryParam)) {
@@ -97,19 +109,31 @@ public class MongoDBQueryUtils {
 
             List<Bson> bsonList = new ArrayList<>(queryParamList.size());
             for (String queryItem : queryParamList) {
-                String op = queryItem.substring(0, 2);
-                ComparisonOperator comparator = getComparisonOperator(op);
-
-                String queryValueString = queryItem.replaceFirst(op, "");
+                Matcher matcher = getPattern(type).matcher(queryItem);
+                String op = "";
+                String queryValueString = queryItem;
+                if (matcher.find()) {
+                    op = matcher.group(1);
+                    queryValueString = matcher.group(2);
+                }
+                ComparisonOperator comparator = getComparisonOperator(op, type);
                 switch (type) {
                     case STRING:
+                    case TEXT:
+                    case TEXT_ARRAY:
                         bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
                         break;
                     case INTEGER:
+                    case INTEGER_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
                         break;
                     case DOUBLE:
+                    case DECIMAL:
+                    case DECIMAL_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                        break;
+                    case BOOLEAN:
+                        bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
                         break;
                     default:
                         break;
@@ -126,7 +150,6 @@ public class MongoDBQueryUtils {
                 }
             }
         }
-
         return filter;
     }
 
@@ -149,16 +172,16 @@ public class MongoDBQueryUtils {
                         filter = Filters.ne(mongoDbField, queryValue);
                         break;
                     case EQUAL_IGNORE_CASE:
-                        filter = Filters.regex(mongoDbField, "/" + queryValue + "/i");
+                        filter = Filters.regex(mongoDbField, queryValue.toString(), "i");
                         break;
                     case START_WITH:
-                        filter = Filters.regex(mongoDbField, "/^" + queryValue + "*/");
+                        filter = Filters.regex(mongoDbField, "^" + queryValue + "*");
                         break;
                     case END_WITH:
-                        filter = Filters.regex(mongoDbField, "/*" + queryValue + "$/");
+                        filter = Filters.regex(mongoDbField, "*" + queryValue + "$");
                         break;
                     case REGEX:
-                        filter = Filters.regex(mongoDbField, "/" + queryValue + "/");
+                        filter = Filters.regex(mongoDbField, queryValue.toString());
                         break;
                     case TEXT:
                         filter = Filters.text(String.valueOf(queryValue));
@@ -193,8 +216,6 @@ public class MongoDBQueryUtils {
         }
         return filter;
     }
-
-
 
     public static <T> Bson createFilter(String mongoDbField, List<T> queryValues) {
         return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUAL, LogicalOperator.OR);
@@ -309,41 +330,102 @@ public class MongoDBQueryUtils {
     }
 
 
-    public static ComparisonOperator getComparisonOperator(String op) {
-        ComparisonOperator comparator;
-        op = op.replaceFirst("[a-zA-Z0-9]", "");
-        if (op.isEmpty()) {
+    public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
+        ComparisonOperator comparator = null;
+        if (op != null && op.isEmpty()) {
             comparator = ComparisonOperator.EQUAL;
         } else {
-            switch(op) {
-                case "=":
-                case "==":
-                    comparator = ComparisonOperator.EQUAL;
+            switch (type) {
+                case STRING:
+                case TEXT:
+                case TEXT_ARRAY:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        case "~":
+                        case "=~":
+                            comparator = ComparisonOperator.REGEX;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown string query operation " + op);
+                    }
                     break;
-                case ">":
-                    comparator = ComparisonOperator.GREATER_THAN;
+                case INTEGER:
+                case INTEGER_ARRAY:
+                case DOUBLE:
+                case DECIMAL:
+                case DECIMAL_ARRAY:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case ">":
+                            comparator = ComparisonOperator.GREATER_THAN;
+                            break;
+                        case ">=":
+                            comparator = ComparisonOperator.GREATER_THAN_EQUAL;
+                            break;
+                        case "<":
+                            comparator = ComparisonOperator.LESS_THAN;
+                            break;
+                        case "<=":
+                            comparator = ComparisonOperator.LESS_THAN_EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown numerical query operation " + op);
+                    }
                     break;
-                case ">=":
-                    comparator = ComparisonOperator.GREATER_THAN_EQUAL;
-                    break;
-                case "<":
-                    comparator = ComparisonOperator.LESS_THAN;
-                    break;
-                case "<=":
-                    comparator = ComparisonOperator.LESS_THAN_EQUAL;
-                    break;
-                case "!=":
-                    comparator = ComparisonOperator.NOT_EQUAL;
-                    break;
-                case "~=":
-                    comparator = ComparisonOperator.REGEX;
+                case BOOLEAN:
+                    switch(op) {
+                        case "=":
+                        case "==":
+                            comparator = ComparisonOperator.EQUAL;
+                            break;
+                        case "!=":
+                            comparator = ComparisonOperator.NOT_EQUAL;
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown boolean query operation " + op);
+                    }
                     break;
                 default:
-                    comparator = ComparisonOperator.EQUAL;
                     break;
             }
         }
         return comparator;
+    }
+
+    private static Pattern getPattern(QueryParam.Type type) {
+        Pattern pattern = null;
+        switch (type) {
+            case STRING:
+            case TEXT:
+            case TEXT_ARRAY:
+                pattern = OPERATION_STRING_PATTERN;
+                break;
+            case INTEGER:
+            case INTEGER_ARRAY:
+            case DOUBLE:
+            case DECIMAL:
+            case DECIMAL_ARRAY:
+                pattern = OPERATION_NUMERIC_PATTERN;
+                break;
+            case BOOLEAN:
+                pattern = OPERATION_BOOLEAN_PATTERN;
+                break;
+            default:
+                break;
+        }
+        return pattern;
     }
 
 }

@@ -6,7 +6,16 @@ package org.opencb.commons.datastore.core;
 public interface QueryParam {
 
     enum Type {
-        TEXT, TEXT_ARRAY, INTEGER, INTEGER_ARRAY, DECIMAL, DECIMAL_ARRAY, BOOLEAN
+        STRING,
+        TEXT,
+        TEXT_ARRAY,
+        INTEGER,
+        INTEGER_ARRAY,
+        DOUBLE,
+        DECIMAL,
+        DECIMAL_ARRAY,
+        BOOLEAN,
+        DATE
     }
 
     String key();
