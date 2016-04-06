@@ -30,7 +30,7 @@ import static org.opencb.commons.datastore.mongodb.MongoDBConfiguration.*;
 /**
  * Created by imedina on 22/03/14.
  */
-public class MongoDataStoreManager {
+public class MongoDataStoreManager implements AutoCloseable {
 
     private static Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
     private List<DataStoreServerAddress> dataStoreServerAddresses;
@@ -225,6 +225,14 @@ public class MongoDataStoreManager {
             mongoDataStores.get(database).close();
             mongoDataStores.remove(database);
         }
+    }
+
+    @Override
+    public void close() {
+        for (Entry<String, MongoDataStore> entry : mongoDataStores.entrySet()) {
+            entry.getValue().close();
+        }
+        mongoDataStores.clear();
     }
 
 
