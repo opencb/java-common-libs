@@ -164,6 +164,11 @@ public class MongoDBNativeQuery {
         }
     }
 
+    public UpdateResult replace(Bson query, Bson updates, boolean upsert) {
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        return dbCollection.replaceOne(query, (Document) updates, updateOptions);
+    }
+
     public BulkWriteResult update(List<Bson> documentList, List<Bson> updatesList, boolean upsert, boolean multi) {
         if (documentList.size() != updatesList.size()) {
             throw new IndexOutOfBoundsException("QueryList.size and UpdatesList must be the same size");

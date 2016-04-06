@@ -57,6 +57,7 @@ public class MongoDBCollection {
 
     public static final String UPSERT = "upsert";
     public static final String MULTI = "multi";
+    public static final String REPLACE = "replace";
 
     private MongoCollection<Document> dbCollection;
 
@@ -368,12 +369,19 @@ public class MongoDBCollection {
 
         boolean upsert = false;
         boolean multi = false;
+        boolean replace = false;
         if (options != null) {
             upsert = options.getBoolean(UPSERT);
             multi = options.getBoolean(MULTI);
+            replace = options.getBoolean(REPLACE);
         }
 
-        UpdateResult updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
+        UpdateResult updateResult;
+        if (replace) {
+            updateResult = mongoDBNativeQuery.replace(query, update, upsert);
+        } else {
+            updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
+        }
         return endQuery(Collections.singletonList(updateResult));
     }
 
