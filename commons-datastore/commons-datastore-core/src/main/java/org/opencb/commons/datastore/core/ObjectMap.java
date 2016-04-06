@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by imedina on 20/03/14.
@@ -89,8 +90,14 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     public String getString(String field, String defaultValue) {
         if (field != null && objectMap.containsKey(field)) {
-            if (objectMap.get(field) != null) {
-                return objectMap.get(field).toString();
+            Object o = objectMap.get(field);
+            if (o != null) {
+                if (o instanceof Collection) {
+                    //Join manually to avoid surrounding brackets
+                    return ((Collection<?>) o).stream().map(Objects::toString).collect(Collectors.joining(","));
+                } else {
+                    return o.toString();
+                }
             } else {
                 return null;
             }

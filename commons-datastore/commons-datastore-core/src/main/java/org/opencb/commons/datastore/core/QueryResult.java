@@ -54,7 +54,7 @@ public class QueryResult<T> {
         this.numTotalResults = numTotalResults;
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
-        this.resultType = result.size() > 0 ? result.get(0).getClass().getCanonicalName() : "";
+        this.resultType = result != null ? result.size() > 0 ? result.get(0).getClass().getCanonicalName() : "" : "";
         this.result = result;
     }
 

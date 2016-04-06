@@ -77,7 +77,7 @@ public class MongoDBQueryUtils {
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
-                    filter = createFilter(mongoDbField, query.getAsIntegerList(queryParam), comparator, operator);
+                    filter = createFilter(mongoDbField, query.getAsLongList(queryParam), comparator, operator);
                     break;
                 case DECIMAL:
                 case DECIMAL_ARRAY:

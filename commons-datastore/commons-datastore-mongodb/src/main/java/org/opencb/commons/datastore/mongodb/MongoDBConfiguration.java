@@ -86,7 +86,7 @@ public class MongoDBConfiguration extends ObjectMap {
             return this;
         }
 
-        public Builder load(final Map<String, Object> inputOptions) {
+        public Builder load(final Map<? extends String, ?> inputOptions) {
             optionsMap.putAll(inputOptions);
             return this;
         }
