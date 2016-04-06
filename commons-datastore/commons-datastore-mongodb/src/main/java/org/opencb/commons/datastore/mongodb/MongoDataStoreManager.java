@@ -17,12 +17,15 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.*;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoDatabase;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static org.opencb.commons.datastore.mongodb.MongoDBConfiguration.*;
 
 /**
  * Created by imedina on 22/03/14.
@@ -85,7 +88,7 @@ public class MongoDataStoreManager {
 
 
     public MongoDataStore get(String database) {
-        return get(database, MongoDBConfiguration.builder().init().build());
+        return get(database, builder().init().build());
     }
 
     public MongoDataStore get(String database, MongoDBConfiguration mongoDBConfiguration) {
@@ -109,29 +112,30 @@ public class MongoDataStoreManager {
             // We create the MongoClientOptions
             MongoClientOptions mongoClientOptions;
             MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
-                    .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
-                    .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
-                    .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString("readPreference", "primary")));
+                    .connectionsPerHost(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT))
+                    .connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT))
+                    .readPreference(
+                            ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE, READ_PREFERENCE_DEFAULT.getValue())));
 
-            if (mongoDBConfiguration.getString("replicaSet") != null && !mongoDBConfiguration.getString("replicaSet").isEmpty()) {
-                System.out.println("Setting replicaSet to " + mongoDBConfiguration.getString("replicaSet"));
-                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString("replicaSet"));
+            if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
+                logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
+                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
             }
             mongoClientOptions = builder.build();
 
             assert (dataStoreServerAddresses != null);
 
             // We create the MongoCredential object
-            String user = mongoDBConfiguration.getString("username", "");
-            String pass = mongoDBConfiguration.getString("password", "");
+            String user = mongoDBConfiguration.getString(USERNAME, "");
+            String pass = mongoDBConfiguration.getString(PASSWORD, "");
             MongoCredential mongoCredential = null;
             if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
 //                final DB authenticationDatabase;
-                if (mongoDBConfiguration.get("authenticationDatabase") != null
-                        && !mongoDBConfiguration.getString("authenticationDatabase").isEmpty()) {
+                if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
+                        && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
 //                        authenticationDatabase = mc.getDB(mongoDBConfiguration.getString("authenticationDatabase"));
                     mongoCredential = MongoCredential.createScramSha1Credential(user,
-                            mongoDBConfiguration.getString("authenticationDatabase"), pass.toCharArray());
+                            mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
                 } else {
 //                        authenticationDatabase = db;
                     mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());

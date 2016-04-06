@@ -19,25 +19,26 @@ package org.opencb.commons.datastore.mongodb;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.opencb.commons.datastore.core.ObjectMap;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by imedina on 22/03/14.
  */
 public class MongoDBConfiguration extends ObjectMap {
 
-//    private MongoDBConfiguration() {
-//        super();
-////        initConfiguration();
-//    }
-
-//    private MongoDBConfiguration(final String key, final Object value) {
-//        super();
-////        initConfiguration();
-//        this.put(key, value);
-//    }
+    public static final String SERVER_ADDRESS = "serverAddress";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String AUTHENTICATION_DATABASE = "authenticationDatabase";
+    public static final String REPLICA_SET = "replicaSet";
+    public static final String READ_PREFERENCE = "readPreference";
+    public static final ReadPreference READ_PREFERENCE_DEFAULT = ReadPreference.PRIMARY;
+    public static final String CONNECT_TIMEOUT = "connectTimeout";
+    public static final int CONNECT_TIMEOUT_DEFAULT = 10000;
+    public static final String SOCKET_TIMEOUT = "socketTimeout";
+    public static final int SOCKET_TIMEOUT_DEFAULT = 10000;
+    public static final String CONNECTIONS_PER_HOST = "connectionsPerHost";
+    public static final int CONNECTIONS_PER_HOST_DEFAULT = 20;
 
     public enum ReadPreference {
         PRIMARY("primary"),
@@ -62,30 +63,26 @@ public class MongoDBConfiguration extends ObjectMap {
         this.putAll(inputOptions);
     }
 
-//    private void initConfiguration() {
-//        this.put("serverAddress", Arrays.asList(new DataStoreServerAddress("localhost", 27017)));
-//        this.put("connectionsPerHost", 20);
-//        this.put("connectTimeout", 10000);
-//        this.put("socketTimeout", 10000);
-//
-//    }
-
     /**
      * A builder for MongoDBConfiguration so that MongoDBConfiguration can be immutable, and to support easier
      * construction through chaining.
      */
     public static class Builder {
-        private Map<String, Object> optionsMap;
+        private ObjectMap optionsMap;
+        private List<DataStoreServerAddress> serverAddresses;
 
         public Builder() {
-            optionsMap = new LinkedHashMap<>();
+            optionsMap = new ObjectMap();
+            serverAddresses = new LinkedList<>();
+            optionsMap.put(SERVER_ADDRESS, serverAddresses);
         }
 
         public Builder init() {
-            optionsMap.put("serverAddress", Arrays.asList(new DataStoreServerAddress("localhost", 27017)));
-            optionsMap.put("connectionsPerHost", 20);
-            optionsMap.put("connectTimeout", 10000);
-            optionsMap.put("socketTimeout", 10000);
+            serverAddresses.add(new DataStoreServerAddress("localhost", 27017));
+            optionsMap.put(SERVER_ADDRESS, serverAddresses);
+            optionsMap.put(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT);
+            optionsMap.put(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT);
+            optionsMap.put(SOCKET_TIMEOUT, SOCKET_TIMEOUT_DEFAULT);
             return this;
         }
 
@@ -96,6 +93,53 @@ public class MongoDBConfiguration extends ObjectMap {
 
         public Builder add(String key, Object value) {
             optionsMap.put(key, value);
+            return this;
+        }
+
+        public Builder setUserPassword(String username, String password) {
+            optionsMap.put(USERNAME, username);
+            optionsMap.put(PASSWORD, password);
+            return this;
+        }
+
+        public Builder setServerAddress(List<DataStoreServerAddress> dataStoreServerAddresses) {
+            serverAddresses.clear();
+            serverAddresses.addAll(dataStoreServerAddresses);
+            return this;
+        }
+
+        public Builder addServerAddress(DataStoreServerAddress dataStoreServerAddress) {
+            serverAddresses.add(dataStoreServerAddress);
+            return this;
+        }
+
+        public Builder setReadPreference(ReadPreference readPreference) {
+            optionsMap.put(READ_PREFERENCE, readPreference);
+            return this;
+        }
+
+        public Builder setReplicaSet(String replicaSet) {
+            optionsMap.put(REPLICA_SET, replicaSet);
+            return this;
+        }
+
+        public Builder setAuthenticationDatabase(String authenticationDatabase) {
+            optionsMap.put(AUTHENTICATION_DATABASE, authenticationDatabase);
+            return this;
+        }
+
+        public Builder setConnectionsPerHost(int connectionsPerHost) {
+            optionsMap.put(CONNECTIONS_PER_HOST, connectionsPerHost);
+            return this;
+        }
+
+        public Builder setConnectTimeout(int timeout) {
+            optionsMap.put(CONNECT_TIMEOUT, timeout);
+            return this;
+        }
+
+        public Builder setSocketTimeout(int timeout) {
+            optionsMap.put(SOCKET_TIMEOUT, timeout);
             return this;
         }
 
