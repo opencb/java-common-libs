@@ -16,6 +16,7 @@
 
 package org.opencb.commons.datastore.mongodb;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.MongoExecutionTimeoutException;
@@ -80,6 +81,7 @@ public class MongoDBCollection {
         mongoDBNativeQuery = new MongoDBNativeQuery(dbCollection);
 
         objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectWriter = objectMapper.writer();
     }
 
@@ -235,7 +237,7 @@ public class MongoDBCollection {
                         while (cursor.hasNext()) {
                             document = cursor.next();
                             try {
-                                list.add(objectMapper.readValue(document.toJson(), clazz));
+                                list.add(objectMapper.readValue(objectWriter.writeValueAsString(document), clazz));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -429,7 +431,7 @@ public class MongoDBCollection {
         Document result = mongoDBNativeQuery.findAndUpdate(query, projection, sort, update, options);
         if (clazz != null && !clazz.equals(Document.class)) {
             try {
-                return endQuery(Collections.singletonList(objectMapper.readValue(result.toJson(), clazz)));
+                return endQuery(Collections.singletonList(objectMapper.readValue(objectWriter.writeValueAsString(result), clazz)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
