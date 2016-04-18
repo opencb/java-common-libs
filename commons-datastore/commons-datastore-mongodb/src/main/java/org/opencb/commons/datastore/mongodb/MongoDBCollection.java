@@ -16,6 +16,7 @@
 
 package org.opencb.commons.datastore.mongodb;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.MongoExecutionTimeoutException;
@@ -61,9 +62,6 @@ public class MongoDBCollection {
 
     private MongoCollection<Document> dbCollection;
 
-    private long start;
-    private long end;
-
     private MongoDBNativeQuery mongoDBNativeQuery;
     private QueryResultWriter<Object> queryResultWriter;
 
@@ -81,21 +79,22 @@ public class MongoDBCollection {
         mongoDBNativeQuery = new MongoDBNativeQuery(dbCollection);
 
         objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectWriter = objectMapper.writer();
     }
 
 
-    private void startQuery() {
-        start = System.currentTimeMillis();
+    private long startQuery() {
+        return System.currentTimeMillis();
     }
 
-    private <T> QueryResult<T> endQuery(List result) {
+    private <T> QueryResult<T> endQuery(List result, double start) {
         int numResults = (result != null) ? result.size() : 0;
-        return endQuery(result, numResults);
+        return endQuery(result, numResults, start);
     }
 
-    private <T> QueryResult<T> endQuery(List result, int numTotalResults) {
-        end = System.currentTimeMillis();
+    private <T> QueryResult<T> endQuery(List result, int numTotalResults, double start) {
+        long end = System.currentTimeMillis();
         int numResults = (result != null) ? result.size() : 0;
 
         QueryResult<T> queryResult = new QueryResult(null, (int) (end - start), numResults, numTotalResults, null, null, result);
@@ -115,15 +114,15 @@ public class MongoDBCollection {
     }
 
     public QueryResult<Long> count() {
-        startQuery();
+        long start = startQuery();
         long l = mongoDBNativeQuery.count();
-        return endQuery(Arrays.asList(l));
+        return endQuery(Arrays.asList(l), start);
     }
 
     public QueryResult<Long> count(Bson query) {
-        startQuery();
+        long start = startQuery();
         long l = mongoDBNativeQuery.count(query);
-        return endQuery(Arrays.asList(l));
+        return endQuery(Arrays.asList(l), start);
     }
 
 
@@ -132,18 +131,18 @@ public class MongoDBCollection {
     }
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
-        startQuery();
+        long start = startQuery();
         List<T> l = new ArrayList<>();
         MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
         while (iterator.hasNext()) {
             l.add((T) iterator.next());
         }
-        return endQuery(l);
+        return endQuery(l, start);
     }
 //
 //    public <DataModelType, StorageType> QueryResult<DataModelType> distinct(String key, Bson query, Class<StorageType> clazz,
 //                                                                            ComplexTypeConverter<DataModelType, StorageType> converter) {
-//        startQuery();
+//        long start = startQuery();
 //
 //        List<DataModelType> convertedresultList = new ArrayList<>();
 //        List<StorageType> distinct = new ArrayList<>();
@@ -201,7 +200,7 @@ public class MongoDBCollection {
 
     private <T> QueryResult<T> privateFind(Bson query, Bson projection, Class<T> clazz, ComplexTypeConverter<T, Document> converter,
                                            QueryOptions options) {
-        startQuery();
+        long start = startQuery();
 
         /**
          * Getting the cursor and setting the batchSize from options. Default value set to 20.
@@ -221,7 +220,7 @@ public class MongoDBCollection {
                     queryResultWriter.close();
                 } catch (IOException e) {
                     cursor.close();
-                    queryResult = endQuery(null);
+                    queryResult = endQuery(null, start);
                     queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
                     return queryResult;
                 }
@@ -236,7 +235,7 @@ public class MongoDBCollection {
                         while (cursor.hasNext()) {
                             document = cursor.next();
                             try {
-                                list.add(objectMapper.readValue(document.toJson(), clazz));
+                                list.add(objectMapper.readValue(objectWriter.writeValueAsString(document), clazz));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -261,13 +260,13 @@ public class MongoDBCollection {
                         numTotalResults = -1;
                     }
                 }
-                queryResult = endQuery(list, numTotalResults);
+                queryResult = endQuery(list, numTotalResults, start);
             } else {
-                queryResult = endQuery(list);
+                queryResult = endQuery(list, start);
             }
             cursor.close();
         } else {
-            queryResult = endQuery(list);
+            queryResult = endQuery(list, start);
         }
 
         return queryResult;
@@ -285,7 +284,7 @@ public class MongoDBCollection {
 
 
     public QueryResult<Document> aggregate(List<Bson> operations, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
         QueryResult<Document> queryResult;
 
         if (options != null && options.containsKey("limit")) {
@@ -304,7 +303,7 @@ public class MongoDBCollection {
                 }
                 queryResultWriter.close();
             } catch (IOException e) {
-                queryResult = endQuery(list);
+                queryResult = endQuery(list, start);
                 queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
                 return queryResult;
             }
@@ -313,12 +312,12 @@ public class MongoDBCollection {
                 list.add(iterator.next());
             }
         }
-        queryResult = endQuery(list);
+        queryResult = endQuery(list, start);
         return queryResult;
     }
 
     public <T> QueryResult<T> aggregate(List<Bson> operations, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
         QueryResult<T> queryResult;
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
         MongoCursor<Document> iterator = output.iterator();
@@ -331,7 +330,7 @@ public class MongoDBCollection {
                 }
                 queryResultWriter.close();
             } catch (IOException e) {
-                queryResult = endQuery(list);
+                queryResult = endQuery(list, start);
                 queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
                 return queryResult;
             }
@@ -346,26 +345,26 @@ public class MongoDBCollection {
                 }
             }
         }
-        queryResult = endQuery(list);
+        queryResult = endQuery(list, start);
         return queryResult;
     }
 
     public QueryResult insert(Document object, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
         mongoDBNativeQuery.insert(object, options);
-        return endQuery(Collections.singletonList(Collections.EMPTY_LIST));
+        return endQuery(Collections.singletonList(Collections.EMPTY_LIST), start);
     }
 
     //Bulk insert
     public QueryResult<BulkWriteResult> insert(List<Document> objects, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
         BulkWriteResult writeResult = mongoDBNativeQuery.insert(objects, options);
-        return endQuery(Collections.singletonList(writeResult));
+        return endQuery(Collections.singletonList(writeResult), start);
     }
 
 
     public QueryResult<UpdateResult> update(Bson query, Bson update, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
 
         boolean upsert = false;
         boolean multi = false;
@@ -382,12 +381,12 @@ public class MongoDBCollection {
         } else {
             updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
         }
-        return endQuery(Collections.singletonList(updateResult));
+        return endQuery(Collections.singletonList(updateResult), start);
     }
 
     //Bulk update
     public QueryResult<BulkWriteResult> update(List<Bson> queries, List<Bson> updates, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
 
         boolean upsert = false;
         boolean multi = false;
@@ -397,28 +396,28 @@ public class MongoDBCollection {
         }
 
         com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.update(queries, updates, upsert, multi);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr));
+        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr), start);
         return queryResult;
     }
 
 
     public QueryResult<DeleteResult> remove(Bson query, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
         DeleteResult wr = mongoDBNativeQuery.remove(query);
-        QueryResult<DeleteResult> queryResult = endQuery(Arrays.asList(wr));
+        QueryResult<DeleteResult> queryResult = endQuery(Arrays.asList(wr), start);
         return queryResult;
     }
 
     //Bulk remove
     public QueryResult<BulkWriteResult> remove(List<Bson> query, QueryOptions options) {
-        startQuery();
+        long start = startQuery();
 
         boolean multi = false;
         if (options != null) {
             multi = options.getBoolean(MULTI);
         }
         com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.remove(query, multi);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr));
+        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr), start);
 
         return queryResult;
     }
@@ -433,16 +432,16 @@ public class MongoDBCollection {
 
     private <T> QueryResult<T> privateFindAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options,
                                                     Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
-        startQuery();
+        long start = startQuery();
         Document result = mongoDBNativeQuery.findAndUpdate(query, projection, sort, update, options);
         if (clazz != null && !clazz.equals(Document.class)) {
             try {
-                return endQuery(Collections.singletonList(objectMapper.readValue(result.toJson(), clazz)));
+                return endQuery(Collections.singletonList(objectMapper.readValue(objectWriter.writeValueAsString(result), clazz)), start);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return endQuery(Collections.singletonList(result));
+        return endQuery(Collections.singletonList(result), start);
     }
 
 
@@ -461,31 +460,31 @@ public class MongoDBCollection {
 
     private <T> QueryResult<T> privateFindAndModify(Bson query, Bson fields, Bson sort, Document update, QueryOptions options,
                                                     Class<T> clazz, ComplexTypeConverter<T, Document> converter) {
-        startQuery();
+        long start = startQuery();
         Object result = mongoDBNativeQuery.findAndModify(query, fields, sort, update, options);
-        return endQuery(Collections.singletonList(result));
+        return endQuery(Collections.singletonList(result), start);
     }
 
 
     public QueryResult createIndex(Bson keys, Bson options) {
-        startQuery();
+        long start = startQuery();
         IndexOptions i = new IndexOptions();
         mongoDBNativeQuery.createIndex(keys, i);
-        QueryResult queryResult = endQuery(Collections.emptyList());
+        QueryResult queryResult = endQuery(Collections.emptyList(), start);
         return queryResult;
     }
 
     public QueryResult dropIndex(Bson keys) {
-        startQuery();
+        long start = startQuery();
         mongoDBNativeQuery.dropIndex(keys);
-        QueryResult queryResult = endQuery(Collections.emptyList());
+        QueryResult queryResult = endQuery(Collections.emptyList(), start);
         return queryResult;
     }
 
     public QueryResult<Bson> getIndex() {
-        startQuery();
+        long start = startQuery();
         List<Bson> index = mongoDBNativeQuery.getIndex();
-        QueryResult<Bson> queryResult = endQuery(index);
+        QueryResult<Bson> queryResult = endQuery(index, start);
         return queryResult;
     }
 
