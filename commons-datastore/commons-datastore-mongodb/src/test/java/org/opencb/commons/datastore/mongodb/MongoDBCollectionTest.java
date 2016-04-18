@@ -103,7 +103,7 @@ public class MongoDBCollectionTest {
             document = new Document("id", i);
             document.put("name", "John");
             document.put("surname", "Doe");
-            document.put("age", i % 5);
+            document.put("age", (int) i % 5);
             mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
@@ -132,7 +132,7 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testDistinct() throws Exception {
-        QueryResult<Integer> id1 = mongoDBCollection.distinct("id", null, Integer.class);
+        QueryResult<Long> id1 = mongoDBCollection.distinct("id", null, Long.class);
 //        QueryResult<Integer> id2 = mongoDBCollection.distinct("id", null, Object.class, new ComplexTypeConverter<Object, Integer>() {
 //            @Override
 //            public Integer convertToStorageType(Object object) {
@@ -202,7 +202,7 @@ public class MongoDBCollectionTest {
         QueryOptions queryOptions = new QueryOptions("include", Arrays.asList("id"));
         QueryResult<Document> queryResult = mongoDBCollection.find(dbObject, queryOptions);
         assertNotNull("Object cannot be null", queryResult.getResult());
-        assertEquals("Returned Id does not match", 4, queryResult.first().get("id"));
+        assertEquals("Returned Id does not match", 4L, queryResult.first().get("id"));
 //        System.out.println("queryResult 'include' = " + queryResult.toString());
     }
 
@@ -260,7 +260,7 @@ public class MongoDBCollectionTest {
         List<QueryResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, queryOptions);
         assertEquals("List must contain 10 results", 10, queryResultList.size());
         assertNotNull("Object cannot be null", queryResultList.get(0).getResult());
-        assertEquals("Returned Id does not match", 9, queryResultList.get(9).first().get("id"));
+        assertEquals("Returned Id does not match", 9L, queryResultList.get(9).first().get("id"));
     }
 
     @Test
