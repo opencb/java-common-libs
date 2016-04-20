@@ -23,6 +23,10 @@ public class ParallelTaskRunner<I, O> {
 
         List<R> apply(List<T> batch);
 
+        default List<R> drain() {
+            return Collections.emptyList();
+        }
+
         default void post() {
         }
     }
@@ -429,6 +433,11 @@ public class ParallelTaskRunner<I, O> {
                     //System.out.println("task: apply done");
                     threadTimeBlockedAtSendWrite += System.nanoTime() - start;
                     batch = getBatch();
+                }
+                List<O> drain = task.drain(); // empty the system
+                if (null != drain && !drain.isEmpty() && writeBlockingQueue != null) {
+                    // submit final batch received from draining
+                    writeBlockingQueue.put(new Batch<O>(batchResult, batch.position));
                 }
                 synchronized (tasks) {
                     timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
