@@ -29,6 +29,8 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonType;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
@@ -126,15 +128,31 @@ public class MongoDBCollection {
 
 
     public QueryResult<String> distinct(String key, Bson query) {
-        return distinct(key, query, String.class);
+        long start = startQuery();
+        List<String> l = new ArrayList<>();
+        MongoCursor<BsonValue> iterator = mongoDBNativeQuery.distinct(key, query, BsonValue.class).iterator();
+        while (iterator.hasNext()) {
+            BsonValue value = iterator.next();
+            if (value.isNull()) {
+                l.add(null);
+            } else if (value.isString()) {
+                l.add(value.asString().getValue());
+            } else {
+                throw new IllegalArgumentException("Found result with BsonType != " + BsonType.STRING);
+            }
+        }
+        return endQuery(l, start);
     }
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
+        if (clazz == null || clazz.equals(String.class)) {
+            return (QueryResult<T>) distinct(key, query);
+        }
         long start = startQuery();
         List<T> l = new ArrayList<>();
-        MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
+        MongoCursor<T> iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
         while (iterator.hasNext()) {
-            l.add((T) iterator.next());
+            l.add(iterator.next());
         }
         return endQuery(l, start);
     }
