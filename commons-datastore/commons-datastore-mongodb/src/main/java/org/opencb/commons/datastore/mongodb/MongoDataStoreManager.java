@@ -18,6 +18,7 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.*;
 import com.mongodb.ReadPreference;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
@@ -182,6 +183,31 @@ public class MongoDataStoreManager implements AutoCloseable {
             logger.debug("MongoDB database is null or empty");
         }
         return mongoDataStore;
+    }
+
+    public boolean exists(String database) {
+
+        if (database != null && !database.trim().equals("")) {
+            MongoClient mc;
+            if (dataStoreServerAddresses.size() == 1) {
+                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
+                        dataStoreServerAddresses.get(0).getPort()));
+            } else {
+                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+                for (ServerAddress serverAddress : serverAddresses) {
+                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+                }
+                mc = new MongoClient(serverAddresses);
+            }
+
+            MongoCursor<String> dbsCursor = mc.listDatabaseNames().iterator();
+            while (dbsCursor.hasNext()) {
+                if (dbsCursor.next().equals(database)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void drop(String database) {
