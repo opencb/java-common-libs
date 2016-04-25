@@ -58,6 +58,9 @@ public class MongoDBCollection {
     public static final String REPLACE = "replace";
 
     public static final String UNIQUE = "unique";
+    public static final String BACKGROUND = "background";
+    public static final String SPARSE = "sparse";
+    public static final String NAME = "index_name";
 
     private MongoCollection<Document> dbCollection;
 
@@ -469,6 +472,15 @@ public class MongoDBCollection {
         IndexOptions i = new IndexOptions();
         if (options.containsKey(UNIQUE)) {
             i.unique(options.getBoolean(UNIQUE));
+        }
+        if (options.containsKey(BACKGROUND)) {
+            i.background(options.getBoolean(BACKGROUND));
+        }
+        if (options.containsKey(SPARSE)) {
+            i.sparse(options.getBoolean(SPARSE));
+        }
+        if (options.containsKey(NAME)) {
+            i.name(options.getString(NAME));
         }
 
         mongoDBNativeQuery.createIndex(keys, i);

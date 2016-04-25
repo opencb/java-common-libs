@@ -26,6 +26,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.QueryResultWriter;
@@ -84,6 +85,7 @@ public class MongoDBCollectionTest {
         public String name;
         public String surname;
         public int age;
+        public int number;
 
         @Override
         public String toString() {
@@ -92,6 +94,7 @@ public class MongoDBCollectionTest {
                     + ", name:\"" + name + '"'
                     + ", surname:\"" + surname + '"'
                     + ", age:" + age
+                    + ", number:" + number
                     + '}';
         }
     }
@@ -104,6 +107,7 @@ public class MongoDBCollectionTest {
             document.put("name", "John");
             document.put("surname", "Doe");
             document.put("age", (int) i % 5);
+            document.put("number", (int) i * i);
             mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
@@ -402,6 +406,18 @@ public class MongoDBCollectionTest {
 
         thrown.expect(MongoBulkWriteException.class);
         mongoDBCollectionInsertTest.insert(list, null);
+    }
+
+    @Test
+    public void testInsertUnique() throws Exception {
+        MongoDBCollection uniqueIndexTest = createTestCollection("unique_index_test", 50);
+        uniqueIndexTest.createIndex(new Document("number", 1), new ObjectMap(MongoDBCollection.UNIQUE, true));
+        Document uniqueObject = new Document("number", -1);
+
+        uniqueIndexTest.insert(uniqueObject, null);
+
+        thrown.expect(MongoWriteException.class);
+        uniqueIndexTest.insert(uniqueObject, null);
     }
 
     @Test
