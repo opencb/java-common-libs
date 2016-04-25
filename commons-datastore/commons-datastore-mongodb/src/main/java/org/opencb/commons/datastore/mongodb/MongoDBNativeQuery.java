@@ -298,7 +298,7 @@ public class MongoDBNativeQuery {
         dbCollection.createIndex(keys, options);
     }
 
-    public List<Bson> getIndex() {
+    public List<Document> getIndex() {
         return dbCollection.listIndexes().into(new ArrayList<>());
     }
 

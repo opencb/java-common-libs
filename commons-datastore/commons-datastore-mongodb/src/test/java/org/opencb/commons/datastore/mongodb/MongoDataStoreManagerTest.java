@@ -32,6 +32,7 @@ public class MongoDataStoreManagerTest {
     @Before
     public void setUp() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("127.0.0.1", 27017);
+        mongoDataStoreManager.get("test").getDb().drop();
         mongoDataStore = mongoDataStoreManager.get("test", MongoDBConfiguration.builder().init().build());
     }
 
@@ -43,5 +44,12 @@ public class MongoDataStoreManagerTest {
     @Test
     public void testGet() throws Exception {
         Assert.assertTrue("MongoDB check connection to 'test' database failed", mongoDataStore.testConnection());
+    }
+
+    @Test
+    public void testsGet() throws Exception {
+        Assert.assertTrue(!mongoDataStoreManager.exists("test"));
+        mongoDataStore.createCollection("collection1");
+        Assert.assertTrue(mongoDataStoreManager.exists("test"));
     }
 }
