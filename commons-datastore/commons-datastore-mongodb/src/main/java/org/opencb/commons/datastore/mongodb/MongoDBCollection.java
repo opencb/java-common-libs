@@ -31,10 +31,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.opencb.commons.datastore.core.ComplexTypeConverter;
-import org.opencb.commons.datastore.core.QueryOptions;
-import org.opencb.commons.datastore.core.QueryResult;
-import org.opencb.commons.datastore.core.QueryResultWriter;
+import org.opencb.commons.datastore.core.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -59,6 +56,8 @@ public class MongoDBCollection {
     public static final String UPSERT = "upsert";
     public static final String MULTI = "multi";
     public static final String REPLACE = "replace";
+
+    public static final String UNIQUE = "unique";
 
     private MongoCollection<Document> dbCollection;
 
@@ -465,10 +464,13 @@ public class MongoDBCollection {
         return endQuery(Collections.singletonList(result), start);
     }
 
-
-    public QueryResult createIndex(Bson keys, Bson options) {
+    public QueryResult createIndex(Bson keys, ObjectMap options) {
         long start = startQuery();
         IndexOptions i = new IndexOptions();
+        if (options.containsKey(UNIQUE)) {
+            i.unique(options.getBoolean(UNIQUE));
+        }
+
         mongoDBNativeQuery.createIndex(keys, i);
         QueryResult queryResult = endQuery(Collections.emptyList(), start);
         return queryResult;
@@ -481,10 +483,10 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public QueryResult<Bson> getIndex() {
+    public QueryResult<Document> getIndex() {
         long start = startQuery();
-        List<Bson> index = mongoDBNativeQuery.getIndex();
-        QueryResult<Bson> queryResult = endQuery(index, start);
+        List<Document> index = mongoDBNativeQuery.getIndex();
+        QueryResult<Document> queryResult = endQuery(index, start);
         return queryResult;
     }
 
