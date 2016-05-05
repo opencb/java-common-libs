@@ -47,6 +47,7 @@ public class MongoDBCollection {
     public static final String LIMIT = "limit";
     public static final String SKIP = "skip";
     public static final String SORT = "sort";
+    public static final String ORDER = "order";
 
     public static final String TIMEOUT = "timeout";
     public static final String SKIP_COUNT = "skipCount";

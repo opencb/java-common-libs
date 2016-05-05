@@ -91,9 +91,25 @@ public class MongoDBNativeQuery {
             findIterable.skip(skip);
         }
 
-        Bson sort = (options != null) ? (Bson) options.get(MongoDBCollection.SORT) : null;
-        if (sort != null) {
-            findIterable.sort(sort);
+        Object sortObject = (options != null) ? options.get(MongoDBCollection.SORT) : null;
+        if (sortObject != null) {
+            if (sortObject instanceof Bson) {
+                findIterable.sort(((Bson) sortObject));
+            } else if (sortObject instanceof String) {
+                String order = options.getString(MongoDBCollection.ORDER);
+                if (order != null && !order.isEmpty()) {
+                    switch(order) {
+                        case "asc":
+                            findIterable.sort(Sorts.ascending(((String) sortObject)));
+                            break;
+                        default:
+                            findIterable.sort(Sorts.descending(((String) sortObject)));
+                            break;
+                    }
+                } else {
+                    findIterable.sort(Sorts.descending(((String) sortObject)));
+                }
+            }
         }
 
         if (options != null && options.containsKey(MongoDBCollection.BATCH_SIZE)) {

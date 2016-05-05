@@ -20,6 +20,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
@@ -155,6 +156,15 @@ public class MongoDBCollectionTest {
 //        });
 //        System.out.println(mongoDBCollection.distinct("name", null).getNumResults());
 //        System.out.println(mongoDBCollection.nativeQuery().distinct("name"));
+    }
+
+    @Test
+    public void testSortOrder() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions(MongoDBCollection.LIMIT, 10).append(MongoDBCollection.SORT, "number")
+                .append(MongoDBCollection.ORDER, "asc");
+        List<Document> result = mongoDBCollection.find(query, queryOptions).getResult();
+        assertEquals(0L, result.get(0).get("number"));
     }
 
     @Test
