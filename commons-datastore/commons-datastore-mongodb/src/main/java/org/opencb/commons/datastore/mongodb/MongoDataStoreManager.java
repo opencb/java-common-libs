@@ -33,7 +33,7 @@ import static org.opencb.commons.datastore.mongodb.MongoDBConfiguration.*;
  */
 public class MongoDataStoreManager implements AutoCloseable {
 
-    private static Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
+    private Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
     private List<DataStoreServerAddress> dataStoreServerAddresses;
 
     //    private MongoDBConfiguration mongoDBConfiguration;
