@@ -62,6 +62,8 @@ public class MongoDBCollection {
     public static final String BACKGROUND = "background";
     public static final String SPARSE = "sparse";
     public static final String NAME = "index_name";
+    public static final String ASCENDING = "ascending";
+    public static final String DESCENDING = "descending";
 
     private MongoCollection<Document> dbCollection;
 
