@@ -99,7 +99,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                     return o.toString();
                 }
             } else {
-                return null;
+                return defaultValue;
             }
         }
         return defaultValue;

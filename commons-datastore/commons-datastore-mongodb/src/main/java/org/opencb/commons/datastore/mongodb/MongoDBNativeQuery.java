@@ -96,19 +96,9 @@ public class MongoDBNativeQuery {
             if (sortObject instanceof Bson) {
                 findIterable.sort(((Bson) sortObject));
             } else if (sortObject instanceof String) {
-                String order = options.getString(MongoDBCollection.ORDER);
-                if (order != null &&  !order.isEmpty()) {
-                    switch(order) {
-                        case MongoDBCollection.ASCENDING:
-                        case "asc":
-                        case "1":
-                            findIterable.sort(Sorts.ascending(((String) sortObject)));
-                            break;
-                        case MongoDBCollection.DESCENDING:
-                        default:
-                            findIterable.sort(Sorts.descending(((String) sortObject)));
-                            break;
-                    }
+                String order = options.getString(MongoDBCollection.ORDER, "DESC");
+                if (order.equalsIgnoreCase(MongoDBCollection.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                    findIterable.sort(Sorts.ascending(((String) sortObject)));
                 } else {
                     findIterable.sort(Sorts.descending(((String) sortObject)));
                 }
