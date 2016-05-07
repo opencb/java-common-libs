@@ -16,6 +16,7 @@
 
 package org.opencb.commons.datastore.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,26 +24,25 @@ import java.util.List;
  */
 public class QueryResponse<T> {
 
-    private static final long serialVersionUID = -2978952531219554024L;
-
-    private int time;
     private String apiVersion;
+    private int time;
     private String warning;
     private String error;
 
     private QueryOptions queryOptions;
-    private List<T> response;
+    private List<QueryResult<T>> response;
 
     public QueryResponse() {
-        this(null, null);
+        this("", -1, "", "", null, null);
     }
 
-    public QueryResponse(QueryOptions queryOptions, List<T> response) {
-        this(queryOptions, response, null, null, -1);
+    public QueryResponse(QueryOptions queryOptions, List<QueryResult<T>> response) {
+        this("", -1, "", "", queryOptions, response);
     }
 
-    public QueryResponse(QueryOptions queryOptions, List<T> response, String version, String species, int time) {
-        this.apiVersion = "v2";
+    @Deprecated
+    public QueryResponse(QueryOptions queryOptions, List<QueryResult<T>> response, String version, String species, int time) {
+        this.apiVersion = "";
         this.warning = "";
         this.error = "";
         this.queryOptions = queryOptions;
@@ -50,12 +50,79 @@ public class QueryResponse<T> {
         this.time = time;
     }
 
-    public void setTime(int time) {
+    public QueryResponse(String apiVersion, int time, String warning, String error, QueryOptions queryOptions,
+                         List<QueryResult<T>> response) {
+        this.apiVersion = apiVersion;
         this.time = time;
+        this.warning = warning;
+        this.error = error;
+        this.queryOptions = queryOptions;
+        this.response = response;
     }
 
-    public String getApiVersion() {
-        return apiVersion;
+
+    /**
+     * This method just returns the first QueryResult in response, or null if response is null or empty.
+     * @return the first QueryResult in the response
+     */
+    public QueryResult<T> first() {
+        if (response != null && response.size() > 0) {
+            return response.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * This method returns the first result T from the first QueryResult in the response.
+     * @return T value if exists, null otherwise
+     */
+    public T firstResult() {
+        if (response != null && response.size() > 0) {
+            return response.get(0).first();
+        }
+        return null;
+    }
+
+    public int allResultsSize() {
+        int totalSize = 0;
+        if (response != null && response.size() > 0) {
+            for (QueryResult<T> queryResult : response) {
+                totalSize += queryResult.getResult().size();
+            }
+        }
+        return totalSize;
+    }
+
+    /**
+     * This method flat the two levels (QueryResponse and QueryResult) into a single list of T.
+     * @return a single list with all the results, or null if no response exists
+     */
+    public List<T> allResults() {
+        List<T> results = null;
+        if (response != null && response.size() > 0) {
+            // We first calculate the total size needed
+            int totalSize = allResultsSize();
+
+            // We init the list and copy data
+            results = new ArrayList<>(totalSize);
+            for (QueryResult<T> queryResult : response) {
+                results.addAll(queryResult.getResult());
+            }
+        }
+        return results;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("QueryResponse{");
+        sb.append("apiVersion='").append(apiVersion).append('\'');
+        sb.append(", time=").append(time);
+        sb.append(", warning='").append(warning).append('\'');
+        sb.append(", error='").append(error).append('\'');
+        sb.append(", queryOptions=").append(queryOptions);
+        sb.append(", response=").append(response);
+        sb.append('}');
+        return sb.toString();
     }
 
     public void setApiVersion(String apiVersion) {
@@ -64,6 +131,14 @@ public class QueryResponse<T> {
 
     public String getWarning() {
         return warning;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
     }
 
     public void setWarning(String warning) {
@@ -86,11 +161,11 @@ public class QueryResponse<T> {
         this.queryOptions = queryOptions;
     }
 
-    public List<T> getResponse() {
+    public List<QueryResult<T>> getResponse() {
         return response;
     }
 
-    public void setResponse(List<T> response) {
+    public void setResponse(List<QueryResult<T>> response) {
         this.response = response;
     }
 }
