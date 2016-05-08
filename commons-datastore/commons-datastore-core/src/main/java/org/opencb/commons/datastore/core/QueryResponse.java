@@ -62,7 +62,7 @@ public class QueryResponse<T> {
 
 
     /**
-     * This method just returns the first QueryResult in response, or null if response is null or empty.
+     * This method just returns the first QueryResult of response, or null if response is null or empty.
      * @return the first QueryResult in the response
      */
     public QueryResult<T> first() {
@@ -73,7 +73,7 @@ public class QueryResponse<T> {
     }
 
     /**
-     * This method returns the first result T from the first QueryResult in the response.
+     * This method returns the first result from the first QueryResult of response, this is equivalent to response.get(0).getResult.get(0).
      * @return T value if exists, null otherwise
      */
     public T firstResult() {
@@ -94,7 +94,7 @@ public class QueryResponse<T> {
     }
 
     /**
-     * This method flat the two levels (QueryResponse and QueryResult) into a single list of T.
+     * This method flats the two levels (QueryResponse and QueryResult) into a single list of T.
      * @return a single list with all the results, or null if no response exists
      */
     public List<T> allResults() {
