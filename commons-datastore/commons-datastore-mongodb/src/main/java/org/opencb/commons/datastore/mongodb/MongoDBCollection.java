@@ -29,12 +29,14 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.*;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Ignacio Medina &lt;imedina@ebi.ac.uk&gt;
@@ -132,7 +134,17 @@ public class MongoDBCollection {
 
 
     public QueryResult<String> distinct(String key, Bson query) {
-        return distinct(key, query, String.class);
+        long start = startQuery();
+        QueryResult<BsonValue> distinct = distinct(key, query, BsonValue.class);
+
+        //Avoid null pointer exception filtering null values.
+        List<String> filteredResult = distinct.getResult()
+                .stream()
+                .filter((bsonValue) -> !bsonValue.isNull())
+                .map((bsonValue) -> bsonValue.asString().getValue())
+                .collect(Collectors.toList());
+
+        return endQuery(filteredResult, start);
     }
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
