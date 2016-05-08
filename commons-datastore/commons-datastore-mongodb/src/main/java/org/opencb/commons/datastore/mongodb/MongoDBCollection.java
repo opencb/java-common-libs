@@ -123,38 +123,42 @@ public class MongoDBCollection {
     public QueryResult<Long> count() {
         long start = startQuery();
         long l = mongoDBNativeQuery.count();
-        return endQuery(Arrays.asList(l), start);
+        return endQuery(Collections.singletonList(l), start);
     }
 
     public QueryResult<Long> count(Bson query) {
         long start = startQuery();
         long l = mongoDBNativeQuery.count(query);
-        return endQuery(Arrays.asList(l), start);
+        return endQuery(Collections.singletonList(l), start);
     }
 
 
     public QueryResult<String> distinct(String key, Bson query) {
-        long start = startQuery();
-        QueryResult<BsonValue> distinct = distinct(key, query, BsonValue.class);
-
-        //Avoid null pointer exception filtering null values.
-        List<String> filteredResult = distinct.getResult()
-                .stream()
-                .filter((bsonValue) -> !bsonValue.isNull())
-                .map((bsonValue) -> bsonValue.asString().getValue())
-                .collect(Collectors.toList());
-
-        return endQuery(filteredResult, start);
+        return distinct(key, query, String.class);
+//        long start = startQuery();
+//        QueryResult<BsonValue> distinct = distinct(key, query, BsonValue.class);
+//
+//        //Avoid null pointer exception filtering null values.
+//        List<String> filteredResult = distinct.getResult()
+//                .stream()
+//                .filter((bsonValue) -> !bsonValue.isNull())
+//                .map((bsonValue) -> bsonValue.asString().getValue())
+//                .collect(Collectors.toList());
+//
+//        return endQuery(filteredResult, start);
     }
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
         long start = startQuery();
-        List<T> l = new ArrayList<>();
+        List<T> list = new ArrayList<>();
         MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
         while (iterator.hasNext()) {
-            l.add((T) iterator.next());
+            Object next = iterator.next();
+            if (next != null) {
+                list.add((T) next);
+            }
         }
-        return endQuery(l, start);
+        return endQuery(list, start);
     }
 //
 //    public <DataModelType, StorageType> QueryResult<DataModelType> distinct(String key, Bson query, Class<StorageType> clazz,
