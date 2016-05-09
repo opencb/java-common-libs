@@ -267,7 +267,7 @@ public class MongoDBCollection {
                 }
             }
 
-            if (options != null && options.getInt(LIMIT) > 0) {
+            if (options != null && options.getInt(SKIP) == 0 && options.getInt(LIMIT) > 0) {
                 int numTotalResults;
                 if (options.getBoolean(SKIP_COUNT)) {
                     numTotalResults = -1;
