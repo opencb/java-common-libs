@@ -437,7 +437,7 @@ public class ParallelTaskRunner<I, O> {
                 List<O> drain = task.drain(); // empty the system
                 if (null != drain && !drain.isEmpty() && writeBlockingQueue != null) {
                     // submit final batch received from draining
-                    writeBlockingQueue.put(new Batch<O>(batchResult, batch.position));
+                    writeBlockingQueue.put(new Batch<O>(drain, batch.position + 1));
                 }
                 synchronized (tasks) {
                     timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
