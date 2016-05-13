@@ -42,15 +42,17 @@ import java.util.*;
  */
 public class MongoDBCollection {
 
-    public static final String INCLUDE = "include";
-    public static final String EXCLUDE = "exclude";
-    public static final String LIMIT = "limit";
-    public static final String SKIP = "skip";
-    public static final String SORT = "sort";
-    public static final String ORDER = "order";
+    @Deprecated public static final String INCLUDE = QueryOptions.INCLUDE;
+    @Deprecated public static final String EXCLUDE = QueryOptions.EXCLUDE;
+    @Deprecated public static final String LIMIT = QueryOptions.LIMIT;
+    @Deprecated public static final String SKIP = QueryOptions.SKIP;
+    @Deprecated public static final String SORT = QueryOptions.SORT;
+    @Deprecated public static final String ORDER = QueryOptions.ORDER;
+    @Deprecated public static final String TIMEOUT = QueryOptions.TIMEOUT;
+    @Deprecated public static final String SKIP_COUNT = QueryOptions.SKIP_COUNT;
+    @Deprecated public static final String ASCENDING = QueryOptions.ASCENDING;
+    @Deprecated public static final String DESCENDING = QueryOptions.DESCENDING;
 
-    public static final String TIMEOUT = "timeout";
-    public static final String SKIP_COUNT = "skipCount";
     public static final String BATCH_SIZE = "batchSize";
     public static final String ELEM_MATCH = "elemMatch";
 
@@ -62,8 +64,6 @@ public class MongoDBCollection {
     public static final String BACKGROUND = "background";
     public static final String SPARSE = "sparse";
     public static final String NAME = "index_name";
-    public static final String ASCENDING = "ascending";
-    public static final String DESCENDING = "descending";
 
     private MongoCollection<Document> dbCollection;
 
@@ -267,9 +267,9 @@ public class MongoDBCollection {
                 }
             }
 
-            if (options != null && options.getInt(SKIP) == 0 && options.getInt(LIMIT) > 0) {
+            if (options != null && options.getInt(QueryOptions.SKIP) == 0 && options.getInt(QueryOptions.LIMIT) > 0) {
                 int numTotalResults;
-                if (options.getBoolean(SKIP_COUNT)) {
+                if (options.getBoolean(QueryOptions.SKIP_COUNT)) {
                     numTotalResults = -1;
                 } else {
                     try {

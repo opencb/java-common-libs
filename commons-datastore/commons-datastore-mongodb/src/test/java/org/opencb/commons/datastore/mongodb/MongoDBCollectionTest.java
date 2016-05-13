@@ -163,8 +163,8 @@ public class MongoDBCollectionTest {
     @Test
     public void testSortOrder() throws Exception {
         Document query = new Document();
-        QueryOptions queryOptions = new QueryOptions(MongoDBCollection.LIMIT, 10).append(MongoDBCollection.SORT, "number")
-                .append(MongoDBCollection.ORDER, "asc");
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
+                .append(QueryOptions.ORDER, "asc");
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResult();
         assertEquals(0L, result.get(0).get("number"));
     }

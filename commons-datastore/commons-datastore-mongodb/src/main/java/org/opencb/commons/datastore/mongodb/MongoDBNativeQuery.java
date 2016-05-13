@@ -81,23 +81,23 @@ public class MongoDBNativeQuery {
 
         FindIterable<Document> findIterable = dbCollection.find(query).projection(projection);
 
-        int limit = (options != null) ? options.getInt(MongoDBCollection.LIMIT, 0) : 0;
+        int limit = (options != null) ? options.getInt(QueryOptions.LIMIT, 0) : 0;
         if (limit > 0) {
             findIterable.limit(limit);
         }
 
-        int skip = (options != null) ? options.getInt(MongoDBCollection.SKIP, 0) : 0;
+        int skip = (options != null) ? options.getInt(QueryOptions.SKIP, 0) : 0;
         if (skip > 0) {
             findIterable.skip(skip);
         }
 
-        Object sortObject = (options != null) ? options.get(MongoDBCollection.SORT) : null;
+        Object sortObject = (options != null) ? options.get(QueryOptions.SORT) : null;
         if (sortObject != null) {
             if (sortObject instanceof Bson) {
                 findIterable.sort(((Bson) sortObject));
             } else if (sortObject instanceof String) {
-                String order = options.getString(MongoDBCollection.ORDER, "DESC");
-                if (order.equalsIgnoreCase(MongoDBCollection.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                String order = options.getString(QueryOptions.ORDER, "DESC");
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
                     findIterable.sort(Sorts.ascending(((String) sortObject)));
                 } else {
                     findIterable.sort(Sorts.descending(((String) sortObject)));
@@ -109,8 +109,8 @@ public class MongoDBNativeQuery {
             findIterable.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
         }
 
-        if (options != null && options.containsKey(MongoDBCollection.TIMEOUT)) {
-            findIterable.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
+        if (options != null && options.containsKey(QueryOptions.TIMEOUT)) {
+            findIterable.maxTime(options.getLong(QueryOptions.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
         return findIterable;
@@ -331,13 +331,13 @@ public class MongoDBNativeQuery {
             // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
 
             Bson include = null;
-            if (options.containsKey(MongoDBCollection.INCLUDE)) {
-                Object includeObject = options.get(MongoDBCollection.INCLUDE);
+            if (options.containsKey(QueryOptions.INCLUDE)) {
+                Object includeObject = options.get(QueryOptions.INCLUDE);
                 if (includeObject != null) {
                     if (includeObject instanceof Bson) {
                         include = (Bson) includeObject;
                     } else {
-                        List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
+                        List<String> includeStringList = options.getAsStringList(QueryOptions.INCLUDE, ",");
                         if (includeStringList != null && includeStringList.size() > 0) {
                             include = Projections.include(includeStringList);
                         }
@@ -347,13 +347,13 @@ public class MongoDBNativeQuery {
 
             Bson exclude = null;
             boolean excludeId = false;
-            if (options.containsKey(MongoDBCollection.EXCLUDE)) {
-                Object excludeObject = options.get(MongoDBCollection.EXCLUDE);
+            if (options.containsKey(QueryOptions.EXCLUDE)) {
+                Object excludeObject = options.get(QueryOptions.EXCLUDE);
                 if (excludeObject != null) {
                     if (excludeObject instanceof Bson) {
                         exclude = (Bson) excludeObject;
                     } else {
-                        List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
+                        List<String> excludeStringList = options.getAsStringList(QueryOptions.EXCLUDE, ",");
                         if (excludeStringList != null && excludeStringList.size() > 0) {
                             exclude = Projections.exclude(excludeStringList);
                             excludeId = excludeStringList.contains("_id");
