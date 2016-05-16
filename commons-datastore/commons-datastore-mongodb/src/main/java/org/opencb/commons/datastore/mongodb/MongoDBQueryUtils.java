@@ -157,7 +157,9 @@ public class MongoDBQueryUtils {
         }
 
         Bson filter;
-        if (bsonList.size() == 1) {
+        if (bsonList.size() == 0) {
+            filter = Filters.size(queryParam, 0);
+        } else if (bsonList.size() == 1) {
             filter = bsonList.get(0);
         } else {
             if (operator.equals(LogicalOperator.OR)) {
