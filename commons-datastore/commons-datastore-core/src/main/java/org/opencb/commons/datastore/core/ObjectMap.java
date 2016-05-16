@@ -402,9 +402,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         } else {
             if (value instanceof List) {
                 return (List) value;
-            } else if (value instanceof EnumSet) {
-                EnumSet x = (EnumSet) value;
-                return Arrays.asList(x.toArray());
+            } else if (value instanceof Collection) {
+                Collection x = (Collection) value;
+                return new ArrayList<Object>(x);
             } else {
                 return Arrays.<Object>asList(value.toString().split(separator));
             }
