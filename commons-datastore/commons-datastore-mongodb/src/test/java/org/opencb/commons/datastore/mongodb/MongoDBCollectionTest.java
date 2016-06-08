@@ -359,6 +359,43 @@ public class MongoDBCollectionTest {
     }
 
     @Test
+    @Ignore
+    public void testPermanentCursor() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions();
+        int documents = 50000;
+        MongoDBCollection collection = createTestCollection("cursor5", documents);
+
+        MongoPersistentCursor cursor = new MongoPersistentCursor(collection, query, null, queryOptions);
+
+        int i = 0;
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            if (i % (documents / 50) == 0) {
+                System.out.println("document.get(\"_id\") = " + document.get("_id"));
+            }
+            i++;
+            if (i == 10) {
+                System.out.println("SLEEP!!! " + i + " document.get(\"_id\") = " + document.get("_id"));
+                int totalMin = 1;
+                for (int min = 0; min < totalMin; min++) {
+                    System.out.println("Continue sleeping: " + min + "/" + totalMin);
+                    Thread.sleep(60 * 1000);
+                }
+                System.out.println("Woke up!!!");
+                document = cursor.next();
+                i++;
+                System.out.println("Woke up!!! " + i + " document.get(\"_id\") = " + document.get("_id"));
+
+            }
+        }
+
+        assertEquals(1, cursor.getCatchedExceptions());
+        assertEquals(documents, cursor.getCount());
+        assertEquals(documents, i);
+    }
+
+    @Test
     public void testAggregate() throws Exception {
         List<Bson> dbObjectList = new ArrayList<>();
         Document match = new Document("$match", new Document("age", new BasicDBObject("$gt", 2)));
