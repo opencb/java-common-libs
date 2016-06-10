@@ -390,7 +390,7 @@ public class MongoDBCollectionTest {
             }
         }
 
-        assertEquals(1, cursor.getCatchedExceptions());
+        assertEquals(1, cursor.getNumExceptions());
         assertEquals(documents, cursor.getCount());
         assertEquals(documents, i);
     }
