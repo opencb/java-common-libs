@@ -29,6 +29,8 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonType;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.*;
@@ -132,21 +134,26 @@ public class MongoDBCollection {
 
 
     public QueryResult<String> distinct(String key, Bson query) {
-        return distinct(key, query, String.class);
-//        long start = startQuery();
-//        QueryResult<BsonValue> distinct = distinct(key, query, BsonValue.class);
-//
-//        //Avoid null pointer exception filtering null values.
-//        List<String> filteredResult = distinct.getResult()
-//                .stream()
-//                .filter((bsonValue) -> !bsonValue.isNull())
-//                .map((bsonValue) -> bsonValue.asString().getValue())
-//                .collect(Collectors.toList());
-//
-//        return endQuery(filteredResult, start);
+        long start = startQuery();
+        List<String> l = new ArrayList<>();
+        MongoCursor<BsonValue> iterator = mongoDBNativeQuery.distinct(key, query, BsonValue.class).iterator();
+        while (iterator.hasNext()) {
+            BsonValue value = iterator.next();
+            if (value.isNull()) {
+                l.add(null);
+            } else if (value.isString()) {
+                l.add(value.asString().getValue());
+            } else {
+                throw new IllegalArgumentException("Found result with BsonType != " + BsonType.STRING + " : " + value.getBsonType());
+            }
+        }
+        return endQuery(l, start);
     }
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
+        if (clazz == null || clazz.equals(String.class)) {
+            return (QueryResult<T>) distinct(key, query);
+        }
         long start = startQuery();
         List<T> list = new ArrayList<>();
         MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
