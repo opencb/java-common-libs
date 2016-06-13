@@ -17,11 +17,15 @@ public class ParallelTaskRunner<I, O> {
     private static final int MAX_SHUTDOWN_RETRIES = 30;
 
     @FunctionalInterface
-    public interface Task<T, R> {
+    public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
+    }
+
+    @FunctionalInterface
+    public interface TaskWithException<T, R, E extends Exception> {
         default void pre() {
         }
 
-        List<R> apply(List<T> batch);
+        List<R> apply(List<T> batch) throws E;
 
         default void post() {
         }
@@ -32,7 +36,7 @@ public class ParallelTaskRunner<I, O> {
 
     private final DataReader<I> reader;
     private final DataWriter<O> writer;
-    private final List<Task<I, O>> tasks;
+    private final List<TaskWithException<I, O, ?>> tasks;
     private final Config config;
 
     private ExecutorService executorService;
@@ -102,7 +106,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws Exception Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, Task<I, O> task, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, TaskWithException<I, O, ?> task, DataWriter<O> writer, Config config) throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -121,7 +125,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws Exception Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, Supplier<Task<I, O>> taskSupplier, DataWriter<O> writer, Config config)
+    public ParallelTaskRunner(DataReader<I> reader, Supplier<TaskWithException<I, O, ?>> taskSupplier, DataWriter<O> writer, Config config)
             throws Exception {
         this.config = config;
         this.reader = reader;
@@ -141,11 +145,12 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws Exception Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, List<Task<I, O>> tasks, DataWriter<O> writer, Config config) throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, List<? extends TaskWithException<I, O, ?>> tasks, DataWriter<O> writer, Config config)
+            throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
-        this.tasks = tasks;
+        this.tasks = new ArrayList<>(tasks);
 
         check();
     }
@@ -191,11 +196,11 @@ public class ParallelTaskRunner<I, O> {
             writer.pre();
         }
 
-        for (Task<I, O> task : tasks) {
+        for (TaskWithException<I, O, ?> task : tasks) {
             task.pre();
         }
 
-        for (Task<I, O> task : tasks) {
+        for (TaskWithException<I, O, ?> task : tasks) {
             doSubmit(new TaskRunnable(task));
         }
         if (writer != null) {
@@ -243,7 +248,7 @@ public class ParallelTaskRunner<I, O> {
             }
         }
 
-        for (Task<I, O> task : tasks) {
+        for (TaskWithException<I, O, ?> task : tasks) {
             task.post();
         }
 
@@ -371,13 +376,13 @@ public class ParallelTaskRunner<I, O> {
 
     class TaskRunnable implements Runnable {
 
-        private final Task<I, O> task;
+        private final TaskWithException<I, O, ?> task;
 
         private long threadTimeBlockedAtTakeRead = 0;
         private long threadTimeBlockedAtSendWrite = 0;
         private long threadTimeTaskApply = 0;
 
-        TaskRunnable(Task<I, O> task) {
+        TaskRunnable(TaskWithException<I, O, ?> task) {
             this.task = task;
         }
 
