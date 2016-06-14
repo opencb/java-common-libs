@@ -125,8 +125,9 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws Exception Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, Supplier<TaskWithException<I, O, ?>> taskSupplier, DataWriter<O> writer, Config config)
-            throws Exception {
+    public ParallelTaskRunner(DataReader<I> reader, Supplier<? extends TaskWithException<I, O, ?>> taskSupplier,
+                              DataWriter<O> writer, Config config)
+        throws Exception {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
