@@ -22,9 +22,9 @@ public class MongoDBQueryUtils {
 
     @Deprecated
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("(!=?|!?=?~|==?|=?\\^|=?\\$)([^\\^\\$=<>~!]+.*)$");
-    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
-    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
 
     public static final String OR = ",";
     public static final String AND = ";";
@@ -391,11 +391,11 @@ public class MongoDBQueryUtils {
                             comparator = ComparisonOperator.REGEX;
                             break;
                         case "^":
-                        case "=^":
+//                        case "=^":
                             comparator = ComparisonOperator.STARTS_WITH;
                             break;
                         case "$":
-                        case "=$":
+//                        case "=$":
                             comparator = ComparisonOperator.ENDS_WITH;
                             break;
                         default:
