@@ -34,26 +34,29 @@ public class CommandLineUtils {
 
         Comparator<ParameterDescription> parameterDescriptionComparator = (e1, e2) -> e1.getLongestName().compareTo(e2.getLongestName());
         commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
-            String type = getType(parameterDescription);
-            String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s %s\n",
-                    (parameterDescription.getParameterized().getParameter() != null
-                            && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
-                    parameterDescription.getNames(),
-                    type,
-                    parameterDescription.getDescription(),
-                    parameterDescription.getDefault() == null ? "" : ("[" + parameterDescription.getDefault() + "]"));
+            if (parameterDescription.getParameterized().getParameter() != null
+                    && !parameterDescription.getParameterized().getParameter().hidden()) {
+                String type = getType(parameterDescription);
+                String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s %s\n",
+                        (parameterDescription.getParameterized().getParameter() != null
+                                && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
+                        parameterDescription.getNames(),
+                        type,
+                        parameterDescription.getDescription(),
+                        parameterDescription.getDefault() == null ? "" : ("[" + parameterDescription.getDefault() + "]"));
 
-            // if lines are longer than the maximum they are trimmed and printed in several lines
-            List<String> lines = new LinkedList<>();
-            while (usage.length() > maxLineLength + 1) {
-                int splitPosition = Math.min(1 + usage.lastIndexOf(" ", maxLineLength), usage.length());
-                lines.add(usage.substring(0, splitPosition) + "\n");
-                usage = String.format("%" + nameAndTypeLength + "s", "") + usage.substring(splitPosition);
+                // if lines are longer than the maximum they are trimmed and printed in several lines
+                List<String> lines = new LinkedList<>();
+                while (usage.length() > maxLineLength + 1) {
+                    int splitPosition = Math.min(1 + usage.lastIndexOf(" ", maxLineLength), usage.length());
+                    lines.add(usage.substring(0, splitPosition) + "\n");
+                    usage = String.format("%" + nameAndTypeLength + "s", "") + usage.substring(splitPosition);
+                }
+                // this is empty for short lines and so no prints anything
+                lines.forEach(printStream::print);
+                // in long lines this prints the last trimmed line
+                printStream.print(usage);
             }
-            // this is empty for short lines and so no prints anything
-            lines.forEach(printStream::print);
-            // in long lines this prints the last trimmed line
-            printStream.print(usage);
         });
     }
 
