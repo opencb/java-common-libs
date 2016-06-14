@@ -391,11 +391,11 @@ public class MongoDBQueryUtils {
                             comparator = ComparisonOperator.REGEX;
                             break;
                         case "^":
-                        case "=^":
+//                        case "=^":
                             comparator = ComparisonOperator.STARTS_WITH;
                             break;
                         case "$":
-                        case "=$":
+//                        case "=$":
                             comparator = ComparisonOperator.ENDS_WITH;
                             break;
                         default:
