@@ -130,8 +130,9 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, Supplier<TaskWithException<I, O, ?>> taskSupplier, DataWriter<O> writer, Config config)
-            throws IllegalArgumentException {
+    public ParallelTaskRunner(DataReader<I> reader, Supplier<? extends TaskWithException<I, O, ?>> taskSupplier,
+                              DataWriter<O> writer, Config config)
+        throws IllegalArgumentException {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
