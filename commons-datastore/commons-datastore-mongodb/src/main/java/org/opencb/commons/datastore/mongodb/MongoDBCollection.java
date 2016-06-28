@@ -206,19 +206,19 @@ public class MongoDBCollection {
     }
 
 
-    public List<QueryResult<Document>> find(List<Bson> queries, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<? extends Bson> queries, QueryOptions options) {
         return find(queries, null, options);
     }
 
-    public List<QueryResult<Document>> find(List<Bson> queries, Bson projection, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<? extends Bson> queries, Bson projection, QueryOptions options) {
         return privateFind(queries, projection, null, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, Class<T> clazz, QueryOptions options) {
+    public <T> List<QueryResult<T>> find(List<? extends Bson> queries, Bson projection, Class<T> clazz, QueryOptions options) {
         return privateFind(queries, projection, clazz, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
+    public <T> List<QueryResult<T>> find(List<? extends Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
                                          QueryOptions options) {
         return privateFind(queries, projection, null, converter, options);
     }
@@ -298,7 +298,7 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public <T> List<QueryResult<T>> privateFind(List<Bson> queries, Bson projection, Class<T> clazz,
+    public <T> List<QueryResult<T>> privateFind(List<? extends Bson> queries, Bson projection, Class<T> clazz,
                                                 ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
         for (Bson query : queries) {
@@ -309,16 +309,16 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult<Document> aggregate(List<Bson> operations, QueryOptions options) {
+    public QueryResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         long start = startQuery();
         QueryResult<Document> queryResult;
 
+        // we need to be sure that the List is mutable
+        List<Bson> bsonOperations = new ArrayList<>(operations);
         if (options != null && options.containsKey("limit")) {
-            // we need to be sure that the List is mutable
-            operations = new ArrayList<>(operations);
-            operations.add(Aggregates.limit(options.getInt("limit")));
+            bsonOperations.add(Aggregates.limit(options.getInt("limit")));
         }
-        AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
+        AggregateIterable output = mongoDBNativeQuery.aggregate(bsonOperations, options);
         MongoCursor<Document> iterator = output.iterator();
         List<Bson> list = new LinkedList<>();
         if (queryResultWriter != null) {
@@ -342,7 +342,8 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public <T> QueryResult<T> aggregate(List<Bson> operations, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+    public <T> QueryResult<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
+                                        QueryOptions options) {
         long start = startQuery();
         QueryResult<T> queryResult;
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
@@ -411,19 +412,25 @@ public class MongoDBCollection {
     }
 
     //Bulk update
-    public QueryResult<BulkWriteResult> update(List<Bson> queries, List<Bson> updates, QueryOptions options) {
+    public QueryResult<BulkWriteResult> update(List<? extends Bson> queries, List<? extends Bson> updates, QueryOptions options) {
         long start = startQuery();
 
         boolean upsert = false;
         boolean multi = false;
+        boolean replace = false;
         if (options != null) {
             upsert = options.getBoolean(UPSERT);
             multi = options.getBoolean(MULTI);
+            replace = options.getBoolean(REPLACE);
         }
 
-        com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.update(queries, updates, upsert, multi);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr), start);
-        return queryResult;
+        com.mongodb.bulk.BulkWriteResult wr;
+        if (replace) {
+            wr = mongoDBNativeQuery.replace(queries, updates, upsert);
+        } else {
+            wr = mongoDBNativeQuery.update(queries, updates, upsert, multi);
+        }
+        return endQuery(Collections.singletonList(wr), start);
     }
 
 
@@ -435,7 +442,7 @@ public class MongoDBCollection {
     }
 
     //Bulk remove
-    public QueryResult<BulkWriteResult> remove(List<Bson> query, QueryOptions options) {
+    public QueryResult<BulkWriteResult> remove(List<? extends Bson> query, QueryOptions options) {
         long start = startQuery();
 
         boolean multi = false;

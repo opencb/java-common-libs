@@ -116,7 +116,7 @@ public class MongoDBNativeQuery {
         return findIterable;
     }
 
-    public AggregateIterable aggregate(List<Bson> operations, QueryOptions options) {
+    public AggregateIterable aggregate(List<? extends Bson> operations, QueryOptions options) {
         return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
     }
 
@@ -173,18 +173,40 @@ public class MongoDBNativeQuery {
         }
     }
 
+    public BulkWriteResult replace(List<? extends Bson> queries, List<? extends Bson> updates, boolean upsert) {
+        if (queries.size() != updates.size()) {
+            throw wrongQueryUpdateSize(queries, updates);
+        }
+
+        Iterator<? extends Bson> queryIterator = queries.iterator();
+        Iterator<? extends Bson> updateIterator = updates.iterator();
+
+        List<WriteModel<Document>> actions = new ArrayList<>(queries.size());
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+
+
+        while (queryIterator.hasNext()) {
+            Bson query = queryIterator.next();
+            Bson update = updateIterator.next();
+
+            actions.add(new ReplaceOneModel<>(query, (Document) update, updateOptions));
+        }
+
+        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+    }
+
     public UpdateResult replace(Bson query, Bson updates, boolean upsert) {
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
         return dbCollection.replaceOne(query, (Document) updates, updateOptions);
     }
 
-    public BulkWriteResult update(List<Bson> documentList, List<Bson> updatesList, boolean upsert, boolean multi) {
+    public BulkWriteResult update(List<? extends Bson> documentList, List<? extends Bson> updatesList, boolean upsert, boolean multi) {
         if (documentList.size() != updatesList.size()) {
-            throw new IndexOutOfBoundsException("QueryList.size and UpdatesList must be the same size");
+            throw wrongQueryUpdateSize(documentList, updatesList);
         }
 
-        Iterator<Bson> queryIterator = documentList.iterator();
-        Iterator<Bson> updateIterator = updatesList.iterator();
+        Iterator<? extends Bson> queryIterator = documentList.iterator();
+        Iterator<? extends Bson> updateIterator = updatesList.iterator();
 
         List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
@@ -223,6 +245,11 @@ public class MongoDBNativeQuery {
         return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
     }
 
+    private IndexOutOfBoundsException wrongQueryUpdateSize(List<? extends Bson> queries, List<? extends Bson> updates) {
+        return new IndexOutOfBoundsException("QueryList.size=" + queries.size()
+                + " and UpdatesList.size=" + updates.size() + " must be the same size.");
+    }
+
 
     public DeleteResult remove(Bson query) {
         return dbCollection.deleteMany(query);
@@ -236,7 +263,7 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult remove(List<Bson> queryList, boolean multi) {
+    public BulkWriteResult remove(List<? extends Bson> queryList, boolean multi) {
         List<WriteModel<Document>> actions = new ArrayList<>(queryList.size());
         if (multi) {
             for (Bson document : queryList) {
