@@ -218,7 +218,7 @@ public class ParallelTaskRunnerTest {
                 },
                 batch -> {
                     // Simulate work
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                     return batch;
                 },
                 batch -> {

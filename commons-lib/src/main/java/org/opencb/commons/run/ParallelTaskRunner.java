@@ -17,7 +17,9 @@ public class ParallelTaskRunner<I, O> {
 
 
     public static final int TIMEOUT_CHECK = 1;
-    private static final int MAX_SHUTDOWN_RETRIES = 30;
+    private static final int EXTRA_AWAIT_TERMINATION_TIMEOUT = 1000;
+    private static final int RETRY_AWAIT_TERMINATION_TIMEOUT = 50;
+    private static final int MAX_SHUTDOWN_RETRIES = 300;
 
     @FunctionalInterface
     public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
@@ -246,6 +248,15 @@ public class ParallelTaskRunner<I, O> {
     }
 
     public void run() throws ExecutionException {
+        try {
+            run(Long.MAX_VALUE, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
+                    + " interruptions.", interruptions.get(0));
+        }
+    }
+
+    public void run(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException {
         long start = System.nanoTime();
         //If there is any InterruptionException, finish as quick as possible.
         boolean interrupted = false;
@@ -280,7 +291,7 @@ public class ParallelTaskRunner<I, O> {
             // If interrupted, do not await for termination.
             if (!interrupted) {
                 try {
-                    executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS); // TODO further action - this is not good!!!
+                    executorService.awaitTermination(timeout, unit); // TODO further action - this is not good!!!
                 } catch (InterruptedException e) {
                     interruptions.add(e);
                     interrupted = true;
@@ -296,46 +307,48 @@ public class ParallelTaskRunner<I, O> {
             }
         }
 
-        if (interrupted) {
-            // If interrupted, quick close
+        //Avoid execute POST and CLOSE if the threads are still alive.
+        int shutdownRetries = 0;
+        try {
+            // Wait extra time
             if (!executorService.isTerminated()) {
+                executorService.awaitTermination(EXTRA_AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS);
+            }
+            while (!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
+                shutdownRetries++;
+                executorService.awaitTermination(RETRY_AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS);
+                System.err.println("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
                 executorService.shutdownNow();
                 for (Future future : futureTasks) {
                     future.cancel(true);
                 }
             }
-        } else {
-            //Avoid execute POST and CLOSE if the threads are still alive.
-            int shutdownRetries = 0;
-            try {
-                while (!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
-                    shutdownRetries++;
-                    Thread.sleep(1000);
-                    System.err.println("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
-                    executorService.shutdownNow();
-                    for (Future future : futureTasks) {
-                        future.cancel(true);
-                    }
-                }
-            } catch (InterruptedException e) {
-                // Stop trying to stop the ExecutorService
-                interruptions.add(e);
-                e.printStackTrace();
-                interrupted = true;
+        } catch (InterruptedException e) {
+            // Stop trying to stop the ExecutorService
+            interruptions.add(e);
+            e.printStackTrace();
+            interrupted = true;
+        }
+
+        // If interrupted, skip POST steps. Only close.
+
+        if (!interrupted) {
+            for (TaskWithException<I, O, ?> task : tasks) {
+                task.post();
             }
         }
 
-        for (TaskWithException<I, O, ?> task : tasks) {
-            task.post();
-        }
-
         if (reader != null) {
-            reader.post();
+            if (!interrupted) {
+                reader.post();
+            }
             reader.close();
         }
 
         if (writer != null) {
-            writer.post();
+            if (!interrupted) {
+                writer.post();
+            }
             writer.close();
         }
 
@@ -361,10 +374,7 @@ public class ParallelTaskRunner<I, O> {
                     + " exceptions.", exceptions.get(0));
         }
         if (interrupted) {
-            // FIXME: Throw InterruptionException
-            Thread.currentThread().interrupt(); // Restore interruption flag
-            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
-                    + " interruptions.", interruptions.get(0));
+            throw interruptions.get(0);
         }
     }
 
