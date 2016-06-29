@@ -2,11 +2,8 @@ package org.opencb.commons.run;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.apache.commons.lang3.time.StopWatch;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.io.StringDataReader;
@@ -21,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParallelTaskRunnerTest {
@@ -63,7 +59,7 @@ public class ParallelTaskRunnerTest {
         long lines = 0, words = 0, chars = 0;
         for (String string : strings) {
             if ((lines & 63) == 0) {
-                System.out.println("->" + (l[0]+lines));
+                System.out.println("[" + Thread.currentThread().getName() + "] ->" + (l[0] + lines));
             }
             list.add(string.length());
             lines++;                                     //lines
@@ -209,6 +205,49 @@ public class ParallelTaskRunnerTest {
             System.out.println("Sleep 10s");
             Thread.sleep(10000);
         }
+
+    }
+
+    @Test
+    public void testInterruptRunner() throws InterruptedException {
+        AtomicInteger count = new AtomicInteger(10000);
+        ParallelTaskRunner<String, String> ptr = new ParallelTaskRunner<>(
+                batchSize -> {
+                    int i = count.getAndDecrement();
+                    return i > 0 ? Collections.singletonList("i: " + i) : Collections.emptyList();
+                },
+                batch -> {
+                    // Simulate work
+                    Thread.sleep(100);
+                    return batch;
+                },
+                batch -> {
+                    for (String s : batch) {
+                        System.out.println(s);
+                    }
+                    return true;
+                }, ParallelTaskRunner.Config.builder().setNumTasks(8).setBatchSize(1).setAbortOnFail(true).build());
+
+        Thread thread = new Thread(() -> {
+            try {
+                ptr.run();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
+
+        StopWatch watch = new StopWatch();
+
+        thread.start();
+        Thread.sleep(300);
+
+        watch.start();
+        thread.interrupt();
+        thread.join();
+        watch.stop();
+
+        System.out.println(watch.getTime());
+        Assert.assertTrue(watch.getTime() < 100);
 
     }
 
