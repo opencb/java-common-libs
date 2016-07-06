@@ -552,4 +552,13 @@ public class MongoDBCollection {
         return mongoDBNativeQuery;
     }
 
+    @Override
+    public String toString() {
+        return "MongoDBCollection{"
+                + "dbCollection=" + getFullName() + '}';
+    }
+
+    private String getFullName() {
+        return dbCollection.getNamespace().getFullName();
+    }
 }
