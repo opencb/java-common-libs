@@ -3,6 +3,7 @@ package org.opencb.commons.utils;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -64,25 +65,18 @@ public class FileUtils {
     }
 
     /**
-     * This method is able to determine whether a file is GZipped and return a BufferedReader in any case.
+     * This method is able to determine whether a file is GZipped and return a {@link BufferedReader} in any case.
      *
      * @param path to be read
      * @return BufferedReader object
      * @throws java.io.IOException IOException
      */
     public static BufferedReader newBufferedReader(Path path) throws IOException {
-        FileUtils.checkFile(path);
-        BufferedReader bufferedReader;
-        if (path.toFile().getName().endsWith(".gz")) {
-            bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
-        } else {
-            bufferedReader = Files.newBufferedReader(path, Charset.defaultCharset());
-        }
-        return bufferedReader;
+        return newBufferedReader(path, Charset.defaultCharset());
     }
 
     /**
-     * This method is able to determine whether a file is GZipped and return a BufferedReader in any case.
+     * This method is able to determine whether a file is GZipped and return a {@link BufferedReader} in any case.
      *
      * @param path to be read
      * @param charset to be read
@@ -90,18 +84,28 @@ public class FileUtils {
      * @throws java.io.IOException IOException
      */
     public static BufferedReader newBufferedReader(Path path, Charset charset) throws IOException {
-        FileUtils.checkFile(path);
-        BufferedReader bufferedReader;
-        if (path.toFile().getName().endsWith(".gz")) {
-            bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path.toFile()))));
-        } else {
-            bufferedReader = Files.newBufferedReader(path, charset);
-        }
-        return bufferedReader;
+        return new BufferedReader(new InputStreamReader(newInputStream(path), charset));
     }
 
     /**
-     * This method is able to determine whether a file is GZipped and return a BufferedWriter in any case.
+     * This method is able to determine whether a file is GZipped and return an {@link InputStream} in any case.
+     *
+     * @param path     the path to the file to open
+     * @param options   options specifying how the file is opened
+     * @return          a new input stream
+     * @throws IOException  if an I/O error occurs
+     */
+    public static InputStream newInputStream(Path path, OpenOption... options) throws IOException {
+        FileUtils.checkFile(path);
+        InputStream inputStream = Files.newInputStream(path, options);
+        if (path.toFile().getName().endsWith(".gz")) {
+            inputStream = new GZIPInputStream(inputStream);
+        }
+        return inputStream;
+    }
+
+    /**
+     * This method is able to determine whether a file is GZipped and return a {@link BufferedWriter} in any case.
      *
      * @param path to be write
      * @return BufferedWriter object
@@ -119,7 +123,7 @@ public class FileUtils {
     }
 
     /**
-     * This method is able to determine whether a file is GZipped and return a BufferedWriter in any case.
+     * This method is able to determine whether a file is GZipped and return a {@link BufferedWriter} in any case.
      *
      * @param path to be write
      * @param charset to be write
@@ -130,7 +134,7 @@ public class FileUtils {
         FileUtils.checkDirectory(path.getParent());
         BufferedWriter bufferedWriter;
         if (path.toFile().getName().endsWith(".gz")) {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path.toFile()))));
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path.toFile())), charset));
         } else {
             bufferedWriter = Files.newBufferedWriter(path, charset);
         }
