@@ -454,10 +454,26 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         return defaultValue;
     }
 
+
     public ObjectMap append(String key, Object value) {
         put(key, value);
         return this;
     }
+
+    public Object putIfNotNull(String key, Object value) {
+        if (key != null && value != null) {
+            return objectMap.put(key, value);
+        }
+        return value;
+    }
+
+    public Object putIfNotEmpty(String key, String value) {
+        if (key != null && value != null && !value.isEmpty()) {
+            return objectMap.put(key, value);
+        }
+        return value;
+    }
+
 
     /**
      * Map methods implementation. Side effect of composition.
@@ -493,8 +509,18 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     @Override
+    public Object putIfAbsent(String key, Object value) {
+        return objectMap.putIfAbsent(key, value);
+    }
+
+    @Override
     public Object remove(Object key) {
         return objectMap.remove(key);
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        return objectMap.remove(key, value);
     }
 
     @Override
