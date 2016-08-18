@@ -38,12 +38,6 @@ public class QueryOptions extends ObjectMap {
     public static final String TIMEOUT = "timeout";
     public static final String SKIP_COUNT = "skipCount";
 
-    private static final QueryOptions EMPTY;
-
-    static {
-        EMPTY = new QueryOptions();
-    }
-
     public QueryOptions() {
 
     }
@@ -131,6 +125,6 @@ public class QueryOptions extends ObjectMap {
     }
 
     public static QueryOptions empty() {
-        return EMPTY;
+        return new QueryOptions();
     }
 }
