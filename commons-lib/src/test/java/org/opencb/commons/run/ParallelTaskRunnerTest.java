@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -248,6 +249,99 @@ public class ParallelTaskRunnerTest {
 
         System.out.println(watch.getTime());
         Assert.assertTrue(watch.getTime() < 100);
+
+    }
+
+    @Test
+    public void testInterruptWrongTaskRunner() throws InterruptedException {
+        AtomicInteger count = new AtomicInteger(10000);
+        ParallelTaskRunner<String, String> ptr = new ParallelTaskRunner<>(
+                batchSize -> {
+//                    try {
+//                        Thread.sleep(50);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                    int i = count.getAndDecrement();
+                    return i > 0 ? Collections.singletonList("i: " + i) : Collections.emptyList();
+                },
+                batch -> {
+                    // Simulate work
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return batch;
+                },
+                batch -> {
+                    for (String s : batch) {
+                        System.out.println(s);
+                    }
+                    return true;
+                }, ParallelTaskRunner.Config.builder().setNumTasks(8).setBatchSize(1).setAbortOnFail(true).build());
+
+        Thread thread = new Thread(() -> {
+            try {
+                ptr.run();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        });
+
+        StopWatch watch = new StopWatch();
+
+        thread.start();
+        Thread.sleep(300);
+
+        watch.start();
+        thread.interrupt();
+        thread.join();
+        watch.stop();
+
+        System.out.println(watch.getTime());
+        Assert.assertTrue(watch.getTime() < 100);
+
+    }
+
+    @Test
+    public void testSorted() throws Exception {
+        ParallelTaskRunner.Config config = ParallelTaskRunner.Config.builder()
+                .setNumTasks(80)
+                .setBatchSize(10)
+                .setCapacity(10)
+                .setSorted(true)
+                .build();
+
+        int limit = 10000;
+        ArrayList<Integer> values = new ArrayList<>(limit);
+        final int[] count = {0};
+
+        ParallelTaskRunner<Integer, Integer> runner = new ParallelTaskRunner<>(batchSize -> {
+            batchSize = RandomUtils.nextInt(1, 10);
+            List<Integer> batch = new ArrayList<>(batchSize);
+            for (int i = 0; i < batchSize && count[0] < limit; i++) {
+                batch.add(count[0]++);
+            }
+            System.out.println("count[0] = " + count[0]);
+            return batch;
+        }, batch -> {
+            System.out.println("batch.get(0) = " + batch.get(0));
+            Thread.sleep(RandomUtils.nextInt(0, 20));
+            return batch;
+        }, batch -> {
+            values.addAll(batch);
+            return true;
+        }, config);
+
+
+        runner.run();
+
+        ArrayList<Integer> expected = new ArrayList<>(limit);
+        for (int i = 0; i < limit; i++) {
+            expected.add(i);
+        }
+        Assert.assertEquals(expected, values);
 
     }
 

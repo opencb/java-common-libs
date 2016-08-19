@@ -3,15 +3,30 @@ package org.opencb.commons.run;
 import org.opencb.commons.io.DataReader;
 import org.opencb.commons.io.DataWriter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
  * Created by hpccoll1 on 26/02/15.
+ *
+ * {@link DataReader} Producer , {@link Task} Worker, {@link DataWriter}Consumer
+ *         ___           ___
+ *         |_|  -> T ->  |_|
+ *   R ->  |_|  -> T ->  |_| -> W
+ *         |_|  -> T ->  |_|
+ *
+ * Sorted runner:
+ * Require reader, tasks and writer.
+ * For each batch read by the reader, a new future will be created
+ * and added to the queue. This will ensure the sorted output. The
+ * worker threads will complete the future actions
+ * ({@link CompletableFuture::complete}), taking them from the
+ * CompletableFuture map. The writer will take tasks from the
+ * queue, and will {@link Future::get} the batch from the future.
+ * If the batch was not read, the thread will be blocked reading
+ * from the queue. If the batch was not processed, will be blocked
+ * by the future.
  */
 public class ParallelTaskRunner<I, O> {
 
@@ -50,7 +65,11 @@ public class ParallelTaskRunner<I, O> {
 
     private ExecutorService executorService;
     private BlockingQueue<Batch<I>> readBlockingQueue;
+    // Unsorted blocking queue
     private BlockingQueue<Batch<O>> writeBlockingQueue;
+    // Sorted blocking queue.
+    private BlockingQueue<Future<Batch<O>>> writeBlockingQueueFuture;
+    private Map<Integer, CompletableFuture<Batch<O>>> writeBlockingQueueFutureMap;
 
     private int numBatches = 0;
     private int finishedTasks = 0;
@@ -222,6 +241,9 @@ public class ParallelTaskRunner<I, O> {
     }
 
     private void check() throws IllegalArgumentException {
+        if (reader == null && config.sorted) {
+            throw new IllegalArgumentException("Unable to execute a sorted ParallelTaskRunner without a reader!!");
+        }
         if (tasks == null || tasks.isEmpty()) {
             throw new IllegalArgumentException("Must provide at least one task");
         }
@@ -238,7 +260,12 @@ public class ParallelTaskRunner<I, O> {
         }
 
         if (writer != null) {
-            writeBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
+            if (config.sorted) {
+                writeBlockingQueueFuture = new ArrayBlockingQueue<>(config.capacity);
+                writeBlockingQueueFutureMap = new ConcurrentHashMap<>();
+            } else {
+                writeBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
+            }
         }
 
         executorService = Executors.newFixedThreadPool(tasks.size() + (writer == null ? 0 : 1));
@@ -401,6 +428,14 @@ public class ParallelTaskRunner<I, O> {
             batch = readBatch();
 
             while (batch.batch != null && !batch.batch.isEmpty()) {
+
+                // If sorted, add futures in a sorted way to the writer queue
+                if (config.sorted) {
+                    CompletableFuture<Batch<O>> completableFuture = new CompletableFuture<>();
+                    writeBlockingQueueFuture.put(completableFuture);
+                    writeBlockingQueueFutureMap.put(batch.position, completableFuture);
+                }
+
                 //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
                 start = System.nanoTime();
                 int cntloop = 0;
@@ -461,7 +496,7 @@ public class ParallelTaskRunner<I, O> {
         start = System.nanoTime();
         int position = numBatches++;
         try {
-            batch = new Batch<I>(reader.read(config.batchSize), position);
+            batch = new Batch<>(reader.read(config.batchSize), position);
         } catch (Exception e) {
             System.err.println("Error reading batch " + position + "" + e.toString());
             e.printStackTrace();
@@ -527,6 +562,9 @@ public class ParallelTaskRunner<I, O> {
                     start = System.nanoTime();
                     if (writeBlockingQueue != null) {
                         writeBlockingQueue.put(new Batch<O>(batchResult, batch.position));
+                    } else if (writeBlockingQueueFuture != null) {
+                        CompletableFuture<Batch<O>> future = writeBlockingQueueFutureMap.get(batch.position);
+                        future.complete(new Batch<O>(batchResult, batch.position));
                     }
                     //System.out.println("task: apply done");
                     threadTimeBlockedAtSendWrite += System.nanoTime() - start;
@@ -534,10 +572,19 @@ public class ParallelTaskRunner<I, O> {
                 }
                 // Drain won't be called if the ParallelTaskRunner is interrupted.
                 List<O> drain = task.drain(); // empty the system
-                if (null != drain && !drain.isEmpty() && writeBlockingQueue != null) {
-                    // submit final batch received from draining
-                    writeBlockingQueue.put(new Batch<O>(drain, batch.position + 1));
+                if (null != drain && !drain.isEmpty()) {
+                    if (writeBlockingQueue != null) {
+                        // submit final batch received from draining
+                        writeBlockingQueue.put(new Batch<>(drain, batch.position + 1));
+                    } else if (writeBlockingQueueFuture != null) {
+                        // Sorted PTR should not have to drain!
+                        CompletableFuture<Batch<O>> future = new CompletableFuture<>();
+                        future.complete(new Batch<O>(batchResult, batch.position + 1));
+                        writeBlockingQueueFuture.put(future);
+                    }
                 }
+            } catch (RuntimeException e) {
+                exceptions.add(e);
             } catch (InterruptedException e) {
                 System.err.println("Catch InterruptedException " + e);
                 throw e;
@@ -551,6 +598,13 @@ public class ParallelTaskRunner<I, O> {
                         if (writeBlockingQueue != null) {
                             // Offer, instead of put, to avoid blocking
                             writeBlockingQueue.offer(POISON_PILL);
+                        } else if (writeBlockingQueueFuture != null) {
+                            CompletableFuture<Batch<O>> future = new CompletableFuture<>();
+                            future.complete(POISON_PILL);
+                            writeBlockingQueueFuture.offer(future);
+                            for (Map.Entry<Integer, CompletableFuture<Batch<O>>> entry : writeBlockingQueueFutureMap.entrySet()) {
+                                entry.getValue().complete(POISON_PILL);
+                            }
                         }
                     }
                 }
@@ -621,11 +675,34 @@ public class ParallelTaskRunner<I, O> {
         private Batch<O> getBatch() throws InterruptedException {
 //                System.out.println("writer: writeBlockingQueue = " + writeBlockingQueue.size());
             long start = System.nanoTime();
-            Batch<O> batch = writeBlockingQueue.take();
+            Batch<O> batch = null;
+            if (config.sorted) {
+                try {
+                    while (batch == null) {
+                        Future<Batch<O>> future = writeBlockingQueueFuture.take();
+                        batch = future.get();
+                    }
+                    writeBlockingQueueFutureMap.remove(batch.position);
+                } catch (ExecutionException e) {
+                    // Impossible!
+                    throw new IllegalStateException(e);
+                }
+            } else {
+                batch = writeBlockingQueue.take();
+            }
             timeBlockedAtTakeWrite += System.nanoTime() - start;
             if (batch == POISON_PILL) {
 //                logger.debug("writer: POISON_PILL");
-                writeBlockingQueue.put(POISON_PILL);
+                if (writeBlockingQueue != null) {
+                    writeBlockingQueue.put(POISON_PILL);
+                } else if (writeBlockingQueueFuture != null) {
+                    CompletableFuture<Batch<O>> future = new CompletableFuture<>();
+                    future.complete(POISON_PILL);
+                    writeBlockingQueueFuture.offer(future);
+                    for (Map.Entry<Integer, CompletableFuture<Batch<O>>> entry : writeBlockingQueueFutureMap.entrySet()) {
+                        entry.getValue().complete(POISON_PILL);
+                    }
+                }
             }
             return batch;
         }
