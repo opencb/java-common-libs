@@ -2,6 +2,8 @@ package org.opencb.commons.run;
 
 import org.opencb.commons.io.DataReader;
 import org.opencb.commons.io.DataWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -86,7 +88,7 @@ public class ParallelTaskRunner<I, O> {
     // Main thread interruptions
     private List<InterruptedException> interruptions;
 
-//    protected static Logger logger = LoggerFactory.getLogger(SimpleThreadRunner.class);
+    protected static Logger logger = LoggerFactory.getLogger(ParallelTaskRunner.class);
 
     public static class Config {
         @Deprecated
@@ -178,7 +180,7 @@ public class ParallelTaskRunner<I, O> {
 
         @Override
         public int compareTo(Batch<T> o) {
-            return 0;
+            return Integer.compare(position, o.position);
         }
     }
 
@@ -189,8 +191,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, TaskWithException<I, O, ?> task, DataWriter<O> writer, Config config)
-            throws IllegalArgumentException {
+    public ParallelTaskRunner(DataReader<I> reader, TaskWithException<I, O, ?> task, DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -210,8 +211,7 @@ public class ParallelTaskRunner<I, O> {
      * @throws IllegalArgumentException Exception.
      */
     public ParallelTaskRunner(DataReader<I> reader, Supplier<? extends TaskWithException<I, O, ?>> taskSupplier,
-                              DataWriter<O> writer, Config config)
-        throws IllegalArgumentException {
+                              DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -230,8 +230,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, List<? extends TaskWithException<I, O, ?>> tasks, DataWriter<O> writer, Config config)
-            throws IllegalArgumentException {
+    public ParallelTaskRunner(DataReader<I> reader, List<? extends TaskWithException<I, O, ?>> tasks, DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -240,17 +239,20 @@ public class ParallelTaskRunner<I, O> {
         check();
     }
 
-    private void check() throws IllegalArgumentException {
+    private void check()  {
         if (reader == null && config.sorted) {
             throw new IllegalArgumentException("Unable to execute a sorted ParallelTaskRunner without a reader!!");
+        }
+        if (writer == null && config.sorted) {
+            throw new IllegalArgumentException("Unable to execute a sorted ParallelTaskRunner without a writer!!");
         }
         if (tasks == null || tasks.isEmpty()) {
             throw new IllegalArgumentException("Must provide at least one task");
         }
         if (tasks.size() != config.numTasks) {
-            //WARN!!
-            return;
+            logger.warn("Different number of provided tasks ({}) than numTasks in configuration ({})", tasks.size(), config.numTasks);
         }
+        return;
     }
 
     private void init() {
@@ -322,12 +324,12 @@ public class ParallelTaskRunner<I, O> {
                 } catch (InterruptedException e) {
                     interruptions.add(e);
                     interrupted = true;
-                    e.printStackTrace();
+                    logger.warn("Catch interrupted exception!", e);
                 }
             }
         } catch (TimeoutException e) {
             exceptions.add(e);
-            e.printStackTrace();
+            logger.warn("Catch interrupted exception!", e);
         } finally {
             if (!executorService.isShutdown()) {
                 executorService.shutdownNow(); // shut down now if not done so (e.g. execption)
@@ -344,7 +346,7 @@ public class ParallelTaskRunner<I, O> {
             while (!executorService.isTerminated() && shutdownRetries < MAX_SHUTDOWN_RETRIES) {
                 shutdownRetries++;
                 executorService.awaitTermination(RETRY_AWAIT_TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS);
-                System.err.println("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
+                logger.debug("Executor is not terminated!! Shutdown now! - " + shutdownRetries);
                 executorService.shutdownNow();
                 for (Future future : futureTasks) {
                     future.cancel(true);
@@ -353,7 +355,7 @@ public class ParallelTaskRunner<I, O> {
         } catch (InterruptedException e) {
             // Stop trying to stop the ExecutorService
             interruptions.add(e);
-            e.printStackTrace();
+            logger.warn("Catch interrupted exception!", e);
             interrupted = true;
         }
 
@@ -381,20 +383,20 @@ public class ParallelTaskRunner<I, O> {
 
 
         if (reader != null) {
-            System.err.println("read:  timeReading                  = " + timeReading / 1000000000.0 + "s");
-            System.err.println("read:  timeBlockedAtPutRead         = " + timeBlockedAtPutRead / 1000000000.0 + "s");
-            System.err.println("task;  timeBlockedAtTakeRead        = " + timeBlockedAtTakeRead / 1000000000.0 + "s");
+            logger.info("read:  timeReading                  = " + timeReading / 1000000000.0 + "s");
+            logger.info("read:  timeBlockedAtPutRead         = " + timeBlockedAtPutRead / 1000000000.0 + "s");
+            logger.info("task;  timeBlockedAtTakeRead        = " + timeBlockedAtTakeRead / 1000000000.0 + "s");
         }
 
-        System.err.println("task;  timeTaskApply                = " + timeTaskApply / 1000000000.0 + "s");
+        logger.info("task;  timeTaskApply                = " + timeTaskApply / 1000000000.0 + "s");
 
         if (writer != null) {
-            System.err.println("task;  timeBlockedAtPutWrite        = " + timeBlockedAtPutWrite / 1000000000.0 + "s");
-            System.err.println("write: timeBlockedWatingDataToWrite = " + timeBlockedAtTakeWrite / 1000000000.0 + "s");
-            System.err.println("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
+            logger.info("task;  timeBlockedAtPutWrite        = " + timeBlockedAtPutWrite / 1000000000.0 + "s");
+            logger.info("write: timeBlockedWatingDataToWrite = " + timeBlockedAtTakeWrite / 1000000000.0 + "s");
+            logger.info("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
         }
 
-        System.err.println("total:                              = " + (System.nanoTime() - start) / 1000000000.0 + "s");
+        logger.info("total:                              = " + (System.nanoTime() - start) / 1000000000.0 + "s");
 
         if (config.abortOnFail && !exceptions.isEmpty()) {
             throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size()
@@ -407,6 +409,34 @@ public class ParallelTaskRunner<I, O> {
 
     public List<Exception> getExceptions() {
         return exceptions;
+    }
+
+    public long getTimeBlockedAtPutRead(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeBlockedAtPutRead, unit);
+    }
+
+    public long getTimeBlockedAtTakeRead(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeBlockedAtTakeRead, unit);
+    }
+
+    public long getTimeBlockedAtPutWrite(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeBlockedAtPutWrite, unit);
+    }
+
+    public long getTimeBlockedAtTakeWrite(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeBlockedAtTakeWrite, unit);
+    }
+
+    public long getTimeReading(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeReading, unit);
+    }
+
+    public long getTimeTaskApply(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeTaskApply, unit);
+    }
+
+    public long getTimeWriting(TimeUnit unit) {
+        return TimeUnit.NANOSECONDS.convert(timeWriting, unit);
     }
 
     private void doSubmit(Callable taskRunnable) {
@@ -436,7 +466,7 @@ public class ParallelTaskRunner<I, O> {
                     writeBlockingQueueFutureMap.put(batch.position, completableFuture);
                 }
 
-                //System.out.println("reader: prePut readBlockingQueue " + readBlockingQueue.size());
+                //logger.trace("reader: prePut readBlockingQueue " + readBlockingQueue.size());
                 start = System.nanoTime();
                 int cntloop = 0;
                 // continues lock of queue if jobs fail - check what's happening!!!
@@ -458,12 +488,12 @@ public class ParallelTaskRunner<I, O> {
                 timeBlockedAtPutRead += System.nanoTime() - start;
                 if (isAbortPending()) {
                     //Some error happen. Abort
-                    System.err.println("Abort read thread on fail");
+                    logger.warn("Abort read thread on fail");
                     break;
                 }
-                //System.out.println("reader: preRead");
+                //logger.trace("reader: preRead");
                 batch = readBatch();
-                //System.out.println("reader: batch.size = " + batch.size());
+                //logger.trace("reader: batch.size = " + batch.size());
             }
             //logger.debug("reader: POISON_PILL");
             readBlockingQueue.put(POISON_PILL);
@@ -498,8 +528,7 @@ public class ParallelTaskRunner<I, O> {
         try {
             batch = new Batch<>(reader.read(config.batchSize), position);
         } catch (Exception e) {
-            System.err.println("Error reading batch " + position + "" + e.toString());
-            e.printStackTrace();
+            logger.error("Error reading batch " + position, e);
             batch = POISON_PILL;
             exceptions.add(e);
         }
@@ -537,13 +566,12 @@ public class ParallelTaskRunner<I, O> {
                         break;
                     }
                     long start;
-                    //System.out.println("task: apply");
+                    //logger.trace("task: apply");
                     start = System.nanoTime();
                     try {
                         batchResult = task.apply(batch.batch);
                     } catch (Exception e) {
-                        System.err.println("Error processing batch " + batch.position + "");
-                        e.printStackTrace();
+                        logger.error("Error processing batch " + batch.position, e);
                         batchResult = null;
                         exceptions.add(e);
                     }
@@ -555,7 +583,7 @@ public class ParallelTaskRunner<I, O> {
                     }
                     if (isAbortPending()) {
                         //Some error happen. Abort
-                        System.err.println("Abort task thread on fail");
+                        logger.warn("Abort task thread on fail");
                         break;
                     }
 
@@ -566,7 +594,7 @@ public class ParallelTaskRunner<I, O> {
                         CompletableFuture<Batch<O>> future = writeBlockingQueueFutureMap.get(batch.position);
                         future.complete(new Batch<O>(batchResult, batch.position));
                     }
-                    //System.out.println("task: apply done");
+                    //logger.trace("task: apply done");
                     threadTimeBlockedAtSendWrite += System.nanoTime() - start;
                     batch = getBatch();
                 }
@@ -586,7 +614,7 @@ public class ParallelTaskRunner<I, O> {
             } catch (RuntimeException e) {
                 exceptions.add(e);
             } catch (InterruptedException e) {
-                System.err.println("Catch InterruptedException " + e);
+                logger.warn("Catch InterruptedException " + e);
                 throw e;
             } finally {
                 synchronized (tasks) {
@@ -620,7 +648,7 @@ public class ParallelTaskRunner<I, O> {
                 long start = System.nanoTime();
                 batch = readBlockingQueue.take();
                 threadTimeBlockedAtTakeRead += start - System.currentTimeMillis();
-                //System.out.println("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : "
+                //logger.trace("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : "
                 // + batch.size() + " : " + batchSize);
                 if (batch == POISON_PILL) {
                     //logger.debug("task: POISON_PILL");
@@ -646,34 +674,33 @@ public class ParallelTaskRunner<I, O> {
                 long start;
                 while (batch != POISON_PILL) {
                     start = System.nanoTime();
-//                    System.out.println("writer: write");
+//                    logger.trace("writer: write");
                     try {
                         dataWriter.write(batch.batch);
                     } catch (Exception e) {
-                        System.err.println("Error writing batch " + batch.position + "");
-                        e.printStackTrace();
+                        logger.error("Error writing batch " + batch.position, e);
                         exceptions.add(e);
                     }
 
                     if (isAbortPending()) {
                         //Some error happen. Abort
-                        System.err.println("Abort writing thread on fail");
+                        logger.warn("Abort writing thread on fail");
                         break;
                     }
 
-//                    System.out.println("writer: wrote");
+//                    logger.trace("writer: wrote");
                     timeWriting += System.nanoTime() - start;
                     batch = getBatch();
                 }
             } catch (InterruptedException e) {
-                System.err.println("Catch InterruptedException " + e);
+                logger.warn("Catch InterruptedException ", e);
                 throw e;
             }
             return null;
         }
 
         private Batch<O> getBatch() throws InterruptedException {
-//                System.out.println("writer: writeBlockingQueue = " + writeBlockingQueue.size());
+//                logger.trace("writer: writeBlockingQueue = " + writeBlockingQueue.size());
             long start = System.nanoTime();
             Batch<O> batch = null;
             if (config.sorted) {
