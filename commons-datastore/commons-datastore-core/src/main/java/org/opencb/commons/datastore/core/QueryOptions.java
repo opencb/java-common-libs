@@ -123,4 +123,8 @@ public class QueryOptions extends ObjectMap {
     public QueryOptions append(String key, Object value) {
         return (QueryOptions) super.append(key, value);
     }
+
+    public static QueryOptions empty() {
+        return new QueryOptions();
+    }
 }
