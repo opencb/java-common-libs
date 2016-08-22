@@ -17,6 +17,7 @@
 package org.opencb.commons.datastore.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,12 @@ public class QueryOptions extends ObjectMap {
 
     public static final String TIMEOUT = "timeout";
     public static final String SKIP_COUNT = "skipCount";
+
+    private static QueryOptions empty;
+
+    static {
+        empty = (QueryOptions) Collections.unmodifiableMap(new QueryOptions());
+    }
 
     public QueryOptions() {
 
@@ -125,6 +132,6 @@ public class QueryOptions extends ObjectMap {
     }
 
     public static QueryOptions empty() {
-        return new QueryOptions();
+        return empty;
     }
 }
