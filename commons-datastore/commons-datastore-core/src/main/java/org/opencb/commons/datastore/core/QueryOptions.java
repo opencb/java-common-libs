@@ -39,11 +39,6 @@ public class QueryOptions extends ObjectMap {
     public static final String TIMEOUT = "timeout";
     public static final String SKIP_COUNT = "skipCount";
 
-//    private static QueryOptions empty;
-
-//    static {
-//        empty = (QueryOptions) Collections.unmodifiableMap(new QueryOptions());
-//    }
 
     public QueryOptions() {
 
