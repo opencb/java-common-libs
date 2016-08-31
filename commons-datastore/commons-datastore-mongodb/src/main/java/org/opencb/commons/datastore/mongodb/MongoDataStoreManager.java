@@ -17,6 +17,8 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.*;
+import com.mongodb.ReadPreference;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
@@ -24,12 +26,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.opencb.commons.datastore.mongodb.MongoDBConfiguration.*;
+
 /**
  * Created by imedina on 22/03/14.
  */
-public class MongoDataStoreManager {
+public class MongoDataStoreManager implements AutoCloseable {
 
-    private static Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
+    private Map<String, MongoDataStore> mongoDataStores = new HashMap<>();
     private List<DataStoreServerAddress> dataStoreServerAddresses;
 
     //    private MongoDBConfiguration mongoDBConfiguration;
@@ -85,7 +89,7 @@ public class MongoDataStoreManager {
 
 
     public MongoDataStore get(String database) {
-        return get(database, MongoDBConfiguration.builder().init().build());
+        return get(database, builder().init().build());
     }
 
     public MongoDataStore get(String database, MongoDBConfiguration mongoDBConfiguration) {
@@ -109,29 +113,30 @@ public class MongoDataStoreManager {
             // We create the MongoClientOptions
             MongoClientOptions mongoClientOptions;
             MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
-                    .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
-                    .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
-                    .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString("readPreference", "primary")));
+                    .connectionsPerHost(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT))
+                    .connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT))
+                    .readPreference(
+                            ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE, READ_PREFERENCE_DEFAULT.getValue())));
 
-            if (mongoDBConfiguration.getString("replicaSet") != null && !mongoDBConfiguration.getString("replicaSet").isEmpty()) {
-                System.out.println("Setting replicaSet to " + mongoDBConfiguration.getString("replicaSet"));
-                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString("replicaSet"));
+            if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
+                logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
+                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
             }
             mongoClientOptions = builder.build();
 
             assert (dataStoreServerAddresses != null);
 
             // We create the MongoCredential object
-            String user = mongoDBConfiguration.getString("username", "");
-            String pass = mongoDBConfiguration.getString("password", "");
+            String user = mongoDBConfiguration.getString(USERNAME, "");
+            String pass = mongoDBConfiguration.getString(PASSWORD, "");
             MongoCredential mongoCredential = null;
             if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
 //                final DB authenticationDatabase;
-                if (mongoDBConfiguration.get("authenticationDatabase") != null
-                        && !mongoDBConfiguration.getString("authenticationDatabase").isEmpty()) {
+                if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
+                        && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
 //                        authenticationDatabase = mc.getDB(mongoDBConfiguration.getString("authenticationDatabase"));
                     mongoCredential = MongoCredential.createScramSha1Credential(user,
-                            mongoDBConfiguration.getString("authenticationDatabase"), pass.toCharArray());
+                            mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
                 } else {
 //                        authenticationDatabase = db;
                     mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
@@ -180,6 +185,31 @@ public class MongoDataStoreManager {
         return mongoDataStore;
     }
 
+    public boolean exists(String database) {
+
+        if (database != null && !database.trim().equals("")) {
+            MongoClient mc;
+            if (dataStoreServerAddresses.size() == 1) {
+                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
+                        dataStoreServerAddresses.get(0).getPort()));
+            } else {
+                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+                for (ServerAddress serverAddress : serverAddresses) {
+                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+                }
+                mc = new MongoClient(serverAddresses);
+            }
+
+            MongoCursor<String> dbsCursor = mc.listDatabaseNames().iterator();
+            while (dbsCursor.hasNext()) {
+                if (dbsCursor.next().equals(database)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void drop(String database) {
         MongoClient mc = null;
         if (database != null && !database.trim().equals("")) {
@@ -221,6 +251,14 @@ public class MongoDataStoreManager {
             mongoDataStores.get(database).close();
             mongoDataStores.remove(database);
         }
+    }
+
+    @Override
+    public void close() {
+        for (Entry<String, MongoDataStore> entry : mongoDataStores.entrySet()) {
+            entry.getValue().close();
+        }
+        mongoDataStores.clear();
     }
 
 

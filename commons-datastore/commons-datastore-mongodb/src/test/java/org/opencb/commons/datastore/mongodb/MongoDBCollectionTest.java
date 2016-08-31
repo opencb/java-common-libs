@@ -26,6 +26,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.QueryResultWriter;
@@ -33,7 +34,10 @@ import org.opencb.commons.datastore.core.QueryResultWriter;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -84,6 +88,7 @@ public class MongoDBCollectionTest {
         public String name;
         public String surname;
         public int age;
+        public int number;
 
         @Override
         public String toString() {
@@ -92,6 +97,7 @@ public class MongoDBCollectionTest {
                     + ", name:\"" + name + '"'
                     + ", surname:\"" + surname + '"'
                     + ", age:" + age
+                    + ", number:" + number
                     + '}';
         }
     }
@@ -104,6 +110,7 @@ public class MongoDBCollectionTest {
             document.put("name", "John");
             document.put("surname", "Doe");
             document.put("age", (int) i % 5);
+            document.put("number", (int) i * i);
             mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
@@ -151,6 +158,15 @@ public class MongoDBCollectionTest {
 //        });
 //        System.out.println(mongoDBCollection.distinct("name", null).getNumResults());
 //        System.out.println(mongoDBCollection.nativeQuery().distinct("name"));
+    }
+
+    @Test
+    public void testSortOrder() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
+                .append(QueryOptions.ORDER, "asc");
+        List<Document> result = mongoDBCollection.find(query, queryOptions).getResult();
+        assertEquals(0L, result.get(0).get("number"));
     }
 
     @Test
@@ -343,6 +359,43 @@ public class MongoDBCollectionTest {
     }
 
     @Test
+    @Ignore
+    public void testPermanentCursor() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions();
+        int documents = 50000;
+        MongoDBCollection collection = createTestCollection("cursor5", documents);
+
+        MongoPersistentCursor cursor = new MongoPersistentCursor(collection, query, null, queryOptions);
+
+        int i = 0;
+        while (cursor.hasNext()) {
+            Document document = cursor.next();
+            if (i % (documents / 50) == 0) {
+                System.out.println("document.get(\"_id\") = " + document.get("_id"));
+            }
+            i++;
+            if (i == 10) {
+                System.out.println("SLEEP!!! " + i + " document.get(\"_id\") = " + document.get("_id"));
+                int totalMin = 1;
+                for (int min = 0; min < totalMin; min++) {
+                    System.out.println("Continue sleeping: " + min + "/" + totalMin);
+                    Thread.sleep(60 * 1000);
+                }
+                System.out.println("Woke up!!!");
+                document = cursor.next();
+                i++;
+                System.out.println("Woke up!!! " + i + " document.get(\"_id\") = " + document.get("_id"));
+
+            }
+        }
+
+        assertEquals(1, cursor.getNumExceptions());
+        assertEquals(documents, cursor.getCount());
+        assertEquals(documents, i);
+    }
+
+    @Test
     public void testAggregate() throws Exception {
         List<Bson> dbObjectList = new ArrayList<>();
         Document match = new Document("$match", new Document("age", new BasicDBObject("$gt", 2)));
@@ -402,6 +455,18 @@ public class MongoDBCollectionTest {
 
         thrown.expect(MongoBulkWriteException.class);
         mongoDBCollectionInsertTest.insert(list, null);
+    }
+
+    @Test
+    public void testInsertUnique() throws Exception {
+        MongoDBCollection uniqueIndexTest = createTestCollection("unique_index_test", 50);
+        uniqueIndexTest.createIndex(new Document("number", 1), new ObjectMap(MongoDBCollection.UNIQUE, true));
+        Document uniqueObject = new Document("number", -1);
+
+        uniqueIndexTest.insert(uniqueObject, null);
+
+        thrown.expect(MongoWriteException.class);
+        uniqueIndexTest.insert(uniqueObject, null);
     }
 
     @Test

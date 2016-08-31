@@ -22,9 +22,13 @@ public class MongoDBQueryUtils {
 
     @Deprecated
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
-    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
-    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
+
+    public static final String OR = ",";
+    public static final String AND = ";";
+    public static final String IS = ":";
 
     public enum LogicalOperator {
         AND,
@@ -32,17 +36,17 @@ public class MongoDBQueryUtils {
     }
 
     public enum ComparisonOperator {
-        EQUAL,
-        NOT_EQUAL,
+        EQUALS,
+        NOT_EQUALS,
         IN,
         NOT_IN,
         ALL,
 
         // String comparators
         EQUAL_IGNORE_CASE,
-        START_WITH,
-        END_WITH,
-        REGEX,
+        STARTS_WITH,         // The regular expression will look for "=^" or "^" at the beginning.
+        ENDS_WITH,            // The regular expression will look for "=$" or "$" at the beginning.
+        REGEX,               // The regular expression will look for "=~" or "~" at the beginning.
         TEXT,
 
         // Numeric comparators
@@ -54,11 +58,11 @@ public class MongoDBQueryUtils {
 
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
-        return createFilter(mongoDbField, queryParam, query, QueryParam.Type.TEXT, ComparisonOperator.EQUAL, LogicalOperator.OR);
+        return createFilter(mongoDbField, queryParam, query, QueryParam.Type.TEXT, ComparisonOperator.EQUALS, LogicalOperator.OR);
     }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type) {
-        return createFilter(mongoDbField, queryParam, query, type, ComparisonOperator.EQUAL, LogicalOperator.OR);
+        return createFilter(mongoDbField, queryParam, query, type, ComparisonOperator.EQUALS, LogicalOperator.OR);
     }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type,
@@ -73,15 +77,18 @@ public class MongoDBQueryUtils {
             switch (type) {
                 case TEXT:
                 case TEXT_ARRAY:
-                    filter = createFilter(mongoDbField, query.getAsStringList(queryParam), comparator, operator);
+                    filter = createFilter(mongoDbField, query.getAsStringList(queryParam, getLogicalSeparator(operator)), comparator,
+                            operator);
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
-                    filter = createFilter(mongoDbField, query.getAsIntegerList(queryParam), comparator, operator);
+                    filter = createFilter(mongoDbField, query.getAsLongList(queryParam, getLogicalSeparator(operator)), comparator,
+                            operator);
                     break;
                 case DECIMAL:
                 case DECIMAL_ARRAY:
-                    filter = createFilter(mongoDbField, query.getAsDoubleList(queryParam), comparator, operator);
+                    filter = createFilter(mongoDbField, query.getAsDoubleList(queryParam, getLogicalSeparator(operator)), comparator,
+                            operator);
                     break;
                 case BOOLEAN:
                     filter = createFilter(mongoDbField, query.getBoolean(queryParam), comparator);
@@ -93,70 +100,82 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
-
+    private static String getLogicalSeparator(LogicalOperator operator) {
+        return (operator != null && operator.equals(LogicalOperator.AND)) ? AND : OR;
+    }
 
     public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type)
             throws NumberFormatException {
-        return createAutoFilter(mongoDbField, queryParam, query, type, LogicalOperator.OR);
+        Bson filter = null;
+        if (query != null && query.containsKey(queryParam)) {
+            List<String> values = query.getAsStringList(queryParam);
+            LogicalOperator operator = LogicalOperator.OR;
+            if (values.size() == 1) {
+                operator = checkOperator(values.get(0));
+            }
+            filter = createAutoFilter(mongoDbField, queryParam, query, type, operator);
+        }
+        return filter;
     }
 
     public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, LogicalOperator operator)
             throws NumberFormatException {
-        Bson filter = null;
 
-        if (query != null && query.containsKey(queryParam)) {
-            List<String> queryParamList = query.getAsStringList(queryParam);
+        List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
 
-            List<Bson> bsonList = new ArrayList<>(queryParamList.size());
-            for (String queryItem : queryParamList) {
-                Matcher matcher = getPattern(type).matcher(queryItem);
-                String op = "";
-                String queryValueString = queryItem;
-                if (matcher.find()) {
-                    op = matcher.group(1);
-                    queryValueString = matcher.group(2);
-                }
-                ComparisonOperator comparator = getComparisonOperator(op, type);
-                switch (type) {
-                    case STRING:
-                    case TEXT:
-                    case TEXT_ARRAY:
-                        bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
-                        break;
-                    case INTEGER:
-                    case INTEGER_ARRAY:
-                        bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
-                        break;
-                    case DOUBLE:
-                    case DECIMAL:
-                    case DECIMAL_ARRAY:
-                        bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
-                        break;
-                    case BOOLEAN:
-                        bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
-                        break;
-                    default:
-                        break;
-                }
+        List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+        for (String queryItem : queryParamList) {
+            Matcher matcher = getPattern(type).matcher(queryItem);
+            String op = "";
+            String queryValueString = queryItem;
+            if (matcher.find()) {
+                op = matcher.group(1);
+                queryValueString = matcher.group(2);
             }
-
-            if (bsonList.size() == 1) {
-                filter = bsonList.get(0);
-            } else {
-                if (operator.equals(LogicalOperator.OR)) {
-                    filter = Filters.or(bsonList);
-                } else {
-                    filter = Filters.and(bsonList);
-                }
+            ComparisonOperator comparator = getComparisonOperator(op, type);
+            switch (type) {
+                case STRING:
+                case TEXT:
+                case TEXT_ARRAY:
+                    bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                    break;
+                case INTEGER:
+                case INTEGER_ARRAY:
+                    bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
+                    break;
+                case DOUBLE:
+                case DECIMAL:
+                case DECIMAL_ARRAY:
+                    bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                    break;
+                case BOOLEAN:
+                    bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                    break;
+                default:
+                    break;
             }
         }
+
+        Bson filter;
+        if (bsonList.size() == 0) {
+            filter = Filters.size(queryParam, 0);
+        } else if (bsonList.size() == 1) {
+            filter = bsonList.get(0);
+        } else {
+            if (operator.equals(LogicalOperator.OR)) {
+                filter = Filters.or(bsonList);
+            } else {
+                filter = Filters.and(bsonList);
+            }
+        }
+
         return filter;
     }
 
 
 
     public static <T> Bson createFilter(String mongoDbField, T queryValue) {
-        return createFilter(mongoDbField, queryValue, ComparisonOperator.EQUAL);
+        return createFilter(mongoDbField, queryValue, ComparisonOperator.EQUALS);
     }
 
     public static <T> Bson createFilter(String mongoDbField, T queryValue, ComparisonOperator comparator) {
@@ -165,19 +184,19 @@ public class MongoDBQueryUtils {
         if (queryValue != null) {
             if (queryValue instanceof String) {
                 switch (comparator) {
-                    case EQUAL:
+                    case EQUALS:
                         filter = Filters.eq(mongoDbField, queryValue);
                         break;
-                    case NOT_EQUAL:
+                    case NOT_EQUALS:
                         filter = Filters.ne(mongoDbField, queryValue);
                         break;
                     case EQUAL_IGNORE_CASE:
                         filter = Filters.regex(mongoDbField, queryValue.toString(), "i");
                         break;
-                    case START_WITH:
+                    case STARTS_WITH:
                         filter = Filters.regex(mongoDbField, "^" + queryValue + "*");
                         break;
-                    case END_WITH:
+                    case ENDS_WITH:
                         filter = Filters.regex(mongoDbField, "*" + queryValue + "$");
                         break;
                     case REGEX:
@@ -191,10 +210,10 @@ public class MongoDBQueryUtils {
                 }
             } else {
                 switch (comparator) {
-                    case EQUAL:
+                    case EQUALS:
                         filter = Filters.eq(mongoDbField, queryValue);
                         break;
-                    case NOT_EQUAL:
+                    case NOT_EQUALS:
                         filter = Filters.ne(mongoDbField, queryValue);
                         break;
                     case GREATER_THAN:
@@ -218,11 +237,11 @@ public class MongoDBQueryUtils {
     }
 
     public static <T> Bson createFilter(String mongoDbField, List<T> queryValues) {
-        return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUAL, LogicalOperator.OR);
+        return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUALS, LogicalOperator.OR);
     }
 
     public static <T> Bson createFilter(String mongoDbField, List<T> queryValues, LogicalOperator operator) {
-        return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUAL, operator);
+        return createFilter(mongoDbField, queryValues, ComparisonOperator.EQUALS, operator);
     }
 
     public static <T> Bson createFilter(String mongoDbField, List<T> queryValues, ComparisonOperator comparator) {
@@ -275,7 +294,26 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
-
+    /**
+     * Checks that the filter value list contains only one type of operations.
+     *
+     * @param value List of values to check
+     * @return  The used operator. Null if no operator is used.
+     * @throws IllegalArgumentException if the list contains different operators.
+     */
+    public static LogicalOperator checkOperator(String value) throws IllegalArgumentException {
+        boolean containsOr = value.contains(OR);
+        boolean containsAnd = value.contains(AND);
+        if (containsAnd && containsOr) {
+            throw new IllegalArgumentException("Cannot merge AND and OR operators in the same query filter.");
+        } else if (containsAnd && !containsOr) {
+            return LogicalOperator.AND;
+        } else if (containsOr && !containsAnd) {
+            return LogicalOperator.OR;
+        } else {    // !containsOr && !containsAnd
+            return null;
+        }
+    }
 
     public static List<Bson> createGroupBy(Bson query, String groupByField, String idField, boolean count) {
         if (groupByField == null || groupByField.isEmpty()) {
@@ -333,7 +371,7 @@ public class MongoDBQueryUtils {
     public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
         ComparisonOperator comparator = null;
         if (op != null && op.isEmpty()) {
-            comparator = ComparisonOperator.EQUAL;
+            comparator = ComparisonOperator.EQUALS;
         } else {
             switch (type) {
                 case STRING:
@@ -342,14 +380,23 @@ public class MongoDBQueryUtils {
                     switch(op) {
                         case "=":
                         case "==":
-                            comparator = ComparisonOperator.EQUAL;
+                            comparator = ComparisonOperator.EQUALS;
                             break;
+                        case "!":
                         case "!=":
-                            comparator = ComparisonOperator.NOT_EQUAL;
+                            comparator = ComparisonOperator.NOT_EQUALS;
                             break;
                         case "~":
                         case "=~":
                             comparator = ComparisonOperator.REGEX;
+                            break;
+                        case "^":
+//                        case "=^":
+                            comparator = ComparisonOperator.STARTS_WITH;
+                            break;
+                        case "$":
+//                        case "=$":
+                            comparator = ComparisonOperator.ENDS_WITH;
                             break;
                         default:
                             throw new IllegalStateException("Unknown string query operation " + op);
@@ -363,7 +410,7 @@ public class MongoDBQueryUtils {
                     switch(op) {
                         case "=":
                         case "==":
-                            comparator = ComparisonOperator.EQUAL;
+                            comparator = ComparisonOperator.EQUALS;
                             break;
                         case ">":
                             comparator = ComparisonOperator.GREATER_THAN;
@@ -378,7 +425,7 @@ public class MongoDBQueryUtils {
                             comparator = ComparisonOperator.LESS_THAN_EQUAL;
                             break;
                         case "!=":
-                            comparator = ComparisonOperator.NOT_EQUAL;
+                            comparator = ComparisonOperator.NOT_EQUALS;
                             break;
                         default:
                             throw new IllegalStateException("Unknown numerical query operation " + op);
@@ -388,10 +435,10 @@ public class MongoDBQueryUtils {
                     switch(op) {
                         case "=":
                         case "==":
-                            comparator = ComparisonOperator.EQUAL;
+                            comparator = ComparisonOperator.EQUALS;
                             break;
                         case "!=":
-                            comparator = ComparisonOperator.NOT_EQUAL;
+                            comparator = ComparisonOperator.NOT_EQUALS;
                             break;
                         default:
                             throw new IllegalStateException("Unknown boolean query operation " + op);
@@ -404,7 +451,7 @@ public class MongoDBQueryUtils {
         return comparator;
     }
 
-    private static Pattern getPattern(QueryParam.Type type) {
+    protected static Pattern getPattern(QueryParam.Type type) {
         Pattern pattern = null;
         switch (type) {
             case STRING:

@@ -32,8 +32,8 @@ public class QueryResult<T> {
     private long numTotalResults;
     private String warningMsg;
     private String errorMsg;
-    @Deprecated
-    private String featureType;
+//    @Deprecated
+//    private String featureType;
 
     private String resultType;
     private Class<T> clazz;
@@ -54,7 +54,7 @@ public class QueryResult<T> {
         this.numTotalResults = numTotalResults;
         this.warningMsg = warningMsg;
         this.errorMsg = errorMsg;
-        this.resultType = result.size() > 0 && result.get(0) != null ? result.get(0).getClass().getCanonicalName() : "";
+        this.resultType = result != null && !result.isEmpty() && result.get(0) != null ? result.get(0).getClass().getCanonicalName() : "";
         this.result = result;
     }
 
@@ -75,7 +75,7 @@ public class QueryResult<T> {
         sb.append(", numTotalResults=").append(numTotalResults);
         sb.append(", warningMsg='").append(warningMsg).append('\'');
         sb.append(", errorMsg='").append(errorMsg).append('\'');
-        sb.append(", featureType='").append(featureType).append('\'');
+//        sb.append(", featureType='").append(featureType).append('\'');
         sb.append(", resultType='").append(resultType).append('\'');
         sb.append(", clazz=").append(clazz);
         sb.append(", result=").append(result);
@@ -140,16 +140,16 @@ public class QueryResult<T> {
     public void setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
     }
-
-    @Deprecated
-    public String getFeatureType() {
-        return featureType;
-    }
-
-    @Deprecated
-    public void setFeatureType(String featureType) {
-        this.featureType = featureType;
-    }
+//
+//    @Deprecated
+//    public String getFeatureType() {
+//        return featureType;
+//    }
+//
+//    @Deprecated
+//    public void setFeatureType(String featureType) {
+//        this.featureType = featureType;
+//    }
 
     public String getResultType() {
         return resultType;

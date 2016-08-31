@@ -81,33 +81,42 @@ public class MongoDBNativeQuery {
 
         FindIterable<Document> findIterable = dbCollection.find(query).projection(projection);
 
-        int limit = (options != null) ? options.getInt(MongoDBCollection.LIMIT, 0) : 0;
+        int limit = (options != null) ? options.getInt(QueryOptions.LIMIT, 0) : 0;
         if (limit > 0) {
             findIterable.limit(limit);
         }
 
-        int skip = (options != null) ? options.getInt(MongoDBCollection.SKIP, 0) : 0;
+        int skip = (options != null) ? options.getInt(QueryOptions.SKIP, 0) : 0;
         if (skip > 0) {
             findIterable.skip(skip);
         }
 
-        Bson sort = (options != null) ? (Bson) options.get(MongoDBCollection.SORT) : null;
-        if (sort != null) {
-            findIterable.sort(sort);
+        Object sortObject = (options != null) ? options.get(QueryOptions.SORT) : null;
+        if (sortObject != null) {
+            if (sortObject instanceof Bson) {
+                findIterable.sort(((Bson) sortObject));
+            } else if (sortObject instanceof String) {
+                String order = options.getString(QueryOptions.ORDER, "DESC");
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                    findIterable.sort(Sorts.ascending(((String) sortObject)));
+                } else {
+                    findIterable.sort(Sorts.descending(((String) sortObject)));
+                }
+            }
         }
 
         if (options != null && options.containsKey(MongoDBCollection.BATCH_SIZE)) {
             findIterable.batchSize(options.getInt(MongoDBCollection.BATCH_SIZE, 20));
         }
 
-        if (options != null && options.containsKey(MongoDBCollection.TIMEOUT)) {
-            findIterable.maxTime(options.getLong(MongoDBCollection.TIMEOUT), TimeUnit.MILLISECONDS);
+        if (options != null && options.containsKey(QueryOptions.TIMEOUT)) {
+            findIterable.maxTime(options.getLong(QueryOptions.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
         return findIterable;
     }
 
-    public AggregateIterable aggregate(List<Bson> operations, QueryOptions options) {
+    public AggregateIterable aggregate(List<? extends Bson> operations, QueryOptions options) {
         return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
     }
 
@@ -164,13 +173,40 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult update(List<Bson> documentList, List<Bson> updatesList, boolean upsert, boolean multi) {
-        if (documentList.size() != updatesList.size()) {
-            throw new IndexOutOfBoundsException("QueryList.size and UpdatesList must be the same size");
+    public BulkWriteResult replace(List<? extends Bson> queries, List<? extends Bson> updates, boolean upsert) {
+        if (queries.size() != updates.size()) {
+            throw wrongQueryUpdateSize(queries, updates);
         }
 
-        Iterator<Bson> queryIterator = documentList.iterator();
-        Iterator<Bson> updateIterator = updatesList.iterator();
+        Iterator<? extends Bson> queryIterator = queries.iterator();
+        Iterator<? extends Bson> updateIterator = updates.iterator();
+
+        List<WriteModel<Document>> actions = new ArrayList<>(queries.size());
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+
+
+        while (queryIterator.hasNext()) {
+            Bson query = queryIterator.next();
+            Bson update = updateIterator.next();
+
+            actions.add(new ReplaceOneModel<>(query, (Document) update, updateOptions));
+        }
+
+        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+    }
+
+    public UpdateResult replace(Bson query, Bson updates, boolean upsert) {
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        return dbCollection.replaceOne(query, (Document) updates, updateOptions);
+    }
+
+    public BulkWriteResult update(List<? extends Bson> documentList, List<? extends Bson> updatesList, boolean upsert, boolean multi) {
+        if (documentList.size() != updatesList.size()) {
+            throw wrongQueryUpdateSize(documentList, updatesList);
+        }
+
+        Iterator<? extends Bson> queryIterator = documentList.iterator();
+        Iterator<? extends Bson> updateIterator = updatesList.iterator();
 
         List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
@@ -209,6 +245,11 @@ public class MongoDBNativeQuery {
         return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
     }
 
+    private IndexOutOfBoundsException wrongQueryUpdateSize(List<? extends Bson> queries, List<? extends Bson> updates) {
+        return new IndexOutOfBoundsException("QueryList.size=" + queries.size()
+                + " and UpdatesList.size=" + updates.size() + " must be the same size.");
+    }
+
 
     public DeleteResult remove(Bson query) {
         return dbCollection.deleteMany(query);
@@ -222,7 +263,7 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult remove(List<Bson> queryList, boolean multi) {
+    public BulkWriteResult remove(List<? extends Bson> queryList, boolean multi) {
         List<WriteModel<Document>> actions = new ArrayList<>(queryList.size());
         if (multi) {
             for (Bson document : queryList) {
@@ -293,7 +334,7 @@ public class MongoDBNativeQuery {
         dbCollection.createIndex(keys, options);
     }
 
-    public List<Bson> getIndex() {
+    public List<Document> getIndex() {
         return dbCollection.listIndexes().into(new ArrayList<>());
     }
 
@@ -317,13 +358,13 @@ public class MongoDBNativeQuery {
             // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
 
             Bson include = null;
-            if (options.containsKey(MongoDBCollection.INCLUDE)) {
-                Object includeObject = options.get(MongoDBCollection.INCLUDE);
+            if (options.containsKey(QueryOptions.INCLUDE)) {
+                Object includeObject = options.get(QueryOptions.INCLUDE);
                 if (includeObject != null) {
                     if (includeObject instanceof Bson) {
                         include = (Bson) includeObject;
                     } else {
-                        List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
+                        List<String> includeStringList = options.getAsStringList(QueryOptions.INCLUDE, ",");
                         if (includeStringList != null && includeStringList.size() > 0) {
                             include = Projections.include(includeStringList);
                         }
@@ -333,13 +374,13 @@ public class MongoDBNativeQuery {
 
             Bson exclude = null;
             boolean excludeId = false;
-            if (options.containsKey(MongoDBCollection.EXCLUDE)) {
-                Object excludeObject = options.get(MongoDBCollection.EXCLUDE);
+            if (options.containsKey(QueryOptions.EXCLUDE)) {
+                Object excludeObject = options.get(QueryOptions.EXCLUDE);
                 if (excludeObject != null) {
                     if (excludeObject instanceof Bson) {
                         exclude = (Bson) excludeObject;
                     } else {
-                        List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
+                        List<String> excludeStringList = options.getAsStringList(QueryOptions.EXCLUDE, ",");
                         if (excludeStringList != null && excludeStringList.size() > 0) {
                             exclude = Projections.exclude(excludeStringList);
                             excludeId = excludeStringList.contains("_id");

@@ -33,10 +33,7 @@ import org.bson.BsonType;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.opencb.commons.datastore.core.ComplexTypeConverter;
-import org.opencb.commons.datastore.core.QueryOptions;
-import org.opencb.commons.datastore.core.QueryResult;
-import org.opencb.commons.datastore.core.QueryResultWriter;
+import org.opencb.commons.datastore.core.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,19 +44,28 @@ import java.util.*;
  */
 public class MongoDBCollection {
 
-    public static final String INCLUDE = "include";
-    public static final String EXCLUDE = "exclude";
-    public static final String LIMIT = "limit";
-    public static final String SKIP = "skip";
-    public static final String SORT = "sort";
+    @Deprecated public static final String INCLUDE = QueryOptions.INCLUDE;
+    @Deprecated public static final String EXCLUDE = QueryOptions.EXCLUDE;
+    @Deprecated public static final String LIMIT = QueryOptions.LIMIT;
+    @Deprecated public static final String SKIP = QueryOptions.SKIP;
+    @Deprecated public static final String SORT = QueryOptions.SORT;
+    @Deprecated public static final String ORDER = QueryOptions.ORDER;
+    @Deprecated public static final String TIMEOUT = QueryOptions.TIMEOUT;
+    @Deprecated public static final String SKIP_COUNT = QueryOptions.SKIP_COUNT;
+    @Deprecated public static final String ASCENDING = QueryOptions.ASCENDING;
+    @Deprecated public static final String DESCENDING = QueryOptions.DESCENDING;
 
-    public static final String TIMEOUT = "timeout";
-    public static final String SKIP_COUNT = "skipCount";
     public static final String BATCH_SIZE = "batchSize";
     public static final String ELEM_MATCH = "elemMatch";
 
     public static final String UPSERT = "upsert";
     public static final String MULTI = "multi";
+    public static final String REPLACE = "replace";
+
+    public static final String UNIQUE = "unique";
+    public static final String BACKGROUND = "background";
+    public static final String SPARSE = "sparse";
+    public static final String NAME = "index_name";
 
     private MongoCollection<Document> dbCollection;
 
@@ -117,13 +123,13 @@ public class MongoDBCollection {
     public QueryResult<Long> count() {
         long start = startQuery();
         long l = mongoDBNativeQuery.count();
-        return endQuery(Arrays.asList(l), start);
+        return endQuery(Collections.singletonList(l), start);
     }
 
     public QueryResult<Long> count(Bson query) {
         long start = startQuery();
         long l = mongoDBNativeQuery.count(query);
-        return endQuery(Arrays.asList(l), start);
+        return endQuery(Collections.singletonList(l), start);
     }
 
 
@@ -138,7 +144,7 @@ public class MongoDBCollection {
             } else if (value.isString()) {
                 l.add(value.asString().getValue());
             } else {
-                throw new IllegalArgumentException("Found result with BsonType != " + BsonType.STRING);
+                throw new IllegalArgumentException("Found result with BsonType != " + BsonType.STRING + " : " + value.getBsonType());
             }
         }
         return endQuery(l, start);
@@ -149,12 +155,15 @@ public class MongoDBCollection {
             return (QueryResult<T>) distinct(key, query);
         }
         long start = startQuery();
-        List<T> l = new ArrayList<>();
-        MongoCursor<T> iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
+        List<T> list = new ArrayList<>();
+        MongoCursor iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
         while (iterator.hasNext()) {
-            l.add(iterator.next());
+            Object next = iterator.next();
+            if (next != null) {
+                list.add((T) next);
+            }
         }
-        return endQuery(l, start);
+        return endQuery(list, start);
     }
 //
 //    public <DataModelType, StorageType> QueryResult<DataModelType> distinct(String key, Bson query, Class<StorageType> clazz,
@@ -197,19 +206,19 @@ public class MongoDBCollection {
     }
 
 
-    public List<QueryResult<Document>> find(List<Bson> queries, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<? extends Bson> queries, QueryOptions options) {
         return find(queries, null, options);
     }
 
-    public List<QueryResult<Document>> find(List<Bson> queries, Bson projection, QueryOptions options) {
+    public List<QueryResult<Document>> find(List<? extends Bson> queries, Bson projection, QueryOptions options) {
         return privateFind(queries, projection, null, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, Class<T> clazz, QueryOptions options) {
+    public <T> List<QueryResult<T>> find(List<? extends Bson> queries, Bson projection, Class<T> clazz, QueryOptions options) {
         return privateFind(queries, projection, clazz, null, options);
     }
 
-    public <T> List<QueryResult<T>> find(List<Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
+    public <T> List<QueryResult<T>> find(List<? extends Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
                                          QueryOptions options) {
         return privateFind(queries, projection, null, converter, options);
     }
@@ -265,9 +274,9 @@ public class MongoDBCollection {
                 }
             }
 
-            if (options != null && options.getInt(LIMIT) > 0) {
+            if (options != null && options.getInt(QueryOptions.SKIP) <= 0 && options.getInt(QueryOptions.LIMIT) > 0) {
                 int numTotalResults;
-                if (options.getBoolean(SKIP_COUNT)) {
+                if (options.getBoolean(QueryOptions.SKIP_COUNT)) {
                     numTotalResults = -1;
                 } else {
                     try {
@@ -289,7 +298,7 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public <T> List<QueryResult<T>> privateFind(List<Bson> queries, Bson projection, Class<T> clazz,
+    public <T> List<QueryResult<T>> privateFind(List<? extends Bson> queries, Bson projection, Class<T> clazz,
                                                 ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         List<QueryResult<T>> queryResultList = new ArrayList<>(queries.size());
         for (Bson query : queries) {
@@ -300,16 +309,16 @@ public class MongoDBCollection {
     }
 
 
-    public QueryResult<Document> aggregate(List<Bson> operations, QueryOptions options) {
+    public QueryResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         long start = startQuery();
         QueryResult<Document> queryResult;
 
+        // we need to be sure that the List is mutable
+        List<Bson> bsonOperations = new ArrayList<>(operations);
         if (options != null && options.containsKey("limit")) {
-            // we need to be sure that the List is mutable
-            operations = new ArrayList<>(operations);
-            operations.add(Aggregates.limit(options.getInt("limit")));
+            bsonOperations.add(Aggregates.limit(options.getInt("limit")));
         }
-        AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
+        AggregateIterable output = mongoDBNativeQuery.aggregate(bsonOperations, options);
         MongoCursor<Document> iterator = output.iterator();
         List<Bson> list = new LinkedList<>();
         if (queryResultWriter != null) {
@@ -333,7 +342,8 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public <T> QueryResult<T> aggregate(List<Bson> operations, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+    public <T> QueryResult<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
+                                        QueryOptions options) {
         long start = startQuery();
         QueryResult<T> queryResult;
         AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
@@ -385,29 +395,42 @@ public class MongoDBCollection {
 
         boolean upsert = false;
         boolean multi = false;
+        boolean replace = false;
         if (options != null) {
             upsert = options.getBoolean(UPSERT);
             multi = options.getBoolean(MULTI);
+            replace = options.getBoolean(REPLACE);
         }
 
-        UpdateResult updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
+        UpdateResult updateResult;
+        if (replace) {
+            updateResult = mongoDBNativeQuery.replace(query, update, upsert);
+        } else {
+            updateResult = mongoDBNativeQuery.update(query, update, upsert, multi);
+        }
         return endQuery(Collections.singletonList(updateResult), start);
     }
 
     //Bulk update
-    public QueryResult<BulkWriteResult> update(List<Bson> queries, List<Bson> updates, QueryOptions options) {
+    public QueryResult<BulkWriteResult> update(List<? extends Bson> queries, List<? extends Bson> updates, QueryOptions options) {
         long start = startQuery();
 
         boolean upsert = false;
         boolean multi = false;
+        boolean replace = false;
         if (options != null) {
             upsert = options.getBoolean(UPSERT);
             multi = options.getBoolean(MULTI);
+            replace = options.getBoolean(REPLACE);
         }
 
-        com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.update(queries, updates, upsert, multi);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr), start);
-        return queryResult;
+        com.mongodb.bulk.BulkWriteResult wr;
+        if (replace) {
+            wr = mongoDBNativeQuery.replace(queries, updates, upsert);
+        } else {
+            wr = mongoDBNativeQuery.update(queries, updates, upsert, multi);
+        }
+        return endQuery(Collections.singletonList(wr), start);
     }
 
 
@@ -419,7 +442,7 @@ public class MongoDBCollection {
     }
 
     //Bulk remove
-    public QueryResult<BulkWriteResult> remove(List<Bson> query, QueryOptions options) {
+    public QueryResult<BulkWriteResult> remove(List<? extends Bson> query, QueryOptions options) {
         long start = startQuery();
 
         boolean multi = false;
@@ -475,10 +498,22 @@ public class MongoDBCollection {
         return endQuery(Collections.singletonList(result), start);
     }
 
-
-    public QueryResult createIndex(Bson keys, Bson options) {
+    public QueryResult createIndex(Bson keys, ObjectMap options) {
         long start = startQuery();
         IndexOptions i = new IndexOptions();
+        if (options.containsKey(UNIQUE)) {
+            i.unique(options.getBoolean(UNIQUE));
+        }
+        if (options.containsKey(BACKGROUND)) {
+            i.background(options.getBoolean(BACKGROUND));
+        }
+        if (options.containsKey(SPARSE)) {
+            i.sparse(options.getBoolean(SPARSE));
+        }
+        if (options.containsKey(NAME)) {
+            i.name(options.getString(NAME));
+        }
+
         mongoDBNativeQuery.createIndex(keys, i);
         QueryResult queryResult = endQuery(Collections.emptyList(), start);
         return queryResult;
@@ -491,10 +526,10 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public QueryResult<Bson> getIndex() {
+    public QueryResult<Document> getIndex() {
         long start = startQuery();
-        List<Bson> index = mongoDBNativeQuery.getIndex();
-        QueryResult<Bson> queryResult = endQuery(index, start);
+        List<Document> index = mongoDBNativeQuery.getIndex();
+        QueryResult<Document> queryResult = endQuery(index, start);
         return queryResult;
     }
 
@@ -517,4 +552,13 @@ public class MongoDBCollection {
         return mongoDBNativeQuery;
     }
 
+    @Override
+    public String toString() {
+        return "MongoDBCollection{"
+                + "dbCollection=" + getFullName() + '}';
+    }
+
+    private String getFullName() {
+        return dbCollection.getNamespace().getFullName();
+    }
 }

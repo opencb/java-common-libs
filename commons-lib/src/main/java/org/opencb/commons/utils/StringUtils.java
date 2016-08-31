@@ -18,11 +18,11 @@ import java.util.zip.GZIPOutputStream;
 public class StringUtils {
 
     public static String randomString() {
-        return RandomStringUtils.random(10);
+        return RandomStringUtils.randomAlphanumeric(10);
     }
 
     public static String randomString(int length) {
-        return RandomStringUtils.random(length);
+        return RandomStringUtils.randomAlphanumeric(length);
     }
 
     public static String sha1(String text) throws NoSuchAlgorithmException {

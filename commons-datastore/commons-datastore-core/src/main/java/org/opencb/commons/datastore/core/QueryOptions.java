@@ -17,6 +17,7 @@
 package org.opencb.commons.datastore.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,19 @@ import java.util.Map;
  * Created by imedina on 20/03/14.
  */
 public class QueryOptions extends ObjectMap {
+
+    public static final String INCLUDE = "include";
+    public static final String EXCLUDE = "exclude";
+    public static final String LIMIT = "limit";
+    public static final String SKIP = "skip";
+
+    public static final String SORT = "sort";
+    public static final String ORDER = "order";
+    public static final String ASCENDING = "ascending";
+    public static final String DESCENDING = "descending";
+
+    public static final String TIMEOUT = "timeout";
+    public static final String SKIP_COUNT = "skipCount";
 
 
     public QueryOptions() {
@@ -110,5 +124,9 @@ public class QueryOptions extends ObjectMap {
     @Override
     public QueryOptions append(String key, Object value) {
         return (QueryOptions) super.append(key, value);
+    }
+
+    public static QueryOptions empty() {
+        return (QueryOptions) Collections.unmodifiableMap(new QueryOptions());
     }
 }

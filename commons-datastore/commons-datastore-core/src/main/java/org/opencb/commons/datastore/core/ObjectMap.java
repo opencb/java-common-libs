@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by imedina on 20/03/14.
@@ -89,10 +90,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     public String getString(String field, String defaultValue) {
         if (field != null && objectMap.containsKey(field)) {
-            if (objectMap.get(field) != null) {
-                return objectMap.get(field).toString();
+            Object o = objectMap.get(field);
+            if (o != null) {
+                if (o instanceof Collection) {
+                    //Join manually to avoid surrounding brackets
+                    return ((Collection<?>) o).stream().map(Objects::toString).collect(Collectors.joining(","));
+                } else {
+                    return o.toString();
+                }
             } else {
-                return null;
+                return defaultValue;
             }
         }
         return defaultValue;
@@ -395,6 +402,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         } else {
             if (value instanceof List) {
                 return (List) value;
+            } else if (value instanceof Collection) {
+                Collection x = (Collection) value;
+                return new ArrayList<Object>(x);
             } else {
                 return Arrays.<Object>asList(value.toString().split(separator));
             }
@@ -444,10 +454,26 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         return defaultValue;
     }
 
+
     public ObjectMap append(String key, Object value) {
         put(key, value);
         return this;
     }
+
+    public Object putIfNotNull(String key, Object value) {
+        if (key != null && value != null) {
+            return objectMap.put(key, value);
+        }
+        return value;
+    }
+
+    public Object putIfNotEmpty(String key, String value) {
+        if (key != null && value != null && !value.isEmpty()) {
+            return objectMap.put(key, value);
+        }
+        return value;
+    }
+
 
     /**
      * Map methods implementation. Side effect of composition.
@@ -483,8 +509,18 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     @Override
+    public Object putIfAbsent(String key, Object value) {
+        return objectMap.putIfAbsent(key, value);
+    }
+
+    @Override
     public Object remove(Object key) {
         return objectMap.remove(key);
+    }
+
+    @Override
+    public boolean remove(Object key, Object value) {
+        return objectMap.remove(key, value);
     }
 
     @Override
