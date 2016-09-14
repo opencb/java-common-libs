@@ -520,6 +520,14 @@ public class ParallelTaskRunner<I, O> {
         return !this.futureTasks.isEmpty();
     }
 
+    /**
+     * Check if all the worker threads have finished.
+     * @return true if all tasks have finished
+     */
+    private boolean allTasksFinished() {
+        return tasks.size() == finishedTasks;
+    }
+
     private Batch<I> readBatch() {
         long start;
         Batch<I> batch;
@@ -622,10 +630,13 @@ public class ParallelTaskRunner<I, O> {
                     timeTaskApply += threadTimeTaskApply;
                     timeBlockedAtTakeRead += threadTimeBlockedAtTakeRead;
                     finishedTasks++;
-                    if (tasks.size() == finishedTasks) {
+                    if (allTasksFinished()) {
                         if (writeBlockingQueue != null) {
                             // Offer, instead of put, to avoid blocking
-                            writeBlockingQueue.offer(POISON_PILL);
+                            boolean offerPoisonPill = writeBlockingQueue.offer(POISON_PILL);
+//                            if (!offerPoisonPill) {
+//                                logger.trace("Offer POISON_PILL failed!");
+//                            }
                         } else if (writeBlockingQueueFuture != null) {
                             CompletableFuture<Batch<O>> future = new CompletableFuture<>();
                             future.complete(POISON_PILL);
@@ -715,7 +726,12 @@ public class ParallelTaskRunner<I, O> {
                     throw new IllegalStateException(e);
                 }
             } else {
-                batch = writeBlockingQueue.take();
+                // WriteBlockingQueue may be empty if queue was full when offering the poison_pill
+                if (allTasksFinished() && writeBlockingQueue.isEmpty()) {
+                    batch = POISON_PILL;
+                } else {
+                    batch = writeBlockingQueue.take();
+                }
             }
             timeBlockedAtTakeWrite += System.nanoTime() - start;
             if (batch == POISON_PILL) {
