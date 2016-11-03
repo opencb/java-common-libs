@@ -14,6 +14,7 @@ import java.util.List;
  * Time: 10:27 PM
  * To change this template use File | Settings | File Templates.
  */
+@Deprecated
 public class FilterApplicator {
 
     public static <E> boolean filter(List<E> recordList, List<? extends Filter<E>> filters) {
