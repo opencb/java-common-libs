@@ -49,7 +49,7 @@ public class MongoDBConfiguration extends ObjectMap {
 
         private String value;
 
-        private ReadPreference(String value) {
+        ReadPreference(String value) {
             this.value = value;
         }
 
