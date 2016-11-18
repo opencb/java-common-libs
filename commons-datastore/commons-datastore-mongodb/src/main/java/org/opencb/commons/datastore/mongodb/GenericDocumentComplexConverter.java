@@ -71,7 +71,7 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
      * @return              Document modified
      */
     public static Document replaceDots(Document document) {
-        return modifyKeys(document, key -> key.replace(".", TO_REPLACE_DOTS));
+        return modifyKeys(document, key -> key.replace(".", TO_REPLACE_DOTS), ".");
     }
 
     /**
@@ -80,7 +80,7 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
      * @return              Restored document
      */
     public static Document restoreDots(Document document) {
-        return modifyKeys(document, key -> key.replace(TO_REPLACE_DOTS, "."));
+        return modifyKeys(document, key -> key.replace(TO_REPLACE_DOTS, "."), TO_REPLACE_DOTS);
     }
 
 
@@ -91,18 +91,19 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
      *
      * @param object        Object to modify
      * @param keyMapper     Key mapper
+     * @param toReplace     String to be replaced
      * @param <T>           Type of the input object.
      * @return              The modified object.
      */
-    protected static <T> T modifyKeys(T object, Function<String, String> keyMapper) {
+    protected static <T> T modifyKeys(T object, Function<String, String> keyMapper, String toReplace) {
         if (object instanceof Map) {
             Map<String, Object> document = (Map<String, Object>) object;
             List<String> keysWithDots = new LinkedList<>();
             for (Map.Entry<String, Object> entry : document.entrySet()) {
-                if (entry.getKey().contains(".")) {
+                if (entry.getKey().contains(toReplace)) {
                     keysWithDots.add(entry.getKey());
                 }
-                modifyKeys(entry.getValue(), keyMapper);
+                modifyKeys(entry.getValue(), keyMapper, toReplace);
             }
             for (String key : keysWithDots) {
                 Object o = document.remove(key);
@@ -111,7 +112,7 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
         } else if (object instanceof Collection) {
             Collection collection = (Collection) object;
             for (Object o : collection) {
-                modifyKeys(o, keyMapper);
+                modifyKeys(o, keyMapper, toReplace);
             }
         }
         return object;

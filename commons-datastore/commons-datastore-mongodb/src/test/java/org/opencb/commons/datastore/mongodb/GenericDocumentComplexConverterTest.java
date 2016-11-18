@@ -2,12 +2,10 @@ package org.opencb.commons.datastore.mongodb;
 
 import org.bson.Document;
 import org.junit.Test;
-import org.opencb.commons.datastore.core.ObjectMap;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.opencb.commons.datastore.mongodb.GenericDocumentComplexConverter.TO_REPLACE_DOTS;
 
 /**
@@ -19,30 +17,40 @@ public class GenericDocumentComplexConverterTest {
 
     @Test
     public void testReplaceDots() throws Exception {
-        Document documentWithDots = new Document("My.key",
-                new Document("myOtherKey", Arrays.asList(
-                        "value.with.dots",
-                        "valueWithoutDots",
-                        5,
-                        5.3,
-                        true,
-                        'c',
-                        new Document("MyKey", 3).append("my.other.key", "true.true"))));
-        Document documentWithoutDots = new Document("My" + TO_REPLACE_DOTS + "key",
-                new Document("myOtherKey", Arrays.asList(
-                        "value.with.dots",
-                        "valueWithoutDots",
-                        5,
-                        5.3,
-                        true,
-                        'c',
-                        new Document("MyKey", 3).append("my" + TO_REPLACE_DOTS + "other" + TO_REPLACE_DOTS + "key", "true.true"))));
+        Document documentWithDots = newDocument(".");
+        Document documentWithoutDots = newDocument(TO_REPLACE_DOTS);
 
         Document documentReplacedDots = GenericDocumentComplexConverter.replaceDots(documentWithDots);
-        Document documentRestoredDots = GenericDocumentComplexConverter.restoreDots(documentWithDots);
-
-        assertEquals(documentWithDots, documentRestoredDots);
         assertEquals(documentWithoutDots, documentReplacedDots);
+    }
+
+    @Test
+    public void testRestoreDots() throws Exception {
+        Document documentWithDots = newDocument(".");
+        Document documentWithoutDots = newDocument(TO_REPLACE_DOTS);
+
+        Document documentRestoredDots = GenericDocumentComplexConverter.restoreDots(documentWithoutDots);
+        assertEquals(documentWithDots, documentRestoredDots);
+    }
+
+    private Document newDocument(String dot) {
+        return newDocument(dot, 3);
+    }
+
+    private Document newDocument(String dot, int levels) {
+        Document document = new Document("My" + dot + "key",
+                new Document("myOtherKey", Arrays.asList(
+                        "value.with.dots",
+                        "valueWithoutDots",
+                        5,
+                        5.3,
+                        true,
+                        'c',
+                        new Document("MyKey", 3).append("my" + dot + "other" + dot + "key", "true.true"))));
+        if (levels > 0) {
+            document.append("recursive", newDocument(dot, levels - 1));
+        }
+        return document;
     }
 
 }
