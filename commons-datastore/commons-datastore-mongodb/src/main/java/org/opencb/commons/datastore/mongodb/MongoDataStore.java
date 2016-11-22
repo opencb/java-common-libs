@@ -95,8 +95,13 @@ public class MongoDataStore {
     }
 
 
+    void drop() {
+        logger.debug("MongoDataStore: drop database '{}'", getDatabaseName());
+        db.drop();
+    }
+
     void close() {
-        logger.debug("MongoDataStore: connection closed");
+        logger.debug("MongoDataStore: connection closed for database '{}'", getDatabaseName());
         mongoClient.close();
     }
 

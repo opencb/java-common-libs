@@ -180,31 +180,10 @@ public class MongoDataStoreManager implements AutoCloseable {
     }
 
     public void drop(String database) {
-
         if (database != null && !database.trim().equals("")) {
-            //                MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
-//                        .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
-//                        .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
-//                        .build();
-
-
-
-            try (MongoClient mc = newMongoClient()) {
-//                logger.debug(mongoDBConfiguration.toString());
-                MongoDatabase db = mc.getDatabase(database);
-//                String user = mongoDBConfiguration.getString("username", "");
-//                String pass = mongoDBConfiguration.getString("password", "");
-//                if((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
-//                    db.authenticate(user, pass.toCharArray());
-//                }
-                db.drop();
-            }
-
-            long t1 = System.currentTimeMillis();
-            logger.debug("MongoDataStoreManager: remove MongoDataStore object for database");
-            MongoDataStore remove = mongoDataStores.remove(database);
-            if (remove != null) {
-                remove.close();
+            if (mongoDataStores.containsKey(database)) {
+                mongoDataStores.get(database).drop();
+                // Do not close or remove from map
             }
         } else {
             logger.debug("MongoDB database is null or empty");
