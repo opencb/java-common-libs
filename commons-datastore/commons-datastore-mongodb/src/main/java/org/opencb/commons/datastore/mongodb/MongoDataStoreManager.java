@@ -145,28 +145,7 @@ public class MongoDataStoreManager implements AutoCloseable {
             }
 
 
-            if (dataStoreServerAddresses.size() == 1) {
-                if (mongoCredential != null) {
-                    mc = new MongoClient(
-                            new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
-                            Arrays.asList(mongoCredential),
-                            mongoClientOptions);
-                } else {
-                    mc = new MongoClient(
-                            new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
-                            mongoClientOptions);
-                }
-            } else {
-                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
-                for (DataStoreServerAddress serverAddress : dataStoreServerAddresses) {
-                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-                }
-                if (mongoCredential != null) {
-                    mc = new MongoClient(serverAddresses, Arrays.asList(mongoCredential), mongoClientOptions);
-                } else {
-                    mc = new MongoClient(serverAddresses, mongoClientOptions);
-                }
-            }
+            mc = newMongoClient(mongoClientOptions, mongoCredential);
 
 //                mc.setReadPreference(ReadPreference.secondary(new BasicDBObject("dc", "PG")));
 //                mc.setReadPreference(ReadPreference.primary());
@@ -188,22 +167,12 @@ public class MongoDataStoreManager implements AutoCloseable {
     public boolean exists(String database) {
 
         if (database != null && !database.trim().equals("")) {
-            MongoClient mc;
-            if (dataStoreServerAddresses.size() == 1) {
-                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
-                        dataStoreServerAddresses.get(0).getPort()));
-            } else {
-                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
-                for (ServerAddress serverAddress : serverAddresses) {
-                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-                }
-                mc = new MongoClient(serverAddresses);
-            }
-
-            MongoCursor<String> dbsCursor = mc.listDatabaseNames().iterator();
-            while (dbsCursor.hasNext()) {
-                if (dbsCursor.next().equals(database)) {
-                    return true;
+            try (MongoClient mc = newMongoClient()) {
+                MongoCursor<String> dbsCursor = mc.listDatabaseNames().iterator();
+                while (dbsCursor.hasNext()) {
+                    if (dbsCursor.next().equals(database)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -211,36 +180,32 @@ public class MongoDataStoreManager implements AutoCloseable {
     }
 
     public void drop(String database) {
-        MongoClient mc = null;
+
         if (database != null && !database.trim().equals("")) {
             //                MongoClientOptions mongoClientOptions = new MongoClientOptions.Builder()
 //                        .connectionsPerHost(mongoDBConfiguration.getInt("connectionsPerHost", 100))
 //                        .connectTimeout(mongoDBConfiguration.getInt("connectTimeout", 10000))
 //                        .build();
 
-            if (dataStoreServerAddresses.size() == 1) {
-                mc = new MongoClient(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
-                        dataStoreServerAddresses.get(0).getPort()));
-            } else {
-                List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
-                for (ServerAddress serverAddress : serverAddresses) {
-                    serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-                }
-                mc = new MongoClient(serverAddresses);
-            }
 
+
+            try (MongoClient mc = newMongoClient()) {
 //                logger.debug(mongoDBConfiguration.toString());
-            MongoDatabase db = mc.getDatabase(database);
+                MongoDatabase db = mc.getDatabase(database);
 //                String user = mongoDBConfiguration.getString("username", "");
 //                String pass = mongoDBConfiguration.getString("password", "");
 //                if((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
 //                    db.authenticate(user, pass.toCharArray());
 //                }
-            db.drop();
+                db.drop();
+            }
 
             long t1 = System.currentTimeMillis();
             logger.debug("MongoDataStoreManager: remove MongoDataStore object for database");
-            mongoDataStores.remove(database);
+            MongoDataStore remove = mongoDataStores.remove(database);
+            if (remove != null) {
+                remove.close();
+            }
         } else {
             logger.debug("MongoDB database is null or empty");
         }
@@ -261,6 +226,36 @@ public class MongoDataStoreManager implements AutoCloseable {
         mongoDataStores.clear();
     }
 
+    private MongoClient newMongoClient() {
+        return newMongoClient(new MongoClientOptions.Builder().build(), null);
+    }
+
+    private MongoClient newMongoClient(MongoClientOptions mongoClientOptions, MongoCredential mongoCredential) {
+        MongoClient mc;
+        if (dataStoreServerAddresses.size() == 1) {
+            if (mongoCredential != null) {
+                mc = new MongoClient(
+                        new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
+                        Arrays.asList(mongoCredential),
+                        mongoClientOptions);
+            } else {
+                mc = new MongoClient(
+                        new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
+                        mongoClientOptions);
+            }
+        } else {
+            List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+            for (DataStoreServerAddress serverAddress : dataStoreServerAddresses) {
+                serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
+            }
+            if (mongoCredential != null) {
+                mc = new MongoClient(serverAddresses, Arrays.asList(mongoCredential), mongoClientOptions);
+            } else {
+                mc = new MongoClient(serverAddresses, mongoClientOptions);
+            }
+        }
+        return mc;
+    }
 
     /*
      * GETTERS AND SETTERS
