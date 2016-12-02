@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.MongoExecutionTimeoutException;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -561,4 +563,15 @@ public class MongoDBCollection {
     private String getFullName() {
         return dbCollection.getNamespace().getFullName();
     }
+
+    public MongoDBCollection withWriteConcern(WriteConcern writeConcern) {
+        dbCollection = dbCollection.withWriteConcern(writeConcern);
+        return this;
+    }
+
+    public MongoDBCollection withReadPreference(ReadPreference readPreference) {
+        dbCollection = dbCollection.withReadPreference(readPreference);
+        return this;
+    }
+
 }
