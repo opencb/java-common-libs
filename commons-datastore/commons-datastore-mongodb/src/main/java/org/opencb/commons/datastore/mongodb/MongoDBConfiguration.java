@@ -114,7 +114,7 @@ public class MongoDBConfiguration extends ObjectMap {
         }
 
         public Builder setReadPreference(ReadPreference readPreference) {
-            optionsMap.put(READ_PREFERENCE, readPreference);
+            optionsMap.put(READ_PREFERENCE, readPreference.getValue());
             return this;
         }
 

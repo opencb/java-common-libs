@@ -46,6 +46,10 @@ public class MongoDBNativeQuery {
         this.dbCollection = dbCollection;
     }
 
+    MongoCollection<Document> getDbCollection() {
+        return dbCollection;
+    }
+
     public long count() {
         return dbCollection.count();
     }
