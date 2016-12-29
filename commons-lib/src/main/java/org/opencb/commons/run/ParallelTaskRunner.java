@@ -729,8 +729,12 @@ public class ParallelTaskRunner<I, O> {
             if (config.sorted) {
                 try {
                     while (batch == null) {
-                        Future<Batch<O>> future = writeBlockingQueueFuture.take();
-                        batch = future.get();
+                        if (allTasksFinished() && writeBlockingQueueFuture.isEmpty()) {
+                            batch = POISON_PILL;
+                        } else {
+                            Future<Batch<O>> future = writeBlockingQueueFuture.take();
+                            batch = future.get();
+                        }
                     }
                     writeBlockingQueueFutureMap.remove(batch.position);
                 } catch (ExecutionException e) {
