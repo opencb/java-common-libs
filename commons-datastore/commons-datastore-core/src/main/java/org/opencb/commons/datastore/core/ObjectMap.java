@@ -119,7 +119,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 try {
                     return Integer.parseInt((String) obj);
                 } catch (NumberFormatException ignored) {
-                    ignored.printStackTrace();
+                    return defaultValue;
                 }
             }
         }
@@ -139,7 +139,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 try {
                     return Long.parseLong((String) obj);
                 } catch (NumberFormatException ignored) {
-                    ignored.printStackTrace();
+                    return defaultValue;
                 }
             }
         }
@@ -160,7 +160,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 try {
                     return Float.parseFloat((String) obj);
                 } catch (NumberFormatException ignored) {
-                    ignored.printStackTrace();
+                    return defaultValue;
                 }
             }
         }
@@ -181,7 +181,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 try {
                     return Double.parseDouble((String) obj);
                 } catch (NumberFormatException ignored) {
-                    ignored.printStackTrace();
+                    return defaultValue;
                 }
             }
         }
