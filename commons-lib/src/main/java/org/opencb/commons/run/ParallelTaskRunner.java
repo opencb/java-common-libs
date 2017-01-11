@@ -5,6 +5,7 @@ import org.opencb.commons.io.DataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
@@ -37,6 +38,7 @@ public class ParallelTaskRunner<I, O> {
     private static final int EXTRA_AWAIT_TERMINATION_TIMEOUT = 1000;
     private static final int RETRY_AWAIT_TERMINATION_TIMEOUT = 50;
     private static final int MAX_SHUTDOWN_RETRIES = 300;
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.###");
 
     @FunctionalInterface
     public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
@@ -291,15 +293,19 @@ public class ParallelTaskRunner<I, O> {
         boolean interrupted = false;
         init();
 
+        long auxTime = System.nanoTime();
         if (reader != null) {
             reader.open();
             reader.pre();
         }
+        timeReading += System.nanoTime() - auxTime;
 
+        auxTime = System.nanoTime();
         if (writer != null) {
             writer.open();
             writer.pre();
         }
+        timeWriting += System.nanoTime() - auxTime;
 
         for (TaskWithException<I, O, ?> task : tasks) {
             task.pre();
@@ -366,37 +372,39 @@ public class ParallelTaskRunner<I, O> {
                 task.post();
             }
         }
-
+        auxTime = System.nanoTime();
         if (reader != null) {
             if (!interrupted) {
                 reader.post();
             }
             reader.close();
         }
+        timeReading += System.nanoTime() - auxTime;
 
+        auxTime = System.nanoTime();
         if (writer != null) {
             if (!interrupted) {
                 writer.post();
             }
             writer.close();
         }
-
+        timeWriting += System.nanoTime() - auxTime;
 
         if (reader != null) {
-            logger.info("read:  timeReading                  = " + timeReading / 1000000000.0 + "s");
-            logger.info("read:  timeBlockedAtPutRead         = " + timeBlockedAtPutRead / 1000000000.0 + "s");
-            logger.info("task;  timeBlockedAtTakeRead        = " + timeBlockedAtTakeRead / 1000000000.0 + "s");
+            logger.info("read:  timeReading                  = " + prettyTime(timeReading) + "s");
+            logger.info("read:  timeBlockedAtPutRead         = " + prettyTime(timeBlockedAtPutRead) + "s");
+            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s");
         }
 
-        logger.info("task;  timeTaskApply                = " + timeTaskApply / 1000000000.0 + "s");
+        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s");
 
         if (writer != null) {
-            logger.info("task;  timeBlockedAtPutWrite        = " + timeBlockedAtPutWrite / 1000000000.0 + "s");
-            logger.info("write: timeBlockedWatingDataToWrite = " + timeBlockedAtTakeWrite / 1000000000.0 + "s");
-            logger.info("write: timeWriting                  = " + timeWriting / 1000000000.0 + "s");
+            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s");
+            logger.info("write: timeBlockedWatingDataToWrite = " + prettyTime(timeBlockedAtTakeWrite) + "s");
+            logger.info("write: timeWriting                  = " + prettyTime(timeWriting) + "s");
         }
 
-        logger.info("total:                              = " + (System.nanoTime() - start) / 1000000000.0 + "s");
+        logger.info("total:                              = " + prettyTime(System.nanoTime() - start) + "s");
 
         if (config.abortOnFail && !exceptions.isEmpty()) {
             throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size()
@@ -405,6 +413,10 @@ public class ParallelTaskRunner<I, O> {
         if (interrupted) {
             throw interruptions.get(0);
         }
+    }
+
+    private String prettyTime(long time) {
+        return DECIMAL_FORMAT.format(TimeUnit.NANOSECONDS.toMillis(time) / 1000.0);
     }
 
     public List<Exception> getExceptions() {
@@ -717,8 +729,12 @@ public class ParallelTaskRunner<I, O> {
             if (config.sorted) {
                 try {
                     while (batch == null) {
-                        Future<Batch<O>> future = writeBlockingQueueFuture.take();
-                        batch = future.get();
+                        if (allTasksFinished() && writeBlockingQueueFuture.isEmpty()) {
+                            batch = POISON_PILL;
+                        } else {
+                            Future<Batch<O>> future = writeBlockingQueueFuture.take();
+                            batch = future.get();
+                        }
                     }
                     writeBlockingQueueFutureMap.remove(batch.position);
                 } catch (ExecutionException e) {

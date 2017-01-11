@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.MongoExecutionTimeoutException;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
@@ -67,20 +69,17 @@ public class MongoDBCollection {
     public static final String SPARSE = "sparse";
     public static final String NAME = "index_name";
 
-    private MongoCollection<Document> dbCollection;
-
     private MongoDBNativeQuery mongoDBNativeQuery;
     private QueryResultWriter<Object> queryResultWriter;
 
     private ObjectMapper objectMapper;
     private ObjectWriter objectWriter;
 
-    MongoDBCollection(MongoCollection dbCollection) {
+    MongoDBCollection(MongoCollection<Document> dbCollection) {
         this(dbCollection, null);
     }
 
-    MongoDBCollection(MongoCollection dbCollection, QueryResultWriter<Object> queryResultWriter) {
-        this.dbCollection = dbCollection;
+    MongoDBCollection(MongoCollection<Document> dbCollection, QueryResultWriter<Object> queryResultWriter) {
         this.queryResultWriter = queryResultWriter;
 
         mongoDBNativeQuery = new MongoDBNativeQuery(dbCollection);
@@ -559,6 +558,17 @@ public class MongoDBCollection {
     }
 
     private String getFullName() {
-        return dbCollection.getNamespace().getFullName();
+        return mongoDBNativeQuery.getDbCollection().getNamespace().getFullName();
     }
+
+    public MongoDBCollection withWriteConcern(WriteConcern writeConcern) {
+        mongoDBNativeQuery = new MongoDBNativeQuery(mongoDBNativeQuery.getDbCollection().withWriteConcern(writeConcern));
+        return this;
+    }
+
+    public MongoDBCollection withReadPreference(ReadPreference readPreference) {
+        mongoDBNativeQuery = new MongoDBNativeQuery(mongoDBNativeQuery.getDbCollection().withReadPreference(readPreference));
+        return this;
+    }
+
 }

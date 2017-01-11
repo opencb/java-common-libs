@@ -6,6 +6,7 @@ import com.google.common.base.Predicate;
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
+@Deprecated
 public abstract class Filter<E> implements Predicate<E>, Comparable<Filter> {
 
     private int priority;

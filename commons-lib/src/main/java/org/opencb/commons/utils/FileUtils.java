@@ -48,7 +48,7 @@ public class FileUtils {
         checkPath(path, writable);
 
         if (Files.isDirectory(path)) {
-            throw new IOException("Path '" + path.toAbsolutePath() + "' must be a file");
+            throw new IOException("Path '" + path.toAbsolutePath() + "' must be a file and not a directory");
         }
     }
 

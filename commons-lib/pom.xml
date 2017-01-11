@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.opencb.commons</groupId>
         <artifactId>commons</artifactId>
-        <version>3.3.2</version>
+        <version>3.4.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -22,8 +22,8 @@
             <version>1.47</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -34,23 +34,22 @@
             <artifactId>slf4j-simple</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>commons-codec</groupId>-->
+            <!--<artifactId>commons-codec</artifactId>-->
+        <!--</dependency>-->
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
             <version>1.8.2</version>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

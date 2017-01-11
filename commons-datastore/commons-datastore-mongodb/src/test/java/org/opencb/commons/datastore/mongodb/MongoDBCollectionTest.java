@@ -62,6 +62,7 @@ public class MongoDBCollectionTest {
     public static void beforeClass() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("localhost", 27017);
 
+        mongoDataStoreManager.get("datastore_test");
         mongoDataStoreManager.drop("datastore_test");
         mongoDataStore = mongoDataStoreManager.get("datastore_test");
 

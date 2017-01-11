@@ -17,11 +17,14 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.MongoClient;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Created by imedina on 22/03/14.
@@ -35,8 +38,6 @@ import java.util.*;
  */
 
 public class MongoDataStore {
-
-    private Map<String, MongoDBCollection> mongoDBCollections = new HashMap<>();
 
     private MongoClient mongoClient;
     private MongoDatabase db;
@@ -58,12 +59,19 @@ public class MongoDataStore {
 
 
     public MongoDBCollection getCollection(String collection) {
-        if (!mongoDBCollections.containsKey(collection)) {
-            MongoDBCollection mongoDBCollection = new MongoDBCollection(db.getCollection(collection));
-            mongoDBCollections.put(collection, mongoDBCollection);
-            logger.debug("MongoDataStore: new MongoDB collection '{}' created", collection);
+        return getCollection(collection, null, null);
+    }
+
+    public MongoDBCollection getCollection(String collection, WriteConcern writeConcern, ReadPreference readPreference) {
+        MongoDBCollection mongoDBCollection = new MongoDBCollection(db.getCollection(collection));
+        if (writeConcern != null) {
+            mongoDBCollection.withWriteConcern(writeConcern);
         }
-        return mongoDBCollections.get(collection);
+        if (readPreference != null) {
+            mongoDBCollection.withReadPreference(readPreference);
+        }
+        logger.debug("MongoDataStore: new MongoDB collection '{}' created", collection);
+        return mongoDBCollection;
     }
 
     public MongoDBCollection createCollection(String collectionName) {
@@ -74,10 +82,11 @@ public class MongoDataStore {
     }
 
     public void dropCollection(String collectionName) {
-        if (Arrays.asList(db.listCollectionNames()).contains(collectionName)) {
-            db.getCollection(collectionName).drop();
-            mongoDBCollections.remove(collectionName);
-        }
+        db.listCollectionNames().forEach((Consumer<String>) s -> {
+            if (s.equals(collectionName)) {
+                db.getCollection(collectionName).drop();
+            }
+        });
     }
 
     public List<String> getCollectionNames() {
@@ -95,8 +104,13 @@ public class MongoDataStore {
     }
 
 
+    void drop() {
+        logger.debug("MongoDataStore: drop database '{}'", getDatabaseName());
+        db.drop();
+    }
+
     void close() {
-        logger.debug("MongoDataStore: connection closed");
+        logger.debug("MongoDataStore: connection closed for database '{}'", getDatabaseName());
         mongoClient.close();
     }
 
@@ -105,8 +119,9 @@ public class MongoDataStore {
      * GETTERS, NO SETTERS ARE AVAILABLE TO MAKE THIS CLASS IMMUTABLE
      */
 
+    @Deprecated
     public Map<String, MongoDBCollection> getMongoDBCollections() {
-        return mongoDBCollections;
+        return Collections.emptyMap();
     }
 
     public MongoDatabase getDb() {

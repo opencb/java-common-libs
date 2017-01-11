@@ -35,8 +35,9 @@ public class MongoDataStoreTest {
     public static void setUp() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("localhost", 27017);
 
-        mongoDataStoreManager.drop("datastore_test");
         mongoDataStore = mongoDataStoreManager.get("datastore_test");
+        mongoDataStoreManager.drop("datastore_test");
+
         mongoDataStore.createCollection("JUnitTest");
     }
 
