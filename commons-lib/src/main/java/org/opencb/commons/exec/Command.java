@@ -123,8 +123,8 @@ public class Command extends RunnableProcess {
             public void run() {
                 try {
                     int bytesRead = 0;
-                    int bufferLength = 2048;
-                    byte[] buffer = new byte[bufferLength];
+                    int bufferLength;
+                    byte[] buffer;
 
                     while (bytesRead != -1) {
                         // int x=in.available();
@@ -138,8 +138,9 @@ public class Command extends RunnableProcess {
                         if (logger != null) {
                             System.err.print(new String(buffer));
                         }
-                        outputBuffer.append(new String(buffer));
-                        if (outputOutputStream != null) {
+                        if (outputOutputStream == null) {
+                            outputBuffer.append(new String(buffer));
+                        } else {
                             outputOutputStream.write(buffer);
                             outputOutputStream.flush();
                         }
@@ -165,8 +166,8 @@ public class Command extends RunnableProcess {
 
                 try {
                     int bytesRead = 0;
-                    int bufferLength = 2048;
-                    byte[] buffer = new byte[bufferLength];
+                    int bufferLength;
+                    byte[] buffer;
 
                     while (bytesRead != -1) {
                         // int x=in.available();
@@ -181,8 +182,9 @@ public class Command extends RunnableProcess {
                         if (logger != null) {
                             System.err.print(new String(buffer));
                         }
-                        errorBuffer.append(new String(buffer));
-                        if (errorOutputStream != null) {
+                        if (errorOutputStream == null) {
+                            errorBuffer.append(new String(buffer));
+                        } else {
                             errorOutputStream.write(buffer);
                             errorOutputStream.flush();
                         }
