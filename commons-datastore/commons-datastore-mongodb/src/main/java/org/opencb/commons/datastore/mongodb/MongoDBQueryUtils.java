@@ -141,7 +141,7 @@ public class MongoDBQueryUtils {
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, Integer.parseInt(queryValueString), comparator));
+                    bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
                     break;
                 case DOUBLE:
                 case DECIMAL:
