@@ -38,7 +38,7 @@ public class ParallelTaskRunner<I, O> {
     private static final int EXTRA_AWAIT_TERMINATION_TIMEOUT = 1000;
     private static final int RETRY_AWAIT_TERMINATION_TIMEOUT = 50;
     private static final int MAX_SHUTDOWN_RETRIES = 300;
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.###");
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.000");
 
     @FunctionalInterface
     public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
@@ -393,13 +393,16 @@ public class ParallelTaskRunner<I, O> {
         if (reader != null) {
             logger.info("read:  timeReading                  = " + prettyTime(timeReading) + "s");
             logger.info("read:  timeBlockedAtPutRead         = " + prettyTime(timeBlockedAtPutRead) + "s");
-            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s");
+            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s(total)"
+                    + "   ~" + prettyTime(timeBlockedAtTakeRead / config.numTasks) + "s/thread");
         }
 
-        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s");
+        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s(total)"
+                + "   ~" + prettyTime(timeTaskApply / config.numTasks) + "s/thread");
 
         if (writer != null) {
-            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s");
+            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s(total)"
+                    + "   ~" + prettyTime(timeBlockedAtPutWrite / config.numTasks) + "s/thread");
             logger.info("write: timeBlockedWatingDataToWrite = " + prettyTime(timeBlockedAtTakeWrite) + "s");
             logger.info("write: timeWriting                  = " + prettyTime(timeWriting) + "s");
         }
@@ -670,7 +673,7 @@ public class ParallelTaskRunner<I, O> {
             } else {
                 long start = System.nanoTime();
                 batch = readBlockingQueue.take();
-                threadTimeBlockedAtTakeRead += start - System.currentTimeMillis();
+                threadTimeBlockedAtTakeRead += (System.nanoTime() - start);
                 //logger.trace("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : "
                 // + batch.size() + " : " + batchSize);
                 if (batch == POISON_PILL) {
