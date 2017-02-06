@@ -27,8 +27,9 @@ public class QueryOptions extends ObjectMap {
 
     public static final String INCLUDE = "include";
     public static final String EXCLUDE = "exclude";
-    public static final String LIMIT = "limit";
     public static final String SKIP = "skip";
+    public static final String LIMIT = "limit";
+    public static final String COUNT = "count";
 
     public static final String SORT = "sort";
     public static final String ORDER = "order";
