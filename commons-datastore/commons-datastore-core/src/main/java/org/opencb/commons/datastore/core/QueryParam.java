@@ -40,4 +40,29 @@ public interface QueryParam {
 
     Type type();
 
+    static QueryParam create(String key, String description, Type type) {
+        return new QueryParamImpl(key, description, type);
+    }
+
+    class QueryParamImpl implements QueryParam {
+
+        private QueryParamImpl(String key, String description, Type type) {
+        }
+
+        @Override
+        public String key() {
+            return null;
+        }
+
+        @Override
+        public String description() {
+            return null;
+        }
+
+        @Override
+        public Type type() {
+            return null;
+        }
+    }
+
 }
