@@ -46,22 +46,29 @@ public interface QueryParam {
 
     class QueryParamImpl implements QueryParam {
 
+        private final String key;
+        private final String description;
+        private final Type type;
+
         private QueryParamImpl(String key, String description, Type type) {
+            this.key = key;
+            this.description = description;
+            this.type = type;
         }
 
         @Override
         public String key() {
-            return null;
+            return key;
         }
 
         @Override
         public String description() {
-            return null;
+            return description;
         }
 
         @Override
         public Type type() {
-            return null;
+            return type;
         }
     }
 
