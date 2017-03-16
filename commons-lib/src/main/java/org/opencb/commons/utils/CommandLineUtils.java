@@ -49,8 +49,7 @@ public class CommandLineUtils {
 
         Comparator<ParameterDescription> parameterDescriptionComparator = (e1, e2) -> e1.getLongestName().compareTo(e2.getLongestName());
         commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
-            if (parameterDescription.getParameter() != null
-                    && !parameterDescription.getParameter().hidden()) {
+            if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
                 String type = getType(parameterDescription);
                 String defaultValue = "";
                 if (parameterDescription.getDefault() != null && !parameterDescription.isDynamicParameter()) {
@@ -83,25 +82,27 @@ public class CommandLineUtils {
         String type = "";
         if (parameterDescription.getParameter().arity() == 0) {
             return type;
-        } else if (parameterDescription.isDynamicParameter()) {
-            Type genericType = parameterDescription.getParameterized().getGenericType();
-            if (genericType instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) genericType;
-                Type rawType = parameterizedType.getRawType();
-                if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                    String key = getType(parameterizedType.getActualTypeArguments()[0]);
-                    String assignment = parameterDescription.getParameter().getAssignment();
-                    String value = getType(parameterizedType.getActualTypeArguments()[1]);
-                    type = key + assignment + value;
+        } else {
+            if (parameterDescription.isDynamicParameter()) {
+                Type genericType = parameterDescription.getParameterized().getGenericType();
+                if (genericType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) genericType;
+                    Type rawType = parameterizedType.getRawType();
+                    if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
+                        String key = getType(parameterizedType.getActualTypeArguments()[0]);
+                        String assignment = parameterDescription.getParameter().getAssignment();
+                        String value = getType(parameterizedType.getActualTypeArguments()[1]);
+                        type = key + assignment + value;
+                    }
+                } else {
+                    type = getType(genericType);
                 }
             } else {
+                Type genericType = parameterDescription.getParameterized().getGenericType();
                 type = getType(genericType);
-            }
-        } else {
-            Type genericType = parameterDescription.getParameterized().getGenericType();
-            type = getType(genericType);
-            if (type.equals("BOOLEAN") && parameterDescription.getParameterized().getParameter().arity() == -1) {
-                type = "";
+                if (type.equals("BOOLEAN") && parameterDescription.getParameterized().getParameter().arity() == -1) {
+                    type = "";
+                }
             }
         }
         return type;
