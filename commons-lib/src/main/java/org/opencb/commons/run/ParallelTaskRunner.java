@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015-2017 OpenCB
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencb.commons.run;
 
 import org.opencb.commons.io.DataReader;
@@ -8,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -38,7 +55,7 @@ public class ParallelTaskRunner<I, O> {
     private static final int EXTRA_AWAIT_TERMINATION_TIMEOUT = 1000;
     private static final int RETRY_AWAIT_TERMINATION_TIMEOUT = 50;
     private static final int MAX_SHUTDOWN_RETRIES = 300;
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.###");
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.000");
 
     @FunctionalInterface
     public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
@@ -51,11 +68,102 @@ public class ParallelTaskRunner<I, O> {
 
         List<R> apply(List<T> batch) throws E;
 
-        default List<R> drain() {
+        default List<R> drain() throws E {
             return Collections.emptyList();
         }
 
         default void post() {
+        }
+
+        /**
+         * Use to concatenate Tasks.
+         *
+         * task1.then(task2).then(task3);
+         *
+         * @param nextTask  Task to concatenate
+         * @param <NR>      New return type.
+         * @return          Task that concatenates the current and the given task.
+         */
+        default <NR> TaskWithException<T, NR, E> then(TaskWithException<R, NR, E> nextTask) {
+            TaskWithException<T, R, E> thisTask = this;
+            return new TaskWithException<T, NR, E>() {
+                @Override
+                public void pre() {
+                    thisTask.pre();
+                    nextTask.pre();
+                }
+
+                @Override
+                public List<NR> apply(List<T> batch) throws E {
+                    List<R> apply1 = thisTask.apply(batch);
+                    return nextTask.apply(apply1);
+                }
+
+                @Override
+                public List<NR> drain() throws E {
+                    // Drain both tasks
+                    List<R> drain1 = thisTask.drain();
+                    // Create new list, in case it is not modifiable
+                    List<NR> batch2 = new ArrayList<>(nextTask.apply(drain1));
+                    List<NR> drain2 = nextTask.drain();
+                    batch2.addAll(drain2);
+                    return batch2;
+                }
+
+                @Override
+                public void post() {
+                    thisTask.post();
+                    nextTask.post();
+                }
+            };
+        }
+
+        /**
+         * Use to concatenate a DataWriter as a task. Allows parallel writing.
+         *
+         * task1.then(writer);
+         *
+         * @param writer    Write step to concatenate
+         * @return          Task that concatenates the current task with the given writer.
+         */
+        default TaskWithException<T, R, E> then(DataWriter<R> writer) {
+            AtomicBoolean pre = new AtomicBoolean(false);
+            AtomicBoolean post = new AtomicBoolean(false);
+            TaskWithException<T, R, E> task = this;
+            return new TaskWithException<T, R, E>() {
+                @Override
+                public void pre() {
+                    if (!pre.getAndSet(true)) {
+                        writer.open();
+                        writer.pre();
+                    }
+                    task.pre();
+                }
+
+                @Override
+                public List<R> apply(List<T> batch) throws E {
+                    List<R> batch2 = task.apply(batch);
+                    writer.write(batch2);
+                    return batch2;
+                }
+
+                @Override
+                public List<R> drain() throws E {
+                    // Drain and write
+                    List<R> drain = task.drain();
+                    writer.write(drain);
+                    return drain;
+                }
+
+                @Override
+                public void post() {
+                    task.post();
+                    if (!post.getAndSet(true)) {
+                        writer.post();
+                        writer.close();
+                    }
+                }
+            };
         }
     }
 
@@ -393,13 +501,16 @@ public class ParallelTaskRunner<I, O> {
         if (reader != null) {
             logger.info("read:  timeReading                  = " + prettyTime(timeReading) + "s");
             logger.info("read:  timeBlockedAtPutRead         = " + prettyTime(timeBlockedAtPutRead) + "s");
-            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s");
+            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s(total)"
+                    + "   ~" + prettyTime(timeBlockedAtTakeRead / config.numTasks) + "s/thread");
         }
 
-        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s");
+        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s(total)"
+                + "   ~" + prettyTime(timeTaskApply / config.numTasks) + "s/thread");
 
         if (writer != null) {
-            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s");
+            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s(total)"
+                    + "   ~" + prettyTime(timeBlockedAtPutWrite / config.numTasks) + "s/thread");
             logger.info("write: timeBlockedWatingDataToWrite = " + prettyTime(timeBlockedAtTakeWrite) + "s");
             logger.info("write: timeWriting                  = " + prettyTime(timeWriting) + "s");
         }
@@ -619,7 +730,14 @@ public class ParallelTaskRunner<I, O> {
                     batch = getBatch();
                 }
                 // Drain won't be called if the ParallelTaskRunner is interrupted.
-                List<O> drain = task.drain(); // empty the system
+                List<O> drain; // empty the system
+                try {
+                    drain = task.drain();
+                } catch (Exception e) {
+                    drain = null;
+                    logger.error("Error draining task", e);
+                    exceptions.add(e);
+                }
                 if (null != drain && !drain.isEmpty()) {
                     if (writeBlockingQueue != null) {
                         // submit final batch received from draining
@@ -670,7 +788,7 @@ public class ParallelTaskRunner<I, O> {
             } else {
                 long start = System.nanoTime();
                 batch = readBlockingQueue.take();
-                threadTimeBlockedAtTakeRead += start - System.currentTimeMillis();
+                threadTimeBlockedAtTakeRead += (System.nanoTime() - start);
                 //logger.trace("task: readBlockingQueue = " + readBlockingQueue.size() + " batch.size : "
                 // + batch.size() + " : " + batchSize);
                 if (batch == POISON_PILL) {

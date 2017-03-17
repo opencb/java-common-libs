@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 OpenCB
+ * Copyright 2015-2017 OpenCB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ public class QueryOptions extends ObjectMap {
 
     public static final String INCLUDE = "include";
     public static final String EXCLUDE = "exclude";
-    public static final String LIMIT = "limit";
     public static final String SKIP = "skip";
+    public static final String LIMIT = "limit";
+    public static final String COUNT = "count";
 
     public static final String SORT = "sort";
     public static final String ORDER = "order";

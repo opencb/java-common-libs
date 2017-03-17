@@ -1,13 +1,28 @@
+/*
+ * Copyright 2015-2017 OpenCB
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencb.commons.utils;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;
 
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,10 +38,10 @@ public class CommandLineUtils {
 
         Integer paramNameMaxSize = Math.max(commander.getParameters().stream()
                 .map(pd -> pd.getNames().length())
-                .collect(Collectors.maxBy(Comparator.<Integer>naturalOrder())).orElse(20), 20);
+                .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(20), 20);
         Integer typeMaxSize = Math.max(commander.getParameters().stream()
                 .map(pd -> getType(pd).length())
-                .collect(Collectors.maxBy(Comparator.<Integer>naturalOrder())).orElse(10), 10);
+                .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(10), 10);
 
         int nameAndTypeLength = paramNameMaxSize + typeMaxSize + 8;
         int descriptionLength = 100;
@@ -34,16 +49,19 @@ public class CommandLineUtils {
 
         Comparator<ParameterDescription> parameterDescriptionComparator = (e1, e2) -> e1.getLongestName().compareTo(e2.getLongestName());
         commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
-            if (parameterDescription.getParameterized().getParameter() != null
-                    && !parameterDescription.getParameterized().getParameter().hidden()) {
+            if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
                 String type = getType(parameterDescription);
+                String defaultValue = "";
+                if (parameterDescription.getDefault() != null && !parameterDescription.isDynamicParameter()) {
+                    defaultValue = ("[" + parameterDescription.getDefault() + "]");
+                }
                 String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s %s\n",
                         (parameterDescription.getParameterized().getParameter() != null
                                 && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
                         parameterDescription.getNames(),
                         type,
                         parameterDescription.getDescription(),
-                        parameterDescription.getDefault() == null ? "" : ("[" + parameterDescription.getDefault() + "]"));
+                        defaultValue);
 
                 // if lines are longer than the maximum they are trimmed and printed in several lines
                 List<String> lines = new LinkedList<>();
@@ -62,16 +80,51 @@ public class CommandLineUtils {
 
     private static String getType(ParameterDescription parameterDescription) {
         String type = "";
-        if (parameterDescription.getParameterized().getParameter() != null
-                && parameterDescription.getParameterized().getParameter().arity() != 0) {
-            type = parameterDescription.getParameterized().getGenericType().getTypeName();
-            type = type.substring(1 + Math.max(type.lastIndexOf("."), type.lastIndexOf("$")));
-            type = Arrays.asList(org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(type)).stream()
-                    .map(String::toUpperCase)
-                    .collect(Collectors.joining("_"));
-            if (type.equals("BOOLEAN") && parameterDescription.getParameterized().getParameter().arity() == -1) {
-                type = "";
+        if (parameterDescription.getParameter().arity() == 0) {
+            return type;
+        } else {
+            if (parameterDescription.isDynamicParameter()) {
+                Type genericType = parameterDescription.getParameterized().getGenericType();
+                if (genericType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) genericType;
+                    Type rawType = parameterizedType.getRawType();
+                    if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
+                        String key = getType(parameterizedType.getActualTypeArguments()[0]);
+                        String assignment = parameterDescription.getParameter().getAssignment();
+                        String value = getType(parameterizedType.getActualTypeArguments()[1]);
+                        type = key + assignment + value;
+                    }
+                } else {
+                    type = getType(genericType);
+                }
+            } else {
+                Type genericType = parameterDescription.getParameterized().getGenericType();
+                type = getType(genericType);
+                if (type.equals("BOOLEAN") && parameterDescription.getParameterized().getParameter().arity() == -1) {
+                    type = "";
+                }
             }
+        }
+        return type;
+    }
+
+    private static String getType(Type genericType) {
+        String type;
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            Type rawType = parameterizedType.getRawType();
+            if (rawType instanceof Class && Collection.class.isAssignableFrom((Class) rawType)) {
+                return getType(parameterizedType.getActualTypeArguments()[0]) + "*";
+            }
+        }
+        type = genericType.getTypeName();
+        type = type.substring(1 + Math.max(type.lastIndexOf("."), type.lastIndexOf("$")));
+        type = Arrays.asList(org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(type)).stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.joining("_"));
+
+        if (type.equals("INTEGER")) {
+            type = "INT";
         }
         return type;
     }
