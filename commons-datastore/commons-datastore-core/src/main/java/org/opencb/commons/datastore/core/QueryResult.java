@@ -16,22 +16,24 @@
 
 package org.opencb.commons.datastore.core;
 
+import org.opencb.commons.datastore.core.result.AbstractResult;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by imedina on 20/03/14.
  */
-public class QueryResult<T> {
+public class QueryResult<T> extends AbstractResult {
 
-    private String id;
-    @Deprecated
-    private int time;
-    private int dbTime;
-    private int numResults;
-    private long numTotalResults;
-    private String warningMsg;
-    private String errorMsg;
+//    private String id;
+//    @Deprecated
+//    private int time;
+//    private int dbTime;
+//    private int numResults;
+//    private long numTotalResults;
+//    private String warningMsg;
+//    private String errorMsg;
 //    @Deprecated
 //    private String featureType;
 
@@ -69,13 +71,12 @@ public class QueryResult<T> {
     public String toString() {
         final StringBuilder sb = new StringBuilder("QueryResult{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", time=").append(time);
+//        sb.append(", time=").append(time);
         sb.append(", dbTime=").append(dbTime);
         sb.append(", numResults=").append(numResults);
         sb.append(", numTotalResults=").append(numTotalResults);
         sb.append(", warningMsg='").append(warningMsg).append('\'');
         sb.append(", errorMsg='").append(errorMsg).append('\'');
-//        sb.append(", featureType='").append(featureType).append('\'');
         sb.append(", resultType='").append(resultType).append('\'');
         sb.append(", clazz=").append(clazz);
         sb.append(", result=").append(result);
@@ -83,72 +84,62 @@ public class QueryResult<T> {
         return sb.toString();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Deprecated
-    public int getTime() {
-        return time;
-    }
-
-    @Deprecated
-    public void setTime(int time) {
-        this.time = time;
-    }
-
-    public int getDbTime() {
-        return dbTime;
-    }
-
-    public void setDbTime(int dbTime) {
-        this.dbTime = dbTime;
-    }
-
-    public int getNumResults() {
-        return numResults;
-    }
-
-    public void setNumResults(int numResults) {
-        this.numResults = numResults;
-    }
-
-    public long getNumTotalResults() {
-        return numTotalResults;
-    }
-
-    public void setNumTotalResults(long numTotalResults) {
-        this.numTotalResults = numTotalResults;
-    }
-
-    public String getWarningMsg() {
-        return warningMsg;
-    }
-
-    public void setWarningMsg(String warningMsg) {
-        this.warningMsg = warningMsg;
-    }
-
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-    }
+//    public String getId() {
+//        return id;
+//    }
 //
-//    @Deprecated
-//    public String getFeatureType() {
-//        return featureType;
+//    public void setId(String id) {
+//        this.id = id;
 //    }
 //
 //    @Deprecated
-//    public void setFeatureType(String featureType) {
-//        this.featureType = featureType;
+//    public int getTime() {
+//        return time;
+//    }
+//
+//    @Deprecated
+//    public void setTime(int time) {
+//        this.time = time;
+//    }
+//
+//    public int getDbTime() {
+//        return dbTime;
+//    }
+//
+//    public void setDbTime(int dbTime) {
+//        this.dbTime = dbTime;
+//    }
+//
+//    public int getNumResults() {
+//        return numResults;
+//    }
+//
+//    public void setNumResults(int numResults) {
+//        this.numResults = numResults;
+//    }
+//
+//    public long getNumTotalResults() {
+//        return numTotalResults;
+//    }
+//
+//    public void setNumTotalResults(long numTotalResults) {
+//        this.numTotalResults = numTotalResults;
+//    }
+//
+//    public String getWarningMsg() {
+//        return warningMsg;
+//    }
+//
+//    public void setWarningMsg(String warningMsg) {
+//        this.warningMsg = warningMsg;
+//    }
+//
+//    public String getErrorMsg() {
+//        return errorMsg;
+//    }
+//
+//    public void setErrorMsg(String errorMsg) {
+//        this.errorMsg = errorMsg;
 //    }
 
     public String getResultType() {
