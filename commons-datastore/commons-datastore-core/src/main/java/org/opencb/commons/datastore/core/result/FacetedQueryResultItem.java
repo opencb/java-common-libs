@@ -36,6 +36,16 @@ public class FacetedQueryResultItem {
         this.ranges = ranges;
     }
 
+    public long size() {
+        long size = 0;
+        if (fields != null) {
+            size += fields.size();
+        }
+        if (ranges != null) {
+            size += ranges.size();
+        }
+        return size;
+    }
 
     public class Field {
 
