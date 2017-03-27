@@ -148,17 +148,17 @@ public class FacetedQueryResultItem {
     public class Range {
 
         private String name;
-        private double start;
-        private double end;
-        private double gap;
+        private Number start;
+        private Number end;
+        private Number gap;
         private long total;
         private List<Long> counts;
 
         public Range() {
-            this("", 0.0, 0.0, 0.0, 0, new ArrayList<>());
+            this("", 0, 0, 0, 0, new ArrayList<>());
         }
 
-        public Range(String name, double start, double end, double gap, long total, List<Long> counts) {
+        public Range(String name, Number start, Number end, Number gap, long total, List<Long> counts) {
             this.name = name;
             this.start = start;
             this.end = end;
@@ -188,27 +188,27 @@ public class FacetedQueryResultItem {
             this.name = name;
         }
 
-        public double getStart() {
+        public Number getStart() {
             return start;
         }
 
-        public void setStart(double start) {
+        public void setStart(Number start) {
             this.start = start;
         }
 
-        public double getEnd() {
+        public Number getEnd() {
             return end;
         }
 
-        public void setEnd(double end) {
+        public void setEnd(Number end) {
             this.end = end;
         }
 
-        public double getGap() {
+        public Number getGap() {
             return gap;
         }
 
-        public void setGap(double gap) {
+        public void setGap(Number gap) {
             this.gap = gap;
         }
 
