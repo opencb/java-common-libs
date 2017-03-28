@@ -18,6 +18,7 @@ package org.opencb.commons.datastore.core.result;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jtarraga on 09/03/17.
@@ -26,14 +27,16 @@ public class FacetedQueryResultItem {
 
     private List<Field> fields;
     private List<Range> ranges;
+    private List<Intersection> intersections;
 
     public FacetedQueryResultItem() {
-        this(new ArrayList<>(), new ArrayList<>());
+        this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-    public FacetedQueryResultItem(List<Field> fields, List<Range> ranges) {
+    public FacetedQueryResultItem(List<Field> fields, List<Range> ranges, List<Intersection> intersections) {
         this.fields = fields;
         this.ranges = ranges;
+        this.intersections = intersections;
     }
 
     public long size() {
@@ -229,11 +232,43 @@ public class FacetedQueryResultItem {
         }
     }
 
+    public class Intersection {
+
+        private int size;
+        private Map<String, Long> counts;
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Intersection{");
+            sb.append("size=").append(size);
+            sb.append(", counts=").append(counts);
+            sb.append('}');
+            return sb.toString();
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(int size) {
+            this.size = size;
+        }
+
+        public Map<String, Long> getCounts() {
+            return counts;
+        }
+
+        public void setCounts(Map<String, Long> counts) {
+            this.counts = counts;
+        }
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("FacetedQueryResultItem{");
         sb.append("fields=").append(fields);
         sb.append(", ranges=").append(ranges);
+        sb.append(", intersections=").append(intersections);
         sb.append('}');
         return sb.toString();
     }
@@ -254,4 +289,11 @@ public class FacetedQueryResultItem {
         this.ranges = ranges;
     }
 
+    public List<Intersection> getIntersections() {
+        return intersections;
+    }
+
+    public void setIntersections(List<Intersection> intersections) {
+        this.intersections = intersections;
+    }
 }
