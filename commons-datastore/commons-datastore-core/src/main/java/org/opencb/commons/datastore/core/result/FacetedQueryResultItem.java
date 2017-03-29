@@ -233,17 +233,26 @@ public class FacetedQueryResultItem {
     }
 
     public class Intersection {
-
+        private String name;
         private int size;
         private Map<String, Long> counts;
 
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("Intersection{");
+            sb.append("name=").append(name);
             sb.append("size=").append(size);
             sb.append(", counts=").append(counts);
             sb.append('}');
             return sb.toString();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public int getSize() {
