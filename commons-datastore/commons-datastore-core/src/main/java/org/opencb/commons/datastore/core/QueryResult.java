@@ -50,12 +50,7 @@ public class QueryResult<T> extends AbstractResult {
     }
 
     public QueryResult(String id, int dbTime, int numResults, long numTotalResults, String warningMsg, String errorMsg, List<T> result) {
-        this.id = id;
-        this.dbTime = dbTime;
-        this.numResults = numResults;
-        this.numTotalResults = numTotalResults;
-        this.warningMsg = warningMsg;
-        this.errorMsg = errorMsg;
+        super(id, dbTime, numResults, numTotalResults, warningMsg, errorMsg);
         this.resultType = result != null && !result.isEmpty() && result.get(0) != null ? result.get(0).getClass().getCanonicalName() : "";
         this.result = result;
     }

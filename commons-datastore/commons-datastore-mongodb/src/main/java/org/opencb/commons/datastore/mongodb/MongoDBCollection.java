@@ -378,7 +378,7 @@ public class MongoDBCollection {
     public QueryResult insert(Document object, QueryOptions options) {
         long start = startQuery();
         mongoDBNativeQuery.insert(object, options);
-        return endQuery(Collections.singletonList(Collections.EMPTY_LIST), start);
+        return endQuery(Collections.emptyList(), start);
     }
 
     //Bulk insert
