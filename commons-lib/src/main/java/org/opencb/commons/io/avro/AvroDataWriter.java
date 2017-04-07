@@ -22,6 +22,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.opencb.commons.ProgressLogger;
 import org.opencb.commons.io.DataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +43,18 @@ public class AvroDataWriter<T extends GenericRecord> implements DataWriter<T> {
     private boolean gzip;
     private DataFileWriter<T> avroWriter;
     private Schema schema;
+    private ProgressLogger progressLogger;
     protected Logger logger = LoggerFactory.getLogger(this.getClass().toString());
 
     public AvroDataWriter(Path outputPath, boolean gzip, Schema schema) {
         this.outputPath = outputPath;
         this.gzip = gzip;
         this.schema = schema;
+    }
+
+    public AvroDataWriter setProgressLogger(ProgressLogger progressLogger) {
+        this.progressLogger = progressLogger;
+        return this;
     }
 
     @Override
@@ -74,6 +81,7 @@ public class AvroDataWriter<T extends GenericRecord> implements DataWriter<T> {
                 last = t;
                 avroWriter.append(t);
             }
+            logProgress(batch);
         } catch (IOException e) {
             logger.error("last element : " + last, e);
             throw new UncheckedIOException(e);
@@ -82,6 +90,12 @@ public class AvroDataWriter<T extends GenericRecord> implements DataWriter<T> {
             throw e;
         }
         return true;
+    }
+
+    protected void logProgress(List<T> batch) {
+        if (progressLogger != null) {
+            progressLogger.increment(batch.size());
+        }
     }
 
     @Override
