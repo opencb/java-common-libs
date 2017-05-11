@@ -19,6 +19,8 @@ package org.opencb.commons;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -47,6 +49,32 @@ public class ProgressLoggerTest {
         }
 
         Assert.assertEquals(numLinesLog, prints.get());
+    }
+
+    @Test
+    public void test2() {
+        int totalCount = 21111;
+        final AtomicInteger prints = new AtomicInteger(0);
+        int numLinesLog = 13;
+        CompletableFuture<Long> future = new CompletableFuture<>();
+        ProgressLogger progressLogger = new ProgressLogger("Message", future, numLinesLog) {
+            @Override
+            protected void print(String m) {
+                super.print(m);
+                prints.incrementAndGet();
+            }
+        };
+        progressLogger.setApproximateTotalCount(totalCount * 2);
+
+        int increment = 1;
+        for (int i = 0; i < totalCount; i+= increment) {
+            if (i > totalCount / 2) {
+                future.complete(((long) totalCount));
+            }
+            progressLogger.increment(increment);
+        }
+
+        Assert.assertEquals(numLinesLog - numLinesLog / 4, prints.get());
     }
 
 }

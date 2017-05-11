@@ -130,6 +130,7 @@ public class ProgressLogger {
         long previousCount = count.getAndAdd(delta);
         long count = previousCount + delta;
 
+        updateFutureTotalCount();
         if ((int) (previousCount / batchSize) != (int) (count / batchSize) || count == totalCount && delta > 0) {
             log(count, supplier == null ? message : supplier.get());
         }
@@ -159,7 +160,7 @@ public class ProgressLogger {
         logger.info(m);
     }
 
-    private long getTotalCount() {
+    private void updateFutureTotalCount() {
         if (futureTotalCount != null) {
             if (futureTotalCount.isDone()) {
                 try {
@@ -173,6 +174,9 @@ public class ProgressLogger {
                 }
             }
         }
+    }
+
+    private long getTotalCount() {
         return this.totalCount;
     }
 
