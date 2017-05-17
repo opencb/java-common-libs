@@ -585,7 +585,7 @@ public class ParallelTaskRunner<I, O> {
                 // If sorted, add futures in a sorted way to the writer queue
                 if (config.sorted) {
                     CompletableFuture<Batch<O>> completableFuture = new CompletableFuture<>();
-                    while (writeBlockingQueueFuture.offer(completableFuture, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                    while (!writeBlockingQueueFuture.offer(completableFuture, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
                         if (isAbortPending()) {
                             break;
                         }
