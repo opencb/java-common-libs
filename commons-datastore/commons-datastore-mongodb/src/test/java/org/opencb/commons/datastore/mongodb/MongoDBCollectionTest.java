@@ -24,6 +24,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.datastore.core.ObjectMap;
@@ -34,11 +35,9 @@ import org.opencb.commons.datastore.core.QueryResultWriter;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.junit.Assert.*;
 
 /**
@@ -57,6 +56,8 @@ public class MongoDBCollectionTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
+    public static final List<String> SURENAMES = Arrays.asList("Doe", "Davis", null);
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -106,10 +107,11 @@ public class MongoDBCollectionTest {
     private static MongoDBCollection createTestCollection(String test, int size) {
         MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(test);
         Document document;
+        Random random = new Random();
         for (long i = 0; i < size; i++) {
             document = new Document("id", i);
-            document.put("name", "John");
-            document.put("surname", "Doe");
+            document.put("name", NAMES.get(random.nextInt(NAMES.size())));
+            document.put("surname", SURENAMES.get(random.nextInt(SURENAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
             mongoDBCollection.nativeQuery().insert(document, null);
@@ -193,7 +195,14 @@ public class MongoDBCollectionTest {
     public void testDistinct2() throws Exception {
         QueryResult<String> queryResult = mongoDBCollection.distinct("name", null, String.class);
         assertNotNull("Object cannot be null", queryResult);
-        assertEquals("ResultType must be 'java.lang.String'", "java.lang.String", queryResult.getResultType());
+        assertEquals("ResultType must be 'java.lang.String'", String.class.getName(), queryResult.getResultType());
+    }
+
+    @Test
+    public void testDistinct3() throws Exception {
+        QueryResult<String> queryResult = mongoDBCollection.distinct("surename", null, String.class);
+        assertNotNull("Object cannot be null", queryResult);
+        assertEquals("ResultType must be 'java.lang.String'", String.class.getName(), queryResult.getResultType());
     }
 
 //    @Test
@@ -354,8 +363,8 @@ public class MongoDBCollectionTest {
         assertEquals("resultType must '" + User.class.getCanonicalName() + "'", User.class.getCanonicalName(), queryResultList.get(0).getResultType());
         for (QueryResult<User> queryResult : queryResultList) {
             assertEquals(1, queryResult.getNumResults());
-            assertEquals("John", queryResult.first().name);
-            assertEquals("Doe", queryResult.first().surname);
+            assertThat(NAMES, CoreMatchers.hasItem(queryResult.first().name));
+            assertThat(SURENAMES, CoreMatchers.hasItem(queryResult.first().surname));
         }
     }
 

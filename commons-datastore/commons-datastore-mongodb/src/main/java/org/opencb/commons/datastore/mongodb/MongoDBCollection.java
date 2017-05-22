@@ -138,7 +138,7 @@ public class MongoDBCollection {
         MongoCursor<BsonValue> iterator = mongoDBNativeQuery.distinct(key, query, BsonValue.class).iterator();
         while (iterator.hasNext()) {
             BsonValue value = iterator.next();
-            if (value.isNull()) {
+            if (value == null || value.isNull()) {
                 l.add(null);
             } else if (value.isString()) {
                 l.add(value.asString().getValue());
@@ -151,7 +151,9 @@ public class MongoDBCollection {
 
     public <T> QueryResult<T> distinct(String key, Bson query, Class<T> clazz) {
         if (clazz == null || clazz.equals(String.class)) {
-            return (QueryResult<T>) distinct(key, query);
+            QueryResult<T> result = (QueryResult<T>) distinct(key, query);
+            result.setResultType(String.class.getName());
+            return result;
         }
         long start = startQuery();
         List<T> list = new ArrayList<>();
@@ -378,7 +380,7 @@ public class MongoDBCollection {
     public QueryResult insert(Document object, QueryOptions options) {
         long start = startQuery();
         mongoDBNativeQuery.insert(object, options);
-        return endQuery(Collections.singletonList(Collections.EMPTY_LIST), start);
+        return endQuery(Collections.emptyList(), start);
     }
 
     //Bulk insert

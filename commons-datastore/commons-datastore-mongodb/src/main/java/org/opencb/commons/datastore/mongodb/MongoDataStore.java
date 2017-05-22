@@ -20,6 +20,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,10 @@ public class MongoDataStore {
         }
         logger.debug("MongoDataStore: new MongoDB collection '{}' created", collection);
         return mongoDBCollection;
+    }
+
+    public Document getServerStatus() {
+        return db.runCommand(new Document("serverStatus", 1));
     }
 
     public MongoDBCollection createCollection(String collectionName) {
