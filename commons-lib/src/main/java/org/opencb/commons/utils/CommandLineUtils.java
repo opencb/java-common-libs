@@ -52,8 +52,16 @@ public class CommandLineUtils {
             if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
                 String type = getType(parameterDescription);
                 String defaultValue = "";
-                if (parameterDescription.getDefault() != null && !parameterDescription.isDynamicParameter()) {
-                    defaultValue = ("[" + parameterDescription.getDefault() + "]");
+                if (parameterDescription.getDefault() != null) {
+                    if (parameterDescription.isDynamicParameter()) {
+                        Object def = parameterDescription.getDefault();
+                        if (def instanceof Map && !((Map) def).isEmpty()) {
+                            defaultValue = ("[" + def + "]");
+                        }
+//                        defaultValue = ("[" + parameterDescription.getDefault() + "]");
+                    } else {
+                        defaultValue = ("[" + parameterDescription.getDefault() + "]");
+                    }
                 }
                 String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s %s\n",
                         (parameterDescription.getParameterized().getParameter() != null
