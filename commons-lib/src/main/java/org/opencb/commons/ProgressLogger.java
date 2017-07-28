@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.text.DecimalFormat;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
@@ -41,7 +42,7 @@ public class ProgressLogger {
     private final int numLinesLog;
     private long totalCount;
     private boolean isApproximated; // Total count is an approximated value
-    private Future<Long> futureTotalCount;
+    private final AtomicReference<Future<Long>> futureTotalCount = new AtomicReference<>();
     private final AtomicLong count;
 
     private double batchSize;
@@ -86,7 +87,7 @@ public class ProgressLogger {
         }
         this.numLinesLog = numLinesLog;
         this.totalCount = totalCount;
-        this.futureTotalCount = futureTotalCount;
+        this.futureTotalCount.set(futureTotalCount);
         this.count = new AtomicLong();
         if (totalCount == 0) {
             batchSize = DEFAULT_BATCH_SIZE;
@@ -161,16 +162,17 @@ public class ProgressLogger {
     }
 
     private void updateFutureTotalCount() {
-        if (futureTotalCount != null) {
-            if (futureTotalCount.isDone()) {
+        Future<Long> future = futureTotalCount.get();
+        if (future != null) {
+            if (future.isDone()) {
                 try {
-                    totalCount = futureTotalCount.get();
+                    totalCount = future.get();
                     updateBatchSize();
                     isApproximated = false;
                 } catch (InterruptedException | ExecutionException ignore) {
                     logger.warn("There was a problem calculating the total number of elements");
                 } finally {
-                    futureTotalCount = null;
+                    futureTotalCount.set(null);
                 }
             }
         }
