@@ -20,7 +20,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 
-public class ListUtils {
+public class ListUtils extends CollectionUtils {
 
     public static <E> List<E> unique(List<E> array) {
         if (array == null) {
