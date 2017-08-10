@@ -9,11 +9,11 @@ import java.util.Collection;
  */
 public class CollectionUtils {
 
-    public boolean isEmpty(Collection<?> collection) {
+    public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }
 
-    public boolean isNotEmpty(Collection<?> collection) {
+    public static boolean isNotEmpty(Collection<?> collection) {
         return !isEmpty(collection);
     }
 
