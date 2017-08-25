@@ -311,43 +311,26 @@ public class MongoDBCollection {
 
 
     public QueryResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
-        long start = startQuery();
-        QueryResult<Document> queryResult;
-
-        // we need to be sure that the List is mutable
-        List<Bson> bsonOperations = new ArrayList<>(operations);
-        if (options != null && options.containsKey("limit")) {
-            bsonOperations.add(Aggregates.limit(options.getInt("limit")));
-        }
-        AggregateIterable output = mongoDBNativeQuery.aggregate(bsonOperations, options);
-        MongoCursor<Document> iterator = output.iterator();
-        List<Bson> list = new LinkedList<>();
-        if (queryResultWriter != null) {
-            try {
-                queryResultWriter.open();
-                while (iterator.hasNext()) {
-                    queryResultWriter.write(iterator.next());
-                }
-                queryResultWriter.close();
-            } catch (IOException e) {
-                queryResult = endQuery(list, start);
-                queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
-                return queryResult;
-            }
-        } else {
-            while (iterator.hasNext()) {
-                list.add(iterator.next());
-            }
-        }
-        queryResult = endQuery(list, start);
-        return queryResult;
+        return aggregate(operations, null, options);
     }
 
     public <T> QueryResult<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
                                         QueryOptions options) {
+
         long start = startQuery();
+
+        // we need to be sure that the List is mutable
+        List<Bson> bsonOperations = new ArrayList<>(operations);
+        if (options != null) {
+            if (options.getInt(QueryOptions.SKIP) > 0) {
+                bsonOperations.add(Aggregates.skip(options.getInt(QueryOptions.SKIP)));
+            }
+            if (options.getInt(QueryOptions.LIMIT) > 0) {
+                bsonOperations.add(Aggregates.limit(options.getInt(QueryOptions.LIMIT)));
+            }
+        }
         QueryResult<T> queryResult;
-        AggregateIterable output = mongoDBNativeQuery.aggregate(operations, options);
+        AggregateIterable<Document> output = mongoDBNativeQuery.aggregate(bsonOperations, options);
         MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
         if (queryResultWriter != null) {

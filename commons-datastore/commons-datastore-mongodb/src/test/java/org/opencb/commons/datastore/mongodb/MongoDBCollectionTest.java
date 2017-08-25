@@ -37,7 +37,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.junit.Assert.*;
 
 /**
@@ -414,10 +413,20 @@ public class MongoDBCollectionTest {
         dbObjectList.add(match);
         dbObjectList.add(group);
 
-        QueryResult queryResult = mongoDBCollection.aggregate(dbObjectList, null);
+        QueryResult<Document> queryResult = mongoDBCollection.aggregate(dbObjectList, null);
         assertNotNull("Object queryResult cannot be null", queryResult);
         assertNotNull("Object queryResult.getResult() cannot be null", queryResult.getResult());
         assertEquals("There must be 2 results", 2, queryResult.getResult().size());
+        List<Document> result = queryResult.getResult();
+
+        queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 0));
+        assertEquals("There must be 1 results", 1, queryResult.getResult().size());
+        assertEquals(result.get(0), queryResult.first());
+
+        queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 1));
+        assertEquals("There must be 1 results", 1, queryResult.getResult().size());
+        assertEquals(result.get(1), queryResult.first());
+
     }
 
     @Test
