@@ -120,7 +120,7 @@ public class MongoDBNativeQuery {
         return findIterable;
     }
 
-    public AggregateIterable aggregate(List<? extends Bson> operations, QueryOptions options) {
+    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
     }
 
