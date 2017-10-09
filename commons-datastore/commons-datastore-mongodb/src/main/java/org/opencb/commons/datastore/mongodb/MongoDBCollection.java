@@ -27,7 +27,6 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -319,18 +318,8 @@ public class MongoDBCollection {
 
         long start = startQuery();
 
-        // we need to be sure that the List is mutable
-        List<Bson> bsonOperations = new ArrayList<>(operations);
-        if (options != null) {
-            if (options.getInt(QueryOptions.SKIP) > 0) {
-                bsonOperations.add(Aggregates.skip(options.getInt(QueryOptions.SKIP)));
-            }
-            if (options.getInt(QueryOptions.LIMIT) > 0) {
-                bsonOperations.add(Aggregates.limit(options.getInt(QueryOptions.LIMIT)));
-            }
-        }
         QueryResult<T> queryResult;
-        AggregateIterable<Document> output = mongoDBNativeQuery.aggregate(bsonOperations, options);
+        AggregateIterable<Document> output = mongoDBNativeQuery.aggregate(operations, options);
         MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
         if (queryResultWriter != null) {

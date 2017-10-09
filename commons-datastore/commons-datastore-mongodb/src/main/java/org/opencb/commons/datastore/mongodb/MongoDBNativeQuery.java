@@ -121,7 +121,17 @@ public class MongoDBNativeQuery {
     }
 
     public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
-        return (operations.size() > 0) ? dbCollection.aggregate(operations) : null;
+        // we need to be sure that the List is mutable
+        List<Bson> bsonOperations = new ArrayList<>(operations);
+        if (options != null) {
+            if (options.getInt(QueryOptions.SKIP) > 0) {
+                bsonOperations.add(Aggregates.skip(options.getInt(QueryOptions.SKIP)));
+            }
+            if (options.getInt(QueryOptions.LIMIT) > 0) {
+                bsonOperations.add(Aggregates.limit(options.getInt(QueryOptions.LIMIT)));
+            }
+        }
+        return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
     }
 
     /**
