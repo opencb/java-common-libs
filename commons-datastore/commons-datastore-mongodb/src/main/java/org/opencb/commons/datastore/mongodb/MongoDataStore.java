@@ -79,6 +79,10 @@ public class MongoDataStore {
         return db.runCommand(new Document("serverStatus", 1));
     }
 
+    public Document getReplSetStatus() {
+        return db.runCommand(new Document("replSetStatus", 1));
+    }
+
     public MongoDBCollection createCollection(String collectionName) {
         if (!Arrays.asList(db.listCollectionNames()).contains(collectionName)) {
             db.createCollection(collectionName);
