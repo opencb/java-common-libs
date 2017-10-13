@@ -181,8 +181,8 @@ public class CommandLineUtils {
 
         autoComplete.append("\n");
         autoComplete.append("complete -F _" + bashFunctName + " " + bashFunctName + ".sh").append('\n');
-        autoComplete.append("complete -F _" + bashFunctName + " ./bin/" + bashFunctName + ".sh").append('\n');
-        autoComplete.append("complete -F _" + bashFunctName + " /opt/" + bashFunctName + "/bin/" + bashFunctName + ".sh").append('\n');
+//        autoComplete.append("complete -F _" + bashFunctName + " ./bin/" + bashFunctName + ".sh").append('\n');
+//        autoComplete.append("complete -F _" + bashFunctName + " /opt/" + bashFunctName + "/bin/" + bashFunctName + ".sh").append('\n');
 
         try {
             PrintWriter pw = new PrintWriter(new FileOutputStream(fileName));
