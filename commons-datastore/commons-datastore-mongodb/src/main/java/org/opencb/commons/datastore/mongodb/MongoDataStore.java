@@ -81,7 +81,7 @@ public class MongoDataStore {
     }
 
     public Document getReplSetStatus() {
-        return db.runCommand(new Document("replSetStatus", 1));
+        return db.runCommand(new Document("replSetGetStatus", 1));
     }
 
     public boolean isReplSet() {
