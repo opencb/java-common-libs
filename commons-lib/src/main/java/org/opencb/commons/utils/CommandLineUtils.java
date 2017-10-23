@@ -128,7 +128,7 @@ public class CommandLineUtils {
                 subCommmands.append(sc).append(" ");
                 subCommmandsOptions.append(command + "_");
                 // - is not allowed in bash main variable name, replacing it with _
-                subCommmandsOptions.append(sc.replace("-", "_") + "_" + "options=" + "\"");
+                subCommmandsOptions.append(sc.replace("-", "_").replace(".", "_") + "_" + "options=" + "\"");
                 JCommander subCommandOptions = subSubCommands.get(sc);
                 for (ParameterDescription param : subCommandOptions.getParameters()) {
                     // Add parameter if it is not excluded
@@ -174,7 +174,7 @@ public class CommandLineUtils {
 
                 for (String subCommand : splittedSubCommands) {
                     autoComplete.append("\t\t").append(subCommand).append(") options=").append("\"").append("${").
-                            append(command).append("_").append(subCommand.replace("-", "_")).append("_options}").
+                            append(command).append("_").append(subCommand.replace("-", "_").replace(".", "_")).append("_options}").
                             append("\"").append(" ;; \n");
                 }
                 autoComplete.append("\t\t *) ;; esac ;; \n");
