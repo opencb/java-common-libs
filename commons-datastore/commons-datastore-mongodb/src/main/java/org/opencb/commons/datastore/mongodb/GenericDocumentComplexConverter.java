@@ -78,6 +78,14 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
         }
     }
 
+    public static Long getLongValue(Document document, String key) {
+        try {
+            return document.getLong(key);
+        } catch (ClassCastException e) {
+            return document.getInteger(key).longValue();
+        }
+    }
+
     /**
      * Replace all the dots in the keys with {@link #TO_REPLACE_DOTS}.
      *
