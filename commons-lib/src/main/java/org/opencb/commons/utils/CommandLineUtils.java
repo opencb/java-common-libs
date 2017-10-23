@@ -97,8 +97,9 @@ public class CommandLineUtils {
      * users_create_options="--password --help --log-file --email --name --log-level --conf --organization --output-format --session-id"
      * ...
      * This accepts two levels: commands and subcommands
-     * @param jCommander JComander object to extractt commands and subcommonds
-     * @param fileName Filename destination
+     *
+     * @param jCommander    JComander object to extractt commands and subcommonds
+     * @param fileName      Filename destination
      * @param bashFunctName Name of the bash function to autocomplete
      * @param excludeParams List of params to be excluded
      * @throws IOException If the destination file cannot be written
@@ -118,7 +119,7 @@ public class CommandLineUtils {
             excludeParamsSet = new HashSet<>(excludeParams);
         }
 
-        for (String command: jCommands.keySet()) {
+        for (String command : jCommands.keySet()) {
             JCommander subCommand = jCommands.get(command);
             mainCommands.append(command).append(" ");
             subCommmands.append(command + "=" + "\"");
@@ -161,19 +162,24 @@ public class CommandLineUtils {
                 + "{COMP_WORDS[1]} in \n");
 
         int subCommandIndex = 0;
-        for (String command: mainCommands.toString().split(" ")) {
-            autoComplete.append('\t').append(command).append(") \n");
-            autoComplete.append("\t\t case " + "$" + "{COMP_WORDS[2]} in \n");
+        for (String command : mainCommands.toString().split(" ")) {
             String[] splittedSubCommands = subCommmands.toString().split("\n")[subCommandIndex]
                     .replace(command + "=" + "\"", "").replace("\"", "").split(" ");
 
-            for (String subCommand: splittedSubCommands) {
-                autoComplete.append("\t\t").append(subCommand).append(") options=").append("\"").append("${").
-                        append(command).append("_").append(subCommand.replace("-", "_")).append("_options}").
-                        append("\"").append(" ;; \n");
+            if (splittedSubCommands[0].isEmpty()) {
+                ++subCommandIndex;
+            } else {
+                autoComplete.append('\t').append(command).append(") \n");
+                autoComplete.append("\t\t case " + "$" + "{COMP_WORDS[2]} in \n");
+
+                for (String subCommand : splittedSubCommands) {
+                    autoComplete.append("\t\t").append(subCommand).append(") options=").append("\"").append("${").
+                            append(command).append("_").append(subCommand.replace("-", "_")).append("_options}").
+                            append("\"").append(" ;; \n");
+                }
+                autoComplete.append("\t\t *) ;; esac ;; \n");
+                ++subCommandIndex;
             }
-            autoComplete.append("\t\t *) ;; esac ;; \n");
-            ++subCommandIndex;
         }
         autoComplete.append("*) ;;  esac \n COMPREPLY=( $( compgen -W " + "\"" + "$" + "options" + "\"" + " -- ${cur}) )"
                 + " \n return 0 \n fi \n if [[ ${cur} == * ]] ; then \n COMPREPLY=( $(compgen -W " + "\"" + "$"
