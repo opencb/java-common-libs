@@ -36,6 +36,10 @@ public class QueryResponse<T> {
         this("", -1, "", "", null, null);
     }
 
+    public QueryResponse(String apiVersion, int time, QueryOptions queryOptions, List<QueryResult<T>> response) {
+        this(apiVersion, time, "", "", queryOptions, response);
+    }
+
     public QueryResponse(QueryOptions queryOptions, List<QueryResult<T>> response) {
         this("", -1, "", "", queryOptions, response);
     }
@@ -125,47 +129,57 @@ public class QueryResponse<T> {
         return sb.toString();
     }
 
-    public void setApiVersion(String apiVersion) {
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public QueryResponse setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
+        return this;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public QueryResponse setTime(int time) {
+        this.time = time;
+        return this;
     }
 
     public String getWarning() {
         return warning;
     }
 
-    public void setTime(int time) {
-        this.time = time;
-    }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public void setWarning(String warning) {
+    public QueryResponse setWarning(String warning) {
         this.warning = warning;
+        return this;
     }
 
     public String getError() {
         return error;
     }
 
-    public void setError(String error) {
+    public QueryResponse setError(String error) {
         this.error = error;
+        return this;
     }
 
     public QueryOptions getQueryOptions() {
         return queryOptions;
     }
 
-    public void setQueryOptions(QueryOptions queryOptions) {
+    public QueryResponse setQueryOptions(QueryOptions queryOptions) {
         this.queryOptions = queryOptions;
+        return this;
     }
 
     public List<QueryResult<T>> getResponse() {
         return response;
     }
 
-    public void setResponse(List<QueryResult<T>> response) {
+    public QueryResponse setResponse(List<QueryResult<T>> response) {
         this.response = response;
+        return this;
     }
 }

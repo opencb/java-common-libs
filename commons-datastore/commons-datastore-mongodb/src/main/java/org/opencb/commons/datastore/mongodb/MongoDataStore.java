@@ -40,6 +40,7 @@ import java.util.function.Consumer;
 
 public class MongoDataStore {
 
+    private static final String REPL_SET_KEY = "repl";
     private MongoClient mongoClient;
     private MongoDatabase db;
     private MongoDBConfiguration mongoDBConfiguration;
@@ -77,6 +78,15 @@ public class MongoDataStore {
 
     public Document getServerStatus() {
         return db.runCommand(new Document("serverStatus", 1));
+    }
+
+    public Document getReplSetStatus() {
+        return db.runCommand(new Document("replSetGetStatus", 1));
+    }
+
+    public boolean isReplSet() {
+        Document document = getServerStatus();
+        return document.containsKey(REPL_SET_KEY);
     }
 
     public MongoDBCollection createCollection(String collectionName) {
