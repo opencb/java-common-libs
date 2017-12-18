@@ -25,9 +25,7 @@ import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
 import org.opencb.commons.datastore.core.QueryParam;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +39,7 @@ public class MongoDBQueryUtils {
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
 
     public static final String OR = ",";
     public static final String AND = ";";
@@ -65,11 +64,12 @@ public class MongoDBQueryUtils {
         REGEX,               // The regular expression will look for "=~" or "~" at the beginning.
         TEXT,
 
-        // Numeric comparators
+        // Numeric and Date comparators
         GREATER_THAN,
         GREATER_THAN_EQUAL,
         LESS_THAN,
-        LESS_THAN_EQUAL;
+        LESS_THAN_EQUAL,
+        RANGES
     }
 
 
@@ -166,6 +166,15 @@ public class MongoDBQueryUtils {
                     break;
                 case BOOLEAN:
                     bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                    break;
+                case DATE:
+                    List<String> dateList = new ArrayList<>();
+                    dateList.add(queryValueString);
+                    if (!matcher.group(3).isEmpty()) {
+                        dateList.add(matcher.group(4));
+                        comparator = ComparisonOperator.RANGES;
+                    }
+                    bsonList.add(createDateFilter(mongoDbField, dateList, comparator));
                     break;
                 default:
                     break;
@@ -311,6 +320,55 @@ public class MongoDBQueryUtils {
     }
 
     /**
+     * Generates a date filter.
+     *
+     * @param mongoDbField Mongo field.
+     * @param dateValues List of 1 or 2 strings (dates). Only one will be expected when something like the following is passed:
+     *                   =20171210, 20171210, >=20171210, >20171210, <20171210, <=20171210
+     *                   When 2 strings are passed, we will expect it to be a range such as: 20171201-20171210
+     * @param comparator Comparator value.
+     * @return the Bson query.
+     */
+    public static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator) {
+        Bson filter = null;
+
+        if (ComparisonOperator.RANGES.equals(comparator)) {
+            if (dateValues.size() == 2) {
+                Date from = converStringToDate(dateValues.get(0));
+                Date to = converStringToDate(dateValues.get(1));
+
+                filter = new Document(mongoDbField, new Document()
+                        .append("$gte", from)
+                        .append("$lt", to)
+                );
+            }
+        } else {
+            Date date = converStringToDate(dateValues.get(0));
+            switch (comparator) {
+                case EQUALS:
+                    filter = Filters.eq(mongoDbField, date);
+                    break;
+                case GREATER_THAN:
+                    filter = Filters.gt(mongoDbField, date);
+                    break;
+                case GREATER_THAN_EQUAL:
+                    filter = Filters.gte(mongoDbField, date);
+                    break;
+                case LESS_THAN:
+                    filter = Filters.lt(mongoDbField, date);
+                    break;
+                case LESS_THAN_EQUAL:
+                    filter = Filters.lte(mongoDbField, date);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return filter;
+    }
+
+    /**
      * Checks that the filter value list contains only one type of operations.
      *
      * @param value List of values to check
@@ -423,6 +481,7 @@ public class MongoDBQueryUtils {
                 case DOUBLE:
                 case DECIMAL:
                 case DECIMAL_ARRAY:
+                case DATE:
                     switch(op) {
                         case "=":
                         case "==":
@@ -485,10 +544,38 @@ public class MongoDBQueryUtils {
             case BOOLEAN:
                 pattern = OPERATION_BOOLEAN_PATTERN;
                 break;
+            case DATE:
+                pattern = OPERATION_DATE_PATTERN;
+                break;
             default:
                 break;
         }
         return pattern;
+    }
+
+    private static Date converStringToDate(String stringDate) {
+        Calendar calendar = Calendar.getInstance();
+        if (!stringDate.isEmpty()) {
+            if (stringDate.length() >= 4) {
+                calendar.set(Calendar.YEAR, Integer.parseInt(stringDate.substring(0, 4)));
+            }
+            if (stringDate.length() >= 6) {
+                calendar.set(Calendar.MONTH, Integer.parseInt(stringDate.substring(4, 6)) - 1);
+            }
+            if (stringDate.length() >= 8) {
+                calendar.set(Calendar.DATE, Integer.parseInt(stringDate.substring(6, 8)));
+            }
+            if (stringDate.length() >= 10) {
+                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(stringDate.substring(8, 10)));
+            }
+            if (stringDate.length() >= 12) {
+                calendar.set(Calendar.MINUTE, Integer.parseInt(stringDate.substring(10, 12)));
+            }
+            if (stringDate.length() >= 14) {
+                calendar.set(Calendar.SECOND, Integer.parseInt(stringDate.substring(12, 14)));
+            }
+        }
+        return calendar.getTime();
     }
 
 }
