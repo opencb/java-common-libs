@@ -25,7 +25,13 @@ import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
 import org.opencb.commons.datastore.core.QueryParam;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +75,7 @@ public class MongoDBQueryUtils {
         GREATER_THAN_EQUAL,
         LESS_THAN,
         LESS_THAN_EQUAL,
-        RANGES
+        BETWEEN
     }
 
 
@@ -108,6 +114,10 @@ public class MongoDBQueryUtils {
                     break;
                 case BOOLEAN:
                     filter = createFilter(mongoDbField, query.getBoolean(queryParam), comparator);
+                    break;
+                case DATE:
+                case TIMESTAMP:
+                    filter = createDateFilter(mongoDbField, query.getAsStringList(queryParam), comparator, type);
                     break;
                 default:
                     break;
@@ -168,13 +178,14 @@ public class MongoDBQueryUtils {
                     bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
                     break;
                 case DATE:
+                case TIMESTAMP:
                     List<String> dateList = new ArrayList<>();
                     dateList.add(queryValueString);
                     if (!matcher.group(3).isEmpty()) {
                         dateList.add(matcher.group(4));
-                        comparator = ComparisonOperator.RANGES;
+                        comparator = ComparisonOperator.BETWEEN;
                     }
-                    bsonList.add(createDateFilter(mongoDbField, dateList, comparator));
+                    bsonList.add(createDateFilter(mongoDbField, dateList, comparator, type));
                     break;
                 default:
                     break;
@@ -327,24 +338,37 @@ public class MongoDBQueryUtils {
      *                   =20171210, 20171210, >=20171210, >20171210, <20171210, <=20171210
      *                   When 2 strings are passed, we will expect it to be a range such as: 20171201-20171210
      * @param comparator Comparator value.
+     * @param type Type of parameter. Expecting one of {@link QueryParam.Type#DATE} or {@link QueryParam.Type#TIMESTAMP}
      * @return the Bson query.
      */
-    public static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator) {
+    private static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
+                                         QueryParam.Type type) {
         Bson filter = null;
 
-        if (ComparisonOperator.RANGES.equals(comparator)) {
-            if (dateValues.size() == 2) {
-                Date from = converStringToDate(dateValues.get(0));
-                Date to = converStringToDate(dateValues.get(1));
+        Object date = null;
+        if (QueryParam.Type.DATE.equals(type)) {
+            date = converStringToDate(dateValues.get(0));
+        } else if (QueryParam.Type.TIMESTAMP.equals(type)) {
+            date = converStringToDate(dateValues.get(0)).getTime();
+        }
 
-                filter = new Document(mongoDbField, new Document()
-                        .append("$gte", from)
-                        .append("$lt", to)
-                );
-            }
-        } else {
-            Date date = converStringToDate(dateValues.get(0));
+        if (date != null) {
             switch (comparator) {
+                case BETWEEN:
+                    if (dateValues.size() == 2) {
+                        Date to = converStringToDate(dateValues.get(1));
+
+                        if (QueryParam.Type.DATE.equals(type)) {
+                            filter = new Document(mongoDbField, new Document()
+                                    .append("$gte", date)
+                                    .append("$lt", to));
+                        } else if (QueryParam.Type.TIMESTAMP.equals(type)) {
+                            filter = new Document(mongoDbField, new Document()
+                                    .append("$gte", date)
+                                    .append("$lt", to.getTime()));
+                        }
+                    }
+                    break;
                 case EQUALS:
                     filter = Filters.eq(mongoDbField, date);
                     break;
@@ -482,6 +506,7 @@ public class MongoDBQueryUtils {
                 case DECIMAL:
                 case DECIMAL_ARRAY:
                 case DATE:
+                case TIMESTAMP:
                     switch(op) {
                         case "=":
                         case "==":
@@ -545,6 +570,7 @@ public class MongoDBQueryUtils {
                 pattern = OPERATION_BOOLEAN_PATTERN;
                 break;
             case DATE:
+            case TIMESTAMP:
                 pattern = OPERATION_DATE_PATTERN;
                 break;
             default:
@@ -554,28 +580,15 @@ public class MongoDBQueryUtils {
     }
 
     private static Date converStringToDate(String stringDate) {
-        Calendar calendar = Calendar.getInstance();
-        if (!stringDate.isEmpty()) {
-            if (stringDate.length() >= 4) {
-                calendar.set(Calendar.YEAR, Integer.parseInt(stringDate.substring(0, 4)));
-            }
-            if (stringDate.length() >= 6) {
-                calendar.set(Calendar.MONTH, Integer.parseInt(stringDate.substring(4, 6)) - 1);
-            }
-            if (stringDate.length() >= 8) {
-                calendar.set(Calendar.DATE, Integer.parseInt(stringDate.substring(6, 8)));
-            }
-            if (stringDate.length() >= 10) {
-                calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(stringDate.substring(8, 10)));
-            }
-            if (stringDate.length() >= 12) {
-                calendar.set(Calendar.MINUTE, Integer.parseInt(stringDate.substring(10, 12)));
-            }
-            if (stringDate.length() >= 14) {
-                calendar.set(Calendar.SECOND, Integer.parseInt(stringDate.substring(12, 14)));
-            }
+        if (stringDate.length() == 4) {
+            stringDate = stringDate + "0101";
+        } else if (stringDate.length() == 6) {
+            stringDate = stringDate + "01";
         }
-        return calendar.getTime();
+        String myDate = String.format("%-14s", stringDate).replace(" ", "0");
+        LocalDateTime localDateTime = LocalDateTime.parse(myDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        // We convert it to date because it is the type used by mongo
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }

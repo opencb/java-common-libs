@@ -31,7 +31,8 @@ public interface QueryParam {
         DECIMAL,
         DECIMAL_ARRAY,
         BOOLEAN,
-        DATE
+        DATE,
+        TIMESTAMP
     }
 
     String key();
