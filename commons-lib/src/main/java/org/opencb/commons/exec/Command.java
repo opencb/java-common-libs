@@ -48,6 +48,7 @@ public class Command extends RunnableProcess {
     private OutputStream errorOutputStream = null;
 
     private final String[] cmdArray;
+    private boolean printOutput = true;
 
     public Command(String commandLine) {
         this.commandLine = commandLine;
@@ -120,11 +121,14 @@ public class Command extends RunnableProcess {
                 error = errorBuffer.toString();
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             exception = e.toString();
             status = Status.ERROR;
             exitValue = -1;
-            logger.error("Exception occurred while executing Command {}", exception);
+            logger.error("Exception occurred while executing Command " + exception, e);
         }
     }
 
@@ -134,54 +138,16 @@ public class Command extends RunnableProcess {
     }
 
     private Thread readOutputStream(InputStream ins) throws IOException {
-        final InputStream in = ins;
-
-        Thread thread = new Thread("stdout_reader") {
-            public void run() {
-                try {
-                    int bytesRead = 0;
-                    int bufferLength;
-                    byte[] buffer;
-
-                    while (bytesRead != -1) {
-                        // int x=in.available();
-                        bufferLength = in.available();
-                        bufferLength = Math.max(bufferLength, 1);
-                        // if (x<=0)
-                        // continue ;
-
-                        buffer = new byte[bufferLength];
-                        bytesRead = in.read(buffer, 0, bufferLength);
-                        if (logger != null) {
-                            System.err.print(new String(buffer));
-                        }
-                        if (outputOutputStream == null) {
-                            outputBuffer.append(new String(buffer));
-                        } else {
-                            outputOutputStream.write(buffer);
-                            outputOutputStream.flush();
-                        }
-                        Thread.sleep(500);
-                        logger.trace("stdout - Sleep (last bytesRead = " + bytesRead + ")");
-                    }
-                    logger.debug("ReadOutputStream - Exit while");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    exception = ex.toString();
-                }
-            }
-        };
-        thread.start();
-        return thread;
+        return readStream("stdout", outputOutputStream, outputBuffer, ins);
     }
 
     private Thread readErrorStream(InputStream ins) throws IOException {
-        final InputStream in = ins;
+        return readStream("stderr", errorOutputStream, errorBuffer, ins);
+    }
 
-        Thread thread = new Thread("stderr_reader") {
-            public void run() {
-
-                try {
+    private Thread readStream(String outputName, OutputStream outputStream, StringBuffer stringBuffer, InputStream in) {
+        Thread thread = new Thread(() -> {
+            try {
                     int bytesRead = 0;
                     int bufferLength;
                     byte[] buffer;
@@ -196,25 +162,30 @@ public class Command extends RunnableProcess {
 
                         buffer = new byte[bufferLength];
                         bytesRead = in.read(buffer, 0, bufferLength);
-                        if (logger != null) {
-                            System.err.print(new String(buffer));
+
+                        if (bytesRead == 0) {
+                            Thread.sleep(500);
+                            logger.trace(outputName + " - Sleep");
+                        } else if (bytesRead > 0) {
+                            logger.trace(outputName + " - last bytesRead = {})", bytesRead);
+                            if (printOutput) {
+                                System.err.print(new String(buffer));
+                            }
+
+                            if (outputStream == null) {
+                                stringBuffer.append(new String(buffer));
+                            } else {
+                                outputStream.write(buffer);
+                                outputStream.flush();
+                            }
                         }
-                        if (errorOutputStream == null) {
-                            errorBuffer.append(new String(buffer));
-                        } else {
-                            errorOutputStream.write(buffer);
-                            errorOutputStream.flush();
-                        }
-                        Thread.sleep(500);
-                        logger.trace("stderr - Sleep  (last bytesRead = " + bytesRead + ")");
                     }
-                    logger.debug("ReadErrorStream - Exit while");
+                    logger.debug("Read {} - Exit while", outputName);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     exception = ex.toString();
                 }
-            }
-        };
+        }, outputName + "_reader");
         thread.start();
         return thread;
     }
@@ -295,6 +266,11 @@ public class Command extends RunnableProcess {
 
     public Command setErrorOutputStream(OutputStream errorOutputStream) {
         this.errorOutputStream = errorOutputStream;
+        return this;
+    }
+
+    public Command setPrintOutput(boolean printOutput) {
+        this.printOutput = printOutput;
         return this;
     }
 }
