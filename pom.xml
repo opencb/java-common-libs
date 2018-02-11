@@ -21,9 +21,9 @@
     <properties>
         <java.commons.version>3.7.0-SNAPSHOT</java.commons.version>
         <compileSource>1.8</compileSource>
-        <jackson.version>2.8.10</jackson.version>
-        <apache.commons.version>3.5</apache.commons.version>
-        <slf4j.version>1.7.21</slf4j.version>
+        <jackson.version>2.8.11</jackson.version>
+        <apache.commons.version>3.7</apache.commons.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <avro.version>1.7.7</avro.version>
     </properties>
 
@@ -52,9 +52,9 @@
             <email>jacobo167@gmail.com</email>
         </developer>
         <developer>
-            <id>cyenyxe</id>
-            <name>Cristina</name>
-            <email>cristina.yenyxe@gmail.com</email>
+            <id>pfurio</id>
+            <name>Pedro</name>
+            <email>pedrofurio@gmail.com</email>
         </developer>
     </developers>
 
@@ -93,11 +93,6 @@
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
             </dependency>
-            <!--<dependency>-->
-            <!--<groupId>commons-codec</groupId>-->
-            <!--<artifactId>commons-codec</artifactId>-->
-            <!--<version>1.10</version>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -110,7 +105,6 @@
                 <scope>test</scope>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
 
     <build>
@@ -121,7 +115,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.7.0</version>
                 <configuration>
                     <source>${compileSource}</source>
                     <target>${compileSource}</target>
@@ -133,7 +127,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.0.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
