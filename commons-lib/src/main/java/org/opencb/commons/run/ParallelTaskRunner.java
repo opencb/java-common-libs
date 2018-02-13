@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -58,113 +57,19 @@ public class ParallelTaskRunner<I, O> {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.000");
 
     @FunctionalInterface
+    @Deprecated
+    /**
+     * @deprecated Use {@link org.opencb.commons.run.Task}
+     */
     public interface Task<T, R> extends TaskWithException<T, R, RuntimeException> {
     }
 
     @FunctionalInterface
-    public interface TaskWithException<T, R, E extends Exception> {
-        default void pre() {
-        }
-
-        List<R> apply(List<T> batch) throws E;
-
-        default List<R> drain() throws E {
-            return Collections.emptyList();
-        }
-
-        default void post() {
-        }
-
-        /**
-         * Use to concatenate Tasks.
-         *
-         * task1.then(task2).then(task3);
-         *
-         * @param nextTask  Task to concatenate
-         * @param <NR>      New return type.
-         * @return          Task that concatenates the current and the given task.
-         */
-        default <NR> TaskWithException<T, NR, E> then(TaskWithException<R, NR, E> nextTask) {
-            TaskWithException<T, R, E> thisTask = this;
-            return new TaskWithException<T, NR, E>() {
-                @Override
-                public void pre() {
-                    thisTask.pre();
-                    nextTask.pre();
-                }
-
-                @Override
-                public List<NR> apply(List<T> batch) throws E {
-                    List<R> apply1 = thisTask.apply(batch);
-                    return nextTask.apply(apply1);
-                }
-
-                @Override
-                public List<NR> drain() throws E {
-                    // Drain both tasks
-                    List<R> drain1 = thisTask.drain();
-                    // Create new list, in case it is not modifiable
-                    List<NR> batch2 = new ArrayList<>(nextTask.apply(drain1));
-                    List<NR> drain2 = nextTask.drain();
-                    batch2.addAll(drain2);
-                    return batch2;
-                }
-
-                @Override
-                public void post() {
-                    thisTask.post();
-                    nextTask.post();
-                }
-            };
-        }
-
-        /**
-         * Use to concatenate a DataWriter as a task. Allows parallel writing.
-         *
-         * task1.then(writer);
-         *
-         * @param writer    Write step to concatenate
-         * @return          Task that concatenates the current task with the given writer.
-         */
-        default TaskWithException<T, R, E> then(DataWriter<R> writer) {
-            AtomicBoolean pre = new AtomicBoolean(false);
-            AtomicBoolean post = new AtomicBoolean(false);
-            TaskWithException<T, R, E> task = this;
-            return new TaskWithException<T, R, E>() {
-                @Override
-                public void pre() {
-                    if (!pre.getAndSet(true)) {
-                        writer.open();
-                        writer.pre();
-                    }
-                    task.pre();
-                }
-
-                @Override
-                public List<R> apply(List<T> batch) throws E {
-                    List<R> batch2 = task.apply(batch);
-                    writer.write(batch2);
-                    return batch2;
-                }
-
-                @Override
-                public List<R> drain() throws E {
-                    // Drain and write
-                    List<R> drain = task.drain();
-                    writer.write(drain);
-                    return drain;
-                }
-
-                @Override
-                public void post() {
-                    task.post();
-                    if (!post.getAndSet(true)) {
-                        writer.post();
-                        writer.close();
-                    }
-                }
-            };
-        }
+    @Deprecated
+    /**
+     * @deprecated Use {@link org.opencb.commons.run.Task}
+     */
+    public interface TaskWithException<T, R, E extends Exception> extends org.opencb.commons.run.Task<T, R> {
     }
 
     @SuppressWarnings("unchecked")
@@ -172,7 +77,7 @@ public class ParallelTaskRunner<I, O> {
 
     private final DataReader<I> reader;
     private final DataWriter<O> writer;
-    private final List<TaskWithException<I, O, ?>> tasks;
+    private final List<org.opencb.commons.run.Task<I, O>> tasks;
     private final Config config;
 
     private ExecutorService executorService;
@@ -301,7 +206,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, TaskWithException<I, O, ?> task, DataWriter<O> writer, Config config) {
+    public ParallelTaskRunner(DataReader<I> reader, org.opencb.commons.run.Task<I, O> task, DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -320,7 +225,7 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, Supplier<? extends TaskWithException<I, O, ?>> taskSupplier,
+    public ParallelTaskRunner(DataReader<I> reader, Supplier<? extends org.opencb.commons.run.Task<I, O>> taskSupplier,
                               DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
@@ -340,7 +245,8 @@ public class ParallelTaskRunner<I, O> {
      * @param config configuration.
      * @throws IllegalArgumentException Exception.
      */
-    public ParallelTaskRunner(DataReader<I> reader, List<? extends TaskWithException<I, O, ?>> tasks, DataWriter<O> writer, Config config) {
+    public ParallelTaskRunner(DataReader<I> reader, List<? extends org.opencb.commons.run.Task<I, O>> tasks,
+                              DataWriter<O> writer, Config config) {
         this.config = config;
         this.reader = reader;
         this.writer = writer;
@@ -415,11 +321,16 @@ public class ParallelTaskRunner<I, O> {
         }
         timeWriting += System.nanoTime() - auxTime;
 
-        for (TaskWithException<I, O, ?> task : tasks) {
-            task.pre();
+        for (org.opencb.commons.run.Task<I, O> task : tasks) {
+            try {
+                task.pre();
+            } catch (Exception e) {
+                // TODO: Improve exception handler
+                throw new ExecutionException(e);
+            }
         }
 
-        for (TaskWithException<I, O, ?> task : tasks) {
+        for (org.opencb.commons.run.Task<I, O> task : tasks) {
             doSubmit(new TaskRunnable(task));
         }
         if (writer != null) {
@@ -476,8 +387,13 @@ public class ParallelTaskRunner<I, O> {
         // If interrupted, skip POST steps. Only close.
 
         if (!interrupted) {
-            for (TaskWithException<I, O, ?> task : tasks) {
-                task.post();
+            for (org.opencb.commons.run.Task<I, O> task : tasks) {
+                try {
+                    task.post();
+                } catch (Exception e) {
+                    // TODO: Improve exception handler
+                    throw new ExecutionException(e);
+                }
             }
         }
         auxTime = System.nanoTime();
@@ -677,13 +593,13 @@ public class ParallelTaskRunner<I, O> {
 
     class TaskRunnable implements Callable<Void> {
 
-        private final TaskWithException<I, O, ?> task;
+        private final org.opencb.commons.run.Task<I, O> task;
 
         private long threadTimeBlockedAtTakeRead = 0;
         private long threadTimeBlockedAtSendWrite = 0;
         private long threadTimeTaskApply = 0;
 
-        TaskRunnable(TaskWithException<I, O, ?> task) {
+        TaskRunnable(org.opencb.commons.run.Task<I, O> task) {
             this.task = task;
         }
 
