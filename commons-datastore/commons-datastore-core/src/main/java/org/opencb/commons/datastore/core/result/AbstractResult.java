@@ -16,6 +16,8 @@
 
 package org.opencb.commons.datastore.core.result;
 
+import java.util.List;
+
 /**
  * Created by imedina on 23/03/17.
  */
@@ -24,13 +26,13 @@ public class AbstractResult {
     protected String id;
     protected int dbTime;
     protected long numMatches;
-    protected Error warning;
+    protected List<Error> warning;
     protected Error error;
 
     public AbstractResult() {
     }
 
-    public AbstractResult(String id, int dbTime, long numMatches, Error warning, Error error) {
+    public AbstractResult(String id, int dbTime, long numMatches, List<Error> warning, Error error) {
         this.id = id;
         this.dbTime = dbTime;
         this.numMatches = numMatches;
@@ -44,8 +46,8 @@ public class AbstractResult {
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
         sb.append(", numMatches=").append(numMatches);
-        sb.append(", warning='").append(warning).append('\'');
-        sb.append(", error='").append(error).append('\'');
+        sb.append(", warning=").append(warning);
+        sb.append(", error=").append(error);
         sb.append('}');
         return sb.toString();
     }
@@ -77,11 +79,11 @@ public class AbstractResult {
         return this;
     }
 
-    public Error getWarning() {
+    public List<Error> getWarning() {
         return warning;
     }
 
-    public AbstractResult setWarning(Error warning) {
+    public AbstractResult setWarning(List<Error> warning) {
         this.warning = warning;
         return this;
     }

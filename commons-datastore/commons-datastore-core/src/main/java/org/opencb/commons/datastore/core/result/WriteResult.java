@@ -14,7 +14,7 @@ public class WriteResult extends AbstractResult {
         super(id, -1, -1, null, null);
     }
 
-    public WriteResult(String id, int dbTime, long numMatches, long numModified, List<Fail> failed, Error warning, Error error) {
+    public WriteResult(String id, int dbTime, long numMatches, long numModified, List<Fail> failed, List<Error> warning, Error error) {
         super(id, dbTime, numMatches, warning, error);
 
         this.numModified = numModified;

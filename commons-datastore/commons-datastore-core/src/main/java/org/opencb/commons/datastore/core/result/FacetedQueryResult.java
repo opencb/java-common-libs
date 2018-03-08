@@ -16,6 +16,9 @@
 
 package org.opencb.commons.datastore.core.result;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by jtarraga on 09/03/17.
  */
@@ -30,10 +33,11 @@ public class FacetedQueryResult extends AbstractResult {
     @Deprecated
     public FacetedQueryResult(String id, int dbTime, int numResults, long numTotalResults, String warningMsg, String errorMsg,
                               FacetedQueryResultItem result) {
-        this(id, dbTime, numResults, numTotalResults, new Error(-1, "", warningMsg), new Error(-1, "", errorMsg), result);
+        this(id, dbTime, numResults, numTotalResults, Collections.singletonList(new Error(-1, "", warningMsg)), new Error(-1, "", errorMsg),
+                result);
     }
 
-    public FacetedQueryResult(String id, int dbTime, int numResults, long numMatches, Error warning, Error error,
+    public FacetedQueryResult(String id, int dbTime, int numResults, long numMatches, List<Error> warning, Error error,
                               FacetedQueryResultItem result) {
         super(id, dbTime, numMatches, warning, error);
         this.numResults = numResults;
