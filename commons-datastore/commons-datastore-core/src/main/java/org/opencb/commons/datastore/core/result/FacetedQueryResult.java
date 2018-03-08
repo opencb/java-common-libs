@@ -21,14 +21,22 @@ package org.opencb.commons.datastore.core.result;
  */
 public class FacetedQueryResult extends AbstractResult {
 
+    private int numResults;
     private FacetedQueryResultItem result;
 
     public FacetedQueryResult() {
     }
 
+    @Deprecated
     public FacetedQueryResult(String id, int dbTime, int numResults, long numTotalResults, String warningMsg, String errorMsg,
                               FacetedQueryResultItem result) {
-        super(id, dbTime, numResults, numTotalResults, warningMsg, errorMsg);
+        this(id, dbTime, numResults, numTotalResults, new Error(-1, "", warningMsg), new Error(-1, "", errorMsg), result);
+    }
+
+    public FacetedQueryResult(String id, int dbTime, int numResults, long numMatches, Error warning, Error error,
+                              FacetedQueryResultItem result) {
+        super(id, dbTime, numMatches, warning, error);
+        this.numResults = numResults;
         this.result = result;
     }
 
@@ -38,12 +46,43 @@ public class FacetedQueryResult extends AbstractResult {
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
         sb.append(", numResults=").append(numResults);
-        sb.append(", numTotalResults=").append(numTotalResults);
-        sb.append(", warningMsg='").append(warningMsg).append('\'');
-        sb.append(", errorMsg='").append(errorMsg).append('\'');
+        sb.append(", numMatches=").append(numMatches);
+        sb.append(", warning='").append(warning).append('\'');
+        sb.append(", error='").append(error).append('\'');
         sb.append(", result=").append(result);
         sb.append('}');
         return sb.toString();
+    }
+
+    public int getNumResults() {
+        return numResults;
+    }
+
+    public FacetedQueryResult setNumResults(int numResults) {
+        this.numResults = numResults;
+        return this;
+    }
+
+    @Deprecated
+    public long getNumTotalResults() {
+        return numMatches;
+    }
+
+    @Deprecated
+    public FacetedQueryResult setNumTotalResults(long numTotalResults) {
+        this.numMatches = numTotalResults;
+        return this;
+    }
+
+    @Override
+    public long getNumMatches() {
+        return numMatches;
+    }
+
+    @Override
+    public FacetedQueryResult setNumMatches(long numMatches) {
+        this.numMatches = numMatches;
+        return this;
     }
 
     public FacetedQueryResultItem getResult() {
