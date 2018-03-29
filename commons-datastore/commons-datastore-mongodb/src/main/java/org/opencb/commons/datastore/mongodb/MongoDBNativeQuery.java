@@ -124,6 +124,10 @@ public class MongoDBNativeQuery {
         // we need to be sure that the List is mutable
         List<Bson> bsonOperations = new ArrayList<>(operations);
         if (options != null) {
+            Bson projection = getProjection(null, options);
+            if (projection != null) {
+                bsonOperations.add(Aggregates.project(projection));
+            }
             if (options.getInt(QueryOptions.SKIP) > 0) {
                 bsonOperations.add(Aggregates.skip(options.getInt(QueryOptions.SKIP)));
             }
