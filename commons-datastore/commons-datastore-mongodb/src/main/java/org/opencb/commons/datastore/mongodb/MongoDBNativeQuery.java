@@ -134,6 +134,20 @@ public class MongoDBNativeQuery {
             if (options.getInt(QueryOptions.LIMIT) > 0) {
                 bsonOperations.add(Aggregates.limit(options.getInt(QueryOptions.LIMIT)));
             }
+
+            Object sortObject = options.get(QueryOptions.SORT);
+            if (sortObject != null) {
+                if (sortObject instanceof Bson) {
+                    bsonOperations.add(Aggregates.sort((Bson) sortObject));
+                } else if (sortObject instanceof String) {
+                    String order = options.getString(QueryOptions.ORDER, "DESC");
+                    if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                        bsonOperations.add(Aggregates.sort(Sorts.ascending((String) sortObject)));
+                    } else {
+                        bsonOperations.add(Aggregates.sort(Sorts.descending((String) sortObject)));
+                    }
+                }
+            }
         }
         return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
     }
