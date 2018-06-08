@@ -34,6 +34,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.getProjection;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.parseQueryOptions;
+
 
 /**
  * Created by imedina on 28/03/14.
@@ -77,6 +80,17 @@ public class MongoDBNativeQuery {
         return find(query, null, options);
     }
 
+    public AggregateIterable<Document> aggregate(List<? extends Bson> operations) {
+        return aggregate(operations, null);
+    }
+
+    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
+        // we need to be sure that the List is mutable
+        List<Bson> bsonOperations = new ArrayList<>(operations);
+        parseQueryOptions(bsonOperations, options);
+        return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
+    }
+
     public FindIterable<Document> find(Bson query, Bson projection, QueryOptions options) {
 
         if (projection == null) {
@@ -118,42 +132,6 @@ public class MongoDBNativeQuery {
         }
 
         return findIterable;
-    }
-
-    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
-        // we need to be sure that the List is mutable
-        List<Bson> bsonOperations = new ArrayList<>(operations);
-        parseQueryOptions(bsonOperations, options);
-        return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
-    }
-
-    public static void parseQueryOptions(List<Bson> operations, QueryOptions options) {
-        if (options != null) {
-            Bson projection = getProjection(null, options);
-            if (projection != null) {
-                operations.add(Aggregates.project(projection));
-            }
-            if (options.getInt(QueryOptions.SKIP) > 0) {
-                operations.add(Aggregates.skip(options.getInt(QueryOptions.SKIP)));
-            }
-            if (options.getInt(QueryOptions.LIMIT) > 0) {
-                operations.add(Aggregates.limit(options.getInt(QueryOptions.LIMIT)));
-            }
-
-            Object sortObject = options.get(QueryOptions.SORT);
-            if (sortObject != null) {
-                if (sortObject instanceof Bson) {
-                    operations.add(Aggregates.sort((Bson) sortObject));
-                } else if (sortObject instanceof String) {
-                    String order = options.getString(QueryOptions.ORDER, "DESC");
-                    if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
-                        operations.add(Aggregates.sort(Sorts.ascending((String) sortObject)));
-                    } else {
-                        operations.add(Aggregates.sort(Sorts.descending((String) sortObject)));
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -376,98 +354,6 @@ public class MongoDBNativeQuery {
 
     public void dropIndex(Bson keys) {
         dbCollection.dropIndex(keys);
-    }
-
-
-    private static Bson getProjection(Bson projection, QueryOptions options) {
-        Bson projectionResult = null;
-        List<Bson> projections = new ArrayList<>();
-
-        // It is too risky to merge projections, if projection alrady exists we return it as it is, otherwise we create a new one.
-        if (projection != null) {
-//            projections.add(projection);
-            return projection;
-        }
-
-        if (options != null) {
-            // Select which fields are excluded and included in the query
-            // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
-
-            Bson include = null;
-            if (options.containsKey(QueryOptions.INCLUDE)) {
-                Object includeObject = options.get(QueryOptions.INCLUDE);
-                if (includeObject != null) {
-                    if (includeObject instanceof Bson) {
-                        include = (Bson) includeObject;
-                    } else {
-                        List<String> includeStringList = options.getAsStringList(QueryOptions.INCLUDE, ",");
-                        if (includeStringList != null && includeStringList.size() > 0) {
-                            include = Projections.include(includeStringList);
-                        }
-                    }
-                }
-            }
-
-            Bson exclude = null;
-            boolean excludeId = false;
-            if (options.containsKey(QueryOptions.EXCLUDE)) {
-                Object excludeObject = options.get(QueryOptions.EXCLUDE);
-                if (excludeObject != null) {
-                    if (excludeObject instanceof Bson) {
-                        exclude = (Bson) excludeObject;
-                    } else {
-                        List<String> excludeStringList = options.getAsStringList(QueryOptions.EXCLUDE, ",");
-                        if (excludeStringList != null && excludeStringList.size() > 0) {
-                            exclude = Projections.exclude(excludeStringList);
-                            excludeId = excludeStringList.contains("_id");
-                        }
-                    }
-                }
-            }
-
-            // If both include and exclude exist we only add include
-            if (include != null) {
-                projections.add(include);
-                // MongoDB allows to exclude _id when include is present
-                if (excludeId) {
-                    projections.add(Projections.excludeId());
-                }
-            } else {
-                if (exclude != null) {
-                    projections.add(exclude);
-                }
-            }
-
-
-            if (options.containsKey(MongoDBCollection.ELEM_MATCH)) {
-                Object elemMatch = options.get(MongoDBCollection.ELEM_MATCH);
-                if (elemMatch != null && elemMatch instanceof Bson) {
-                    projections.add((Bson) elemMatch);
-                }
-            }
-
-//            List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
-//            if (includeStringList != null && includeStringList.size() > 0) {
-//                projections.add(Projections.include(includeStringList));
-////                for (Object field : includeStringList) {
-////                    projection.put(field.toString(), 1);
-////                }
-//            } else {
-//                List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
-//                if (excludeStringList != null && excludeStringList.size() > 0) {
-//                    projections.add(Projections.exclude(excludeStringList));
-////                    for (Object field : excludeStringList) {
-////                        projection.put(field.toString(), 0);
-////                    }
-//                }
-//            }
-        }
-
-        if (projections.size() > 0) {
-            projectionResult = Projections.fields(projections);
-        }
-
-        return projectionResult;
     }
 
 }
