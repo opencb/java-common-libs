@@ -687,10 +687,12 @@ public class ParallelTaskRunner<I, O> {
                     if (allTasksFinished()) {
                         if (writeBlockingQueue != null) {
                             // Offer, instead of put, to avoid blocking
-                            boolean offerPoisonPill = writeBlockingQueue.offer(POISON_PILL);
+                            if (!writeBlockingQueue.contains(POISON_PILL)) {
+                                boolean offerPoisonPill = writeBlockingQueue.offer(POISON_PILL);
 //                            if (!offerPoisonPill) {
 //                                logger.trace("Offer POISON_PILL failed!");
 //                            }
+                            }
                         } else if (writeBlockingQueueFuture != null) {
                             CompletableFuture<Batch<O>> future = new CompletableFuture<>();
                             future.complete(POISON_PILL);
@@ -795,7 +797,13 @@ public class ParallelTaskRunner<I, O> {
             if (batch == POISON_PILL) {
 //                logger.debug("writer: POISON_PILL");
                 if (writeBlockingQueue != null) {
-                    writeBlockingQueue.put(POISON_PILL);
+                    if (!writeBlockingQueue.contains(POISON_PILL)) {
+                        synchronized (tasks) {
+                            if (!writeBlockingQueue.contains(POISON_PILL)) {
+                                writeBlockingQueue.put(POISON_PILL);
+                            }
+                        }
+                    }
                 } else if (writeBlockingQueueFuture != null) {
                     CompletableFuture<Batch<O>> future = new CompletableFuture<>();
                     future.complete(POISON_PILL);
