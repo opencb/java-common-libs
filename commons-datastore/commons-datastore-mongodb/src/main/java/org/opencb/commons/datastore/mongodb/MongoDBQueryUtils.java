@@ -147,65 +147,140 @@ public class MongoDBQueryUtils {
 
         List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
 
-        List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+        if (LogicalOperator.OR.equals(operator)
+                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.EQUALS)) {
+            // It is better to perform a $in operation
+            return Filters.in(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+        } else if (LogicalOperator.AND.equals(operator)
+                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.NOT_EQUALS)) {
+            // It is better to perform a $nin operation
+            return Filters.nin(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+        } else {
+            List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+            for (String queryItem : queryParamList) {
+                Matcher matcher = getPattern(type).matcher(queryItem);
+                String op = "";
+                String queryValueString = queryItem;
+                if (matcher.find()) {
+                    op = matcher.group(1);
+                    queryValueString = matcher.group(2);
+                }
+                ComparisonOperator comparator = getComparisonOperator(op, type);
+                switch (type) {
+                    case STRING:
+                    case TEXT:
+                    case TEXT_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                        break;
+                    case INTEGER:
+                    case INTEGER_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
+                        break;
+                    case DOUBLE:
+                    case DECIMAL:
+                    case DECIMAL_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                        break;
+                    case BOOLEAN:
+                        bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                        break;
+                    case DATE:
+                    case TIMESTAMP:
+                        List<String> dateList = new ArrayList<>();
+                        dateList.add(queryValueString);
+                        if (!matcher.group(3).isEmpty()) {
+                            dateList.add(matcher.group(4));
+                            comparator = ComparisonOperator.BETWEEN;
+                        }
+                        bsonList.add(createDateFilter(mongoDbField, dateList, comparator, type));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            Bson filter;
+            if (bsonList.size() == 0) {
+                filter = Filters.size(queryParam, 0);
+            } else if (bsonList.size() == 1) {
+                filter = bsonList.get(0);
+            } else {
+                if (operator.equals(LogicalOperator.OR)) {
+                    filter = Filters.or(bsonList);
+                } else {
+                    filter = Filters.and(bsonList);
+                }
+            }
+
+            return filter;
+        }
+    }
+
+    /**
+     * Auxiliary method to check if the operator of each of the values in the queryParamList matches the operator passed.
+     *
+     * @param type QueryParam type.
+     * @param queryParamList List of values.
+     * @param operator Operator to be checked.
+     * @return boolean indicating whether the list of values have always the same operator or not.
+     */
+    private static boolean queryParamsOperatorAlwaysMatchesOperator(QueryParam.Type type, List<String> queryParamList,
+                                                                    ComparisonOperator operator) {
         for (String queryItem : queryParamList) {
             Matcher matcher = getPattern(type).matcher(queryItem);
             String op = "";
-            String queryValueString = queryItem;
             if (matcher.find()) {
                 op = matcher.group(1);
+            }
+            if (operator != getComparisonOperator(op, type)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes any operators present in the queryParamList and gets a list of the values parsed to the corresponding data type.
+     *
+     * @param type QueryParam type.
+     * @param queryParamList List of values.
+     * @return a list of the values parsed to the corresponding data type.
+     */
+    private static List<Object> removeOperatorsFromQueryParamList(QueryParam.Type type, List<String> queryParamList) {
+        List<Object> newQueryParamList = new ArrayList<>();
+
+        for (String queryItem : queryParamList) {
+            Matcher matcher = getPattern(type).matcher(queryItem);
+            String queryValueString = queryItem;
+            if (matcher.find()) {
                 queryValueString = matcher.group(2);
             }
-            ComparisonOperator comparator = getComparisonOperator(op, type);
             switch (type) {
                 case STRING:
                 case TEXT:
                 case TEXT_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                    newQueryParamList.add(queryValueString);
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
+                    newQueryParamList.add(Long.parseLong(queryValueString));
                     break;
                 case DOUBLE:
                 case DECIMAL:
                 case DECIMAL_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                    newQueryParamList.add(Double.parseDouble(queryValueString));
                     break;
                 case BOOLEAN:
-                    bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
-                    break;
-                case DATE:
-                case TIMESTAMP:
-                    List<String> dateList = new ArrayList<>();
-                    dateList.add(queryValueString);
-                    if (!matcher.group(3).isEmpty()) {
-                        dateList.add(matcher.group(4));
-                        comparator = ComparisonOperator.BETWEEN;
-                    }
-                    bsonList.add(createDateFilter(mongoDbField, dateList, comparator, type));
+                    newQueryParamList.add(Boolean.parseBoolean(queryValueString));
                     break;
                 default:
                     break;
             }
         }
 
-        Bson filter;
-        if (bsonList.size() == 0) {
-            filter = Filters.size(queryParam, 0);
-        } else if (bsonList.size() == 1) {
-            filter = bsonList.get(0);
-        } else {
-            if (operator.equals(LogicalOperator.OR)) {
-                filter = Filters.or(bsonList);
-            } else {
-                filter = Filters.and(bsonList);
-            }
-        }
-
-        return filter;
+        return newQueryParamList;
     }
-
 
 
     public static <T> Bson createFilter(String mongoDbField, T queryValue) {
