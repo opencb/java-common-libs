@@ -64,9 +64,11 @@ public class Query extends ObjectMap {
                         put(queryParam.key(), getAsStringList(queryParam.key()));
                         break;
                     case INTEGER:
+                    case LONG:
                         put(queryParam.key(), getLong(queryParam.key()));
                         break;
                     case INTEGER_ARRAY:
+                    case LONG_ARRAY:
                         put(queryParam.key(), getAsLongList(queryParam.key()));
                         break;
                     case DECIMAL:

@@ -102,6 +102,8 @@ public class MongoDBQueryUtils {
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
+                case LONG:
+                case LONG_ARRAY:
                     filter = createFilter(mongoDbField, query.getAsLongList(queryParam, getLogicalSeparator(operator)), comparator,
                             operator);
                     break;
@@ -111,6 +113,7 @@ public class MongoDBQueryUtils {
                             operator);
                     break;
                 case BOOLEAN:
+                case BOOLEAN_ARRAY:
                     filter = createFilter(mongoDbField, query.getBoolean(queryParam), comparator);
                     break;
                 case DATE:
@@ -172,6 +175,8 @@ public class MongoDBQueryUtils {
                     case TEXT_ARRAY:
                         bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
                         break;
+                    case LONG:
+                    case LONG_ARRAY:
                     case INTEGER:
                     case INTEGER_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
@@ -182,6 +187,7 @@ public class MongoDBQueryUtils {
                         bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
                         break;
                     case BOOLEAN:
+                    case BOOLEAN_ARRAY:
                         bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
                         break;
                     case DATE:
@@ -262,6 +268,8 @@ public class MongoDBQueryUtils {
                 case TEXT_ARRAY:
                     newQueryParamList.add(queryValueString);
                     break;
+                case LONG:
+                case LONG_ARRAY:
                 case INTEGER:
                 case INTEGER_ARRAY:
                     newQueryParamList.add(Long.parseLong(queryValueString));
@@ -272,6 +280,7 @@ public class MongoDBQueryUtils {
                     newQueryParamList.add(Double.parseDouble(queryValueString));
                     break;
                 case BOOLEAN:
+                case BOOLEAN_ARRAY:
                     newQueryParamList.add(Boolean.parseBoolean(queryValueString));
                     break;
                 default:
@@ -720,6 +729,8 @@ public class MongoDBQueryUtils {
                             throw new IllegalStateException("Unknown string query operation " + op);
                     }
                     break;
+                case LONG:
+                case LONG_ARRAY:
                 case INTEGER:
                 case INTEGER_ARRAY:
                 case DOUBLE:
@@ -752,6 +763,7 @@ public class MongoDBQueryUtils {
                     }
                     break;
                 case BOOLEAN:
+                case BOOLEAN_ARRAY:
                     switch(op) {
                         case "=":
                         case "==":
@@ -779,6 +791,8 @@ public class MongoDBQueryUtils {
             case TEXT_ARRAY:
                 pattern = OPERATION_STRING_PATTERN;
                 break;
+            case LONG:
+            case LONG_ARRAY:
             case INTEGER:
             case INTEGER_ARRAY:
             case DOUBLE:
@@ -787,6 +801,7 @@ public class MongoDBQueryUtils {
                 pattern = OPERATION_NUMERIC_PATTERN;
                 break;
             case BOOLEAN:
+            case BOOLEAN_ARRAY:
                 pattern = OPERATION_BOOLEAN_PATTERN;
                 break;
             case DATE:
