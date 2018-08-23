@@ -50,7 +50,7 @@ public class FacetedQueryResultItem {
         return size;
     }
 
-    public class Field {
+    public static class Field {
 
         private String name;
         private long total;
@@ -101,11 +101,15 @@ public class FacetedQueryResultItem {
         }
     }
 
-    public class Count {
+    public static class Count {
 
         private String value;
         private long count;
         private Field field;
+
+        public Count() {
+            this("", 0, null);
+        }
 
         public Count(String value, long count, Field field) {
             this.value = value;
@@ -148,7 +152,7 @@ public class FacetedQueryResultItem {
         }
     }
 
-    public class Range {
+    public static class Range {
 
         private String name;
         private Number start;
@@ -219,7 +223,7 @@ public class FacetedQueryResultItem {
             return total;
         }
 
-        public void setGap(long totalCount) {
+        public void setTotal(long totalCount) {
             this.total = totalCount;
         }
 
@@ -232,10 +236,13 @@ public class FacetedQueryResultItem {
         }
     }
 
-    public class Intersection {
+    public static class Intersection {
         private String name;
         private int size;
         private Map<String, Long> counts;
+
+        public Intersection() {
+        }
 
         @Override
         public String toString() {
