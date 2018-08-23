@@ -16,17 +16,19 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
+import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryParam;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +43,7 @@ public class MongoDBQueryUtils {
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
 
     public static final String OR = ",";
     public static final String AND = ";";
@@ -65,11 +68,12 @@ public class MongoDBQueryUtils {
         REGEX,               // The regular expression will look for "=~" or "~" at the beginning.
         TEXT,
 
-        // Numeric comparators
+        // Numeric and Date comparators
         GREATER_THAN,
         GREATER_THAN_EQUAL,
         LESS_THAN,
-        LESS_THAN_EQUAL;
+        LESS_THAN_EQUAL,
+        BETWEEN
     }
 
 
@@ -98,6 +102,8 @@ public class MongoDBQueryUtils {
                     break;
                 case INTEGER:
                 case INTEGER_ARRAY:
+                case LONG:
+                case LONG_ARRAY:
                     filter = createFilter(mongoDbField, query.getAsLongList(queryParam, getLogicalSeparator(operator)), comparator,
                             operator);
                     break;
@@ -107,7 +113,12 @@ public class MongoDBQueryUtils {
                             operator);
                     break;
                 case BOOLEAN:
+                case BOOLEAN_ARRAY:
                     filter = createFilter(mongoDbField, query.getBoolean(queryParam), comparator);
+                    break;
+                case DATE:
+                case TIMESTAMP:
+                    filter = createDateFilter(mongoDbField, query.getAsStringList(queryParam), comparator, type);
                     break;
                 default:
                     break;
@@ -139,55 +150,146 @@ public class MongoDBQueryUtils {
 
         List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
 
-        List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+        if (LogicalOperator.OR.equals(operator)
+                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.EQUALS)) {
+            // It is better to perform a $in operation
+            return Filters.in(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+        } else if (LogicalOperator.AND.equals(operator)
+                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.NOT_EQUALS)) {
+            // It is better to perform a $nin operation
+            return Filters.nin(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+        } else {
+            List<Bson> bsonList = new ArrayList<>(queryParamList.size());
+            for (String queryItem : queryParamList) {
+                Matcher matcher = getPattern(type).matcher(queryItem);
+                String op = "";
+                String queryValueString = queryItem;
+                if (matcher.find()) {
+                    op = matcher.group(1);
+                    queryValueString = matcher.group(2);
+                }
+                ComparisonOperator comparator = getComparisonOperator(op, type);
+                switch (type) {
+                    case STRING:
+                    case TEXT:
+                    case TEXT_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                        break;
+                    case LONG:
+                    case LONG_ARRAY:
+                    case INTEGER:
+                    case INTEGER_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
+                        break;
+                    case DOUBLE:
+                    case DECIMAL:
+                    case DECIMAL_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                        break;
+                    case BOOLEAN:
+                    case BOOLEAN_ARRAY:
+                        bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                        break;
+                    case DATE:
+                    case TIMESTAMP:
+                        List<String> dateList = new ArrayList<>();
+                        dateList.add(queryValueString);
+                        if (!matcher.group(3).isEmpty()) {
+                            dateList.add(matcher.group(4));
+                            comparator = ComparisonOperator.BETWEEN;
+                        }
+                        bsonList.add(createDateFilter(mongoDbField, dateList, comparator, type));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            Bson filter;
+            if (bsonList.size() == 0) {
+                filter = Filters.size(queryParam, 0);
+            } else if (bsonList.size() == 1) {
+                filter = bsonList.get(0);
+            } else {
+                if (operator.equals(LogicalOperator.OR)) {
+                    filter = Filters.or(bsonList);
+                } else {
+                    filter = Filters.and(bsonList);
+                }
+            }
+
+            return filter;
+        }
+    }
+
+    /**
+     * Auxiliary method to check if the operator of each of the values in the queryParamList matches the operator passed.
+     *
+     * @param type QueryParam type.
+     * @param queryParamList List of values.
+     * @param operator Operator to be checked.
+     * @return boolean indicating whether the list of values have always the same operator or not.
+     */
+    private static boolean queryParamsOperatorAlwaysMatchesOperator(QueryParam.Type type, List<String> queryParamList,
+                                                                    ComparisonOperator operator) {
         for (String queryItem : queryParamList) {
             Matcher matcher = getPattern(type).matcher(queryItem);
             String op = "";
-            String queryValueString = queryItem;
             if (matcher.find()) {
                 op = matcher.group(1);
+            }
+            if (operator != getComparisonOperator(op, type)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes any operators present in the queryParamList and gets a list of the values parsed to the corresponding data type.
+     *
+     * @param type QueryParam type.
+     * @param queryParamList List of values.
+     * @return a list of the values parsed to the corresponding data type.
+     */
+    private static List<Object> removeOperatorsFromQueryParamList(QueryParam.Type type, List<String> queryParamList) {
+        List<Object> newQueryParamList = new ArrayList<>();
+
+        for (String queryItem : queryParamList) {
+            Matcher matcher = getPattern(type).matcher(queryItem);
+            String queryValueString = queryItem;
+            if (matcher.find()) {
                 queryValueString = matcher.group(2);
             }
-            ComparisonOperator comparator = getComparisonOperator(op, type);
             switch (type) {
                 case STRING:
                 case TEXT:
                 case TEXT_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, queryValueString, comparator));
+                    newQueryParamList.add(queryValueString);
                     break;
+                case LONG:
+                case LONG_ARRAY:
                 case INTEGER:
                 case INTEGER_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, Long.parseLong(queryValueString), comparator));
+                    newQueryParamList.add(Long.parseLong(queryValueString));
                     break;
                 case DOUBLE:
                 case DECIMAL:
                 case DECIMAL_ARRAY:
-                    bsonList.add(createFilter(mongoDbField, Double.parseDouble(queryValueString), comparator));
+                    newQueryParamList.add(Double.parseDouble(queryValueString));
                     break;
                 case BOOLEAN:
-                    bsonList.add(createFilter(mongoDbField, Boolean.parseBoolean(queryValueString), comparator));
+                case BOOLEAN_ARRAY:
+                    newQueryParamList.add(Boolean.parseBoolean(queryValueString));
                     break;
                 default:
                     break;
             }
         }
 
-        Bson filter;
-        if (bsonList.size() == 0) {
-            filter = Filters.size(queryParam, 0);
-        } else if (bsonList.size() == 1) {
-            filter = bsonList.get(0);
-        } else {
-            if (operator.equals(LogicalOperator.OR)) {
-                filter = Filters.or(bsonList);
-            } else {
-                filter = Filters.and(bsonList);
-            }
-        }
-
-        return filter;
+        return newQueryParamList;
     }
-
 
 
     public static <T> Bson createFilter(String mongoDbField, T queryValue) {
@@ -311,6 +413,68 @@ public class MongoDBQueryUtils {
     }
 
     /**
+     * Generates a date filter.
+     *
+     * @param mongoDbField Mongo field.
+     * @param dateValues List of 1 or 2 strings (dates). Only one will be expected when something like the following is passed:
+     *                   =20171210, 20171210, >=20171210, >20171210, <20171210, <=20171210
+     *                   When 2 strings are passed, we will expect it to be a range such as: 20171201-20171210
+     * @param comparator Comparator value.
+     * @param type Type of parameter. Expecting one of {@link QueryParam.Type#DATE} or {@link QueryParam.Type#TIMESTAMP}
+     * @return the Bson query.
+     */
+    private static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
+                                         QueryParam.Type type) {
+        Bson filter = null;
+
+        Object date = null;
+        if (QueryParam.Type.DATE.equals(type)) {
+            date = converStringToDate(dateValues.get(0));
+        } else if (QueryParam.Type.TIMESTAMP.equals(type)) {
+            date = converStringToDate(dateValues.get(0)).getTime();
+        }
+
+        if (date != null) {
+            switch (comparator) {
+                case BETWEEN:
+                    if (dateValues.size() == 2) {
+                        Date to = converStringToDate(dateValues.get(1));
+
+                        if (QueryParam.Type.DATE.equals(type)) {
+                            filter = new Document(mongoDbField, new Document()
+                                    .append("$gte", date)
+                                    .append("$lt", to));
+                        } else if (QueryParam.Type.TIMESTAMP.equals(type)) {
+                            filter = new Document(mongoDbField, new Document()
+                                    .append("$gte", date)
+                                    .append("$lt", to.getTime()));
+                        }
+                    }
+                    break;
+                case EQUALS:
+                    filter = Filters.eq(mongoDbField, date);
+                    break;
+                case GREATER_THAN:
+                    filter = Filters.gt(mongoDbField, date);
+                    break;
+                case GREATER_THAN_EQUAL:
+                    filter = Filters.gte(mongoDbField, date);
+                    break;
+                case LESS_THAN:
+                    filter = Filters.lt(mongoDbField, date);
+                    break;
+                case LESS_THAN_EQUAL:
+                    filter = Filters.lte(mongoDbField, date);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return filter;
+    }
+
+    /**
      * Checks that the filter value list contains only one type of operations.
      *
      * @param value List of values to check
@@ -383,6 +547,153 @@ public class MongoDBQueryUtils {
         }
     }
 
+    public static void parseQueryOptions(List<Bson> operations, QueryOptions options) {
+        if (options != null) {
+            Bson projection = getProjection(options);
+            if (projection != null) {
+                operations.add(projection);
+            }
+            Bson skip = getSkip(options);
+            if (skip != null) {
+                operations.add(skip);
+            }
+            Bson limit = getLimit(options);
+            if (limit != null) {
+                operations.add(limit);
+            }
+            Bson sort = getSort(options);
+            if (sort != null) {
+                operations.add(sort);
+            }
+        }
+    }
+
+    public static Bson getSort(QueryOptions options) {
+        Object sortObject = options.get(QueryOptions.SORT);
+        if (sortObject != null) {
+            if (sortObject instanceof Bson) {
+                return Aggregates.sort((Bson) sortObject);
+            } else if (sortObject instanceof String) {
+                String order = options.getString(QueryOptions.ORDER, "DESC");
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                    return Aggregates.sort(Sorts.ascending((String) sortObject));
+                } else {
+                    return Aggregates.sort(Sorts.descending((String) sortObject));
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Bson getLimit(QueryOptions options) {
+        if (options.getInt(QueryOptions.LIMIT) > 0) {
+            return Aggregates.limit(options.getInt(QueryOptions.LIMIT));
+        }
+        return null;
+    }
+
+    public static Bson getSkip(QueryOptions options) {
+        if (options.getInt(QueryOptions.SKIP) > 0) {
+            return Aggregates.skip(options.getInt(QueryOptions.SKIP));
+        }
+        return null;
+    }
+
+    public static Bson getProjection(QueryOptions options) {
+        Bson projection = getProjection(null, options);
+        return projection != null ? Aggregates.project(projection) : null;
+    }
+
+    protected static Bson getProjection(Bson projection, QueryOptions options) {
+        Bson projectionResult = null;
+        List<Bson> projections = new ArrayList<>();
+
+        // It is too risky to merge projections, if projection alrady exists we return it as it is, otherwise we create a new one.
+        if (projection != null) {
+//            projections.add(projection);
+            return projection;
+        }
+
+        if (options != null) {
+            // Select which fields are excluded and included in the query
+            // Read and process 'include'/'exclude'/'elemMatch' field from 'options' object
+
+            Bson include = null;
+            if (options.containsKey(QueryOptions.INCLUDE)) {
+                Object includeObject = options.get(QueryOptions.INCLUDE);
+                if (includeObject != null) {
+                    if (includeObject instanceof Bson) {
+                        include = (Bson) includeObject;
+                    } else {
+                        List<String> includeStringList = options.getAsStringList(QueryOptions.INCLUDE, ",");
+                        if (includeStringList != null && includeStringList.size() > 0) {
+                            include = Projections.include(includeStringList);
+                        }
+                    }
+                }
+            }
+
+            Bson exclude = null;
+            boolean excludeId = false;
+            if (options.containsKey(QueryOptions.EXCLUDE)) {
+                Object excludeObject = options.get(QueryOptions.EXCLUDE);
+                if (excludeObject != null) {
+                    if (excludeObject instanceof Bson) {
+                        exclude = (Bson) excludeObject;
+                    } else {
+                        List<String> excludeStringList = options.getAsStringList(QueryOptions.EXCLUDE, ",");
+                        if (excludeStringList != null && excludeStringList.size() > 0) {
+                            exclude = Projections.exclude(excludeStringList);
+                            excludeId = excludeStringList.contains("_id");
+                        }
+                    }
+                }
+            }
+
+            // If both include and exclude exist we only add include
+            if (include != null) {
+                projections.add(include);
+                // MongoDB allows to exclude _id when include is present
+                if (excludeId) {
+                    projections.add(Projections.excludeId());
+                }
+            } else {
+                if (exclude != null) {
+                    projections.add(exclude);
+                }
+            }
+
+
+            if (options.containsKey(MongoDBCollection.ELEM_MATCH)) {
+                Object elemMatch = options.get(MongoDBCollection.ELEM_MATCH);
+                if (elemMatch != null && elemMatch instanceof Bson) {
+                    projections.add((Bson) elemMatch);
+                }
+            }
+
+//            List<String> includeStringList = options.getAsStringList(MongoDBCollection.INCLUDE, ",");
+//            if (includeStringList != null && includeStringList.size() > 0) {
+//                projections.add(Projections.include(includeStringList));
+////                for (Object field : includeStringList) {
+////                    projection.put(field.toString(), 1);
+////                }
+//            } else {
+//                List<String> excludeStringList = options.getAsStringList(MongoDBCollection.EXCLUDE, ",");
+//                if (excludeStringList != null && excludeStringList.size() > 0) {
+//                    projections.add(Projections.exclude(excludeStringList));
+////                    for (Object field : excludeStringList) {
+////                        projection.put(field.toString(), 0);
+////                    }
+//                }
+//            }
+        }
+
+        if (projections.size() > 0) {
+            projectionResult = Projections.fields(projections);
+        }
+
+        return projectionResult;
+    }
 
     public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
         ComparisonOperator comparator = null;
@@ -418,11 +729,15 @@ public class MongoDBQueryUtils {
                             throw new IllegalStateException("Unknown string query operation " + op);
                     }
                     break;
+                case LONG:
+                case LONG_ARRAY:
                 case INTEGER:
                 case INTEGER_ARRAY:
                 case DOUBLE:
                 case DECIMAL:
                 case DECIMAL_ARRAY:
+                case DATE:
+                case TIMESTAMP:
                     switch(op) {
                         case "=":
                         case "==":
@@ -448,6 +763,7 @@ public class MongoDBQueryUtils {
                     }
                     break;
                 case BOOLEAN:
+                case BOOLEAN_ARRAY:
                     switch(op) {
                         case "=":
                         case "==":
@@ -475,6 +791,8 @@ public class MongoDBQueryUtils {
             case TEXT_ARRAY:
                 pattern = OPERATION_STRING_PATTERN;
                 break;
+            case LONG:
+            case LONG_ARRAY:
             case INTEGER:
             case INTEGER_ARRAY:
             case DOUBLE:
@@ -483,12 +801,29 @@ public class MongoDBQueryUtils {
                 pattern = OPERATION_NUMERIC_PATTERN;
                 break;
             case BOOLEAN:
+            case BOOLEAN_ARRAY:
                 pattern = OPERATION_BOOLEAN_PATTERN;
+                break;
+            case DATE:
+            case TIMESTAMP:
+                pattern = OPERATION_DATE_PATTERN;
                 break;
             default:
                 break;
         }
         return pattern;
+    }
+
+    private static Date converStringToDate(String stringDate) {
+        if (stringDate.length() == 4) {
+            stringDate = stringDate + "0101";
+        } else if (stringDate.length() == 6) {
+            stringDate = stringDate + "01";
+        }
+        String myDate = String.format("%-14s", stringDate).replace(" ", "0");
+        LocalDateTime localDateTime = LocalDateTime.parse(myDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        // We convert it to date because it is the type used by mongo
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }

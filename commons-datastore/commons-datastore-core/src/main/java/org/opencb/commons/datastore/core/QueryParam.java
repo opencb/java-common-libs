@@ -30,8 +30,12 @@ public interface QueryParam {
         DOUBLE,
         DECIMAL,
         DECIMAL_ARRAY,
+        LONG,
+        LONG_ARRAY,
         BOOLEAN,
-        DATE
+        BOOLEAN_ARRAY,
+        DATE,
+        TIMESTAMP
     }
 
     String key();

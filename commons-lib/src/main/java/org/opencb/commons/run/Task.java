@@ -1,61 +1,119 @@
-/*
- * Copyright 2015-2017 OpenCB
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.opencb.commons.run;
 
-import java.io.IOException;
+import org.opencb.commons.io.DataWriter;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @author Alejandro Aleman Ramos <aaleman@cipf.es>
+ * Created on 13/02/18.
+ *
+ * @author Jacobo Coll &lt;jacobo167@gmail.com&gt;
  */
-@Deprecated
-public abstract class Task<T> implements Comparable<Task<T>> {
-
-    private int priority;
-
-    public Task() {
-        this(0);
+@FunctionalInterface
+public interface Task<T, R> {
+    default void pre() throws Exception {
     }
 
-    public Task(int priority) {
-        this.priority = priority;
+    List<R> apply(List<T> batch) throws Exception;
+
+    default List<R> drain() throws Exception {
+        return Collections.emptyList();
     }
 
-    public abstract boolean apply(List<T> batch) throws IOException;
-
-    public boolean pre() {
-        return true;
+    default void post() throws Exception {
     }
 
-    public boolean post() {
-        return true;
+    /**
+     * Use to concatenate Tasks.
+     *
+     * task1.then(task2).then(task3);
+     *
+     * @param nextTask  Task to concatenate
+     * @param <NR>      New return type.
+     * @return          Task that concatenates the current and the given task.
+     */
+    default <NR> Task<T, NR> then(Task<R, NR> nextTask) {
+        Task<T, R> thisTask = this;
+        return new Task<T, NR>() {
+            @Override
+            public void pre() throws Exception {
+                thisTask.pre();
+                nextTask.pre();
+            }
+
+            @Override
+            public List<NR> apply(List<T> batch) throws Exception {
+                List<R> apply1 = thisTask.apply(batch);
+                return nextTask.apply(apply1);
+            }
+
+            @Override
+            public List<NR> drain() throws Exception {
+                // Drain both tasks
+                List<R> drain1 = thisTask.drain();
+                // Create new list, in case it is not modifiable
+                List<NR> batch2 = new ArrayList<>(nextTask.apply(drain1));
+                List<NR> drain2 = nextTask.drain();
+                batch2.addAll(drain2);
+                return batch2;
+            }
+
+            @Override
+            public void post() throws Exception {
+                thisTask.post();
+                nextTask.post();
+            }
+        };
     }
 
-    public int getPriority() {
-        return priority;
-    }
+    /**
+     * Use to concatenate a DataWriter as a task. Allows parallel writing.
+     *
+     * task1.then(writer);
+     *
+     * @param writer    Write step to concatenate
+     * @return          Task that concatenates the current task with the given writer.
+     */
+    default Task<T, R> then(DataWriter<R> writer) {
+        AtomicBoolean pre = new AtomicBoolean(false);
+        AtomicBoolean post = new AtomicBoolean(false);
+        Task<T, R> task = this;
+        return new Task<T, R>() {
+            @Override
+            public void pre() throws Exception {
+                if (!pre.getAndSet(true)) {
+                    writer.open();
+                    writer.pre();
+                }
+                task.pre();
+            }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
+            @Override
+            public List<R> apply(List<T> batch) throws Exception {
+                List<R> batch2 = task.apply(batch);
+                writer.write(batch2);
+                return batch2;
+            }
 
-    @Override
-    public int compareTo(Task<T> elem) {
-        return elem.getPriority() - this.priority;
-    }
+            @Override
+            public List<R> drain() throws Exception {
+                // Drain and write
+                List<R> drain = task.drain();
+                writer.write(drain);
+                return drain;
+            }
 
+            @Override
+            public void post() throws Exception {
+                task.post();
+                if (!post.getAndSet(true)) {
+                    writer.post();
+                    writer.close();
+                }
+            }
+        };
+    }
 }

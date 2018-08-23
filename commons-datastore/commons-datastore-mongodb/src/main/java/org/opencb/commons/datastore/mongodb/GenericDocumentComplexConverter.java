@@ -78,6 +78,13 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
         }
     }
 
+    /**
+     * @deprecated This method should not be here, must be moved to a better class
+     * @param document Document with the field
+     * @param key Field name to be converted
+     * @return Long converted value
+     */
+    @Deprecated
     public static Long getLongValue(Document document, String key) {
         try {
             return document.getLong(key);

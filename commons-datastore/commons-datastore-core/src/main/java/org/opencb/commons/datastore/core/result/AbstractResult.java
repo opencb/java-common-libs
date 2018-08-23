@@ -16,6 +16,8 @@
 
 package org.opencb.commons.datastore.core.result;
 
+import java.util.List;
+
 /**
  * Created by imedina on 23/03/17.
  */
@@ -23,21 +25,19 @@ public class AbstractResult {
 
     protected String id;
     protected int dbTime;
-    protected int numResults;
-    protected long numTotalResults;
-    protected String warningMsg;
-    protected String errorMsg;
+    protected long numMatches;
+    protected List<Error> warning;
+    protected Error error;
 
     public AbstractResult() {
     }
 
-    public AbstractResult(String id, int dbTime, int numResults, long numTotalResults, String warningMsg, String errorMsg) {
+    public AbstractResult(String id, int dbTime, long numMatches, List<Error> warning, Error error) {
         this.id = id;
         this.dbTime = dbTime;
-        this.numResults = numResults;
-        this.numTotalResults = numTotalResults;
-        this.warningMsg = warningMsg;
-        this.errorMsg = errorMsg;
+        this.numMatches = numMatches;
+        this.warning = warning;
+        this.error = error;
     }
 
     @Override
@@ -45,10 +45,9 @@ public class AbstractResult {
         final StringBuilder sb = new StringBuilder("AbstractResult{");
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
-        sb.append(", numResults=").append(numResults);
-        sb.append(", numTotalResults=").append(numTotalResults);
-        sb.append(", warningMsg='").append(warningMsg).append('\'');
-        sb.append(", errorMsg='").append(errorMsg).append('\'');
+        sb.append(", numMatches=").append(numMatches);
+        sb.append(", warning=").append(warning);
+        sb.append(", error=").append(error);
         sb.append('}');
         return sb.toString();
     }
@@ -71,39 +70,30 @@ public class AbstractResult {
         return this;
     }
 
-    public int getNumResults() {
-        return numResults;
+    public long getNumMatches() {
+        return numMatches;
     }
 
-    public AbstractResult setNumResults(int numResults) {
-        this.numResults = numResults;
+    public AbstractResult setNumMatches(long numMatches) {
+        this.numMatches = numMatches;
         return this;
     }
 
-    public long getNumTotalResults() {
-        return numTotalResults;
+    public List<Error> getWarning() {
+        return warning;
     }
 
-    public AbstractResult setNumTotalResults(long numTotalResults) {
-        this.numTotalResults = numTotalResults;
+    public AbstractResult setWarning(List<Error> warning) {
+        this.warning = warning;
         return this;
     }
 
-    public String getWarningMsg() {
-        return warningMsg;
+    public Error getError() {
+        return error;
     }
 
-    public AbstractResult setWarningMsg(String warningMsg) {
-        this.warningMsg = warningMsg;
-        return this;
-    }
-
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
-    public AbstractResult setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
+    public AbstractResult setError(Error error) {
+        this.error = error;
         return this;
     }
 }

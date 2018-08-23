@@ -16,6 +16,9 @@
 
 package org.opencb.commons.io;
 
+import com.google.common.base.Throwables;
+import org.opencb.commons.run.Task;
+
 import java.util.List;
 
 /**
@@ -46,4 +49,64 @@ public interface DataReader<T> {
     }
 
     List<T> read(int batchSize);
+
+
+    default <O> DataReader<O> then(Task<T, O> task) {
+        return new DataReader<O>() {
+            @Override
+            public boolean open() {
+                return DataReader.this.open();
+            }
+
+            @Override
+            public boolean pre() {
+                try {
+                    task.pre();
+                } catch (Exception e) {
+                    throw Throwables.propagate(e);
+                }
+                return DataReader.this.pre();
+            }
+
+            @Override
+            public boolean close() {
+                return DataReader.this.close();
+            }
+
+            @Override
+            public boolean post() {
+                try {
+                    task.post();
+                } catch (Exception e) {
+                    throw Throwables.propagate(e);
+                }
+                return DataReader.this.post();
+            }
+
+            @Override
+            public List<O> read(int batch) {
+                try {
+                    List<T> read = DataReader.this.read(batch);
+                    // Iterate while reader has data
+                    // Exit when reader is exhausted, or task produces data
+                    while (read != null && !read.isEmpty()) {
+                        List<O> apply = task.apply(read);
+                        if (apply != null && !apply.isEmpty()) {
+                            // Valid task apply.
+                            return apply;
+                        } else {
+                            // Empty task apply. Read more data
+                            read = DataReader.this.read(batch);
+                        }
+                    }
+                    // Reader is exhausted. Drain the task.
+                    return task.drain();
+                } catch (Exception e) {
+                    // TODO: Reader should throw any exception
+                    throw Throwables.propagate(e);
+                }
+            }
+        };
+    }
+
 }

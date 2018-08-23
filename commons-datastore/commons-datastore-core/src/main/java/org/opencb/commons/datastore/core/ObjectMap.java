@@ -547,4 +547,21 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     public Set<Entry<String, Object>> entrySet() {
         return objectMap.entrySet();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ObjectMap)) {
+            return false;
+        }
+        ObjectMap objectMap1 = (ObjectMap) o;
+        return Objects.equals(objectMap, objectMap1.objectMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(objectMap);
+    }
 }
