@@ -332,9 +332,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         List list = getAsList(field, separator);
 
         if (list.isEmpty()) {
-            List<N> emptyList = Collections.<N>emptyList();
-            put(field, emptyList);
-            return emptyList;
+            return Collections.<N>emptyList();
         } else {
             boolean valid = true;
             for (Object o : list) {
