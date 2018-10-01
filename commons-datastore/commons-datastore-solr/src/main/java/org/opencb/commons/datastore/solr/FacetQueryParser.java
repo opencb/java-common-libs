@@ -43,7 +43,12 @@ public class FacetQueryParser {
         count = 0;
     }
 
-    // chrom>>type,biotype,avg>>gerp,avg;type;biotype>>sadasd
+    /**
+     * This method accepts a simple facet declaration format and converts it into a rich JSON query.
+     * @param query A string with the format: chrom>>type,biotype,avg>>gerp,avg;type;biotype>>sadasd
+     * @return A JSON string facet query
+     * @throws Exception Any exception related with JSON conversion
+     */
     public String parse(String query) throws Exception {
         if (StringUtils.isEmpty(query)) {
             return "";
