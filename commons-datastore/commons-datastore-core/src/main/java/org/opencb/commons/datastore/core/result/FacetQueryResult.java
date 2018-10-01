@@ -22,23 +22,23 @@ import java.util.List;
 /**
  * Created by jtarraga on 09/03/17.
  */
-public class FacetedQueryResult extends AbstractResult {
+public class FacetQueryResult extends AbstractResult {
 
     private String query;
-    private FacetedQueryResultItem result;
+    private FacetQueryResultItem result;
 
-    public FacetedQueryResult() {
+    public FacetQueryResult() {
     }
 
     @Deprecated
-    public FacetedQueryResult(String id, int dbTime, long numTotalResults, String warningMsg, String errorMsg,
-                              FacetedQueryResultItem result, String query) {
+    public FacetQueryResult(String id, int dbTime, long numTotalResults, String warningMsg, String errorMsg,
+                            FacetQueryResultItem result, String query) {
         this(id, dbTime, numTotalResults, Collections.singletonList(new Error(-1, "", warningMsg)), new Error(-1, "", errorMsg),
                 result, query);
     }
 
-    public FacetedQueryResult(String id, int dbTime, long numMatches, List<Error> warning, Error error,
-                              FacetedQueryResultItem result, String query) {
+    public FacetQueryResult(String id, int dbTime, long numMatches, List<Error> warning, Error error,
+                            FacetQueryResultItem result, String query) {
         super(id, dbTime, numMatches, warning, error);
         this.result = result;
         this.query = query;
@@ -46,7 +46,7 @@ public class FacetedQueryResult extends AbstractResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FacetedQueryResult{");
+        final StringBuilder sb = new StringBuilder("FacetQueryResult{");
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
         sb.append(", numMatches=").append(numMatches);
@@ -62,16 +62,16 @@ public class FacetedQueryResult extends AbstractResult {
         return query;
     }
 
-    public FacetedQueryResult setQuery(String query) {
+    public FacetQueryResult setQuery(String query) {
         this.query = query;
         return this;
     }
 
-    public FacetedQueryResultItem getResult() {
+    public FacetQueryResultItem getResult() {
         return result;
     }
 
-    public FacetedQueryResult setResult(FacetedQueryResultItem result) {
+    public FacetQueryResult setResult(FacetQueryResultItem result) {
         this.result = result;
         return this;
     }

@@ -22,15 +22,15 @@ import java.util.List;
 /**
  * Created by jtarraga on 09/03/17.
  */
-public class FacetedQueryResultItem {
+public class FacetQueryResultItem {
 
     private List<FacetField> facetFields;
 
-    public FacetedQueryResultItem() {
+    public FacetQueryResultItem() {
         this(new ArrayList<>());
     }
 
-    public FacetedQueryResultItem(List<FacetField> facetFields) {
+    public FacetQueryResultItem(List<FacetField> facetFields) {
         this.facetFields = facetFields;
     }
 
