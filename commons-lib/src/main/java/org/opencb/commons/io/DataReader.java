@@ -16,7 +16,6 @@
 
 package org.opencb.commons.io;
 
-import com.google.common.base.Throwables;
 import org.opencb.commons.run.Task;
 
 import java.util.List;
@@ -63,7 +62,7 @@ public interface DataReader<T> {
                 try {
                     task.pre();
                 } catch (Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
                 return DataReader.this.pre();
             }
@@ -78,7 +77,7 @@ public interface DataReader<T> {
                 try {
                     task.post();
                 } catch (Exception e) {
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
                 return DataReader.this.post();
             }
@@ -103,7 +102,7 @@ public interface DataReader<T> {
                     return task.drain();
                 } catch (Exception e) {
                     // TODO: Reader should throw any exception
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 }
             }
         };
