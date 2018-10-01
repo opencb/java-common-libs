@@ -16,6 +16,7 @@
     <modules>
         <module>commons-datastore-core</module>
         <module>commons-datastore-mongodb</module>
+        <module>commons-datastore-solr</module>
     </modules>
 
     <dependencyManagement>
