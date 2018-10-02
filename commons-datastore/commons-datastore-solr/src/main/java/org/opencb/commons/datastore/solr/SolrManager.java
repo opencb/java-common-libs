@@ -37,20 +37,20 @@ public class SolrManager {
 
     private String host;
     private String mode;
-    private int timeout;
-
     private SolrClient solrClient;
 
     private Logger logger;
 
+    public static final String DEFAULT_MODE = "cloud";
+    public static final int DEFAULT_TIMEOUT = 30000;
+
     public SolrManager(String host) {
-        this(host, "cloud", 30000);
+        this(host, DEFAULT_MODE, DEFAULT_TIMEOUT);
     }
 
     public SolrManager(String host, String mode, int timeout) {
         this.host = host;
         this.mode = mode;
-        this.timeout = timeout;
 
         // The default implementation is HttpSolrClient and we can set up some parameters
         this.solrClient = new HttpSolrClient.Builder(host).build();
@@ -73,7 +73,6 @@ public class SolrManager {
         this.solrClient = solrClient;
         this.host = host;
         this.mode = mode;
-        this.timeout = timeout;
 
         this.init();
     }
@@ -83,8 +82,11 @@ public class SolrManager {
     }
 
     public SolrCollection getCollection(String collection) throws SolrException {
+        if (!isAlive(collection)) {
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Solr server is not alive");
+        }
         if (!exists(collection)) {
-            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Collection '" + collection + "' does not exist");
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Collection '" + collection + "' does not exist");
         }
         return new SolrCollection(collection, solrClient);
     }
@@ -300,7 +302,6 @@ public class SolrManager {
         final StringBuilder sb = new StringBuilder("SolrManager{");
         sb.append("host='").append(host).append('\'');
         sb.append(", mode='").append(mode).append('\'');
-        sb.append(", timeout=").append(timeout);
         sb.append(", solrClient=").append(solrClient);
         sb.append('}');
         return sb.toString();
@@ -321,15 +322,6 @@ public class SolrManager {
 
     public SolrManager setMode(String mode) {
         this.mode = mode;
-        return this;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public SolrManager setTimeout(int timeout) {
-        this.timeout = timeout;
         return this;
     }
 

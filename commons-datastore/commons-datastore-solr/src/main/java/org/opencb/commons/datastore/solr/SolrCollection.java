@@ -50,9 +50,8 @@ public class SolrCollection {
     }
 
     public <S> QueryResult<S> query(SolrQuery solrQuery, Class<S> clazz) throws IOException, SolrServerException {
+        logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-
-        logger.debug("Solr query: {}", solrQuery.toString());
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
@@ -62,9 +61,8 @@ public class SolrCollection {
 
     public <S, T> QueryResult<T> query(SolrQuery solrQuery, Class<S> clazz, ComplexTypeConverter<T, S> converter)
             throws IOException, SolrServerException {
+        logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-
-        logger.debug("Solr query: {}", solrQuery.toString());
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
@@ -82,14 +80,14 @@ public class SolrCollection {
     }
 
     public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException, SolrServerException {
+        logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-
-        logger.debug("Solr query: {}", solrQuery.toString());
         QueryResponse query = solrClient.query(collection, solrQuery);
         FacetQueryResultItem resultItem = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
+        int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
-        return new FacetQueryResult("Faceted data from Solr", (int) stopWatch.getTime(), resultItem.getFacetFields().size(),
-                Collections.emptyList(), null, resultItem, solrQuery.getQuery());
+        return new FacetQueryResult("Faceted data from Solr", dbTime, resultItem.getFacetFields().size(), Collections.emptyList(), null,
+                resultItem, solrQuery.getQuery());
     }
 
 }
