@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 public class FacetQueryParser {
 
     private static final String FACET_SEPARATOR = ";";
+    private static final String LABEL_SEPARATOR = "__";
     private static final String NESTED_FACET_SEPARATOR = ">>";
     private static final String NESTED_SUBFACET_SEPARATOR = "\\+";
     private static final String RANGE_IDENTIFIER = "..";
@@ -77,24 +78,44 @@ public class FacetQueryParser {
 
     private void parseSimpleFacet(String facet, Map<String, Object> jsonFacet) throws Exception {
         Map<String, Object> facetMap = parseFacet(facet);
-        String key = "facet" + (count++) + "_";
+        String label;
         if (facetMap == null) {
-            jsonFacet.put(key + getFieldFromAggregation(facet), facet);
+            // Aggregation
+             label = getLabelFromAggregation(facet);
+            jsonFacet.put(label, facet);
         } else {
-            jsonFacet.put(key + facetMap.get("field"), facetMap);
+            // Categorical or range
+            label = getLabel(facetMap);
+            jsonFacet.put(label, facetMap);
         }
     }
 
-    private String getFieldFromAggregation(String facet) {
-        if (facet.startsWith("percentile")) {
-            return facet.substring(facet.indexOf("(") + 1, facet.indexOf(","));
-        } else {
-            return facet.substring(facet.indexOf("(") + 1, facet.indexOf(")"));
+    private String getLabel(Map<String, Object> facetMap) {
+        String label = facetMap.get("field").toString();
+        if (facetMap.containsKey("step")) {
+            // Range
+            label += (LABEL_SEPARATOR + facetMap.get("start") + LABEL_SEPARATOR + facetMap.get("end") + LABEL_SEPARATOR
+                    + facetMap.get("step"));
         }
+        return label + LABEL_SEPARATOR + (count++);
+    }
+
+    private String getLabelFromAggregation(String facet) {
+        String label;
+        String aggregationName = facet.substring(0, facet.indexOf("("));
+        if (facet.startsWith("percentile")) {
+            String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(","));
+            String[] params = facet.substring(facet.indexOf(",") + 1).split(",");
+            label = fieldName + LABEL_SEPARATOR + aggregationName + LABEL_SEPARATOR + StringUtils.join(params, LABEL_SEPARATOR);
+        } else {
+            String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(")"));
+            label = fieldName + LABEL_SEPARATOR + aggregationName;
+        }
+        return label + LABEL_SEPARATOR + (count++);
     }
 
     /**
-     * parse a facet and return the map containing the facet fields.
+     * Parse a facet and return the map containing the facet fields.
      *
      * @param facet facet string
      * @return the map containing the facet fields.
