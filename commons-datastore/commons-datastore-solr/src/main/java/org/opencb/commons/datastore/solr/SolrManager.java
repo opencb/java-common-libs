@@ -43,28 +43,50 @@ public class SolrManager {
 
     private Logger logger;
 
+    public SolrManager(String host) {
+        this(host, "cloud", 30000);
+    }
+
     public SolrManager(String host, String mode, int timeout) {
         this.host = host;
         this.mode = mode;
         this.timeout = timeout;
 
-        this.solrClient = new HttpSolrClient.Builder(host).build();
-
         // The default implementation is HttpSolrClient and we can set up some parameters
+        this.solrClient = new HttpSolrClient.Builder(host).build();
         ((HttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
         ((HttpSolrClient) this.solrClient).setSoTimeout(timeout);
 
-        logger = LoggerFactory.getLogger(SolrManager.class);
+        this.init();
     }
 
+    public SolrManager(SolrClient solrClient, String host, String mode) {
+        this.solrClient = solrClient;
+        this.host = host;
+        this.mode = mode;
+
+        this.init();
+    }
+
+    @Deprecated
     public SolrManager(SolrClient solrClient, String host, String mode, int timeout) {
+        this.solrClient = solrClient;
         this.host = host;
         this.mode = mode;
         this.timeout = timeout;
 
-        this.solrClient = solrClient;
+        this.init();
+    }
 
+    private void init() {
         logger = LoggerFactory.getLogger(SolrManager.class);
+    }
+
+    public SolrCollection getCollection(String collection) throws SolrException {
+        if (!exists(collection)) {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Collection '" + collection + "' does not exist");
+        }
+        return new SolrCollection(collection, solrClient);
     }
 
     public boolean isAlive(String collection) {
@@ -253,6 +275,37 @@ public class SolrManager {
         }
     }
 
+    private boolean isCloud() {
+        if (StringUtils.isEmpty(mode)) {
+            logger.warn("Solr 'mode' is empty, setting default 'cloud'");
+            mode = "cloud";
+        }
+        switch (mode.toLowerCase()) {
+            case "collection":
+            case "cloud": {
+                return true;
+            }
+            case "core":
+            case "standalone": {
+                return false;
+            }
+            default: {
+                throw new IllegalArgumentException("Invalid Solr mode '" + mode + "'. Valid values are 'standalone' or 'cloud'");
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SolrManager{");
+        sb.append("host='").append(host).append('\'');
+        sb.append(", mode='").append(mode).append('\'');
+        sb.append(", timeout=").append(timeout);
+        sb.append(", solrClient=").append(solrClient);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getHost() {
         return host;
     }
@@ -287,25 +340,5 @@ public class SolrManager {
     public SolrManager setSolrClient(SolrClient solrClient) {
         this.solrClient = solrClient;
         return this;
-    }
-
-    private boolean isCloud() {
-        if (StringUtils.isEmpty(mode)) {
-            logger.warn("Solr 'mode' is empty, setting default 'cloud'");
-            mode = "cloud";
-        }
-        switch (mode.toLowerCase()) {
-            case "collection":
-            case "cloud": {
-                return true;
-            }
-            case "core":
-            case "standalone": {
-                return false;
-            }
-            default: {
-                throw new IllegalArgumentException("Invalid Solr mode '" + mode + "'. Valid values are 'standalone' or 'cloud'");
-            }
-        }
     }
 }
