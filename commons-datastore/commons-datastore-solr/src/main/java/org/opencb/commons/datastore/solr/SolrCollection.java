@@ -22,14 +22,17 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
+import org.opencb.commons.datastore.core.Query;
+import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.result.FacetQueryResult;
+import org.opencb.commons.datastore.core.result.FacetQueryResultItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +53,8 @@ public class SolrCollection {
 
     public <S> QueryResult<S> query(SolrQuery solrQuery, Class<S> clazz) throws IOException, SolrServerException {
         StopWatch stopWatch = StopWatch.createStarted();
+
+        logger.debug("Solr query: {}", solrQuery.toString());
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
@@ -60,6 +65,8 @@ public class SolrCollection {
     public <S, T> QueryResult<T> query(SolrQuery solrQuery, Class<S> clazz, ComplexTypeConverter<T, S> converter)
             throws IOException, SolrServerException {
         StopWatch stopWatch = StopWatch.createStarted();
+
+        logger.debug("Solr query: {}", solrQuery.toString());
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
@@ -77,10 +84,14 @@ public class SolrCollection {
     }
 
     public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException, SolrServerException {
-        QueryResponse query = solrClient.query(collection, solrQuery);
-        SolrFacetToFacetQueryResultItemConverter converter = new SolrFacetToFacetQueryResultItemConverter();
+        StopWatch stopWatch = StopWatch.createStarted();
 
-        return null;
+        logger.debug("Solr query: {}", solrQuery.toString());
+        QueryResponse query = solrClient.query(collection, solrQuery);
+        FacetQueryResultItem resultItem = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
+
+        return new FacetQueryResult("Faceted data from Solr", (int) stopWatch.getTime(), resultItem.getFacetFields().size(),
+                Collections.emptyList(), null, resultItem, solrQuery.getQuery());
     }
 
 }

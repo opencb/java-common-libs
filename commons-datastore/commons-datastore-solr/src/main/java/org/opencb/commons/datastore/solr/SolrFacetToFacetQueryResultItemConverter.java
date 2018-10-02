@@ -26,6 +26,10 @@ public class SolrFacetToFacetQueryResultItemConverter {
             return null;
         }
 
+        if (solrKeyMap == null) {
+            solrKeyMap = new HashMap<>();
+        }
+
         SimpleOrderedMap<Object> solrFacets = (SimpleOrderedMap<Object>) solrResponse.getResponse().get("facets");
         List<FacetQueryResultItem.FacetField> facetFields = new ArrayList<>();
         int count = (int) solrFacets.get("count");
