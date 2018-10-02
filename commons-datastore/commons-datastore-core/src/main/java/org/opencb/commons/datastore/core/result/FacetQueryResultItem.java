@@ -41,6 +41,15 @@ public class FacetQueryResultItem {
         return 0;
     }
 
+    public List<FacetField> getFacetFields() {
+        return facetFields;
+    }
+
+    public FacetQueryResultItem setFacetFields(List<FacetField> facetFields) {
+        this.facetFields = facetFields;
+        return this;
+    }
+
     public static class FacetField {
         private String name;
         private long count;
