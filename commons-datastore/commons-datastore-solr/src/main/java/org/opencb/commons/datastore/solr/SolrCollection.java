@@ -76,27 +76,30 @@ public class SolrCollection {
     }
 
     public FacetQueryResult facet(SolrQuery solrQuery) throws IOException, SolrServerException {
-        return facet(solrQuery, null, null);
+        return facet(solrQuery, null);
     }
 
-    public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias, Map<String, List<String>> exclude) throws IOException,
+    public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException,
             SolrServerException {
         logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
         QueryResponse query = solrClient.query(collection, solrQuery);
-        FacetQueryResultItem resultItem = SolrFacetToFacetQueryResultItemConverter.convert(query, alias, exclude);
+        FacetQueryResultItem resultItem = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
         return new FacetQueryResult("Faceted data from Solr", dbTime, resultItem.getFacetFields().size(), Collections.emptyList(), null,
                 resultItem, solrQuery.getQuery());
     }
 
-    public long count(SolrQuery solrQuery) throws IOException, SolrServerException {
+    public QueryResult<Long> count(SolrQuery solrQuery) throws IOException, SolrServerException {
         // Only count, no results
         solrQuery.setRows(0);
 
         logger.debug("Solr count: {}", solrQuery.toString());
+        StopWatch stopWatch = StopWatch.createStarted();
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
-        return solrResponse.getResults().getNumFound();
+        int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
+
+        return new QueryResult(null, dbTime, 1, 1, null, null, Collections.singletonList(solrResponse.getResults().getNumFound()));
     }
 }
