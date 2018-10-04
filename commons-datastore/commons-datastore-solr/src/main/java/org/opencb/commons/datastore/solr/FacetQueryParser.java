@@ -35,8 +35,8 @@ public class FacetQueryParser {
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
 
-    public static final Pattern RANGE_PATTERN =
-            Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)\\[([-]?[0-9]+)\\.\\.([-]?[0-9]+)]:([-]?[0-9]+)$");
+//    public static final Pattern RANGE_PATTERN =
+//            Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)\\[([-]?[0-9]+)\\.\\.([-]?[0-9]+)]:([-]?[0-9]+)$");
     public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
     private int count;
@@ -56,38 +56,37 @@ public class FacetQueryParser {
             return "";
         }
 
-        Map<String, Object> jsonFacet = new HashMap<>();
-
-        if (query.contains(NESTED_FACET_SEPARATOR)) {
+        Map<String, Object> jsonFacetMap = new LinkedHashMap<>();
+        if (query.contains(FACET_SEPARATOR)) {
             String[] split = query.split(FACET_SEPARATOR);
             for (String facet : split) {
                 if (facet.contains(NESTED_FACET_SEPARATOR)) {
-                    parseNestedFacet(facet, jsonFacet);
+                    parseNestedFacet(facet, jsonFacetMap);
                 } else {
-                    parseSimpleFacet(facet, jsonFacet);
+                    parseSimpleFacet(facet, jsonFacetMap);
                 }
             }
         } else {
-            String[] split = query.split("[" + FACET_SEPARATOR + NESTED_SUBFACET_SEPARATOR + "]");
+            String[] split = query.split("[" + FACET_SEPARATOR + "\\-\\-]");
             for (String facet : split) {
-                parseSimpleFacet(facet, jsonFacet);
+                parseSimpleFacet(facet, jsonFacetMap);
             }
         }
 
-        return parseJson(new ObjectMapper().writeValueAsString(jsonFacet));
+        return parseJson(new ObjectMapper().writeValueAsString(jsonFacetMap));
     }
 
-    private void parseSimpleFacet(String facet, Map<String, Object> jsonFacet) throws Exception {
+    private void parseSimpleFacet(String facet, Map<String, Object> jsonFacetMap) throws Exception {
         Map<String, Object> facetMap = parseFacet(facet);
         String label;
         if (facetMap == null) {
             // Aggregation
-             label = getLabelFromAggregation(facet);
-            jsonFacet.put(label, facet);
+            label = getLabelFromAggregation(facet);
+            jsonFacetMap.put(label, facet);
         } else {
             // Categorical or range
             label = getLabel(facetMap);
-            jsonFacet.put(label, facetMap);
+            jsonFacetMap.put(label, facetMap);
         }
     }
 
@@ -95,8 +94,9 @@ public class FacetQueryParser {
         String label = facetMap.get("field").toString();
         if (facetMap.containsKey("step")) {
             // Range
-            label += (LABEL_SEPARATOR + facetMap.get("start") + LABEL_SEPARATOR + facetMap.get("end") + LABEL_SEPARATOR
-                    + facetMap.get("step"));
+            label += LABEL_SEPARATOR + facetMap.get("start")
+                    + LABEL_SEPARATOR + facetMap.get("end")
+                    + LABEL_SEPARATOR + facetMap.get("step");
         }
         return label + LABEL_SEPARATOR + (count++);
     }
@@ -122,9 +122,7 @@ public class FacetQueryParser {
      * @return the map containing the facet fields.
      */
     private Map<String, Object> parseFacet(String facet) throws Exception {
-
         Map<String, Object> outputMap = new HashMap<>();
-
         if (facet.contains(AGGREGATION_IDENTIFIER)) {
             // Validate function
             for (String function: AGGREGATION_FUNCTIONS) {
@@ -135,15 +133,20 @@ public class FacetQueryParser {
             throw new Exception("Invalid aggregation function: " + facet);
         } else if (facet.contains(RANGE_IDENTIFIER)) {
             // Deal with ranges...
-            Matcher matcher = RANGE_PATTERN.matcher(facet);
-            if (matcher.find()) {
-                outputMap.put("field", matcher.group(1));
-                outputMap.put("start", parseNumber(matcher.group(2)));
-                outputMap.put("end", parseNumber(matcher.group(3)));
-                outputMap.put("step", parseNumber(matcher.group(4)));
-            } else {
-                throw new Exception("Invalid range facet: " + facet);
-            }
+//            Matcher matcher = RANGE_PATTERN.matcher(facet);
+//            if (matcher.find()) {
+//                outputMap.put("field", matcher.group(1));
+//                outputMap.put("start", parseNumber(matcher.group(2)));
+//                outputMap.put("end", parseNumber(matcher.group(3)));
+//                outputMap.put("step", parseNumber(matcher.group(4)));
+//            } else {
+//                throw new Exception("Invalid range facet: " + facet);
+//            }
+            String[] split = facet.replace("[", ":").replace("..", ":").replace("]", "").split(":");
+            outputMap.put("field", split[0]);
+            outputMap.put("start", parseNumber(split[1]));
+            outputMap.put("end", parseNumber(split[2]));
+            outputMap.put("step", parseNumber(split[3]));
         } else {
             // Categorical...
             Matcher matcher = CATEGORICAL_PATTERN.matcher(facet);
@@ -186,7 +189,6 @@ public class FacetQueryParser {
 
         Map<String, Object> rootFacetMap = new HashMap<>();
         Map<String, Object> childFacetMap = new HashMap<>();
-
         for (int i = split.length - 1; i >= 0; i--) {
             String facet = split[i];
             String[] subfacets = facet.split(NESTED_SUBFACET_SEPARATOR);
@@ -210,9 +212,9 @@ public class FacetQueryParser {
         jsonFacet.putAll(childFacetMap);
     }
 
-    public String parseJson(String query) throws IOException {
+    public String parseJson(String facetJson) throws IOException {
         Queue<Map<String, Object>> myQueue = new LinkedList<>();
-        Map jsonMap = new ObjectMapper().readValue(query, Map.class);
+        Map jsonMap = new ObjectMapper().readValue(facetJson, Map.class);
         myQueue.add(jsonMap);
 
         while (!myQueue.isEmpty()) {
