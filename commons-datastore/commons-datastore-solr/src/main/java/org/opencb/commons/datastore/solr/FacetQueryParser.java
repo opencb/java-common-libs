@@ -127,7 +127,7 @@ public class FacetQueryParser {
 
         if (facet.contains(AGGREGATION_IDENTIFIER)) {
             // Validate function
-            for (String function : AGGREGATION_FUNCTIONS) {
+            for (String function: AGGREGATION_FUNCTIONS) {
                 if (facet.startsWith(function)) {
                     return null;
                 }
@@ -152,7 +152,6 @@ public class FacetQueryParser {
                 String include = matcher.group(2);
                 if (StringUtils.isNotEmpty(include)) {
                     include = include.replace("]", "").replace("[", "");
-
                     if (include.endsWith("*")) {
                         outputMap.put("prefix", include.substring(0, include.indexOf("*")));
                     } else {

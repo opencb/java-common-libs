@@ -108,11 +108,10 @@ public class SolrFacetToFacetQueryResultItemConverter {
             for (int i = 3; i < split.length - 1; i++) {
                 aggregationName += ("," + split[i]);
             }
-            aggregationName += ")";
         }
         List<Double> values;
-        if (value instanceof Double[]) {
-            values = Arrays.asList((Double[]) value);
+        if (value instanceof ArrayList) {
+            values = (List<Double>) value;
         } else {
             values = Collections.singletonList((Double) value);
         }
