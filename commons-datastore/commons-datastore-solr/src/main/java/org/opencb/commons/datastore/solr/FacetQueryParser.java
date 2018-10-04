@@ -35,8 +35,9 @@ public class FacetQueryParser {
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
 
-    public static final Pattern RANGE_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_]+)\\[([-]?[0-9]+)\\.\\.([-]?[0-9]+)]:([-]?[0-9]+)$");
-    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
+    public static final Pattern RANGE_PATTERN =
+            Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)\\[([-]?[0-9]+)\\.\\.([-]?[0-9]+)]:([-]?[0-9]+)$");
+    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
     private int count;
 
@@ -137,9 +138,9 @@ public class FacetQueryParser {
             Matcher matcher = RANGE_PATTERN.matcher(facet);
             if (matcher.find()) {
                 outputMap.put("field", matcher.group(1));
-                outputMap.put("start", Integer.parseInt(matcher.group(2)));
-                outputMap.put("end", Integer.parseInt(matcher.group(3)));
-                outputMap.put("step", Integer.parseInt(matcher.group(4)));
+                outputMap.put("start", Long.parseLong(matcher.group(2)));
+                outputMap.put("end", Long.parseLong(matcher.group(3)));
+                outputMap.put("step", Long.parseLong(matcher.group(4)));
             } else {
                 throw new Exception("Invalid range facet: " + facet);
             }

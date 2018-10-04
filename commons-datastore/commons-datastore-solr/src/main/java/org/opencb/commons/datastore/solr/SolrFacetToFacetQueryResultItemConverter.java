@@ -108,11 +108,4 @@ public class SolrFacetToFacetQueryResultItemConverter {
         return new FacetQueryResultItem.FacetField(solrKeyMap.getOrDefault(fieldName, fieldName), aggregationName, values);
     }
 
-    private static boolean excludeCount(String facetName, Map<String, List<String>> exclude) {
-        // TODO: fix hardcoded field name
-//        if (exclude.to)) {
-//
-//        }
-        return false;
-    }
 }
