@@ -40,8 +40,6 @@ public class QueryOptions extends ObjectMap {
     public static final String SKIP_COUNT = "skipCount";
 
     public static final String FACET = "facet";
-    public static final String FACET_RANGE = "facetRange";
-    public static final String FACET_INTERSECTION = "facetIntersection";
 
     public QueryOptions() {
 
