@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class FacetQueryParser {
 
     private static final String FACET_SEPARATOR = ";";
-    private static final String LABEL_SEPARATOR = "__";
+    public static final String LABEL_SEPARATOR = "___";
     private static final String NESTED_FACET_SEPARATOR = ">>";
     private static final String NESTED_SUBFACET_SEPARATOR = "\\+";
     private static final String RANGE_IDENTIFIER = "..";
@@ -138,9 +138,9 @@ public class FacetQueryParser {
             Matcher matcher = RANGE_PATTERN.matcher(facet);
             if (matcher.find()) {
                 outputMap.put("field", matcher.group(1));
-                outputMap.put("start", Long.parseLong(matcher.group(2)));
-                outputMap.put("end", Long.parseLong(matcher.group(3)));
-                outputMap.put("step", Long.parseLong(matcher.group(4)));
+                outputMap.put("start", parseNumber(matcher.group(2)));
+                outputMap.put("end", parseNumber(matcher.group(3)));
+                outputMap.put("step", parseNumber(matcher.group(4)));
             } else {
                 throw new Exception("Invalid range facet: " + facet);
             }
@@ -243,6 +243,14 @@ public class FacetQueryParser {
         }
 
         return new ObjectMapper().writeValueAsString(jsonMap);
+    }
+
+    static Number parseNumber(String number) {
+        try {
+            return Long.parseLong(number);
+        } catch (NumberFormatException e) {
+            return Double.parseDouble(number);
+        }
     }
 
 }

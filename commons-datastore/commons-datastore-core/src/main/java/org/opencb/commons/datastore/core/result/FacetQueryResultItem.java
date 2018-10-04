@@ -56,9 +56,9 @@ public class FacetQueryResultItem {
         private List<Bucket> buckets;
         private String aggregationName;
         private List<Double> aggregationValues;
-        private int start;
-        private int end;
-        private int step;
+        private Number start;
+        private Number end;
+        private Number step;
 
         public FacetField(String name, long count, List<Bucket> buckets) {
             this.name = name;
@@ -132,29 +132,29 @@ public class FacetQueryResultItem {
             return this;
         }
 
-        public int getStart() {
+        public Number getStart() {
             return start;
         }
 
-        public FacetField setStart(int start) {
+        public FacetField setStart(Number start) {
             this.start = start;
             return this;
         }
 
-        public int getEnd() {
+        public Number getEnd() {
             return end;
         }
 
-        public FacetField setEnd(int end) {
+        public FacetField setEnd(Number end) {
             this.end = end;
             return this;
         }
 
-        public int getStep() {
+        public Number getStep() {
             return step;
         }
 
-        public FacetField setStep(int step) {
+        public FacetField setStep(Number step) {
             this.step = step;
             return this;
         }

@@ -6,6 +6,9 @@ import org.opencb.commons.datastore.core.result.FacetQueryResultItem;
 
 import java.util.*;
 
+import static org.opencb.commons.datastore.solr.FacetQueryParser.LABEL_SEPARATOR;
+import static org.opencb.commons.datastore.solr.FacetQueryParser.parseNumber;
+
 public class SolrFacetToFacetQueryResultItemConverter {
 
     public static FacetQueryResultItem convert(QueryResponse solrResponse) {
@@ -37,8 +40,16 @@ public class SolrFacetToFacetQueryResultItemConverter {
             String name = solrFacets.getName(i);
             if (!"count".equals(name)) {
                 if (solrFacets.get(name) instanceof SimpleOrderedMap) {
-                    FacetQueryResultItem.FacetField facetField = new FacetQueryResultItem.FacetField(alias.getOrDefault(name, name),
-                            count, new ArrayList<>());
+
+                    String[] split = name.split("___");
+                    FacetQueryResultItem.FacetField facetField = new FacetQueryResultItem.FacetField(getName(split[0], alias), count,
+                            new ArrayList<>());
+                    if (split.length > 3) {
+                        facetField.setStart(FacetQueryParser.parseNumber(split[1]));
+                        facetField.setEnd(FacetQueryParser.parseNumber(split[2]));
+                        facetField.setStep(FacetQueryParser.parseNumber(split[3]));
+                    }
+
                     parseBuckets((SimpleOrderedMap<Object>) solrFacets.get(name), facetField, alias);
                     facetFields.add(facetField);
                 } else {
@@ -67,12 +78,12 @@ public class SolrFacetToFacetQueryResultItemConverter {
                     value = solrBucket.getVal(i).toString();
                 } else {
                     if (solrBucket.getVal(i) instanceof SimpleOrderedMap) {
-                        String[] split = fullname.split("__");
-                        subfield = new FacetQueryResultItem.FacetField(alias.getOrDefault(split[0], split[0]), count, new ArrayList<>());
+                        String[] split = fullname.split(LABEL_SEPARATOR);
+                        subfield = new FacetQueryResultItem.FacetField(getName(split[0], alias), count, new ArrayList<>());
                         if (split.length > 3) {
-                            subfield.setStart(Integer.parseInt(split[1]));
-                            subfield.setEnd(Integer.parseInt(split[2]));
-                            subfield.setStep(Integer.parseInt(split[3]));
+                            subfield.setStart(parseNumber(split[1]));
+                            subfield.setEnd(parseNumber(split[2]));
+                            subfield.setStep(parseNumber(split[3]));
                         }
                         parseBuckets((SimpleOrderedMap<Object>) solrBucket.getVal(i), subfield, alias);
                     } else {
@@ -88,8 +99,8 @@ public class SolrFacetToFacetQueryResultItemConverter {
         facetField.setBuckets(buckets);
     }
 
-    private static FacetQueryResultItem.FacetField parseAggregation(String fullname, Object value, Map<String, String> solrKeyMap) {
-        String[] split = fullname.split("__");
+    private static FacetQueryResultItem.FacetField parseAggregation(String fullname, Object value, Map<String, String> alias) {
+        String[] split = fullname.split(LABEL_SEPARATOR);
         String fieldName = split[0];
         String aggregationName = split[1];
         if (split.length > 3) {
@@ -105,7 +116,12 @@ public class SolrFacetToFacetQueryResultItemConverter {
         } else {
             values = Collections.singletonList((Double) value);
         }
-        return new FacetQueryResultItem.FacetField(solrKeyMap.getOrDefault(fieldName, fieldName), aggregationName, values);
+        return new FacetQueryResultItem.FacetField(getName(fieldName, alias), aggregationName, values);
+    }
+
+    private static String getName(String name, Map<String, String> alias) {
+        String[] split = name.split(LABEL_SEPARATOR);
+        return alias.getOrDefault(split[0], name);
     }
 
 }
