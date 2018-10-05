@@ -29,14 +29,12 @@ public class FacetQueryParser {
     private static final String FACET_SEPARATOR = ";";
     public static final String LABEL_SEPARATOR = "___";
     private static final String NESTED_FACET_SEPARATOR = ">>";
-    private static final String NESTED_SUBFACET_SEPARATOR = "--"; //"\\+";
+    private static final String NESTED_SUBFACET_SEPARATOR = ",";
+    private static final String INCLUDE_SEPARATOR = ",";
     private static final String RANGE_IDENTIFIER = "..";
     private static final String AGGREGATION_IDENTIFIER = "(";
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
-
-//    public static final Pattern RANGE_PATTERN =
-//            Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)\\[([-]?[0-9]+)\\.\\.([-]?[0-9]+)]:([-]?[0-9]+)$");
     public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
     private int count;
@@ -47,6 +45,7 @@ public class FacetQueryParser {
 
     /**
      * This method accepts a simple facet declaration format and converts it into a rich JSON query.
+     *
      * @param query A string with the format: chrom>>type,biotype,avg>>gerp,avg;type;biotype>>sadasd
      * @return A JSON string facet query
      * @throws Exception Any exception related with JSON conversion
@@ -57,19 +56,15 @@ public class FacetQueryParser {
         }
 
         Map<String, Object> jsonFacetMap = new LinkedHashMap<>();
-        if (query.contains(FACET_SEPARATOR)) {
-            String[] split = query.split(FACET_SEPARATOR);
-            for (String facet : split) {
-                if (facet.contains(NESTED_FACET_SEPARATOR)) {
-                    parseNestedFacet(facet, jsonFacetMap);
-                } else {
-                    parseSimpleFacet(facet, jsonFacetMap);
+        String[] split = query.split(FACET_SEPARATOR);
+        for (String facet : split) {
+            if (facet.contains(NESTED_FACET_SEPARATOR)) {
+                parseNestedFacet(facet, jsonFacetMap);
+            } else {
+                List<String> simpleFacets = getSubFacets(facet);
+                for (String simpleFacet : simpleFacets) {
+                    parseSimpleFacet(simpleFacet, jsonFacetMap);
                 }
-            }
-        } else {
-            String[] split = query.split("[" + FACET_SEPARATOR + "\\-\\-]");
-            for (String facet : split) {
-                parseSimpleFacet(facet, jsonFacetMap);
             }
         }
 
@@ -82,7 +77,11 @@ public class FacetQueryParser {
         if (facetMap == null) {
             // Aggregation
             label = getLabelFromAggregation(facet);
-            jsonFacetMap.put(label, facet);
+            if (facet.startsWith("percentile")) {
+                jsonFacetMap.put(label, facet.replace(")", ",1,10,25,50,75,90,99)"));
+            } else {
+                jsonFacetMap.put(label, facet);
+            }
         } else {
             // Categorical or range
             label = getLabel(facetMap);
@@ -104,14 +103,8 @@ public class FacetQueryParser {
     private String getLabelFromAggregation(String facet) {
         String label;
         String aggregationName = facet.substring(0, facet.indexOf("("));
-        if (facet.startsWith("percentile")) {
-            String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(","));
-            String[] params = facet.substring(facet.indexOf(",") + 1).split(",");
-            label = fieldName + LABEL_SEPARATOR + aggregationName + LABEL_SEPARATOR + StringUtils.join(params, LABEL_SEPARATOR);
-        } else {
-            String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(")"));
-            label = fieldName + LABEL_SEPARATOR + aggregationName;
-        }
+        String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(")"));
+        label = fieldName + LABEL_SEPARATOR + aggregationName;
         return label + LABEL_SEPARATOR + (count++);
     }
 
@@ -125,7 +118,7 @@ public class FacetQueryParser {
         Map<String, Object> outputMap = new HashMap<>();
         if (facet.contains(AGGREGATION_IDENTIFIER)) {
             // Validate function
-            for (String function: AGGREGATION_FUNCTIONS) {
+            for (String function : AGGREGATION_FUNCTIONS) {
                 if (facet.startsWith(function)) {
                     return null;
                 }
@@ -160,7 +153,7 @@ public class FacetQueryParser {
                     } else {
                         //  domain : { filter : "popularity:HIGH OR popularity:LOW" }
                         List<String> filters = new ArrayList<>();
-                        for (String value : include.split(",")) {
+                        for (String value : include.split(INCLUDE_SEPARATOR)) {
                             filters.add(matcher.group(1) + ":" + value);
                         }
                         Map<String, Object> auxMap = new HashMap<>();
@@ -191,8 +184,8 @@ public class FacetQueryParser {
         Map<String, Object> childFacetMap = new HashMap<>();
         for (int i = split.length - 1; i >= 0; i--) {
             String facet = split[i];
-            String[] subfacets = facet.split(NESTED_SUBFACET_SEPARATOR);
-            for (String subfacet : subfacets) {
+            List<String> subfacets = getSubFacets(facet);
+            for (String subfacet: subfacets) {
                 parseSimpleFacet(subfacet, rootFacetMap);
             }
 
@@ -254,4 +247,36 @@ public class FacetQueryParser {
         }
     }
 
+    static List<String> getSubFacets(String query) {
+        String facet = "";
+        List<String> facets = new ArrayList<>();
+        String[] split = query.split(NESTED_SUBFACET_SEPARATOR);
+        for (String s: split) {
+            if (s.contains("[")) {
+                if (s.contains("]")) {
+                    facets.add(s);
+                    facet = null;
+                } else {
+                    if (StringUtils.isEmpty(facet)) {
+                        facet = s;
+                    } else {
+                        facets.add(facet);
+                        facet = s;
+                    }
+                }
+            } else if (s.contains("]")) {
+                facets.add(facet + "," + s);
+                facet = null;
+            } else {
+                if (StringUtils.isEmpty(facet)) {
+                    facets.add(s);
+                    facet = null;
+                } else {
+                    facet += ("," + s);
+                }
+            }
+        }
+
+        return facets;
+    }
 }
