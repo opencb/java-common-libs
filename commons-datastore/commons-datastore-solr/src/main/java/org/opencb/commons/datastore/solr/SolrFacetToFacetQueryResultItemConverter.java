@@ -2,7 +2,7 @@ package org.opencb.commons.datastore.solr;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.util.SimpleOrderedMap;
-import org.opencb.commons.datastore.core.result.FacetQueryResultItem;
+import org.opencb.commons.datastore.core.result.FacetQueryResult;
 
 import java.util.*;
 
@@ -11,19 +11,19 @@ import static org.opencb.commons.datastore.solr.FacetQueryParser.parseNumber;
 
 public class SolrFacetToFacetQueryResultItemConverter {
 
-    public static FacetQueryResultItem convert(QueryResponse solrResponse) {
+    public static List<FacetQueryResult.Field> convert(QueryResponse solrResponse) {
         return convert(solrResponse, new HashMap<>());
     }
 
     /**
-     * Convert a generic solrResponse into our FacetQueryResultItem.
+     * Convert a generic solrResponse into our FacetQueryResult.
      *
      * @param solrResponse SolrResponse.
      * @param alias        Map containing the solr keys present in the solrResponse and the key we actually want to be visible for the user.
      *                     This is mainly to be able to hide private solr keys to the user and use better user-friendly keys.
-     * @return a FacetQueryResultItem.
+     * @return a FacetQueryResult.
      */
-    public static FacetQueryResultItem convert(QueryResponse solrResponse, Map<String, String> alias) {
+    public static List<FacetQueryResult.Field> convert(QueryResponse solrResponse, Map<String, String> alias) {
         // Sanity check
         if (solrResponse == null || solrResponse.getResponse() == null || solrResponse.getResponse().get("facets") == null) {
             return null;
@@ -34,7 +34,7 @@ public class SolrFacetToFacetQueryResultItemConverter {
         }
 
         SimpleOrderedMap<Object> solrFacets = (SimpleOrderedMap<Object>) solrResponse.getResponse().get("facets");
-        List<FacetQueryResultItem.FacetField> facetFields = new ArrayList<>();
+        List<FacetQueryResult.Field> fields = new ArrayList<>();
         int count = (int) solrFacets.get("count");
         for (int i = 0; i < solrFacets.size(); i++) {
             String name = solrFacets.getName(i);
@@ -42,8 +42,7 @@ public class SolrFacetToFacetQueryResultItemConverter {
                 if (solrFacets.get(name) instanceof SimpleOrderedMap) {
 
                     String[] split = name.split("___");
-                    FacetQueryResultItem.FacetField facetField = new FacetQueryResultItem.FacetField(getName(split[0], alias), count,
-                            new ArrayList<>());
+                    FacetQueryResult.Field facetField = new FacetQueryResult.Field(getName(split[0], alias), count, new ArrayList<>());
                     if (split.length > 3) {
                         facetField.setStart(FacetQueryParser.parseNumber(split[1]));
                         facetField.setEnd(FacetQueryParser.parseNumber(split[2]));
@@ -51,25 +50,25 @@ public class SolrFacetToFacetQueryResultItemConverter {
                     }
 
                     parseBuckets((SimpleOrderedMap<Object>) solrFacets.get(name), facetField, alias);
-                    facetFields.add(facetField);
+                    fields.add(facetField);
                 } else {
-                    facetFields.add(parseAggregation(name, solrFacets.get(name), alias));
+                    fields.add(parseAggregation(name, solrFacets.get(name), alias));
                 }
             }
         }
 
-        return new FacetQueryResultItem(facetFields);
+        return fields;
     }
 
-    private static void parseBuckets(SimpleOrderedMap<Object> solrFacets, FacetQueryResultItem.FacetField facetField,
+    private static void parseBuckets(SimpleOrderedMap<Object> solrFacets, FacetQueryResult.Field facetField,
                                      Map<String, String> alias) {
         List<SimpleOrderedMap<Object>> solrBuckets = (List<SimpleOrderedMap<Object>>) solrFacets.get("buckets");
-        List<FacetQueryResultItem.Bucket> buckets = new ArrayList<>();
+        List<FacetQueryResult.Bucket> buckets = new ArrayList<>();
         for (SimpleOrderedMap<Object> solrBucket : solrBuckets) {
             int count = 0;
             String value = "";
-            FacetQueryResultItem.FacetField subfield;
-            List<FacetQueryResultItem.FacetField> subfields = new ArrayList<>();
+            FacetQueryResult.Field subfield;
+            List<FacetQueryResult.Field> subfields = new ArrayList<>();
             for (int i = 0; i < solrBucket.size(); i++) {
                 String fullname = solrBucket.getName(i);
                 if ("count".equals(fullname)) {
@@ -79,7 +78,7 @@ public class SolrFacetToFacetQueryResultItemConverter {
                 } else {
                     if (solrBucket.getVal(i) instanceof SimpleOrderedMap) {
                         String[] split = fullname.split(LABEL_SEPARATOR);
-                        subfield = new FacetQueryResultItem.FacetField(getName(split[0], alias), count, new ArrayList<>());
+                        subfield = new FacetQueryResult.Field(getName(split[0], alias), count, new ArrayList<>());
                         if (split.length > 3) {
                             subfield.setStart(parseNumber(split[1]));
                             subfield.setEnd(parseNumber(split[2]));
@@ -92,14 +91,14 @@ public class SolrFacetToFacetQueryResultItemConverter {
                     subfields.add(subfield);
                 }
             }
-            FacetQueryResultItem.Bucket bucket = new FacetQueryResultItem.Bucket(value, count, subfields);
-            bucket.setFacetFields(subfields);
+            FacetQueryResult.Bucket bucket = new FacetQueryResult.Bucket(value, count, subfields);
+            bucket.setFields(subfields);
             buckets.add(bucket);
         }
         facetField.setBuckets(buckets);
     }
 
-    private static FacetQueryResultItem.FacetField parseAggregation(String fullname, Object value, Map<String, String> alias) {
+    private static FacetQueryResult.Field parseAggregation(String fullname, Object value, Map<String, String> alias) {
         String[] split = fullname.split(LABEL_SEPARATOR);
         String fieldName = split[0];
         String aggregationName = split[1];
@@ -115,7 +114,7 @@ public class SolrFacetToFacetQueryResultItemConverter {
         } else {
             values = Collections.singletonList((Double) value);
         }
-        return new FacetQueryResultItem.FacetField(getName(fieldName, alias), aggregationName, values);
+        return new FacetQueryResult.Field(getName(fieldName, alias), aggregationName, values);
     }
 
     private static String getName(String name, Map<String, String> alias) {

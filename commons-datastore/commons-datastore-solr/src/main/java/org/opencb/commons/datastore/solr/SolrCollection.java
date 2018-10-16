@@ -24,7 +24,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.result.FacetQueryResult;
-import org.opencb.commons.datastore.core.result.FacetQueryResultItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +83,11 @@ public class SolrCollection {
         logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
         QueryResponse query = solrClient.query(collection, solrQuery);
-        FacetQueryResultItem resultItem = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
+        List<FacetQueryResult.Field> results = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
-        return new FacetQueryResult("Faceted data from Solr", dbTime, resultItem.getFacetFields().size(), Collections.emptyList(), null,
-                resultItem, solrQuery.getQuery());
+        return new FacetQueryResult("Faceted data from Solr", dbTime, results.size(), Collections.emptyList(), null, results,
+                solrQuery.getQuery());
     }
 
     public QueryResult<Long> count(SolrQuery solrQuery) throws IOException, SolrServerException {
