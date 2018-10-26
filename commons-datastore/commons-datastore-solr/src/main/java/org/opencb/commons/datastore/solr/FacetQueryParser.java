@@ -37,6 +37,8 @@ public class FacetQueryParser {
             "stddev", };
     public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
+    public static final int DEFAULT_FACET_LIMIT = 50;
+
     private int count;
 
     public FacetQueryParser() {
@@ -168,6 +170,8 @@ public class FacetQueryParser {
                     } else {
                         outputMap.put("limit", Integer.parseInt(limit.substring(1)));
                     }
+                } else {
+                    outputMap.put("limit", DEFAULT_FACET_LIMIT);
                 }
             } else {
                 throw new Exception("Invalid categorical facet: " + facet);
