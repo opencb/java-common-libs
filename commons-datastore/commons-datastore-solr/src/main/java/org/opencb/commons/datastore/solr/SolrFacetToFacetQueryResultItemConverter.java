@@ -42,7 +42,8 @@ public class SolrFacetToFacetQueryResultItemConverter {
                 if (solrFacets.get(name) instanceof SimpleOrderedMap) {
 
                     String[] split = name.split("___");
-                    FacetQueryResult.Field facetField = new FacetQueryResult.Field(getName(split[0], alias), count, new ArrayList<>());
+                    FacetQueryResult.Field facetField = new FacetQueryResult.Field(getName(split[0], alias),
+                            getBucketCount((SimpleOrderedMap<Object>) solrFacets.get(name), count), new ArrayList<>());
                     if (split.length > 3) {
                         facetField.setStart(FacetQueryParser.parseNumber(split[1]));
                         facetField.setEnd(FacetQueryParser.parseNumber(split[2]));
@@ -60,11 +61,41 @@ public class SolrFacetToFacetQueryResultItemConverter {
         return fields;
     }
 
+    /**
+     * In order to process type=query facets with a nested type=range.
+     *
+     * @param solrFacets    Solr facet
+     * @param defaultCount  Default count
+     * @return  Actual count
+     */
+    private static int getBucketCount(SimpleOrderedMap<Object> solrFacets, int defaultCount) {
+        List<SimpleOrderedMap<Object>> solrBuckets = (List<SimpleOrderedMap<Object>>) solrFacets.get("buckets");
+        if (solrBuckets == null) {
+            for (int i = 0; i < solrFacets.size(); i++) {
+                if (solrFacets.getName(i).equals("count")) {
+                    return (int) solrFacets.getVal(i);
+                }
+            }
+        }
+        return defaultCount;
+    }
+
     private static void parseBuckets(SimpleOrderedMap<Object> solrFacets, FacetQueryResult.Field facetField,
                                      Map<String, String> alias) {
         List<SimpleOrderedMap<Object>> solrBuckets = (List<SimpleOrderedMap<Object>>) solrFacets.get("buckets");
+        if (solrBuckets == null) {
+            // If it does not have buckets, it means that we are processing a type=query facet with a nested type=range
+            for (int i = 0; i < solrFacets.size(); i++) {
+                if (!solrFacets.getName(i).equals("count")
+                        && ((SimpleOrderedMap<Object>) solrFacets.getVal(i)).get("buckets") != null) {
+                    solrBuckets = (List<SimpleOrderedMap<Object>>)
+                            ((SimpleOrderedMap<Object>) solrFacets.getVal(i)).get("buckets");
+                    break;
+                }
+            }
+        }
         List<FacetQueryResult.Bucket> buckets = new ArrayList<>();
-        for (SimpleOrderedMap<Object> solrBucket : solrBuckets) {
+        for (SimpleOrderedMap<Object> solrBucket: solrBuckets) {
             int count = 0;
             String value = "";
             FacetQueryResult.Field subfield;
@@ -78,7 +109,9 @@ public class SolrFacetToFacetQueryResultItemConverter {
                 } else {
                     if (solrBucket.getVal(i) instanceof SimpleOrderedMap) {
                         String[] split = fullname.split(LABEL_SEPARATOR);
-                        subfield = new FacetQueryResult.Field(getName(split[0], alias), count, new ArrayList<>());
+                        subfield = new FacetQueryResult.Field(getName(split[0], alias),
+                                getBucketCount((SimpleOrderedMap<Object>) solrBucket.getVal(i), count),
+                                new ArrayList<>());
                         if (split.length > 3) {
                             subfield.setStart(parseNumber(split[1]));
                             subfield.setEnd(parseNumber(split[2]));

@@ -92,7 +92,7 @@ public class FacetQueryParser {
     }
 
     private String getLabel(Map<String, Object> facetMap) {
-        String label = facetMap.get("field").toString();
+        String label = (facetMap.containsKey("field") ? facetMap.get("field").toString() : "noname");
         if (facetMap.containsKey("step")) {
             // Range
             label += LABEL_SEPARATOR + facetMap.get("start")
@@ -128,20 +128,35 @@ public class FacetQueryParser {
             throw new Exception("Invalid aggregation function: " + facet);
         } else if (facet.contains(RANGE_IDENTIFIER)) {
             // Deal with ranges...
-//            Matcher matcher = RANGE_PATTERN.matcher(facet);
-//            if (matcher.find()) {
-//                outputMap.put("field", matcher.group(1));
-//                outputMap.put("start", parseNumber(matcher.group(2)));
-//                outputMap.put("end", parseNumber(matcher.group(3)));
-//                outputMap.put("step", parseNumber(matcher.group(4)));
-//            } else {
-//                throw new Exception("Invalid range facet: " + facet);
-//            }
-            String[] split = facet.replace("[", ":").replace("..", ":").replace("]", "").split(":");
-            outputMap.put("field", split[0]);
-            outputMap.put("start", parseNumber(split[1]));
-            outputMap.put("end", parseNumber(split[2]));
-            outputMap.put("step", parseNumber(split[3]));
+            int numMatches = StringUtils.countMatches(facet, ':');
+            if (numMatches > 1) {
+                String[] split = facet.split(":");
+                Map<String, Object> rangeMap = new HashMap<>();
+                String filter = split[3];
+                for (int i = 4; i < split.length; i++) {
+                    filter += (":" + split[i]);
+                }
+
+                String[] range = split[0].replace("[", ":").replace("..", ":").replace("]", "").split(":");
+                rangeMap.put("field", range[0]);
+                rangeMap.put("type", "range");
+                rangeMap.put("start", parseNumber(range[1]));
+                rangeMap.put("end", parseNumber(range[2]));
+                rangeMap.put("step", parseNumber(split[1]));
+
+                outputMap.put("field", split[2]);
+                outputMap.put("type", "query");
+                outputMap.put("q", filter);
+                Map<String, Object> auxMap = new HashMap<>();
+                auxMap.put(range[0], rangeMap);
+                outputMap.put("facet", auxMap);
+            } else {
+                String[] split = facet.replace("[", ":").replace("..", ":").replace("]", "").split(":");
+                outputMap.put("field", split[0]);
+                outputMap.put("start", parseNumber(split[1]));
+                outputMap.put("end", parseNumber(split[2]));
+                outputMap.put("step", parseNumber(split[3]));
+            }
         } else {
             // Categorical...
             Matcher matcher = CATEGORICAL_PATTERN.matcher(facet);
@@ -226,7 +241,10 @@ public class FacetQueryParser {
                         innerMap.put("type", "range");
                         innerMap.put("gap", innerMap.get("step"));
                         innerMap.remove("step");
-                    } else {
+                    } else if (innerMap.containsKey("q")) {
+                        // Query
+                        innerMap.put("type", "query");
+                    } else if (innerMap.containsKey("field")) {
                         // Categorical
                         innerMap.put("type", "terms");
                     }
