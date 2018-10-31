@@ -171,23 +171,10 @@ public class SolrManager {
             throw new SolrException(SolrException.ErrorCode.CONFLICT, "Missing name when checking collection");
         }
 
-        if (StringUtils.isNotEmpty(mode)) {
-            logger.warn("Solr 'mode' is empty, setting default 'cloud'");
-            mode = "cloud";
-        }
-
-        switch (mode.toLowerCase()) {
-            case "core":
-            case "standalone": {
-                return existsCore(dbName);
-            }
-            case "collection":
-            case "cloud": {
-                return existsCollection(dbName);
-            }
-            default: {
-                throw new IllegalArgumentException("Invalid Solr mode '" + mode + "'. Valid values are 'standalone' or 'cloud'");
-            }
+        if (isCloud()) {
+            return existsCollection(dbName);
+        } else {
+            return existsCore(dbName);
         }
     }
 
