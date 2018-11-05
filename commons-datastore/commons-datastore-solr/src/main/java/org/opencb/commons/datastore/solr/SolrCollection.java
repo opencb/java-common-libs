@@ -75,14 +75,26 @@ public class SolrCollection {
     }
 
     public FacetQueryResult facet(SolrQuery solrQuery) throws IOException, SolrServerException {
-        return facet(solrQuery, null);
+        return facet(solrQuery, null, null);
     }
 
     public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException,
             SolrServerException {
+        return facet(solrQuery, alias, null);
+    }
+
+    public interface FacetPostprocessing {
+        QueryResponse apply(QueryResponse solrQueryResponse);
+    }
+
+    public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias, FacetPostprocessing post)
+            throws IOException, SolrServerException {
         logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
         QueryResponse query = solrClient.query(collection, solrQuery);
+        if (post != null) {
+            query = post.apply(query);
+        }
         List<FacetQueryResult.Field> results = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 

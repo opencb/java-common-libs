@@ -168,14 +168,15 @@ public class FacetQueryParser {
                     if (include.endsWith("*")) {
                         outputMap.put("prefix", include.substring(0, include.indexOf("*")));
                     } else {
-                        //  domain : { filter : "popularity:HIGH OR popularity:LOW" }
-                        List<String> filters = new ArrayList<>();
-                        for (String value : include.split(INCLUDE_SEPARATOR)) {
-                            filters.add(matcher.group(1) + ":" + value);
-                        }
-                        Map<String, Object> auxMap = new HashMap<>();
-                        auxMap.put("filter", StringUtils.join(filters, " OR "));
-                        outputMap.put("domain", auxMap);
+//                        //  domain : { filter : "popularity:HIGH OR popularity:LOW" }
+//                        List<String> filters = new ArrayList<>();
+//                        for (String value : include.split(INCLUDE_SEPARATOR)) {
+//                            filters.add(matcher.group(1) + ":" + value);
+//                        }
+//                        Map<String, Object> auxMap = new HashMap<>();
+//                        auxMap.put("filter", StringUtils.join(filters, " OR "));
+//                        outputMap.put("domain", auxMap);
+                        outputMap.put("includes", Arrays.asList(include.split(INCLUDE_SEPARATOR)));
                     }
                 }
                 String limit = matcher.group(3);
