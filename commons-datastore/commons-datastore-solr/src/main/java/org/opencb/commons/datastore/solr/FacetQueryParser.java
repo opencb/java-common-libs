@@ -130,6 +130,7 @@ public class FacetQueryParser {
             // Deal with ranges...
             int numMatches = StringUtils.countMatches(facet, ':');
             if (numMatches > 1) {
+                // Special case: facet with type "query" and with a nested "range"
                 String[] split = facet.split(":");
                 Map<String, Object> rangeMap = new HashMap<>();
                 String filter = split[3];
@@ -144,12 +145,26 @@ public class FacetQueryParser {
                 rangeMap.put("end", parseNumber(range[2]));
                 rangeMap.put("step", parseNumber(split[1]));
 
-                outputMap.put("field", split[2]);
+                String[] nested = split[2].split(LABEL_SEPARATOR);
+                outputMap.put("field", nested[0]);
                 outputMap.put("type", "query");
                 outputMap.put("q", filter);
-                Map<String, Object> auxMap = new HashMap<>();
-                auxMap.put(range[0], rangeMap);
-                outputMap.put("facet", auxMap);
+                if (nested.length > 1) {
+                    Map<String, Object> nestedMap = new HashMap<>();
+                    nestedMap.put("field", nested[1]);
+                    nestedMap.put("type", "terms");
+                    Map<String, Object> auxMap1 = new HashMap<>();
+                    auxMap1.put(range[0], rangeMap);
+                    nestedMap.put("facet", auxMap1);
+
+                    Map<String, Object> auxMap2 = new HashMap<>();
+                    auxMap2.put(nested[1], nestedMap);
+                    outputMap.put("facet", auxMap2);
+                } else {
+                    Map<String, Object> auxMap1 = new HashMap<>();
+                    auxMap1.put(range[0], rangeMap);
+                    outputMap.put("facet", auxMap1);
+                }
             } else {
                 String[] split = facet.replace("[", ":").replace("..", ":").replace("]", "").split(":");
                 outputMap.put("field", split[0]);
