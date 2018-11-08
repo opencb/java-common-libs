@@ -176,6 +176,7 @@ public class FacetQueryParser {
             // Categorical...
             Matcher matcher = CATEGORICAL_PATTERN.matcher(facet);
             if (matcher.find()) {
+                boolean isQuery = false;
                 outputMap.put("field", matcher.group(1));
                 String include = matcher.group(2);
                 if (StringUtils.isNotEmpty(include)) {
@@ -183,26 +184,30 @@ public class FacetQueryParser {
                     if (include.endsWith("*")) {
                         outputMap.put("prefix", include.substring(0, include.indexOf("*")));
                     } else {
-//                        //  domain : { filter : "popularity:HIGH OR popularity:LOW" }
-//                        List<String> filters = new ArrayList<>();
-//                        for (String value : include.split(INCLUDE_SEPARATOR)) {
-//                            filters.add(matcher.group(1) + ":" + value);
-//                        }
-//                        Map<String, Object> auxMap = new HashMap<>();
-//                        auxMap.put("filter", StringUtils.join(filters, " OR "));
-//                        outputMap.put("domain", auxMap);
-                        outputMap.put("includes", Arrays.asList(include.split(INCLUDE_SEPARATOR)));
+                        isQuery = true;
+                        List<String> filters = new ArrayList<>();
+                        for (String value: include.split(INCLUDE_SEPARATOR)) {
+                            filters.add(matcher.group(1) + ":" + value);
+                        }
+                        outputMap.put("q", StringUtils.join(filters, " OR "));
                     }
                 }
-                String limit = matcher.group(3);
-                if (StringUtils.isNotEmpty(limit)) {
-                    if (limit.contains("*")) {
-                        outputMap.put("allBuckets", true);
-                    } else {
-                        outputMap.put("limit", Integer.parseInt(limit.substring(1)));
-                    }
+
+                if (isQuery) {
+                    outputMap.put("type", "query");
+
+                    Map<String, Object> auxMap = new HashMap<>();
+                    auxMap.put("field", matcher.group(1));
+                    auxMap.put("type", "terms");
+                    setTermLimit(matcher.group(3), auxMap);
+
+                    Map<String, Object> tmpMap = new HashMap<>();
+                    tmpMap.put(matcher.group(1), auxMap);
+
+                    outputMap.put("facet", tmpMap);
                 } else {
-                    outputMap.put("limit", DEFAULT_FACET_LIMIT);
+                    outputMap.put("type", "terms");
+                    setTermLimit(matcher.group(3), outputMap);
                 }
             } else {
                 throw new Exception("Invalid categorical facet: " + facet);
@@ -210,6 +215,18 @@ public class FacetQueryParser {
         }
 
         return outputMap;
+    }
+
+    private void setTermLimit(String limit, Map<String, Object> map) {
+        if (StringUtils.isNotEmpty(limit)) {
+            if (limit.contains("*")) {
+                map.put("allBuckets", true);
+            } else {
+                map.put("limit", Integer.parseInt(limit.substring(1)));
+            }
+        } else {
+            map.put("limit", DEFAULT_FACET_LIMIT);
+        }
     }
 
     private void parseNestedFacet(String nestedFacet, Map<String, Object> jsonFacet) throws Exception {
@@ -228,7 +245,18 @@ public class FacetQueryParser {
                 for (Map.Entry<String, Object> entry : rootFacetMap.entrySet()) {
                     if (entry.getValue() instanceof Map) {
                         Map<String, Object> value = (Map<String, Object>) entry.getValue();
-                        value.put("facet", childFacetMap);
+                        // We have to check if there is already a fieldname facet, it means we are processing
+                        // a facet of type "query"
+                        if (value.containsKey("facet")) {
+                            Map<String, Object> innerMap = (Map<String, Object>) value.get("facet");
+                            for (Map.Entry<String, Object> innerEntry: innerMap.entrySet()) {
+                                if (innerEntry.getValue() instanceof Map) {
+                                    ((Map<String, Object>) innerEntry.getValue()).put("facet", childFacetMap);
+                                }
+                            }
+                        } else {
+                            value.put("facet", childFacetMap);
+                        }
                     }
                 }
             }

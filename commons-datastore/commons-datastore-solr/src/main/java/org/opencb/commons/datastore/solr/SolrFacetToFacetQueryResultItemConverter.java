@@ -94,6 +94,11 @@ public class SolrFacetToFacetQueryResultItemConverter {
                 }
             }
         }
+        if (solrBuckets == null) {
+            // No buckets, just return!
+            return;
+        }
+
         List<FacetQueryResult.Bucket> buckets = new ArrayList<>();
         for (SimpleOrderedMap<Object> solrBucket: solrBuckets) {
             int count = 0;
