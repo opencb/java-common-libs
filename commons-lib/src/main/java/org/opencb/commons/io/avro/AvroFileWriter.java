@@ -26,28 +26,48 @@ import org.opencb.commons.io.DataWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * Created by hpccoll1 on 02/04/15.
+ * Created on 02/04/15.
+ *
+ * @author Jacobo Coll &lt;jacobo167@gmail.com&gt;
  */
 public class AvroFileWriter<T extends GenericRecord> implements DataWriter<ByteBuffer> {
 
     private final String codecName;
     private final Schema schema;
-    private final OutputStream outputStream;
+    private OutputStream outputStream;
+    private final Path output;
     private final DataFileWriter<T> writer;
     private final DatumWriter<T> datumWriter;
     private int numWrites = 0;
+    private boolean closeOutputStream;
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass().toString());
 
     public AvroFileWriter(Schema schema, String codecName, OutputStream outputStream) {
+        this(schema, codecName, null, Objects.requireNonNull(outputStream));
+        // Do not close OutputStreams if provided in constructor. Respect symmetric open/close
+        closeOutputStream = false;
+    }
+
+    public AvroFileWriter(Schema schema, String codecName, Path output) {
+        this(schema, codecName, Objects.requireNonNull(output), null);
+        closeOutputStream = true;
+    }
+
+    private AvroFileWriter(Schema schema, String codecName, Path output, OutputStream outputStream) {
         this.schema = schema;
         this.outputStream = outputStream;
+        this.output = output;
         this.codecName = codecName;
 
         datumWriter = new SpecificDatumWriter<>();
@@ -58,10 +78,12 @@ public class AvroFileWriter<T extends GenericRecord> implements DataWriter<ByteB
     @Override
     public boolean open() {
         try {
+            if (outputStream == null) {
+                outputStream = new FileOutputStream(output.toFile());
+            }
             writer.create(schema, outputStream);
         } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            throw new UncheckedIOException(e);
         }
         return true;
     }
@@ -70,19 +92,17 @@ public class AvroFileWriter<T extends GenericRecord> implements DataWriter<ByteB
         writer.append(datum);
     }
 
-
     @Override
     public boolean write(List<ByteBuffer> batch) {
-        for (ByteBuffer byteBuffer : batch) {
-            if (numWrites++ % 1000 == 0) {
-                logger.debug("Written {} elements", numWrites);
-            }
-            try {
+        try {
+            for (ByteBuffer byteBuffer : batch) {
+                if (numWrites++ % 1000 == 0) {
+                    logger.debug("Written {} elements", numWrites);
+                }
                 writer.appendEncoded(byteBuffer);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         logger.debug("[" + Thread.currentThread().getName() + "] Written " + batch.size());
         return true;
@@ -91,10 +111,12 @@ public class AvroFileWriter<T extends GenericRecord> implements DataWriter<ByteB
     @Override
     public boolean close() {
         try {
-            writer.close();
+            writer.flush();
+            if (closeOutputStream) {
+                writer.close();
+            }
         } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            throw new UncheckedIOException(e);
         }
         return true;
     }
