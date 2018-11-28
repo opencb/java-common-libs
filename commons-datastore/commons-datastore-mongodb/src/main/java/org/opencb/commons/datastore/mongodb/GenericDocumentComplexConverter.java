@@ -51,6 +51,11 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
         objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
     }
 
+    public GenericDocumentComplexConverter(Class<T> clazz, ObjectMapper objectMapper) {
+        this.clazz = clazz;
+        this.objectMapper = objectMapper;
+    }
+
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }

@@ -16,6 +16,7 @@
     <modules>
         <module>commons-datastore-core</module>
         <module>commons-datastore-mongodb</module>
+        <module>commons-datastore-solr</module>
     </modules>
 
     <dependencyManagement>
@@ -23,11 +24,6 @@
             <dependency>
                 <groupId>org.opencb.commons</groupId>
                 <artifactId>commons-datastore-core</artifactId>
-                <version>${java.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencb.commons</groupId>
-                <artifactId>commons-datastore-mongodb</artifactId>
                 <version>${java.commons.version}</version>
             </dependency>
         </dependencies>

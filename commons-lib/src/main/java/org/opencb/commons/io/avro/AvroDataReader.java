@@ -17,6 +17,7 @@
 package org.opencb.commons.io.avro;
 
 import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -24,9 +25,11 @@ import org.opencb.commons.io.DataReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created on 09/11/15.
@@ -37,19 +40,30 @@ public class AvroDataReader<T extends GenericRecord> implements DataReader<T> {
 
     private final Class<T> clazz;
     private final File file;
-    private DataFileReader<T> dataFileReader;
+    private final InputStream is;
+    private DataFileStream<T> dataFileReader;
 
     public AvroDataReader(File file, Class<T> clazz) {
         this.clazz = clazz;
-        this.file = file;
+        this.file = Objects.requireNonNull(file);
+        this.is = null;
     }
 
+    public AvroDataReader(InputStream is, Class<T> clazz) {
+        this.is = Objects.requireNonNull(is);
+        this.clazz = clazz;
+        this.file = null;
+    }
 
     @Override
     public boolean open() {
         DatumReader<T> datumReader = new SpecificDatumReader<>(clazz);
         try {
-            dataFileReader = new DataFileReader<>(file, datumReader);
+            if (is != null) {
+                dataFileReader = new DataFileStream<>(is, datumReader);
+            } else {
+                dataFileReader = new DataFileReader<>(file, datumReader);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

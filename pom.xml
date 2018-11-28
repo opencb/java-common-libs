@@ -22,7 +22,7 @@
         <java.commons.version>3.8.0-SNAPSHOT</java.commons.version>
         <compileSource>1.8</compileSource>
         <jackson.version>2.8.11</jackson.version>
-        <apache.commons.version>3.7</apache.commons.version>
+        <apache.commons.version>3.8.1</apache.commons.version>
         <slf4j.version>1.7.25</slf4j.version>
         <avro.version>1.7.7</avro.version>
     </properties>
@@ -55,6 +55,11 @@
             <id>pfurio</id>
             <name>Pedro</name>
             <email>pedrofurio@gmail.com</email>
+        </developer>
+        <developer>
+            <id>jtarraga</id>
+            <name>Joaquin</name>
+            <email>joaquintarraga@gmail.com</email>
         </developer>
     </developers>
 
@@ -92,11 +97,6 @@
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>18.0</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>

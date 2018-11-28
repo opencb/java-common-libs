@@ -429,16 +429,16 @@ public class MongoDBQueryUtils {
 
         Object date = null;
         if (QueryParam.Type.DATE.equals(type)) {
-            date = converStringToDate(dateValues.get(0));
+            date = convertStringToDate(dateValues.get(0));
         } else if (QueryParam.Type.TIMESTAMP.equals(type)) {
-            date = converStringToDate(dateValues.get(0)).getTime();
+            date = convertStringToDate(dateValues.get(0)).getTime();
         }
 
         if (date != null) {
             switch (comparator) {
                 case BETWEEN:
                     if (dateValues.size() == 2) {
-                        Date to = converStringToDate(dateValues.get(1));
+                        Date to = convertStringToDate(dateValues.get(1));
 
                         if (QueryParam.Type.DATE.equals(type)) {
                             filter = new Document(mongoDbField, new Document()
@@ -814,7 +814,7 @@ public class MongoDBQueryUtils {
         return pattern;
     }
 
-    private static Date converStringToDate(String stringDate) {
+    public static Date convertStringToDate(String stringDate) {
         if (stringDate.length() == 4) {
             stringDate = stringDate + "0101";
         } else if (stringDate.length() == 6) {
