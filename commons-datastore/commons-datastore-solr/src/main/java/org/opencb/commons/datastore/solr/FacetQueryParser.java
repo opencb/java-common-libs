@@ -26,18 +26,18 @@ import java.util.regex.Pattern;
 
 public class FacetQueryParser {
 
-    public static final String FACET_SEPARATOR = ";";
+    private static final String FACET_SEPARATOR = ";";
     public static final String LABEL_SEPARATOR = "___";
     private static final String NESTED_FACET_SEPARATOR = ">>";
     private static final String NESTED_SUBFACET_SEPARATOR = ",";
-    public static final String INCLUDE_SEPARATOR = ",";
+    private static final String INCLUDE_SEPARATOR = ",";
     private static final String RANGE_IDENTIFIER = "..";
     private static final String AGGREGATION_IDENTIFIER = "(";
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
-    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
+    private static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
-    public static final int DEFAULT_FACET_LIMIT = 50;
+    private static final int DEFAULT_FACET_LIMIT = 50;
 
     private int count;
 
@@ -93,20 +93,20 @@ public class FacetQueryParser {
 
     private String getLabel(Map<String, Object> facetMap) {
         String label = (facetMap.containsKey("field") ? facetMap.get("field").toString() : "noname");
+        // Range
         if (facetMap.containsKey("step")) {
-            // Range
-            label += LABEL_SEPARATOR + facetMap.get("start")
-                    + LABEL_SEPARATOR + facetMap.get("end")
-                    + LABEL_SEPARATOR + facetMap.get("step");
+            label += LABEL_SEPARATOR
+                    + facetMap.get("start") + LABEL_SEPARATOR
+                    + facetMap.get("end") + LABEL_SEPARATOR
+                    + facetMap.get("step");
         }
         return label + LABEL_SEPARATOR + (count++);
     }
 
     private String getLabelFromAggregation(String facet) {
-        String label;
         String aggregationName = facet.substring(0, facet.indexOf("("));
         String fieldName = facet.substring(facet.indexOf("(") + 1, facet.indexOf(")"));
-        label = fieldName + LABEL_SEPARATOR + aggregationName;
+        String label = fieldName + LABEL_SEPARATOR + aggregationName;
         return label + LABEL_SEPARATOR + (count++);
     }
 
@@ -133,9 +133,9 @@ public class FacetQueryParser {
                 // Special case: facet with type "query" and with a nested "range"
                 String[] split = facet.split(":");
                 Map<String, Object> rangeMap = new HashMap<>();
-                String filter = split[3];
+                StringBuilder filter = new StringBuilder(split[3]);
                 for (int i = 4; i < split.length; i++) {
-                    filter += (":" + split[i]);
+                    filter.append(":").append(split[i]);
                 }
 
                 String[] range = split[0].replace("[", ":").replace("..", ":").replace("]", "").split(":");
@@ -148,7 +148,7 @@ public class FacetQueryParser {
                 String[] nested = split[2].split(LABEL_SEPARATOR);
                 outputMap.put("field", nested[0]);
                 outputMap.put("type", "query");
-                outputMap.put("q", filter);
+                outputMap.put("q", filter.toString());
                 if (nested.length > 1) {
                     Map<String, Object> nestedMap = new HashMap<>();
                     nestedMap.put("field", nested[1]);
