@@ -40,7 +40,6 @@ public class SolrFacetToFacetQueryResultItemConverter {
             String name = solrFacets.getName(i);
             if (!"count".equals(name)) {
                 if (solrFacets.get(name) instanceof SimpleOrderedMap) {
-
                     String[] split = name.split("___");
                     FacetQueryResult.Field facetField = new FacetQueryResult.Field(getName(split[0], alias),
                             getBucketCount((SimpleOrderedMap<Object>) solrFacets.get(name), count), new ArrayList<>());
