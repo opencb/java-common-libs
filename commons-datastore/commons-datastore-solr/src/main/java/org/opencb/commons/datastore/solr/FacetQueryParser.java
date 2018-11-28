@@ -26,16 +26,16 @@ import java.util.regex.Pattern;
 
 public class FacetQueryParser {
 
-    private static final String FACET_SEPARATOR = ";";
+    public static final String FACET_SEPARATOR = ";";
     public static final String LABEL_SEPARATOR = "___";
     private static final String NESTED_FACET_SEPARATOR = ">>";
     private static final String NESTED_SUBFACET_SEPARATOR = ",";
-    private static final String INCLUDE_SEPARATOR = ",";
+    public static final String INCLUDE_SEPARATOR = ",";
     private static final String RANGE_IDENTIFIER = "..";
     private static final String AGGREGATION_IDENTIFIER = "(";
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
-    private static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
+    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
 
     private static final int DEFAULT_FACET_LIMIT = 50;
 
