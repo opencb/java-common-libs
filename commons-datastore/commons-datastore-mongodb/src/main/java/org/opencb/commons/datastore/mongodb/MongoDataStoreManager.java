@@ -122,6 +122,12 @@ public class MongoDataStoreManager implements AutoCloseable {
                 logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
                 builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
             }
+
+            if (mongoDBConfiguration.getBoolean(SSL_ENABLED)) {
+                logger.debug("SSL connections enabled for " + database);
+                builder = builder.sslEnabled(mongoDBConfiguration.getBoolean(SSL_ENABLED));
+            }
+
             mongoClientOptions = builder.build();
 
             assert (dataStoreServerAddresses != null);

@@ -39,6 +39,8 @@ public class MongoDBConfiguration extends ObjectMap {
     public static final int SOCKET_TIMEOUT_DEFAULT = 10000;
     public static final String CONNECTIONS_PER_HOST = "connectionsPerHost";
     public static final int CONNECTIONS_PER_HOST_DEFAULT = 20;
+    public static final String SSL_ENABLED = "sslEnabled";
+    public static final Boolean SSL_ENABLED_DEFAULT = false;
 
     public enum ReadPreference {
         PRIMARY("primary"),
@@ -140,6 +142,11 @@ public class MongoDBConfiguration extends ObjectMap {
 
         public Builder setSocketTimeout(int timeout) {
             optionsMap.put(SOCKET_TIMEOUT, timeout);
+            return this;
+        }
+
+        public Builder setSslEnabled(Boolean enabled) {
+            optionsMap.put(SSL_ENABLED, enabled);
             return this;
         }
 
