@@ -20,7 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.LBHttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.request.CoreStatus;
@@ -31,7 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SolrManager {
 
@@ -39,7 +43,7 @@ public class SolrManager {
     private String mode;
     private SolrClient solrClient;
 
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(SolrManager.class);
 
     public static final String DEFAULT_MODE = "cloud";
     public static final int DEFAULT_TIMEOUT = 30000;
@@ -49,23 +53,58 @@ public class SolrManager {
     }
 
     public SolrManager(String host, String mode, int timeout) {
-        this.host = host;
+        this(Arrays.asList(host.split(",")), mode, timeout);
+    }
+
+    /**
+     * Creates a SolrManager connected to multiple nodes.
+     *
+     * @param hosts   The list of hosts can point to the Solr nodes or to the zookeper nodes:
+     *                When pointing directly the solr nodes, use the whole URL.
+     *                  e.g. http://opencga-solr-01.zone:8983/solr
+     *                When pointing to the Zookeeper nodes, use HOST:PORT
+     *                  e.g. opencga-zookeeper-01:2181
+     * @param mode    Connection mode, either cloud or core
+     * @param timeout Read timeout
+     */
+    public SolrManager(List<String> hosts, String mode, int timeout) {
+        hosts = hosts.stream().flatMap(s -> Arrays.stream(s.split(","))).collect(Collectors.toList());
+
+        this.host = String.join(",", hosts);
         this.mode = mode;
 
-        // The default implementation is HttpSolrClient and we can set up some parameters
-        this.solrClient = new HttpSolrClient.Builder(host).build();
-        ((HttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
-        ((HttpSolrClient) this.solrClient).setSoTimeout(timeout);
+        if (hosts.get(0).startsWith("http")) {
+            if (hosts.size() == 1) {
+                // Single HTTP endpoint.
+                this.solrClient = new HttpSolrClient.Builder(host).build();
+                ((HttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((HttpSolrClient) this.solrClient).setSoTimeout(timeout);
+            } else {
+                // Use a LoadBalancer if there are multiple http hosts
+                this.solrClient = new LBHttpSolrClient.Builder().withBaseSolrUrls(hosts.toArray(new String[0])).build();
 
-        this.init();
+                ((LBHttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((LBHttpSolrClient) this.solrClient).setSoTimeout(timeout);
+            }
+        } else {
+            // If the provided hosts are not http, assume zookeeper hosts like HOST:PORT
+            // This client will use Zookeeper to discover Solr endpoints for SolrCloud collections, and then use the
+            // LBHttpSolrClient to issue requests.
+            if (isCloud()) {
+                this.solrClient = new CloudSolrClient.Builder().withZkHost(hosts).build();
+
+                ((CloudSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((CloudSolrClient) this.solrClient).setSoTimeout(timeout);
+            } else {
+                throw new IllegalArgumentException("Can not initialize SolrManager from Zookeeper host not in Cloud mode");
+            }
+        }
     }
 
     public SolrManager(SolrClient solrClient, String host, String mode) {
         this.solrClient = solrClient;
         this.host = host;
         this.mode = mode;
-
-        this.init();
     }
 
     @Deprecated
@@ -73,12 +112,6 @@ public class SolrManager {
         this.solrClient = solrClient;
         this.host = host;
         this.mode = mode;
-
-        this.init();
-    }
-
-    private void init() {
-        logger = LoggerFactory.getLogger(SolrManager.class);
     }
 
     public SolrCollection getCollection(String collection) throws SolrException {
