@@ -5,7 +5,6 @@ import org.opencb.commons.io.DataWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created on 13/02/18.
@@ -78,42 +77,53 @@ public interface Task<T, R> {
      * @return          Task that concatenates the current task with the given writer.
      */
     default Task<T, R> then(DataWriter<R> writer) {
-        AtomicBoolean pre = new AtomicBoolean(false);
-        AtomicBoolean post = new AtomicBoolean(false);
-        Task<T, R> task = this;
+        return then(writer.asTask(false));
+    }
+
+
+    /**
+     * Use to execute multiple Tasks with the same input.
+     * Only the output of the main task will be propagated.
+     *
+     * task = Task.join(task1, task2);
+     *
+     * @param mainTask    Main task to propagate
+     * @param otherTask   Task to execute with the same input. The output will be lost.
+     * @param <T>         Input type.
+     * @param <R>         Return type.
+     * @return            Task that runs both tasks with the same input.
+     */
+    static <T, R> Task<T, R> join(Task<T, R> mainTask, Task<T, ?> otherTask) {
         return new Task<T, R>() {
             @Override
             public void pre() throws Exception {
-                if (!pre.getAndSet(true)) {
-                    writer.open();
-                    writer.pre();
-                }
-                task.pre();
+                mainTask.pre();
+                otherTask.pre();
             }
 
             @Override
             public List<R> apply(List<T> batch) throws Exception {
-                List<R> batch2 = task.apply(batch);
-                writer.write(batch2);
-                return batch2;
+                List<R> apply1 = mainTask.apply(batch);
+                otherTask.apply(batch); // ignore output
+                return apply1;
             }
 
             @Override
             public List<R> drain() throws Exception {
-                // Drain and write
-                List<R> drain = task.drain();
-                writer.write(drain);
-                return drain;
+                // Drain both tasks
+                List<R> drain1 = mainTask.drain();
+                otherTask.drain(); // ignore output
+
+                // Return drain1
+                return drain1;
             }
 
             @Override
             public void post() throws Exception {
-                task.post();
-                if (!post.getAndSet(true)) {
-                    writer.post();
-                    writer.close();
-                }
+                mainTask.post();
+                otherTask.post();
             }
         };
     }
+
 }
