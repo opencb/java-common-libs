@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
@@ -110,6 +112,10 @@ public interface DataReader<T> extends Iterable<T> {
         };
     }
 
+    default Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
     default Iterator<T> iterator() {
         return iterator(1);
     }
@@ -127,7 +133,7 @@ public interface DataReader<T> extends Iterable<T> {
                     pre();
                     opened = true;
                 }
-                if (batchIterator.hasNext()) {
+                if (!batchIterator.hasNext()) {
                     if (!closed) {
                         batchIterator = read(batchSize).iterator();
                         if (!batchIterator.hasNext()) {
