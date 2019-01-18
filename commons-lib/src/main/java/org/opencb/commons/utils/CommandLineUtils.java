@@ -33,6 +33,11 @@ import java.util.stream.Collectors;
  */
 public class CommandLineUtils {
 
+    public static final String DEPRECATED = "[DEPRECATED] ";
+
+    private static final int DESCRIPTION_INDENT = 2;
+    private static final int DESCRIPTION_LENGTH = 100;
+
     public static void printCommandUsage(JCommander commander) {
         printCommandUsage(commander, System.err);
     }
@@ -47,10 +52,11 @@ public class CommandLineUtils {
                 .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(10), 10);
 
         int nameAndTypeLength = paramNameMaxSize + typeMaxSize + 8;
-        int descriptionLength = 100;
-        int maxLineLength = nameAndTypeLength + descriptionLength;  //160
+        int maxLineLength = nameAndTypeLength + DESCRIPTION_LENGTH;  //160
 
-        Comparator<ParameterDescription> parameterDescriptionComparator = (e1, e2) -> e1.getLongestName().compareTo(e2.getLongestName());
+        Comparator<ParameterDescription> parameterDescriptionComparator =
+                Comparator.comparing((ParameterDescription p) -> p.getDescription().contains("DEPRECATED"))
+                        .thenComparing(ParameterDescription::getLongestName);
         commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
             if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
                 String type = getType(parameterDescription);
@@ -59,14 +65,13 @@ public class CommandLineUtils {
                     if (parameterDescription.isDynamicParameter()) {
                         Object def = parameterDescription.getDefault();
                         if (def instanceof Map && !((Map) def).isEmpty()) {
-                            defaultValue = ("[" + def + "]");
+                            defaultValue = " [" + def + "]";
                         }
-//                        defaultValue = ("[" + parameterDescription.getDefault() + "]");
                     } else {
-                        defaultValue = ("[" + parameterDescription.getDefault() + "]");
+                        defaultValue = " [" + parameterDescription.getDefault() + "]";
                     }
                 }
-                String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s %s\n",
+                String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s%s\n",
                         (parameterDescription.getParameterized().getParameter() != null
                                 && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
                         parameterDescription.getNames(),
@@ -78,8 +83,11 @@ public class CommandLineUtils {
                 List<String> lines = new LinkedList<>();
                 while (usage.length() > maxLineLength + 1) {
                     int splitPosition = Math.min(1 + usage.lastIndexOf(" ", maxLineLength), usage.length());
+                    if (splitPosition <= nameAndTypeLength + DESCRIPTION_INDENT) {
+                        splitPosition = Math.min(1 + usage.indexOf(" ", maxLineLength), usage.length());
+                    }
                     lines.add(usage.substring(0, splitPosition) + "\n");
-                    usage = String.format("%" + nameAndTypeLength + "s", "") + usage.substring(splitPosition);
+                    usage = String.format("%" + (nameAndTypeLength + DESCRIPTION_INDENT) + "s", "") + "" + usage.substring(splitPosition);
                 }
                 // this is empty for short lines and so no prints anything
                 lines.forEach(printStream::print);
