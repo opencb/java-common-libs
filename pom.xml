@@ -6,7 +6,7 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
-    <version>3.7.3-SNAPSHOT</version>
+    <version>3.7.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
@@ -19,7 +19,7 @@
     </modules>
 
     <properties>
-        <java.commons.version>3.7.3-SNAPSHOT</java.commons.version>
+        <java.commons.version>3.7.4-SNAPSHOT</java.commons.version>
         <compileSource>1.8</compileSource>
         <jackson.version>2.8.11</jackson.version>
         <apache.commons.version>3.8.1</apache.commons.version>
