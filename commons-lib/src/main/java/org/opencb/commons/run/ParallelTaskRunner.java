@@ -535,7 +535,8 @@ public class ParallelTaskRunner<I, O> {
                 timeBlockedAtPutRead += System.nanoTime() - start;
                 if (isAbortPending()) {
                     //Some error happen. Abort
-                    logger.warn("Abort read thread on fail");
+                    logger.warn("Abort read thread on fail. Clear read queue and insert poison pill.");
+                    readBlockingQueue.clear();
                     break;
                 }
                 //logger.trace("reader: preRead");
@@ -644,7 +645,13 @@ public class ParallelTaskRunner<I, O> {
 
                     start = System.nanoTime();
                     if (writeBlockingQueue != null) {
-                        writeBlockingQueue.put(new Batch<O>(batchResult, batch.position));
+                        while (!writeBlockingQueue.offer(new Batch<O>(batchResult, batch.position), 1, TimeUnit.SECONDS)) {
+                            if (isAbortPending()) {
+                                //Some error happen. Abort
+                                logger.warn("Abort task thread on fail");
+                                break;
+                            }
+                        }
                     } else if (writeBlockingQueueFuture != null) {
                         CompletableFuture<Batch<O>> future = writeBlockingQueueFutureMap.get(batch.position);
                         future.complete(new Batch<O>(batchResult, batch.position));
