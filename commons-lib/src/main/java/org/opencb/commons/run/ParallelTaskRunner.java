@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 /**
  * Created by hpccoll1 on 26/02/15.
  *
- * {@link DataReader} Producer , {@link Task} Worker, {@link DataWriter}Consumer
+ * {@link DataReader} Producer , {@link org.opencb.commons.run.Task} Worker, {@link DataWriter}Consumer
  *         ___           ___
  *         |_|  -> T ->  |_|
  *   R ->  |_|  -> T ->  |_| -> W
@@ -544,7 +544,12 @@ public class ParallelTaskRunner<I, O> {
                 //logger.trace("reader: batch.size = " + batch.size());
             }
             //logger.debug("reader: POISON_PILL");
-            readBlockingQueue.put(POISON_PILL);
+            while (!readBlockingQueue.offer(POISON_PILL, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                if (isAbortPending()) {
+                    logger.warn("Abort read thread on fail. Clear read queue and insert poison pill.");
+                    readBlockingQueue.clear();
+                }
+            }
         } catch (InterruptedException e) {
             interruptions.add(e);
             e.printStackTrace();
@@ -672,12 +677,23 @@ public class ParallelTaskRunner<I, O> {
                 if (null != drain && !drain.isEmpty()) {
                     if (writeBlockingQueue != null) {
                         // submit final batch received from draining
-                        writeBlockingQueue.put(new Batch<>(drain, batch.position + 1));
+                        Batch<O> drainBatch = new Batch<>(drain, batch.position + 1);
+                        while (!writeBlockingQueue.offer(drainBatch, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                            if (isAbortPending()) {
+                                logger.warn("Abort task thread on fail");
+                                break;
+                            }
+                        }
                     } else if (writeBlockingQueueFuture != null) {
                         // Sorted PTR should not have to drain!
                         CompletableFuture<Batch<O>> future = new CompletableFuture<>();
                         future.complete(new Batch<O>(batchResult, batch.position + 1));
-                        writeBlockingQueueFuture.put(future);
+                        while (!writeBlockingQueueFuture.offer(future, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                            if (isAbortPending()) {
+                                logger.warn("Abort task thread on fail");
+                                break;
+                            }
+                        }
                     }
                 }
             } catch (RuntimeException e) {
@@ -726,7 +742,12 @@ public class ParallelTaskRunner<I, O> {
                 // + batch.size() + " : " + batchSize);
                 if (batch == POISON_PILL) {
                     //logger.debug("task: POISON_PILL");
-                    readBlockingQueue.put(POISON_PILL);
+                    while (!readBlockingQueue.offer(POISON_PILL, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                        if (isAbortPending()) {
+                            logger.warn("Abort task thread on fail");
+                            break;
+                        }
+                    }
                 }
                 return batch;
             }
@@ -807,7 +828,12 @@ public class ParallelTaskRunner<I, O> {
                     if (!writeBlockingQueue.contains(POISON_PILL)) {
                         synchronized (tasks) {
                             if (!writeBlockingQueue.contains(POISON_PILL)) {
-                                writeBlockingQueue.put(POISON_PILL);
+                                while (!writeBlockingQueue.offer(POISON_PILL, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
+                                    if (isAbortPending()) {
+                                        logger.warn("Abort writing thread on fail");
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
