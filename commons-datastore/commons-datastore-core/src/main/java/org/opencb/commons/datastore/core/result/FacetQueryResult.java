@@ -130,6 +130,11 @@ public class FacetQueryResult extends AbstractResult {
             return this;
         }
 
+        public Field addCount(long delta) {
+            this.count += delta;
+            return this;
+        }
+
         public List<Bucket> getBuckets() {
             return buckets;
         }
@@ -221,6 +226,11 @@ public class FacetQueryResult extends AbstractResult {
 
         public Bucket setCount(long count) {
             this.count = count;
+            return this;
+        }
+
+        public Bucket addCount(long delta) {
+            this.count += delta;
             return this;
         }
 
