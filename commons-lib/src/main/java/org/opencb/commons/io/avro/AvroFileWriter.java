@@ -54,9 +54,13 @@ public class AvroFileWriter<T extends GenericRecord> implements DataWriter<ByteB
     protected Logger logger = LoggerFactory.getLogger(this.getClass().toString());
 
     public AvroFileWriter(Schema schema, String codecName, OutputStream outputStream) {
+        // By default, do not close OutputStreams if provided in constructor. Respect symmetric open/close
+        this(schema, codecName, outputStream, false);
+    }
+
+    public AvroFileWriter(Schema schema, String codecName, OutputStream outputStream, boolean closeOutputStream) {
         this(schema, codecName, null, Objects.requireNonNull(outputStream));
-        // Do not close OutputStreams if provided in constructor. Respect symmetric open/close
-        closeOutputStream = false;
+        this.closeOutputStream = closeOutputStream;
     }
 
     public AvroFileWriter(Schema schema, String codecName, Path output) {
