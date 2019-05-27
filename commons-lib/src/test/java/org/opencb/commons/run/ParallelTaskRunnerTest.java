@@ -19,7 +19,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ParallelTaskRunnerTest {
 
@@ -345,4 +348,26 @@ public class ParallelTaskRunnerTest {
 
     }
 
+    @Test(expected = ExecutionException.class, timeout = 10000)
+    public void testBlockAtWriterFailure() throws ExecutionException {
+        AtomicInteger i = new AtomicInteger();
+        new ParallelTaskRunner<String, String>(
+                b -> IntStream.range(0, b).mapToObj(String::valueOf).collect(Collectors.toList()),
+                b -> b,
+                b -> {
+                    try {
+                        if (i.get() == 1) {
+                            throw new RuntimeException("Fail!");
+                        }
+                        i.getAndIncrement();
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                    return true;
+                },
+                ParallelTaskRunner.Config.builder().setReadQueuePutTimeout(3).build()
+        ).run();
+    }
 }

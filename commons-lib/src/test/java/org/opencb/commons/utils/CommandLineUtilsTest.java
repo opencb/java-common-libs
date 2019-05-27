@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.opencb.commons.utils.CommandLineUtils.DEPRECATED;
 
 /**
  * Created on 15/03/17.
@@ -43,6 +44,8 @@ public class CommandLineUtilsTest {
         public List<String> aVariableArityStringList;
         @Parameter(names = {"-6", "--aHidden"}, description = "Description hidden", hidden = true)
         public String aHidden;
+        @Parameter(names = {"-7", "--aDeprecated"}, description = DEPRECATED + "use --non-deprecated")
+        public String aDeprecated;
         @DynamicParameter(names = {"-D"}, description = "Description")
         public Map<String, String> dynamic = new HashMap<>();
         @DynamicParameter(names = {"-F"}, assignment = ":", description = "Description")

@@ -18,14 +18,19 @@ package org.opencb.commons.io;
 
 import org.opencb.commons.run.Task;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Alejandro Aleman Ramos <aaleman@cipf.es>
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
  */
 @FunctionalInterface
-public interface DataReader<T> {
+public interface DataReader<T> extends Iterable<T> {
 
     default boolean open() {
         return true;
@@ -48,7 +53,6 @@ public interface DataReader<T> {
     }
 
     List<T> read(int batchSize);
-
 
     default <O> DataReader<O> then(Task<T, O> task) {
         return new DataReader<O>() {
@@ -104,6 +108,50 @@ public interface DataReader<T> {
                     // TODO: Reader should throw any exception
                     throw new RuntimeException(e);
                 }
+            }
+        };
+    }
+
+    default Stream<T> stream() {
+        return StreamSupport.stream(spliterator(), false);
+    }
+
+    default Iterator<T> iterator() {
+        return iterator(1);
+    }
+
+    default Iterator<T> iterator(int batchSize) {
+        return new Iterator<T>() {
+            private boolean opened = false;
+            private boolean closed = false;
+            private Iterator<T> batchIterator = Collections.emptyIterator();
+
+            @Override
+            public boolean hasNext() {
+                if (!opened) {
+                    open();
+                    pre();
+                    opened = true;
+                }
+                if (!batchIterator.hasNext()) {
+                    if (!closed) {
+                        batchIterator = read(batchSize).iterator();
+                        if (!batchIterator.hasNext()) {
+                            post();
+                            close();
+                            closed = true;
+                        }
+                    }
+                }
+                return batchIterator.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return batchIterator.next();
             }
         };
     }
