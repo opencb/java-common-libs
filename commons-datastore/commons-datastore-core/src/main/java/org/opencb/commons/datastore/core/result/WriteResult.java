@@ -1,5 +1,6 @@
 package org.opencb.commons.datastore.core.result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WriteResult extends AbstractResult {
@@ -11,7 +12,7 @@ public class WriteResult extends AbstractResult {
     }
 
     public WriteResult(String id) {
-        super(id, -1, -1, null, null);
+        this(id, 0, 0, 0, new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public WriteResult(String id, int dbTime, long numMatches, long numModified, List<Fail> failed, List<Error> warning, Error error) {
@@ -19,6 +20,19 @@ public class WriteResult extends AbstractResult {
 
         this.numModified = numModified;
         this.failed = failed;
+    }
+
+    public void concat(WriteResult writeResult) {
+        this.numMatches += writeResult.numMatches;
+        this.numModified += writeResult.numModified;
+        this.dbTime += writeResult.dbTime;
+
+        if (failed != null && writeResult.getFailed() != null) {
+            failed.addAll(writeResult.getFailed());
+        }
+        if (warning != null && writeResult.getWarning() != null) {
+            warning.addAll(writeResult.getWarning());
+        }
     }
 
     public static class Fail {
@@ -74,6 +88,12 @@ public class WriteResult extends AbstractResult {
         sb.append(", error=").append(error);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public WriteResult setId(String id) {
+        super.setId(id);
+        return this;
     }
 
     public long getNumModified() {

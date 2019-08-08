@@ -16,11 +16,13 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ReadPreference;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.TransactionBody;
 import org.bson.Document;
+import org.opencb.commons.datastore.core.result.Error;
+import org.opencb.commons.datastore.core.result.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,13 @@ public class MongoDataStore {
     private MongoDBConfiguration mongoDBConfiguration;
 
     protected Logger logger = LoggerFactory.getLogger(MongoDataStore.class);
+
+    public static final TransactionOptions DEFAULT_TRANSACTION_OPTION =
+            TransactionOptions.builder()
+                    .readPreference(ReadPreference.primary())
+                    .readConcern(ReadConcern.LOCAL)
+                    .writeConcern(WriteConcern.MAJORITY)
+                    .build();
 
     MongoDataStore(MongoClient mongoClient, MongoDatabase db, MongoDBConfiguration mongoDBConfiguration) {
         this.mongoClient = mongoClient;
@@ -87,6 +96,27 @@ public class MongoDataStore {
     public boolean isReplSet() {
         Document document = getServerStatus();
         return document.containsKey(REPL_SET_KEY);
+    }
+
+    public ClientSession startSession() {
+        return mongoClient.startSession(
+                ClientSessionOptions.builder()
+                        .defaultTransactionOptions(
+                                TransactionOptions.builder().writeConcern(WriteConcern.MAJORITY).build())
+                        .build());
+    }
+
+    public WriteResult commitSession(ClientSession clientSession, TransactionBody<WriteResult> txnBody) {
+        WriteResult writeResult = null;
+        try {
+            writeResult = clientSession.withTransaction(txnBody);
+        } catch (RuntimeException e) {
+            writeResult = new WriteResult("", -1, -1, -1, null, null, new Error(0, e.getMessage(), e.getLocalizedMessage()));
+            logger.error("Transaction error: {}", e.getMessage(), e);
+        } finally {
+            clientSession.close();
+            return writeResult;
+        }
     }
 
     public MongoDBCollection createCollection(String collectionName) {

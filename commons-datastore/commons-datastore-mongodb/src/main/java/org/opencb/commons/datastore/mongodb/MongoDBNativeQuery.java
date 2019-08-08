@@ -18,10 +18,7 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.DistinctIterable;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
+import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -54,14 +51,20 @@ public class MongoDBNativeQuery {
     }
 
     public long count() {
-        return dbCollection.count();
+        return dbCollection.countDocuments();
     }
 
     public long count(Bson query) {
-//        CountOptions c = new CountOptions().
-        return dbCollection.count(query);
+        return count(null, query);
     }
 
+    public long count(ClientSession clientSession, Bson query) {
+        if (clientSession != null) {
+            return dbCollection.countDocuments(clientSession, query);
+        } else {
+            return dbCollection.countDocuments(query);
+        }
+    }
 
     public DistinctIterable<Document> distinct(String key) {
         return distinct(key, null, Document.class);
@@ -77,7 +80,11 @@ public class MongoDBNativeQuery {
 
 
     public FindIterable<Document> find(Bson query, QueryOptions options) {
-        return find(query, null, options);
+        return find(null, query, null, options);
+    }
+
+    public FindIterable<Document> find(ClientSession clientSession, Bson query, QueryOptions options) {
+        return find(clientSession, query, null, options);
     }
 
     public AggregateIterable<Document> aggregate(List<? extends Bson> operations) {
@@ -92,12 +99,21 @@ public class MongoDBNativeQuery {
     }
 
     public FindIterable<Document> find(Bson query, Bson projection, QueryOptions options) {
+        return find(null, query, projection, options);
+    }
+
+    public FindIterable<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
 
         if (projection == null) {
             projection = getProjection(projection, options);
         }
 
-        FindIterable<Document> findIterable = dbCollection.find(query).projection(projection);
+        FindIterable<Document> findIterable;
+        if (clientSession != null) {
+            findIterable = dbCollection.find(clientSession, query).projection(projection);
+        } else {
+            findIterable = dbCollection.find(query).projection(projection);
+        }
 
         int limit = (options != null) ? options.getInt(QueryOptions.LIMIT, 0) : 0;
         if (limit > 0) {
@@ -141,6 +157,17 @@ public class MongoDBNativeQuery {
      * @param options  Some options like timeout
      */
     public void insert(Document document, QueryOptions options) {
+        insert(null, document, options);
+    }
+
+    /**
+     * This method insert a single document into a collection. Params w and wtimeout are read from QueryOptions.
+     *
+     * @param clientSession Session in which the insert will be performed. Can be null.
+     * @param document The new document to be inserted
+     * @param options  Some options like timeout
+     */
+    public void insert(ClientSession clientSession, Document document, QueryOptions options) {
         int writeConcern = 1;
         int ms = 0;
         if (options != null && (options.containsKey("w") || options.containsKey("wtimeout"))) {
@@ -150,7 +177,11 @@ public class MongoDBNativeQuery {
             ms = options.getInt("wtimeout", 0);
         }
         dbCollection.withWriteConcern(new WriteConcern(writeConcern, ms));
-        dbCollection.insertOne(document);
+        if (clientSession != null) {
+            dbCollection.insertOne(clientSession, document);
+        } else {
+            dbCollection.insertOne(document);
+        }
     }
 
     /**
@@ -161,6 +192,18 @@ public class MongoDBNativeQuery {
      * @return A BulkWriteResult from MongoDB API
      */
     public BulkWriteResult insert(List<Document> documentList, QueryOptions options) {
+        return insert(null, documentList, options);
+    }
+
+    /**
+     * This method insert a list of documents into a collection. Params w and wtimeout are read from QueryOptions.
+     *
+     * @param clientSession Session in which the insert will be performed. Can be null.
+     * @param documentList The new list of documents to be inserted
+     * @param options      Some options like timeout
+     * @return A BulkWriteResult from MongoDB API
+     */
+    public BulkWriteResult insert(ClientSession clientSession, List<Document> documentList, QueryOptions options) {
         List<WriteModel<Document>> actions = new ArrayList<>(documentList.size());
         for (Document document : documentList) {
             actions.add(new InsertOneModel<>(document));
@@ -174,20 +217,40 @@ public class MongoDBNativeQuery {
         }
         dbCollection.withWriteConcern(new WriteConcern(writeConcern, ms));
 
-        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        if (clientSession != null) {
+            return dbCollection.bulkWrite(clientSession, actions, new BulkWriteOptions().ordered(false));
+        } else {
+            return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        }
     }
 
-
     public UpdateResult update(Bson query, Bson updates, boolean upsert, boolean multi) {
+        return update(null, query, updates, upsert, multi);
+    }
+
+    public UpdateResult update(ClientSession clientSession, Bson query, Bson updates, boolean upsert, boolean multi) {
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
         if (multi) {
-            return dbCollection.updateMany(query, updates, updateOptions);
+            if (clientSession != null) {
+                return dbCollection.updateMany(clientSession, query, updates, updateOptions);
+            } else {
+                return dbCollection.updateMany(query, updates, updateOptions);
+            }
         } else {
-            return dbCollection.updateOne(query, updates, updateOptions);
+            if (clientSession != null) {
+                return dbCollection.updateOne(clientSession, query, updates, updateOptions);
+            } else {
+                return dbCollection.updateOne(query, updates, updateOptions);
+            }
         }
     }
 
     public BulkWriteResult replace(List<? extends Bson> queries, List<? extends Bson> updates, boolean upsert) {
+        return replace(null, queries, updates, upsert);
+    }
+
+    public BulkWriteResult replace(ClientSession clientSession, List<? extends Bson> queries, List<? extends Bson> updates,
+                                   boolean upsert) {
         if (queries.size() != updates.size()) {
             throw wrongQueryUpdateSize(queries, updates);
         }
@@ -206,15 +269,32 @@ public class MongoDBNativeQuery {
             actions.add(new ReplaceOneModel<>(query, (Document) update, updateOptions));
         }
 
-        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        if (clientSession != null) {
+            return dbCollection.bulkWrite(clientSession, actions, new BulkWriteOptions().ordered(false));
+        } else {
+            return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        }
     }
 
     public UpdateResult replace(Bson query, Bson updates, boolean upsert) {
+        return replace(null, query, updates, upsert);
+    }
+
+    public UpdateResult replace(ClientSession clientSession, Bson query, Bson updates, boolean upsert) {
         UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
-        return dbCollection.replaceOne(query, (Document) updates, updateOptions);
+        if (clientSession != null) {
+            return dbCollection.replaceOne(clientSession, query, (Document) updates, updateOptions);
+        } else {
+            return dbCollection.replaceOne(query, (Document) updates, updateOptions);
+        }
     }
 
     public BulkWriteResult update(List<? extends Bson> documentList, List<? extends Bson> updatesList, boolean upsert, boolean multi) {
+        return update(null, documentList, updatesList, upsert, multi);
+    }
+
+    public BulkWriteResult update(ClientSession clientSession, List<? extends Bson> documentList, List<? extends Bson> updatesList,
+                                  boolean upsert, boolean multi) {
         if (documentList.size() != updatesList.size()) {
             throw wrongQueryUpdateSize(documentList, updatesList);
         }
@@ -256,7 +336,11 @@ public class MongoDBNativeQuery {
 
         }
 //        return bulk.execute();
-        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        if (clientSession != null) {
+            return dbCollection.bulkWrite(clientSession, actions, new BulkWriteOptions().ordered(false));
+        } else {
+            return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        }
     }
 
     private IndexOutOfBoundsException wrongQueryUpdateSize(List<? extends Bson> queries, List<? extends Bson> updates) {
@@ -264,20 +348,43 @@ public class MongoDBNativeQuery {
                 + " and UpdatesList.size=" + updates.size() + " must be the same size.");
     }
 
-
     public DeleteResult remove(Bson query) {
-        return dbCollection.deleteMany(query);
+        return remove(null, query);
+    }
+
+    public DeleteResult remove(ClientSession clientSession, Bson query) {
+        if (clientSession != null) {
+            return dbCollection.deleteMany(clientSession, query);
+        } else {
+            return dbCollection.deleteMany(query);
+        }
     }
 
     public DeleteResult remove(Bson query, boolean multi) {
+        return remove(null, query, multi);
+    }
+
+    public DeleteResult remove(ClientSession clientSession, Bson query, boolean multi) {
         if (multi) {
-            return dbCollection.deleteMany(query);
+            if (clientSession != null) {
+                return dbCollection.deleteMany(clientSession, query);
+            } else {
+                return dbCollection.deleteMany(query);
+            }
         } else {
-            return dbCollection.deleteOne(query);
+            if (clientSession != null) {
+                return dbCollection.deleteOne(clientSession, query);
+            } else {
+                return dbCollection.deleteOne(query);
+            }
         }
     }
 
     public BulkWriteResult remove(List<? extends Bson> queryList, boolean multi) {
+        return remove(null, queryList, multi);
+    }
+
+    public BulkWriteResult remove(ClientSession clientSession, List<? extends Bson> queryList, boolean multi) {
         List<WriteModel<Document>> actions = new ArrayList<>(queryList.size());
         if (multi) {
             for (Bson document : queryList) {
@@ -288,11 +395,19 @@ public class MongoDBNativeQuery {
                 actions.add(new DeleteOneModel<>(document));
             }
         }
-        return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        if (clientSession != null) {
+            return dbCollection.bulkWrite(clientSession, actions, new BulkWriteOptions().ordered(false));
+        } else {
+            return dbCollection.bulkWrite(actions, new BulkWriteOptions().ordered(false));
+        }
     }
 
 
     public Document findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
+        return findAndUpdate(null, query, projection, sort, update, options);
+    }
+
+    public Document findAndUpdate(ClientSession clientSession, Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
         boolean upsert = false;
         boolean returnNew = false;
 
@@ -309,10 +424,20 @@ public class MongoDBNativeQuery {
                 .projection(projection)
                 .upsert(upsert)
                 .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
-        return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+
+        if (clientSession != null) {
+            return dbCollection.findOneAndUpdate(clientSession, query, update, findOneAndUpdateOptions);
+        } else {
+            return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+        }
     }
 
     public Document findAndModify(Bson query, Bson projection, Bson sort, Document update, QueryOptions options) {
+        return findAndModify(null, query, projection, sort, update, options);
+    }
+
+    public Document findAndModify(ClientSession clientSession, Bson query, Bson projection, Bson sort, Document update,
+                                  QueryOptions options) {
         boolean remove = false;
         boolean upsert = false;
         boolean returnNew = false;
@@ -332,14 +457,22 @@ public class MongoDBNativeQuery {
                     .projection(projection)
                     .upsert(upsert)
                     .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
-            return dbCollection.findOneAndReplace(query, update, findOneAndReplaceOptions);
+            if (clientSession != null) {
+                return dbCollection.findOneAndReplace(clientSession, query, update, findOneAndReplaceOptions);
+            } else {
+                return dbCollection.findOneAndReplace(query, update, findOneAndReplaceOptions);
+            }
         } else {
             FindOneAndUpdateOptions findOneAndUpdateOptions = new FindOneAndUpdateOptions()
                     .sort(sort)
                     .projection(projection)
                     .upsert(upsert)
                     .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
-            return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+            if (clientSession != null) {
+                return dbCollection.findOneAndUpdate(clientSession, query, update, findOneAndUpdateOptions);
+            } else {
+                return dbCollection.findOneAndUpdate(query, update, findOneAndUpdateOptions);
+            }
         }
 //        return dbCollection.findOneAndUpdate(query, projection, sort, remove, update, returnNew, upsert);
     }
