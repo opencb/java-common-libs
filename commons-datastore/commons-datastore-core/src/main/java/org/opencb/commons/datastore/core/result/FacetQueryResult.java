@@ -33,11 +33,10 @@ public class FacetQueryResult extends AbstractResult {
     @Deprecated
     public FacetQueryResult(String id, int dbTime, long numTotalResults, String warningMsg, String errorMsg,
                             List<Field> results, String query) {
-        this(id, dbTime, numTotalResults, Collections.singletonList(new Error(-1, "", warningMsg)), new Error(-1, "", errorMsg),
-                results, query);
+        this(id, dbTime, numTotalResults, Collections.singletonList(warningMsg), new Error(-1, "", errorMsg), results, query);
     }
 
-    public FacetQueryResult(String id, int dbTime, long numMatches, List<Error> warning, Error error, List<Field> results, String query) {
+    public FacetQueryResult(String id, int dbTime, long numMatches, List<String> warning, Error error, List<Field> results, String query) {
         super(id, dbTime, numMatches, warning, error);
         this.results = results;
         this.query = query;

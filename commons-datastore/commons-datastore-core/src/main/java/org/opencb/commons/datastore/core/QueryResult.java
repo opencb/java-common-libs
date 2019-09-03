@@ -22,6 +22,7 @@ import java.util.List;
 /**
  * Created by imedina on 20/03/14.
  */
+@Deprecated
 public class QueryResult<T> {
 
     protected String id;

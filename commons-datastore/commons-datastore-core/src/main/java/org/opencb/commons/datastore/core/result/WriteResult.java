@@ -1,23 +1,19 @@
 package org.opencb.commons.datastore.core.result;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WriteResult extends AbstractResult {
 
+    private long numMatches;
     private long numModified;
     private List<Fail> failed;
 
     public WriteResult() {
     }
 
-    public WriteResult(String id) {
-        this(id, 0, 0, 0, new ArrayList<>(), new ArrayList<>(), null);
-    }
-
-    public WriteResult(String id, int dbTime, long numMatches, long numModified, List<Fail> failed, List<Error> warning, Error error) {
-        super(id, dbTime, numMatches, warning, error);
-
+    public WriteResult(int dbTime, long numMatches, long numModified, List<String> warning, List<Fail> failed) {
+        super(dbTime, warning);
+        this.numMatches = numMatches;
         this.numModified = numModified;
         this.failed = failed;
     }
@@ -79,20 +75,21 @@ public class WriteResult extends AbstractResult {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("WriteResult{");
-        sb.append("numModified=").append(numModified);
+        sb.append("numMatches=").append(numMatches);
+        sb.append(", numModified=").append(numModified);
         sb.append(", failed=").append(failed);
-        sb.append(", id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
-        sb.append(", numMatches=").append(numMatches);
         sb.append(", warning=").append(warning);
-        sb.append(", error=").append(error);
         sb.append('}');
         return sb.toString();
     }
 
-    @Override
-    public WriteResult setId(String id) {
-        super.setId(id);
+    public long getNumMatches() {
+        return numMatches;
+    }
+
+    public WriteResult setNumMatches(long numMatches) {
+        this.numMatches = numMatches;
         return this;
     }
 
@@ -113,5 +110,4 @@ public class WriteResult extends AbstractResult {
         this.failed = failed;
         return this;
     }
-
 }

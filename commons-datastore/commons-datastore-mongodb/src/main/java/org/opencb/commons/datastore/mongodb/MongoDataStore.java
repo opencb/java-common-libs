@@ -21,7 +21,6 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.TransactionBody;
 import org.bson.Document;
-import org.opencb.commons.datastore.core.result.Error;
 import org.opencb.commons.datastore.core.result.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +110,7 @@ public class MongoDataStore {
         try {
             writeResult = clientSession.withTransaction(txnBody);
         } catch (RuntimeException e) {
-            writeResult = new WriteResult("", -1, -1, -1, null, null, new Error(0, e.getMessage(), e.getLocalizedMessage()));
+            writeResult = new WriteResult(-1, -1, -1, null, Collections.singletonList(new WriteResult.Fail("", e.getMessage())));
             logger.error("Transaction error: {}", e.getMessage(), e);
         } finally {
             clientSession.close();
