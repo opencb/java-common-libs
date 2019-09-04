@@ -1,5 +1,6 @@
 package org.opencb.commons.datastore.core.result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WriteResult extends AbstractResult {
@@ -9,6 +10,7 @@ public class WriteResult extends AbstractResult {
     private List<Fail> failed;
 
     public WriteResult() {
+        this(-1, 0, 0, new ArrayList<>(), new ArrayList<>());
     }
 
     public WriteResult(int dbTime, long numMatches, long numModified, List<String> warning, List<Fail> failed) {
