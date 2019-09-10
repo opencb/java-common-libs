@@ -110,7 +110,7 @@ public class MongoDataStore {
         try {
             writeResult = clientSession.withTransaction(txnBody);
         } catch (RuntimeException e) {
-            writeResult = new WriteResult(-1, -1, -1, null, Collections.singletonList(new WriteResult.Fail("", e.getMessage())));
+            writeResult = new WriteResult(-1, -1, -1, -1, -1, null, Collections.singletonList(new WriteResult.Fail("", e.getMessage())));
             logger.error("Transaction error: {}", e.getMessage(), e);
         } finally {
             clientSession.close();

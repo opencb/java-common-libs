@@ -32,6 +32,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.*;
+import org.opencb.commons.datastore.core.result.WriteResult;
 
 import java.io.IOException;
 import java.util.*;
@@ -112,7 +113,21 @@ public class MongoDBCollection {
 //        }
 
         return queryResult;
+    }
 
+    private WriteResult endWrite(long start) {
+        return endWrite(1, 0, 1, 0, start);
+    }
+
+    private WriteResult endWrite(long numMatches, long numUpdated, long start) {
+        long end = System.currentTimeMillis();
+        return new WriteResult((int) (end - start), numMatches, 0, numUpdated, 0, Collections.emptyList(), Collections.emptyList());
+    }
+
+    private WriteResult endWrite(long numMatches, long numInserted, long numUpdated, long numDeleted, long start) {
+        long end = System.currentTimeMillis();
+        return new WriteResult((int) (end - start), numMatches, numInserted, numUpdated, numDeleted, Collections.emptyList(),
+                Collections.emptyList());
     }
 
     public QueryResult<Long> count() {
@@ -369,32 +384,32 @@ public class MongoDBCollection {
         return queryResult;
     }
 
-    public QueryResult insert(Document object, QueryOptions options) {
+    public WriteResult insert(Document object, QueryOptions options) {
         return insert(null, object, options);
     }
 
-    public QueryResult insert(ClientSession clientSession, Document object, QueryOptions options) {
+    public WriteResult insert(ClientSession clientSession, Document object, QueryOptions options) {
         long start = startQuery();
         mongoDBNativeQuery.insert(clientSession, object, options);
-        return endQuery(Collections.emptyList(), start);
+        return endWrite(start);
     }
 
     //Bulk insert
-    public QueryResult<BulkWriteResult> insert(List<Document> objects, QueryOptions options) {
+    public WriteResult insert(List<Document> objects, QueryOptions options) {
         return insert(null, objects, options);
     }
 
-    public QueryResult<BulkWriteResult> insert(ClientSession clientSession, List<Document> objects, QueryOptions options) {
+    public WriteResult insert(ClientSession clientSession, List<Document> objects, QueryOptions options) {
         long start = startQuery();
         BulkWriteResult writeResult = mongoDBNativeQuery.insert(clientSession, objects, options);
-        return endQuery(Collections.singletonList(writeResult), start);
+        return endWrite(writeResult.getMatchedCount(), writeResult.getInsertedCount(), 0, 0, start);
     }
 
-    public QueryResult<UpdateResult> update(Bson query, Bson update, QueryOptions options) {
+    public WriteResult update(Bson query, Bson update, QueryOptions options) {
         return update(null, query, update, options);
     }
 
-    public QueryResult<UpdateResult> update(ClientSession clientSession, Bson query, Bson update, QueryOptions options) {
+    public WriteResult update(ClientSession clientSession, Bson query, Bson update, QueryOptions options) {
         long start = startQuery();
 
         boolean upsert = false;
@@ -412,15 +427,16 @@ public class MongoDBCollection {
         } else {
             updateResult = mongoDBNativeQuery.update(clientSession, query, update, upsert, multi);
         }
-        return endQuery(Collections.singletonList(updateResult), start);
+        return endWrite(updateResult.getMatchedCount(), updateResult.getUpsertedId() != null ? 1 : 0,
+                updateResult.getUpsertedId() == null ? updateResult.getModifiedCount() : 0, 0, start);
     }
 
     //Bulk update
-    public QueryResult<BulkWriteResult> update(List<? extends Bson> queries, List<? extends Bson> updates, QueryOptions options) {
+    public WriteResult update(List<? extends Bson> queries, List<? extends Bson> updates, QueryOptions options) {
         return update(null, queries, updates, options);
     }
 
-    public QueryResult<BulkWriteResult> update(ClientSession clientSession, List<? extends Bson> queries, List<? extends Bson> updates,
+    public WriteResult update(ClientSession clientSession, List<? extends Bson> queries, List<? extends Bson> updates,
                                                QueryOptions options) {
         long start = startQuery();
 
@@ -439,27 +455,26 @@ public class MongoDBCollection {
         } else {
             wr = mongoDBNativeQuery.update(clientSession, queries, updates, upsert, multi);
         }
-        return endQuery(Collections.singletonList(wr), start);
+        return endWrite(wr.getMatchedCount(), wr.getInsertedCount(), wr.getModifiedCount(), wr.getDeletedCount(), start);
     }
 
 
-    public QueryResult<DeleteResult> remove(Bson query, QueryOptions options) {
+    public WriteResult remove(Bson query, QueryOptions options) {
         return remove(null, query, options);
     }
 
-    public QueryResult<DeleteResult> remove(ClientSession clientSession, Bson query, QueryOptions options) {
+    public WriteResult remove(ClientSession clientSession, Bson query, QueryOptions options) {
         long start = startQuery();
         DeleteResult wr = mongoDBNativeQuery.remove(clientSession, query);
-        QueryResult<DeleteResult> queryResult = endQuery(Arrays.asList(wr), start);
-        return queryResult;
+        return endWrite(wr.getDeletedCount(), 0, 0, wr.getDeletedCount(), start);
     }
 
     //Bulk remove
-    public QueryResult<BulkWriteResult> remove(List<? extends Bson> query, QueryOptions options) {
+    public WriteResult remove(List<? extends Bson> query, QueryOptions options) {
         return remove(null, query, options);
     }
 
-    public QueryResult<BulkWriteResult> remove(ClientSession clientSession, List<? extends Bson> query, QueryOptions options) {
+    public WriteResult remove(ClientSession clientSession, List<? extends Bson> query, QueryOptions options) {
         long start = startQuery();
 
         boolean multi = false;
@@ -467,9 +482,8 @@ public class MongoDBCollection {
             multi = options.getBoolean(MULTI);
         }
         com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.remove(clientSession, query, multi);
-        QueryResult<BulkWriteResult> queryResult = endQuery(Arrays.asList(wr), start);
 
-        return queryResult;
+        return endWrite(wr.getMatchedCount(), wr.getInsertedCount(), wr.getModifiedCount(), wr.getDeletedCount(), start);
     }
 
     public QueryResult<Document> findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {

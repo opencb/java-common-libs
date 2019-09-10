@@ -20,8 +20,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
@@ -31,6 +29,7 @@ import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.QueryResultWriter;
+import org.opencb.commons.datastore.core.result.WriteResult;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -56,7 +55,7 @@ public class MongoDBCollectionTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
-    public static final List<String> SURENAMES = Arrays.asList("Doe", "Davis", null);
+    public static final List<String> SURNAMES = Arrays.asList("Doe", "Davis", null);
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -110,7 +109,7 @@ public class MongoDBCollectionTest {
         for (long i = 0; i < size; i++) {
             document = new Document("id", i);
             document.put("name", NAMES.get(random.nextInt(NAMES.size())));
-            document.put("surname", SURENAMES.get(random.nextInt(SURENAMES.size())));
+            document.put("surname", SURNAMES.get(random.nextInt(SURNAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
             mongoDBCollection.nativeQuery().insert(document, null);
@@ -363,7 +362,7 @@ public class MongoDBCollectionTest {
         for (QueryResult<User> queryResult : queryResultList) {
             assertEquals(1, queryResult.getNumResults());
             assertThat(NAMES, CoreMatchers.hasItem(queryResult.first().name));
-            assertThat(SURENAMES, CoreMatchers.hasItem(queryResult.first().surname));
+            assertThat(SURNAMES, CoreMatchers.hasItem(queryResult.first().surname));
         }
     }
 
@@ -492,30 +491,30 @@ public class MongoDBCollectionTest {
     public void testUpdate() throws Exception {
         Document query = new Document("name", "John");
         long count = mongoDBCollectionUpdateTest.count(query).first();
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(query,
+        WriteResult writeResult = mongoDBCollectionUpdateTest.update(query,
                 new Document("$set", new Document("modified", true)),
                 new QueryOptions("multi", true)
-        ).first();
-        assertEquals("All the objects are named \"John\", so all objects should be modified", count, writeResult.getModifiedCount());
+        );
+        assertEquals("All the objects are named \"John\", so all objects should be modified", count, writeResult.getNumUpdated());
     }
 
     @Test
     public void testUpdate1() throws Exception {
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
+        WriteResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
                 new Document("$set", new Document("modifiedAgain", true)),
                 new QueryOptions("multi", true)
-        ).first();
-        assertEquals("Any objects have the surname \"Johnson\", so any objects should be modified", 0, writeResult.getModifiedCount());
+        );
+        assertEquals("Any objects have the surname \"Johnson\", so any objects should be modified", 0, writeResult.getNumUpdated());
     }
 
     @Test
     public void testUpdate2() throws Exception {
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
+        WriteResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
                 new Document("$set", new Document("modifiedAgain", true)),
                 new QueryOptions("upsert", true)
-        ).first();
-        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getMatchedCount());
-        assertNotNull("Any objects have the surname \"Johnson\", so one object should be inserted", writeResult.getUpsertedId());
+        );
+        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getNumMatches());
+        assertEquals("Any objects have the surname \"Johnson\", so one object should be inserted", 1, writeResult.getNumInserted());
     }
 
     @Test
@@ -529,8 +528,8 @@ public class MongoDBCollectionTest {
             queries.add(new Document("id", i));
             updates.add(new Document("$set", new BasicDBObject("bulkUpdated", i)));
         }
-        com.mongodb.bulk.BulkWriteResult bulkWriteResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false)).first();
-        assertEquals("", modifiedDocuments, bulkWriteResult.getModifiedCount());
+        WriteResult writeResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false));
+        assertEquals("", modifiedDocuments, writeResult.getNumUpdated());
     }
 
     @Test
@@ -555,8 +554,8 @@ public class MongoDBCollectionTest {
         int count = mongoDBCollectionRemoveTest.count().first().intValue();
         Document query = new Document("age", 1);
         int matchingDocuments = mongoDBCollectionRemoveTest.count(query).first().intValue();
-        DeleteResult writeResult = mongoDBCollectionRemoveTest.remove(query, null).first();
-        assertEquals(matchingDocuments, writeResult.getDeletedCount());
+        WriteResult writeResult = mongoDBCollectionRemoveTest.remove(query, null);
+        assertEquals(matchingDocuments, writeResult.getNumDeleted());
         assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - matchingDocuments);
     }
 
@@ -570,8 +569,8 @@ public class MongoDBCollectionTest {
             remove.add(new Document("name", "John"));
         }
 
-        com.mongodb.bulk.BulkWriteResult bulkWriteResult = mongoDBCollectionRemoveTest.remove(remove, null).first();
-        assertEquals(numDeletions, bulkWriteResult.getDeletedCount());
+        WriteResult bulkWriteResult = mongoDBCollectionRemoveTest.remove(remove, null);
+        assertEquals(numDeletions, bulkWriteResult.getNumDeleted());
         assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - numDeletions);
     }
 

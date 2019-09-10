@@ -6,23 +6,34 @@ import java.util.List;
 public class WriteResult extends AbstractResult {
 
     private long numMatches;
-    private long numModified;
+    private long numInserted;
+    private long numUpdated;
+    private long numDeleted;
     private List<Fail> failed;
 
     public WriteResult() {
-        this(-1, 0, 0, new ArrayList<>(), new ArrayList<>());
+        this(-1, 0, 0, 0, 0, new ArrayList<>(), new ArrayList<>());
     }
 
-    public WriteResult(int dbTime, long numMatches, long numModified, List<String> warning, List<Fail> failed) {
+    public WriteResult(int dbTime, long numMatches, long numInserted, long numUpdated, long numDeleted, List<String> warning,
+                       List<Fail> failed) {
         super(dbTime, warning);
         this.numMatches = numMatches;
-        this.numModified = numModified;
+        this.numInserted = numInserted;
+        this.numUpdated = numUpdated;
+        this.numDeleted = numDeleted;
         this.failed = failed;
+    }
+
+    public static WriteResult empty() {
+        return new WriteResult();
     }
 
     public void concat(WriteResult writeResult) {
         this.numMatches += writeResult.numMatches;
-        this.numModified += writeResult.numModified;
+        this.numInserted += writeResult.numInserted;
+        this.numUpdated += writeResult.numUpdated;
+        this.numDeleted += writeResult.numDeleted;
         this.dbTime += writeResult.dbTime;
 
         if (failed != null && writeResult.getFailed() != null) {
@@ -78,7 +89,9 @@ public class WriteResult extends AbstractResult {
     public String toString() {
         final StringBuilder sb = new StringBuilder("WriteResult{");
         sb.append("numMatches=").append(numMatches);
-        sb.append(", numModified=").append(numModified);
+        sb.append(", numInserted=").append(numInserted);
+        sb.append(", numUpdated=").append(numUpdated);
+        sb.append(", numDeleted=").append(numDeleted);
         sb.append(", failed=").append(failed);
         sb.append(", dbTime=").append(dbTime);
         sb.append(", warning=").append(warning);
@@ -95,12 +108,30 @@ public class WriteResult extends AbstractResult {
         return this;
     }
 
-    public long getNumModified() {
-        return numModified;
+    public long getNumInserted() {
+        return numInserted;
     }
 
-    public WriteResult setNumModified(long numModified) {
-        this.numModified = numModified;
+    public WriteResult setNumInserted(long numInserted) {
+        this.numInserted = numInserted;
+        return this;
+    }
+
+    public long getNumUpdated() {
+        return numUpdated;
+    }
+
+    public WriteResult setNumUpdated(long numUpdated) {
+        this.numUpdated = numUpdated;
+        return this;
+    }
+
+    public long getNumDeleted() {
+        return numDeleted;
+    }
+
+    public WriteResult setNumDeleted(long numDeleted) {
+        this.numDeleted = numDeleted;
         return this;
     }
 
@@ -112,4 +143,17 @@ public class WriteResult extends AbstractResult {
         this.failed = failed;
         return this;
     }
+
+    @Override
+    public WriteResult setDbTime(int dbTime) {
+        super.setDbTime(dbTime);
+        return this;
+    }
+
+    @Override
+    public WriteResult setWarning(List<String> warning) {
+        super.setWarning(warning);
+        return this;
+    }
+
 }
