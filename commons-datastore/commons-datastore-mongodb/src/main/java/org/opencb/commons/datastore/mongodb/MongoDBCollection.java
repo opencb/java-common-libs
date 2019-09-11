@@ -455,9 +455,14 @@ public class MongoDBCollection {
         } else {
             wr = mongoDBNativeQuery.update(clientSession, queries, updates, upsert, multi);
         }
-        return endWrite(wr.getMatchedCount(), wr.getInsertedCount(), wr.getModifiedCount(), wr.getDeletedCount(), start);
-    }
 
+        return endWrite(
+                wr.getMatchedCount(),
+                wr.getInsertedCount() + wr.getUpserts().size(),
+                wr.getModifiedCount(),
+                wr.getDeletedCount(),
+                start);
+    }
 
     public WriteResult remove(Bson query, QueryOptions options) {
         return remove(null, query, options);

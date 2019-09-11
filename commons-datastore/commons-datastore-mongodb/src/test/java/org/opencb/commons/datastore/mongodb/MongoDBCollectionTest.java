@@ -533,7 +533,7 @@ public class MongoDBCollectionTest {
     }
 
     @Test
-    public void testUpdate4() throws Exception {
+    public void testUpdate4_error() throws Exception {
         int count = mongoDBCollectionUpdateTest.count().first().intValue();
         int modifiedDocuments = count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
@@ -547,6 +547,30 @@ public class MongoDBCollectionTest {
 
         thrown.expect(IndexOutOfBoundsException.class);
         mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false));
+    }
+
+    @Test
+    public void testUpdate5_upsert() throws Exception {
+        int count = mongoDBCollectionUpdateTest.count().first().intValue();
+        int modifiedDocuments = count / 2;
+        ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
+
+        for (int i = 0; i < modifiedDocuments; i++) {
+            queries.add(new Document("id", i));
+            updates.add(new Document("$set", new BasicDBObject("bulkUpdated_b", i)));
+        }
+
+        int numUpserts = 10;
+        for (int i = 0; i < numUpserts; i++) {
+            queries.add(new Document("id", 10000 + i));
+            updates.add(new Document("$set", new BasicDBObject("upsert", i)));
+        }
+
+        WriteResult writeResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false)
+                .append(MongoDBCollection.UPSERT, true));
+        assertEquals(modifiedDocuments, writeResult.getNumUpdated());
+        assertEquals(numUpserts, writeResult.getNumInserted());
     }
 
     @Test
