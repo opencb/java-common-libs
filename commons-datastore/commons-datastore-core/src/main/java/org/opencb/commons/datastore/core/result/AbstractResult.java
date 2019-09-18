@@ -28,7 +28,7 @@ public class AbstractResult {
     protected int dbTime;
     @Deprecated
     protected long numMatches;
-    protected List<String> warning;
+    protected List<String> warnings;
     @Deprecated
     protected Error error;
 
@@ -36,24 +36,24 @@ public class AbstractResult {
     }
 
     @Deprecated
-    public AbstractResult(String id, int dbTime, long numMatches, List<String> warning, Error error) {
+    public AbstractResult(String id, int dbTime, long numMatches, List<String> warnings, Error error) {
         this.id = id;
         this.dbTime = dbTime;
         this.numMatches = numMatches;
-        this.warning = warning;
+        this.warnings = warnings;
         this.error = error;
     }
 
-    public AbstractResult(int dbTime, List<String> warning) {
+    public AbstractResult(int dbTime, List<String> warnings) {
         this.dbTime = dbTime;
-        this.warning = warning;
+        this.warnings = warnings;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("AbstractResult{");
         sb.append("dbTime=").append(dbTime);
-        sb.append(", warning=").append(warning);
+        sb.append(", warnings=").append(warnings);
         sb.append('}');
         return sb.toString();
     }
@@ -89,12 +89,12 @@ public class AbstractResult {
         return this;
     }
 
-    public List<String> getWarning() {
-        return warning;
+    public List<String> getWarnings() {
+        return warnings;
     }
 
-    public AbstractResult setWarning(List<String> warning) {
-        this.warning = warning;
+    public AbstractResult setWarnings(List<String> warnings) {
+        this.warnings = warnings;
         return this;
     }
 

@@ -5,20 +5,20 @@ import java.util.List;
 
 public class WriteResult extends AbstractResult {
 
-    private long numMatches;
+    private long numMatched;
     private long numInserted;
     private long numUpdated;
     private long numDeleted;
     private List<Fail> failed;
 
     public WriteResult() {
-        this(-1, 0, 0, 0, 0, new ArrayList<>(), new ArrayList<>());
+        this(0, 0, 0, 0, 0, new ArrayList<>(), new ArrayList<>());
     }
 
-    public WriteResult(int dbTime, long numMatches, long numInserted, long numUpdated, long numDeleted, List<String> warning,
+    public WriteResult(int dbTime, long numMatched, long numInserted, long numUpdated, long numDeleted, List<String> warnings,
                        List<Fail> failed) {
-        super(dbTime, warning);
-        this.numMatches = numMatches;
+        super(dbTime, warnings);
+        this.numMatched = numMatched;
         this.numInserted = numInserted;
         this.numUpdated = numUpdated;
         this.numDeleted = numDeleted;
@@ -29,8 +29,8 @@ public class WriteResult extends AbstractResult {
         return new WriteResult();
     }
 
-    public void concat(WriteResult writeResult) {
-        this.numMatches += writeResult.numMatches;
+    public void append(WriteResult writeResult) {
+        this.numMatched += writeResult.numMatched;
         this.numInserted += writeResult.numInserted;
         this.numUpdated += writeResult.numUpdated;
         this.numDeleted += writeResult.numDeleted;
@@ -39,8 +39,8 @@ public class WriteResult extends AbstractResult {
         if (failed != null && writeResult.getFailed() != null) {
             failed.addAll(writeResult.getFailed());
         }
-        if (warning != null && writeResult.getWarning() != null) {
-            warning.addAll(writeResult.getWarning());
+        if (warnings != null && writeResult.getWarnings() != null) {
+            warnings.addAll(writeResult.getWarnings());
         }
     }
 
@@ -88,23 +88,23 @@ public class WriteResult extends AbstractResult {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("WriteResult{");
-        sb.append("numMatches=").append(numMatches);
+        sb.append("numMatched=").append(numMatched);
         sb.append(", numInserted=").append(numInserted);
         sb.append(", numUpdated=").append(numUpdated);
         sb.append(", numDeleted=").append(numDeleted);
         sb.append(", failed=").append(failed);
         sb.append(", dbTime=").append(dbTime);
-        sb.append(", warning=").append(warning);
+        sb.append(", warnings=").append(warnings);
         sb.append('}');
         return sb.toString();
     }
 
-    public long getNumMatches() {
-        return numMatches;
+    public long getNumMatched() {
+        return numMatched;
     }
 
-    public WriteResult setNumMatches(long numMatches) {
-        this.numMatches = numMatches;
+    public WriteResult setNumMatched(long numMatched) {
+        this.numMatched = numMatched;
         return this;
     }
 
@@ -151,8 +151,8 @@ public class WriteResult extends AbstractResult {
     }
 
     @Override
-    public WriteResult setWarning(List<String> warning) {
-        super.setWarning(warning);
+    public WriteResult setWarnings(List<String> warnings) {
+        super.setWarnings(warnings);
         return this;
     }
 

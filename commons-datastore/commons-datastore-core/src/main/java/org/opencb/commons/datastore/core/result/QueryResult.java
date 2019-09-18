@@ -11,8 +11,8 @@ public class QueryResult<T> extends AbstractResult {
     public QueryResult() {
     }
 
-    public QueryResult(int dbTime, List<String> warning, long numResults, long numTotalResults, List<T> results) {
-        super(dbTime, warning);
+    public QueryResult(int dbTime, List<String> warnings, long numResults, long numTotalResults, List<T> results) {
+        super(dbTime, warnings);
         this.numResults = numResults;
         this.numTotalResults = numTotalResults;
         this.results = results;
@@ -25,7 +25,7 @@ public class QueryResult<T> extends AbstractResult {
         sb.append(", numTotalResults=").append(numTotalResults);
         sb.append(", results=").append(results);
         sb.append(", dbTime=").append(dbTime);
-        sb.append(", warning=").append(warning);
+        sb.append(", warnings=").append(warnings);
         sb.append('}');
         return sb.toString();
     }

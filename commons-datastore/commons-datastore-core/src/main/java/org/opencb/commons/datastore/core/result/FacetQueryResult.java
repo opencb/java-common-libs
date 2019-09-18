@@ -36,8 +36,8 @@ public class FacetQueryResult extends AbstractResult {
         this(id, dbTime, numTotalResults, Collections.singletonList(warningMsg), new Error(-1, "", errorMsg), results, query);
     }
 
-    public FacetQueryResult(String id, int dbTime, long numMatches, List<String> warning, Error error, List<Field> results, String query) {
-        super(id, dbTime, numMatches, warning, error);
+    public FacetQueryResult(String id, int dbTime, long numMatches, List<String> warnings, Error error, List<Field> results, String query) {
+        super(id, dbTime, numMatches, warnings, error);
         this.results = results;
         this.query = query;
     }
@@ -48,7 +48,7 @@ public class FacetQueryResult extends AbstractResult {
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
         sb.append(", numMatches=").append(numMatches);
-        sb.append(", warning='").append(warning).append('\'');
+        sb.append(", warnings='").append(warnings).append('\'');
         sb.append(", error='").append(error).append('\'');
         sb.append(", query=").append(query);
         sb.append(", results=").append(results);
