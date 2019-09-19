@@ -25,6 +25,7 @@ import java.util.List;
 public class FacetQueryResult extends AbstractResult {
 
     private String query;
+    private long numMatched;
     private List<Field> results;
 
     public FacetQueryResult() {
@@ -36,8 +37,9 @@ public class FacetQueryResult extends AbstractResult {
         this(id, dbTime, numTotalResults, Collections.singletonList(warningMsg), new Error(-1, "", errorMsg), results, query);
     }
 
-    public FacetQueryResult(String id, int dbTime, long numMatches, List<String> warnings, Error error, List<Field> results, String query) {
-        super(id, dbTime, numMatches, warnings, error);
+    public FacetQueryResult(String id, int dbTime, long numMatched, List<String> warnings, Error error, List<Field> results, String query) {
+        super(id, dbTime, numMatched, warnings, error);
+        this.numMatched = numMatched;
         this.results = results;
         this.query = query;
     }
@@ -47,7 +49,7 @@ public class FacetQueryResult extends AbstractResult {
         final StringBuilder sb = new StringBuilder("FacetQueryResult{");
         sb.append("id='").append(id).append('\'');
         sb.append(", dbTime=").append(dbTime);
-        sb.append(", numMatches=").append(numMatches);
+        sb.append(", numMatched=").append(numMatched);
         sb.append(", warnings='").append(warnings).append('\'');
         sb.append(", error='").append(error).append('\'');
         sb.append(", query=").append(query);
@@ -62,6 +64,15 @@ public class FacetQueryResult extends AbstractResult {
 
     public FacetQueryResult setQuery(String query) {
         this.query = query;
+        return this;
+    }
+
+    public long getNumMatched() {
+        return numMatched;
+    }
+
+    public FacetQueryResult setNumMatched(long numMatched) {
+        this.numMatched = numMatched;
         return this;
     }
 

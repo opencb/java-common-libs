@@ -513,7 +513,7 @@ public class MongoDBCollectionTest {
                 new Document("$set", new Document("modifiedAgain", true)),
                 new QueryOptions("upsert", true)
         );
-        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getNumMatches());
+        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getNumMatched());
         assertEquals("Any objects have the surname \"Johnson\", so one object should be inserted", 1, writeResult.getNumInserted());
     }
 
