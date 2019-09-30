@@ -30,22 +30,22 @@ public class QueryResponse<T> {
     private String error;
 
     private QueryOptions queryOptions;
-    private List<QueryResult<T>> response;
+    private List<DataResult<T>> response;
 
     public QueryResponse() {
         this("", -1, "", "", null, null);
     }
 
-    public QueryResponse(String apiVersion, int time, QueryOptions queryOptions, List<QueryResult<T>> response) {
+    public QueryResponse(String apiVersion, int time, QueryOptions queryOptions, List<DataResult<T>> response) {
         this(apiVersion, time, "", "", queryOptions, response);
     }
 
-    public QueryResponse(QueryOptions queryOptions, List<QueryResult<T>> response) {
+    public QueryResponse(QueryOptions queryOptions, List<DataResult<T>> response) {
         this("", -1, "", "", queryOptions, response);
     }
 
     @Deprecated
-    public QueryResponse(QueryOptions queryOptions, List<QueryResult<T>> response, String version, String species, int time) {
+    public QueryResponse(QueryOptions queryOptions, List<DataResult<T>> response, String version, String species, int time) {
         this.apiVersion = "";
         this.warning = "";
         this.error = "";
@@ -55,7 +55,7 @@ public class QueryResponse<T> {
     }
 
     public QueryResponse(String apiVersion, int time, String warning, String error, QueryOptions queryOptions,
-                         List<QueryResult<T>> response) {
+                         List<DataResult<T>> response) {
         this.apiVersion = apiVersion;
         this.time = time;
         this.warning = warning;
@@ -66,10 +66,10 @@ public class QueryResponse<T> {
 
 
     /**
-     * This method just returns the first QueryResult of response, or null if response is null or empty.
-     * @return the first QueryResult in the response
+     * This method just returns the first DataResult of response, or null if response is null or empty.
+     * @return the first DataResult in the response
      */
-    public QueryResult<T> first() {
+    public DataResult<T> first() {
         if (response != null && response.size() > 0) {
             return response.get(0);
         }
@@ -77,7 +77,7 @@ public class QueryResponse<T> {
     }
 
     /**
-     * This method returns the first result from the first QueryResult of response, this is equivalent to response.get(0).getResult.get(0).
+     * This method returns the first result from the first DataResult of response, this is equivalent to response.get(0).getResult.get(0).
      * @return T value if exists, null otherwise
      */
     public T firstResult() {
@@ -90,15 +90,15 @@ public class QueryResponse<T> {
     public int allResultsSize() {
         int totalSize = 0;
         if (response != null && response.size() > 0) {
-            for (QueryResult<T> queryResult : response) {
-                totalSize += queryResult.getResult().size();
+            for (DataResult<T> queryResult : response) {
+                totalSize += queryResult.getResults().size();
             }
         }
         return totalSize;
     }
 
     /**
-     * This method flats the two levels (QueryResponse and QueryResult) into a single list of T.
+     * This method flats the two levels (QueryResponse and DataResult) into a single list of T.
      * @return a single list with all the results, or null if no response exists
      */
     public List<T> allResults() {
@@ -109,8 +109,8 @@ public class QueryResponse<T> {
 
             // We init the list and copy data
             results = new ArrayList<>(totalSize);
-            for (QueryResult<T> queryResult : response) {
-                results.addAll(queryResult.getResult());
+            for (DataResult<T> queryResult : response) {
+                results.addAll(queryResult.getResults());
             }
         }
         return results;
@@ -174,11 +174,11 @@ public class QueryResponse<T> {
         return this;
     }
 
-    public List<QueryResult<T>> getResponse() {
+    public List<DataResult<T>> getResponse() {
         return response;
     }
 
-    public QueryResponse setResponse(List<QueryResult<T>> response) {
+    public QueryResponse setResponse(List<DataResult<T>> response) {
         this.response = response;
         return this;
     }
