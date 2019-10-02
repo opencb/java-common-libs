@@ -182,6 +182,30 @@ public class ParallelTaskRunner<I, O> {
         private final boolean abortOnFail;
         private final boolean sorted;
         private final int readQueuePutTimeout;
+
+        public int getNumTasks() {
+            return numTasks;
+        }
+
+        public int getBatchSize() {
+            return batchSize;
+        }
+
+        public int getCapacity() {
+            return capacity;
+        }
+
+        public boolean isAbortOnFail() {
+            return abortOnFail;
+        }
+
+        public boolean isSorted() {
+            return sorted;
+        }
+
+        public int getReadQueuePutTimeout() {
+            return readQueuePutTimeout;
+        }
     }
 
     private static final class Batch<T> implements Comparable<Batch<T>> {
