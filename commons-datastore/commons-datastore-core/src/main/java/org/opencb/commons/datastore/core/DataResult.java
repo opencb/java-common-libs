@@ -8,7 +8,7 @@ public class DataResult<T> {
 
     private int time;
 
-    private List<String> warnings;
+    private List<Event> events;
 
     private int numResults;
     private List<T> results;
@@ -26,27 +26,27 @@ public class DataResult<T> {
     public DataResult() {
     }
 
-    public DataResult(int time, List<String> warnings, int numResults, List<T> results, long numMatches) {
-        this(time, warnings, numResults, results, numMatches, 0, 0, 0, new ObjectMap());
+    public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches) {
+        this(time, events, numResults, results, numMatches, 0, 0, 0, new ObjectMap());
     }
 
-    public DataResult(int time, List<String> warnings, int numResults, List<T> results, long numMatches, ObjectMap attributes) {
-        this(time, warnings, numResults, results, numMatches, 0, 0, 0, attributes);
+    public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches, ObjectMap attributes) {
+        this(time, events, numResults, results, numMatches, 0, 0, 0, attributes);
     }
 
-    public DataResult(int time, List<String> warnings, long numMatches, long numInserted, long numUpdated, long numDeleted) {
-        this(time, warnings, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, new ObjectMap());
+    public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted) {
+        this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, new ObjectMap());
     }
 
-    public DataResult(int time, List<String> warnings, long numMatches, long numInserted, long numUpdated, long numDeleted,
+    public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted,
                       ObjectMap attributes) {
-        this(time, warnings, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, attributes);
+        this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, attributes);
     }
 
-    public DataResult(int time, List<String> warnings, int numResults, List<T> results, long numMatches, long numInserted, long numUpdated,
+    public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches, long numInserted, long numUpdated,
                       long numDeleted, ObjectMap attributes) {
         this.time = time;
-        this.warnings = warnings;
+        this.events = events;
         this.numResults = numResults;
         this.results = results;
         this.numMatches = numMatches;
@@ -77,8 +77,8 @@ public class DataResult<T> {
         this.numDeleted += dataResult.numDeleted;
         this.time += dataResult.time;
 
-        if (this.warnings != null && dataResult.getWarnings() != null) {
-            this.warnings.addAll(dataResult.getWarnings());
+        if (this.events != null && dataResult.getEvents() != null) {
+            this.events.addAll(dataResult.getEvents());
         }
         if (this.results != null && dataResult.getResults() != null) {
             this.results.addAll(dataResult.getResults());
@@ -89,7 +89,7 @@ public class DataResult<T> {
     public String toString() {
         final StringBuilder sb = new StringBuilder("DataResult{");
         sb.append("time=").append(time);
-        sb.append(", warnings=").append(warnings);
+        sb.append(", events=").append(events);
         sb.append(", numResults=").append(numResults);
         sb.append(", results=").append(results);
         sb.append(", numMatches=").append(numMatches);
@@ -110,12 +110,12 @@ public class DataResult<T> {
         return this;
     }
 
-    public List<String> getWarnings() {
-        return warnings;
+    public List<Event> getEvents() {
+        return events;
     }
 
-    public DataResult<T> setWarnings(List<String> warnings) {
-        this.warnings = warnings;
+    public DataResult<T> setEvents(List<Event> events) {
+        this.events = events;
         return this;
     }
 
