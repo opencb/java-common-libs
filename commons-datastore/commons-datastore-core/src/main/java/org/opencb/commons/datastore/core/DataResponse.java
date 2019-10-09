@@ -34,6 +34,51 @@ public class DataResponse<T> {
     }
 
     /**
+     * Fetch the m-result of the first response.
+     * @param m Position of the result from the array of results.
+     * @return the m-result of the first response.
+     */
+    public T result(int m) {
+        return result(m, 0);
+    }
+
+    /**
+     * Fetch the m-result of the n-response.
+     * @param m Position of the result from the array of results.
+     * @param n Position of the response from the array of responses.
+     * @return the m-result of the n-response.
+     */
+    public T result(int m, int n) {
+        return this.responses.get(n).getResults().get(m);
+    }
+
+    /**
+     * Fetch the list of results of the m-response.
+     * @param m Position of the response from the array of responses.
+     * @return the list of results of the m-response.
+     */
+    public List<T> results(int m) {
+        return this.responses.get(m).getResults();
+    }
+
+    /**
+     * Fetch the list of responses.
+     * @return the list of responses.
+     */
+    public List<DataResult<T>> responses() {
+        return this.responses;
+    }
+
+    /**
+     * Fetch the DataResult of the m-response.
+     * @param m Position of the response from the array of responses.
+     * @return the DataResult of the m-response.
+     */
+    public DataResult<T> response(int m) {
+        return this.responses.get(m);
+    }
+
+    /**
      * This method just returns the first DataResult of response, or null if response is null or empty.
      * @return the first DataResult in the response
      */
