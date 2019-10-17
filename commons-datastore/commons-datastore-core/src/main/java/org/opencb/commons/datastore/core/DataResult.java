@@ -6,22 +6,22 @@ import java.util.List;
 
 public class DataResult<T> {
 
-    private int time;
+    protected int time;
 
-    private List<Event> events;
+    protected List<Event> events;
 
-    private int numResults;
-    private List<T> results;
-    private String resultType;
+    protected int numResults;
+    protected List<T> results;
+    protected String resultType;
 
     @Deprecated
     private long numTotalResults;
-    private long numMatches;
-    private long numInserted;
-    private long numUpdated;
-    private long numDeleted;
+    protected long numMatches;
+    protected long numInserted;
+    protected long numUpdated;
+    protected long numDeleted;
 
-    private ObjectMap attributes;
+    protected ObjectMap attributes;
 
     public DataResult() {
     }
