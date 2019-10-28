@@ -3,9 +3,7 @@ package org.opencb.commons.datastore.mongodb;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
@@ -16,10 +14,7 @@ import java.util.stream.Collectors;
 
 public class MongoDBIndexUtils {
 
-    public void createIndexes(MongoClient mongoClient, MongoDatabase db, MongoDBConfiguration mongoDBConfiguration,
-                              InputStream resourceAsStream) {
-
-        MongoDataStore mongoDataStore = new MongoDataStore(mongoClient, db, mongoDBConfiguration);
+    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream) {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
@@ -55,7 +50,7 @@ public class MongoDBIndexUtils {
         }
     }
 
-    private void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes) {
+    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes) {
         DataResult<Document> index = mongoCollection.getIndex();
         // We store the existing indexes
         Set<String> existingIndexes = index.getResults()
