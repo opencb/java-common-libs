@@ -99,7 +99,8 @@ public class ParallelTaskRunner<I, O> {
     private long timeWriting;
 
     private List<Future> futureTasks;
-    private List<Exception> exceptions;
+    private List<Throwable> exceptions;
+    private List<Error> errors;
     // Main thread interruptions
     private List<InterruptedException> interruptions;
 
@@ -470,8 +471,12 @@ public class ParallelTaskRunner<I, O> {
         return DECIMAL_FORMAT.format(TimeUnit.NANOSECONDS.toMillis(time) / 1000.0);
     }
 
-    public List<Exception> getExceptions() {
+    public List<Throwable> getExceptions() {
         return exceptions;
+    }
+
+    public List<Error> getErrors() {
+        return errors;
     }
 
     public long getTimeBlockedAtPutRead(TimeUnit unit) {
@@ -720,6 +725,9 @@ public class ParallelTaskRunner<I, O> {
                         }
                     }
                 }
+            } catch (Error e) {
+                exceptions.add(e);
+                errors.add(e);
             } catch (RuntimeException e) {
                 exceptions.add(e);
             } catch (InterruptedException e) {
@@ -799,6 +807,10 @@ public class ParallelTaskRunner<I, O> {
                     } catch (Exception e) {
                         logger.error("Error writing batch " + batch.position, e);
                         exceptions.add(e);
+                    } catch (Error e) {
+                        errors.add(e);
+                        exceptions.add(e);
+                        throw e;
                     }
 
                     if (isAbortPending()) {
