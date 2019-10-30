@@ -73,6 +73,38 @@ public class FacetQueryParser {
         return parseJson(new ObjectMapper().writeValueAsString(jsonFacetMap));
     }
 
+    public Map<String, Set<String>> getIncludingValuesMap(String facet) throws Exception {
+        Map<String, Set<String>> includeMap = new HashMap<>();
+        String[] subfacets = facet.split(FACET_SEPARATOR);
+        for (String subfacet : subfacets) {
+            if (subfacet.contains(NESTED_FACET_SEPARATOR)) {
+                String[] nestedFacets = subfacet.split(NESTED_FACET_SEPARATOR);
+                for (String nestedFacet : nestedFacets) {
+                    updateIncludeMap(nestedFacet, includeMap);
+                }
+            } else {
+                updateIncludeMap(subfacet, includeMap);
+            }
+        }
+        return includeMap;
+    }
+
+    private void updateIncludeMap(String facet, Map<String, Set<String>> includeMap) throws Exception {
+        // Only for categorical field names
+        if (!facet.contains(RANGE_IDENTIFIER) && !facet.contains(AGGREGATION_IDENTIFIER)) {
+            Matcher matcher = FacetQueryParser.CATEGORICAL_PATTERN.matcher(facet);
+            if (matcher.find()) {
+                if (matcher.group(1) != null && matcher.group(2) != null) {
+                    if (includeMap.containsKey(matcher.group(1))) {
+                        throw new Exception("Duplicated categorical field name: '" + matcher.group(1) + "'");
+                    }
+                    String include = matcher.group(2).replace("[", "").replace("]", "");
+                    includeMap.put(matcher.group(1), new HashSet<>(Arrays.asList(include.split(FacetQueryParser.INCLUDE_SEPARATOR))));
+                }
+            }
+        }
+    }
+
     private void parseSimpleFacet(String facet, Map<String, Object> jsonFacetMap) throws Exception {
         Map<String, Object> facetMap = parseFacet(facet);
         String label;
