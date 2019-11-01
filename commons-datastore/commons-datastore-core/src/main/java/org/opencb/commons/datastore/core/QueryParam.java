@@ -35,7 +35,9 @@ public interface QueryParam {
         BOOLEAN,
         BOOLEAN_ARRAY,
         DATE,
-        TIMESTAMP
+        TIMESTAMP,
+        MAP,
+        OBJECT
     }
 
     String key();
