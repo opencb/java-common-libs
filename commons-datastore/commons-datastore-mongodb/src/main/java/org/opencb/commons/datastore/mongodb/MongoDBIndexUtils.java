@@ -4,49 +4,68 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoException;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class MongoDBIndexUtils {
 
-    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream) {
+    /**
+     * Create indexes in a given database.
+     * @param mongoDataStore Database name
+     * @param indexFile Input stream with the index information
+     */
+    public static void createIndexes(MongoDataStore mongoDataStore, Path indexFile) throws IOException {
+        createIndexes(mongoDataStore, Files.newInputStream(indexFile));
+    }
+
+    /**
+     * Create indexes in a given database.
+     * @param mongoDataStore Database name
+     * @param resourceAsStream Input stream with the index information
+     */
+    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream) throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
         ObjectMapper objectMapper = generateDefaultObjectMapper();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream));
+
         // We store all the indexes that are in the file in the indexes object
-        Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
-        bufferedReader.lines().filter(s -> !s.trim().isEmpty()).forEach(s -> {
-            try {
-                HashMap hashMap = objectMapper.readValue(s, HashMap.class);
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+            Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
+            bufferedReader.lines()
+                    .filter(line -> !line.trim().isEmpty())
+                    .forEach(line -> {
+                        try {
+                            HashMap hashMap = objectMapper.readValue(line, HashMap.class);
+                            String collection = (String) hashMap.get("collection");
+                            if (!indexes.containsKey(collection)) {
+                                indexes.put(collection, new ArrayList<>());
+                            }
+                            Map<String, ObjectMap> myIndexes = new HashMap<>();
+                            myIndexes.put("fields", new ObjectMap((Map) hashMap.get("fields")));
+                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options", Collections.emptyMap())));
+                            indexes.get(collection).add(myIndexes);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
 
-                String collection = (String) hashMap.get("collection");
-                if (!indexes.containsKey(collection)) {
-                    indexes.put(collection, new ArrayList<>());
-                }
-                Map<String, ObjectMap> myIndexes = new HashMap<>();
-                myIndexes.put("fields", new ObjectMap((Map) hashMap.get("fields")));
-                myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options", Collections.emptyMap())));
-                indexes.get(collection).add(myIndexes);
-            } catch (IOException e) {
-                e.printStackTrace();
+            // We can create now the indexes
+            for (String collectionName : indexes.keySet()) {
+                MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+                createIndexes(mongoDBCollection, indexes.get(collectionName));
             }
-        });
-        try {
-            bufferedReader.close();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        for (String collectionName : indexes.keySet()) {
-            MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
-            createIndexes(mongoDBCollection, indexes.get(collectionName));
         }
     }
 
@@ -60,20 +79,20 @@ public class MongoDBIndexUtils {
 
         if (index.getNumResults() != indexes.size() + 1) { // It is + 1 because mongo always create the _id index by default
             for (Map<String, ObjectMap> userIndex : indexes) {
-                String indexName = "";
+                StringBuilder indexName = new StringBuilder();
                 Document keys = new Document();
                 Iterator fieldsIterator = userIndex.get("fields").entrySet().iterator();
                 while (fieldsIterator.hasNext()) {
                     Map.Entry pair = (Map.Entry) fieldsIterator.next();
                     keys.append((String) pair.getKey(), pair.getValue());
 
-                    if (!indexName.isEmpty()) {
-                        indexName += "_";
+                    if (indexName.length() > 0) {
+                        indexName.append("_");
                     }
-                    indexName += pair.getKey() + "_" + pair.getValue();
+                    indexName.append(pair.getKey()).append("_").append(pair.getValue());
                 }
 
-                if (!existingIndexes.contains(indexName)) {
+                if (!existingIndexes.contains(indexName.toString())) {
                     mongoCollection.createIndex(keys, new ObjectMap(userIndex.get("options")));
                 }
             }
