@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoException;
-import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
@@ -24,6 +23,7 @@ public class MongoDBIndexUtils {
      * Create indexes in a given database.
      * @param mongoDataStore Database name
      * @param indexFile Input stream with the index information
+     * @throws IOException if index file can't be read
      */
     public static void createIndexes(MongoDataStore mongoDataStore, Path indexFile) throws IOException {
         createIndexes(mongoDataStore, Files.newInputStream(indexFile));
@@ -33,6 +33,7 @@ public class MongoDBIndexUtils {
      * Create indexes in a given database.
      * @param mongoDataStore Database name
      * @param resourceAsStream Input stream with the index information
+     * @throws IOException if index file can't be read
      */
     public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream) throws IOException {
         if (mongoDataStore == null) {
