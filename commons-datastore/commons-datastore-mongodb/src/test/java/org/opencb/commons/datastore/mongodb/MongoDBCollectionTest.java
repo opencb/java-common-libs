@@ -170,6 +170,28 @@ public class MongoDBCollectionTest {
     }
 
     @Test
+    public void testMultipleSortOrder() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 500)
+                .append(QueryOptions.SORT, Arrays.asList("age:ASC", "number:DESC"))
+                .append(QueryOptions.ORDER, "asc");
+        int age = 0;
+        long number = Long.MAX_VALUE;
+        List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
+        for (Document document : result) {
+            if (age < document.getInteger("age")) {
+                number = Long.MAX_VALUE;
+            }
+
+            assertTrue(age <= document.getInteger("age"));
+            assertTrue(number >= document.getLong("number"));
+
+            age = document.getInteger("age");
+            number = document.getLong("number");
+        }
+    }
+
+    @Test
     public void testCount() throws Exception {
         DataResult<Long> queryResult = mongoDBCollection.count();
         assertEquals("The number of documents must be equals", new Long(N), queryResult.getResults().get(0));

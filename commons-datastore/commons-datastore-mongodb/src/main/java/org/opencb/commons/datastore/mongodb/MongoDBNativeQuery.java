@@ -27,6 +27,7 @@ import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.QueryOptions;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -136,6 +137,28 @@ public class MongoDBNativeQuery {
                 } else {
                     findIterable.sort(Sorts.descending(((String) sortObject)));
                 }
+            } else if (sortObject instanceof Collection) {
+                List<String> fieldList = options.getAsStringList(QueryOptions.SORT);
+                List<Bson> sortedList = new ArrayList<>(fieldList.size());
+                for (String field : fieldList) {
+                    String[] fieldArray = field.split(":");
+                    String order = null;
+                    String sortField = null;
+                    if (fieldArray.length == 2) {
+                        sortField = fieldArray[0];
+                        order = fieldArray[1];
+                    } else if (fieldArray.length == 1) {
+                        sortField = field;
+                        order = options.getString(QueryOptions.ORDER, "DESC");
+                    }
+                    if (QueryOptions.ASCENDING.equalsIgnoreCase(order) || "ASC".equalsIgnoreCase(order) || "1".equals(order)) {
+                        sortedList.add(Sorts.ascending(sortField));
+                    } else {
+                        sortedList.add(Sorts.descending(sortField));
+                    }
+                }
+
+                findIterable.sort(Sorts.orderBy(sortedList));
             }
         }
 
