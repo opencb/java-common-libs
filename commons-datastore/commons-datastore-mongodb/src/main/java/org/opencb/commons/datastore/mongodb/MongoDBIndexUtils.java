@@ -23,27 +23,60 @@ public class MongoDBIndexUtils {
      * Create indexes in a given database.
      * @param mongoDataStore Database name
      * @param indexFile Input stream with the index information
+     * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
+     *                         will not be recreated if they already exist
      * @throws IOException if index file can't be read
      */
-    public static void createIndexes(MongoDataStore mongoDataStore, Path indexFile) throws IOException {
-        createIndexes(mongoDataStore, Files.newInputStream(indexFile));
+    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst)
+            throws IOException {
+        if (mongoDataStore == null) {
+            throw new MongoException("Unable to connect to MongoDB");
+        }
+        createAllIndexes(mongoDataStore, Files.newInputStream(indexFile), dropIndexesFirst);
     }
 
     /**
      * Create indexes in a given database.
      * @param mongoDataStore Database name
      * @param resourceAsStream Input stream with the index information
+     * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
+     *                         will not be recreated if they already exist
      * @throws IOException if index file can't be read
      */
-    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream) throws IOException {
+    public static void createAllIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, boolean dropIndexesFirst)
+            throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
-        ObjectMapper objectMapper = generateDefaultObjectMapper();
+        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexes(resourceAsStream);
+        for (String collectionName : indexes.keySet()) {
+            MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+            createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
+        }
+    }
 
-        // We store all the indexes that are in the file in the indexes object
+    /**
+     * Create indexes for a specific collection in a given database.
+     * @param mongoDataStore Database name
+     * @param resourceAsStream Input stream with the index information
+     * @param collectionName Name of collection to index
+     * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
+     *                         will not be recreated if they already exist
+     * @throws IOException if index file can't be read
+     */
+    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, String collectionName,
+                                     boolean dropIndexesFirst)
+            throws IOException {
+        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexes(resourceAsStream);
+        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+        createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
+    }
+
+    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream)
+            throws IOException {
+        ObjectMapper objectMapper = generateDefaultObjectMapper();
+        Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
-            Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
             bufferedReader.lines()
                     .filter(line -> !line.trim().isEmpty())
                     .forEach(line -> {
@@ -55,47 +88,51 @@ public class MongoDBIndexUtils {
                             }
                             Map<String, ObjectMap> myIndexes = new HashMap<>();
                             myIndexes.put("fields", new ObjectMap((Map) hashMap.get("fields")));
-                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options", Collections.emptyMap())));
+                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options",
+                                    Collections.emptyMap())));
                             indexes.get(collection).add(myIndexes);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
-
-            // We can create now the indexes
-            for (String collectionName : indexes.keySet()) {
-                MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
-                createIndexes(mongoDBCollection, indexes.get(collectionName));
-            }
         }
+        return indexes;
     }
 
-    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes) {
-        DataResult<Document> index = mongoCollection.getIndex();
-        // We store the existing indexes
-        Set<String> existingIndexes = index.getResults()
-                .stream()
-                .map(document -> (String) document.get("name"))
-                .collect(Collectors.toSet());
+    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes,
+                                      boolean dropIndexesFirst) {
 
-        if (index.getNumResults() != indexes.size() + 1) { // It is + 1 because mongo always create the _id index by default
-            for (Map<String, ObjectMap> userIndex : indexes) {
-                StringBuilder indexName = new StringBuilder();
-                Document keys = new Document();
-                Iterator fieldsIterator = userIndex.get("fields").entrySet().iterator();
-                while (fieldsIterator.hasNext()) {
-                    Map.Entry pair = (Map.Entry) fieldsIterator.next();
-                    keys.append((String) pair.getKey(), pair.getValue());
+        Set<String> existingIndexes = null;
+        if (!dropIndexesFirst) {
+            DataResult<Document> index = mongoCollection.getIndex();
+            existingIndexes = index.getResults()
+                    .stream()
+                    .map(document -> (String) document.get("name"))
+                    .collect(Collectors.toSet());
 
-                    if (indexName.length() > 0) {
-                        indexName.append("_");
-                    }
-                    indexName.append(pair.getKey()).append("_").append(pair.getValue());
+            // It is + 1 because mongo always create the _id index by default
+            if (index.getNumResults() == indexes.size() + 1) {
+                // we already have the indexes we need, nothing to do here.
+                return;
+            }
+        }
+
+        for (Map<String, ObjectMap> userIndex : indexes) {
+            StringBuilder indexName = new StringBuilder();
+            Document keys = new Document();
+            Iterator fieldsIterator = userIndex.get("fields").entrySet().iterator();
+            while (fieldsIterator.hasNext()) {
+                Map.Entry pair = (Map.Entry) fieldsIterator.next();
+                keys.append((String) pair.getKey(), pair.getValue());
+
+                if (indexName.length() > 0) {
+                    indexName.append("_");
                 }
+                indexName.append(pair.getKey()).append("_").append(pair.getValue());
+            }
 
-                if (!existingIndexes.contains(indexName.toString())) {
-                    mongoCollection.createIndex(keys, new ObjectMap(userIndex.get("options")));
-                }
+            if (dropIndexesFirst || !existingIndexes.contains(indexName.toString())) {
+                mongoCollection.createIndex(keys, new ObjectMap(userIndex.get("options")));
             }
         }
     }
