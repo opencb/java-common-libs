@@ -27,12 +27,13 @@ public class MongoDBIndexUtils {
      *                         will not be recreated if they already exist
      * @throws IOException if index file can't be read
      */
-    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst)
-            throws IOException {
+    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst) throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
-        createAllIndexes(mongoDataStore, Files.newInputStream(indexFile), dropIndexesFirst);
+        InputStream inputStream = Files.newInputStream(indexFile);
+        createAllIndexes(mongoDataStore, inputStream, dropIndexesFirst);
+        inputStream.close();
     }
 
     /**
@@ -65,8 +66,7 @@ public class MongoDBIndexUtils {
      * @throws IOException if index file can't be read
      */
     public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, String collectionName,
-                                     boolean dropIndexesFirst)
-            throws IOException {
+                                     boolean dropIndexesFirst) throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
@@ -91,8 +91,7 @@ public class MongoDBIndexUtils {
                             }
                             Map<String, ObjectMap> myIndexes = new HashMap<>();
                             myIndexes.put("fields", new ObjectMap((Map) hashMap.get("fields")));
-                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options",
-                                    Collections.emptyMap())));
+                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options", Collections.emptyMap())));
                             indexes.get(collection).add(myIndexes);
                         } catch (IOException e) {
                             e.printStackTrace();
