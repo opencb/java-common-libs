@@ -67,6 +67,9 @@ public class MongoDBIndexUtils {
     public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, String collectionName,
                                      boolean dropIndexesFirst)
             throws IOException {
+        if (mongoDataStore == null) {
+            throw new MongoException("Unable to connect to MongoDB");
+        }
         Map<String, List<Map<String, ObjectMap>>> indexes = getIndexes(resourceAsStream);
         MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
         createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
@@ -120,10 +123,10 @@ public class MongoDBIndexUtils {
         for (Map<String, ObjectMap> userIndex : indexes) {
             StringBuilder indexName = new StringBuilder();
             Document keys = new Document();
-            Iterator fieldsIterator = userIndex.get("fields").entrySet().iterator();
+            Iterator<Map.Entry<String, Object>> fieldsIterator = userIndex.get("fields").entrySet().iterator();
             while (fieldsIterator.hasNext()) {
-                Map.Entry pair = (Map.Entry) fieldsIterator.next();
-                keys.append((String) pair.getKey(), pair.getValue());
+                Map.Entry<String, Object> pair = fieldsIterator.next();
+                keys.append(pair.getKey(), pair.getValue());
 
                 if (indexName.length() > 0) {
                     indexName.append("_");
