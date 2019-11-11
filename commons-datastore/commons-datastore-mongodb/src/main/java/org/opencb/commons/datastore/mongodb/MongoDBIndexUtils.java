@@ -75,8 +75,7 @@ public class MongoDBIndexUtils {
         createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
     }
 
-    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream)
-            throws IOException {
+    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream) throws IOException {
         ObjectMapper objectMapper = generateDefaultObjectMapper();
         Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
@@ -101,9 +100,7 @@ public class MongoDBIndexUtils {
         return indexes;
     }
 
-    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes,
-                                      boolean dropIndexesFirst) {
-
+    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes, boolean dropIndexesFirst) {
         Set<String> existingIndexes = null;
         if (!dropIndexesFirst) {
             DataResult<Document> index = mongoCollection.getIndex();
@@ -114,7 +111,7 @@ public class MongoDBIndexUtils {
 
             // It is + 1 because mongo always create the _id index by default
             if (index.getNumResults() == indexes.size() + 1) {
-                // we already have the indexes we need, nothing to do here.
+                // We already have the indexes we need, nothing to do here.
                 return;
             }
         }
@@ -122,9 +119,7 @@ public class MongoDBIndexUtils {
         for (Map<String, ObjectMap> userIndex : indexes) {
             StringBuilder indexName = new StringBuilder();
             Document keys = new Document();
-            Iterator<Map.Entry<String, Object>> fieldsIterator = userIndex.get("fields").entrySet().iterator();
-            while (fieldsIterator.hasNext()) {
-                Map.Entry<String, Object> pair = fieldsIterator.next();
+            for (Map.Entry<String, Object> pair : userIndex.get("fields").entrySet()) {
                 keys.append(pair.getKey(), pair.getValue());
 
                 if (indexName.length() > 0) {
