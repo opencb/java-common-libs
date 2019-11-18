@@ -194,13 +194,13 @@ public class MongoDBCollectionTest {
     @Test
     public void testCount() throws Exception {
         DataResult<Long> queryResult = mongoDBCollection.count();
-        assertEquals("The number of documents must be equals", new Long(N), queryResult.getResults().get(0));
+        assertEquals("The number of documents must be equals", N, queryResult.getNumMatches());
     }
 
     @Test
     public void testCount1() throws Exception {
         DataResult<Long> queryResult = mongoDBCollection.count();
-        assertEquals("The number must be equals", new Long(N), queryResult.first());
+        assertEquals("The number must be equals", N, queryResult.getNumMatches());
     }
 
     @Test
@@ -451,10 +451,10 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testInsert() throws Exception {
-        Long countBefore = mongoDBCollectionInsertTest.count().first();
+        Long countBefore = mongoDBCollectionInsertTest.count().getNumMatches();
         for (int i = 1; i < 50; i++) {
             mongoDBCollectionInsertTest.insert(new Document("insertedObject", i), null);
-            assertEquals("Insert operation must insert 1 element each time.", countBefore + i, mongoDBCollectionInsertTest.count().first().longValue());
+            assertEquals("Insert operation must insert 1 element each time.", countBefore + i, mongoDBCollectionInsertTest.count().getNumMatches());
         }
     }
 
@@ -469,7 +469,7 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testInsert2() throws Exception {
-        Long countBefore = mongoDBCollectionInsertTest.count().first();
+        Long countBefore = mongoDBCollectionInsertTest.count().getNumMatches();
         int numBulkInsertions = 50;
         int bulkInsertSize = 100;
 
@@ -479,7 +479,7 @@ public class MongoDBCollectionTest {
                 list.add(new Document("bulkInsertedObject", i));
             }
             mongoDBCollectionInsertTest.insert(list, null);
-            assertEquals("Bulk insert operation must insert " + bulkInsertSize + " elements each time.", countBefore + bulkInsertSize * b, mongoDBCollectionInsertTest.count().first().longValue());
+            assertEquals("Bulk insert operation must insert " + bulkInsertSize + " elements each time.", countBefore + bulkInsertSize * b, mongoDBCollectionInsertTest.count().getNumMatches());
         }
     }
 
@@ -511,7 +511,7 @@ public class MongoDBCollectionTest {
     @Test
     public void testUpdate() throws Exception {
         Document query = new Document("name", "John");
-        long count = mongoDBCollectionUpdateTest.count(query).first();
+        long count = mongoDBCollectionUpdateTest.count(query).getNumMatches();
         DataResult writeResult = mongoDBCollectionUpdateTest.update(query,
                 new Document("$set", new Document("modified", true)),
                 new QueryOptions("multi", true)
@@ -540,8 +540,8 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testUpdate3() throws Exception {
-        int count = mongoDBCollectionUpdateTest.count().first().intValue();
-        int modifiedDocuments = count / 2;
+        long count = mongoDBCollectionUpdateTest.count().getNumMatches();
+        int modifiedDocuments = (int) count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
         ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
 
@@ -555,7 +555,7 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testUpdate4_error() throws Exception {
-        int count = mongoDBCollectionUpdateTest.count().first().intValue();
+        int count = (int) mongoDBCollectionUpdateTest.count().getNumMatches();
         int modifiedDocuments = count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
         ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
@@ -572,8 +572,8 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testUpdate5_upsert() throws Exception {
-        int count = mongoDBCollectionUpdateTest.count().first().intValue();
-        int modifiedDocuments = count / 2;
+        long count = mongoDBCollectionUpdateTest.count().getNumMatches();
+        int modifiedDocuments = (int) count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
         ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
 
@@ -596,17 +596,17 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testRemove() throws Exception {
-        int count = mongoDBCollectionRemoveTest.count().first().intValue();
+        int count = (int) mongoDBCollectionRemoveTest.count().getNumMatches();
         Document query = new Document("age", 1);
-        int matchingDocuments = mongoDBCollectionRemoveTest.count(query).first().intValue();
+        int matchingDocuments = (int) mongoDBCollectionRemoveTest.count(query).getNumMatches();
         DataResult writeResult = mongoDBCollectionRemoveTest.remove(query, null);
         assertEquals(matchingDocuments, writeResult.getNumDeleted());
-        assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - matchingDocuments);
+        assertEquals(mongoDBCollectionRemoveTest.count().getNumMatches(), count - matchingDocuments);
     }
 
     @Test
     public void testRemove1() throws Exception {
-        int count = mongoDBCollectionRemoveTest.count().first().intValue();
+        int count = (int) mongoDBCollectionRemoveTest.count().getNumMatches();
 
         int numDeletions = 10;
         List<Bson> remove = new ArrayList<>(numDeletions);
@@ -616,7 +616,7 @@ public class MongoDBCollectionTest {
 
         DataResult bulkDataResult = mongoDBCollectionRemoveTest.remove(remove, null);
         assertEquals(numDeletions, bulkDataResult.getNumDeleted());
-        assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - numDeletions);
+        assertEquals(mongoDBCollectionRemoveTest.count().getNumMatches(), count - numDeletions);
     }
 
     @Test
