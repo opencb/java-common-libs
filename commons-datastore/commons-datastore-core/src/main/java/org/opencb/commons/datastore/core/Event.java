@@ -6,35 +6,35 @@ public class Event {
     private int code;
     private String id;
     private String name;
-    private String description;
+    private String message;
 
     public Event() {
     }
 
-    public Event(Type type, String description) {
+    public Event(Type type, String message) {
         this.type = type;
-        this.description = description;
+        this.message = message;
     }
 
-    public Event(Type type, String id, String description) {
+    public Event(Type type, String id, String message) {
         this.type = type;
         this.id = id;
-        this.description = description;
+        this.message = message;
     }
 
-    public Event(Type type, int code, String name, String description) {
+    public Event(Type type, int code, String name, String message) {
         this.type = type;
         this.code = code;
         this.name = name;
-        this.description = description;
+        this.message = message;
     }
 
-    public Event(Type type, int code, String id, String name, String description) {
+    public Event(Type type, int code, String id, String name, String message) {
         this.type = type;
         this.code = code;
         this.id = id;
         this.name = name;
-        this.description = description;
+        this.message = message;
     }
 
     public enum Type {
@@ -50,7 +50,7 @@ public class Event {
         sb.append(", code=").append(code);
         sb.append(", id='").append(id).append('\'');
         sb.append(", name='").append(name).append('\'');
-        sb.append(", description='").append(description).append('\'');
+        sb.append(", description='").append(message).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -91,12 +91,12 @@ public class Event {
         return this;
     }
 
-    public String getDescription() {
-        return description;
+    public String getMessage() {
+        return message;
     }
 
-    public Event setDescription(String description) {
-        this.description = description;
+    public Event setMessage(String message) {
+        this.message = message;
         return this;
     }
 }
