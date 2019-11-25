@@ -46,7 +46,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         objectMap.put(key, value);
     }
 
-    public ObjectMap(final Map<String, Object> map) {
+    public ObjectMap(final Map<String, ?> map) {
         objectMap = new LinkedHashMap<>(map);
     }
 
@@ -455,6 +455,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     public ObjectMap append(String key, Object value) {
         put(key, value);
+        return this;
+    }
+
+    public ObjectMap appendAll(Map<String, ?> m) {
+        putAll(m);
         return this;
     }
 
