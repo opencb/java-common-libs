@@ -98,11 +98,11 @@ public class MongoDBCollection {
         return endQuery(result, numResults, start);
     }
 
-    private <T> DataResult<T> endQuery(List result, int numTotalResults, double start) {
+    private <T> DataResult<T> endQuery(List result, long numMatches, double start) {
         long end = System.currentTimeMillis();
         int numResults = (result != null) ? result.size() : 0;
 
-        DataResult<T> queryResult = new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numTotalResults, null);
+        DataResult<T> queryResult = new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
         // If a converter is provided, convert DBObjects to the requested type
 //        if (converter != null) {
 //            List convertedResult = new ArrayList<>(numResults);
@@ -134,7 +134,7 @@ public class MongoDBCollection {
     public DataResult<Long> count() {
         long start = startQuery();
         long l = mongoDBNativeQuery.count();
-        return endQuery(Collections.singletonList(l), start);
+        return endQuery(Collections.emptyList(), l, start);
     }
 
     public DataResult<Long> count(Bson query) {
@@ -144,7 +144,7 @@ public class MongoDBCollection {
     public DataResult<Long> count(ClientSession clientSession, Bson query) {
         long start = startQuery();
         long l = mongoDBNativeQuery.count(clientSession, query);
-        return endQuery(Collections.singletonList(l), start);
+        return endQuery(Collections.emptyList(), l, start);
     }
 
     public DataResult<String> distinct(String key, Bson query) {

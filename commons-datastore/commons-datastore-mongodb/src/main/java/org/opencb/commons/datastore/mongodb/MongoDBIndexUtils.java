@@ -27,12 +27,13 @@ public class MongoDBIndexUtils {
      *                         will not be recreated if they already exist
      * @throws IOException if index file can't be read
      */
-    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst)
-            throws IOException {
+    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst) throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
-        createAllIndexes(mongoDataStore, Files.newInputStream(indexFile), dropIndexesFirst);
+        InputStream inputStream = Files.newInputStream(indexFile);
+        createAllIndexes(mongoDataStore, inputStream, dropIndexesFirst);
+        inputStream.close();
     }
 
     /**
@@ -65,8 +66,7 @@ public class MongoDBIndexUtils {
      * @throws IOException if index file can't be read
      */
     public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, String collectionName,
-                                     boolean dropIndexesFirst)
-            throws IOException {
+                                     boolean dropIndexesFirst) throws IOException {
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
@@ -74,6 +74,7 @@ public class MongoDBIndexUtils {
         MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
         createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
     }
+
 
     /**
      * Create the given index for the given collection. Sharding requires the key to be indexed so we need to individually create indexes
@@ -95,8 +96,7 @@ public class MongoDBIndexUtils {
         createIndexes(mongoDBCollection, indexes, false);
     }
 
-    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream)
-            throws IOException {
+    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream) throws IOException {
         ObjectMapper objectMapper = generateDefaultObjectMapper();
         Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
@@ -111,8 +111,7 @@ public class MongoDBIndexUtils {
                             }
                             Map<String, ObjectMap> myIndexes = new HashMap<>();
                             myIndexes.put("fields", new ObjectMap((Map) hashMap.get("fields")));
-                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options",
-                                    Collections.emptyMap())));
+                            myIndexes.put("options", new ObjectMap((Map) hashMap.getOrDefault("options", Collections.emptyMap())));
                             indexes.get(collection).add(myIndexes);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -122,9 +121,7 @@ public class MongoDBIndexUtils {
         return indexes;
     }
 
-    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes,
-                                      boolean dropIndexesFirst) {
-
+    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes, boolean dropIndexesFirst) {
         Set<String> existingIndexes = null;
         if (!dropIndexesFirst) {
             DataResult<Document> index = mongoCollection.getIndex();
@@ -135,7 +132,7 @@ public class MongoDBIndexUtils {
 
             // It is + 1 because mongo always create the _id index by default
             if (index.getNumResults() == indexes.size() + 1) {
-                // we already have the indexes we need, nothing to do here.
+                // We already have the indexes we need, nothing to do here.
                 return;
             }
         }
@@ -143,9 +140,7 @@ public class MongoDBIndexUtils {
         for (Map<String, ObjectMap> userIndex : indexes) {
             StringBuilder indexName = new StringBuilder();
             Document keys = new Document();
-            Iterator<Map.Entry<String, Object>> fieldsIterator = userIndex.get("fields").entrySet().iterator();
-            while (fieldsIterator.hasNext()) {
-                Map.Entry<String, Object> pair = fieldsIterator.next();
+            for (Map.Entry<String, Object> pair : userIndex.get("fields").entrySet()) {
                 keys.append(pair.getKey(), pair.getValue());
 
                 if (indexName.length() > 0) {

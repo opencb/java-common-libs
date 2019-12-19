@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.opencb.commons.datastore.core.QueryOptions;
 
@@ -42,18 +43,18 @@ public class TransactionTest {
         mongoDataStore.createCollection("foo");
         mongoDataStore.createCollection("bar");
 
-        TransactionBody txnBody = new TransactionBody<String>() {
-            public String execute() {
+        TransactionBody txnBody = new TransactionBody<DataResult>() {
+            public DataResult execute() {
                 MongoDBCollection coll1 = mongoDataStore.getCollection("foo");
                 MongoDBCollection coll2 = mongoDataStore.getCollection("bar");
 
-                for (int i = 0; i < 100000; i++) {
+                for (int i = 0; i < 1000; i++) {
                     coll1.insert(clientSession, new Document("abc", i), QueryOptions.empty());
-//                    coll2.insert(clientSession, new Document("xyz", i + 100), QueryOptions.empty());
+                    coll2.insert(clientSession, new Document("xyz", i + 100), QueryOptions.empty());
 //                    coll2.insert(clientSession, new Document("abc", i + 100), QueryOptions.empty());
                 }
 
-                return "Inserted into collections in different databases";
+                return DataResult.empty();
             }
         };
 
