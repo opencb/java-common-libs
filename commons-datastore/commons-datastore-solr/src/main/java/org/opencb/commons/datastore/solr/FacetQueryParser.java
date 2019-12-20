@@ -28,8 +28,8 @@ public class FacetQueryParser {
 
     public static final String FACET_SEPARATOR = ";";
     public static final String LABEL_SEPARATOR = "___";
-    private static final String NESTED_FACET_SEPARATOR = ">>";
-    private static final String NESTED_SUBFACET_SEPARATOR = ",";
+    public static final String NESTED_FACET_SEPARATOR = ">>";
+    public static final String NESTED_SUBFACET_SEPARATOR = ",";
     public static final String INCLUDE_SEPARATOR = ",";
     private static final String RANGE_IDENTIFIER = "..";
     private static final String AGGREGATION_IDENTIFIER = "(";
