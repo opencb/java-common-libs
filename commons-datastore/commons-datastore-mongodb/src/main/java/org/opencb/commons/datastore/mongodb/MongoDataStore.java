@@ -59,6 +59,8 @@ public class MongoDataStore {
         this.mongoClient = mongoClient;
         this.db = db;
         this.mongoDBConfiguration = mongoDBConfiguration;
+
+
     }
 
     public boolean testConnection() {
@@ -156,6 +158,12 @@ public class MongoDataStore {
         mongoClient.close();
     }
 
+    /**
+     * @return the mongo client for this database. Might be null.
+     */
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }
 
     /*
      * GETTERS, NO SETTERS ARE AVAILABLE TO MAKE THIS CLASS IMMUTABLE
@@ -177,5 +185,4 @@ public class MongoDataStore {
     public MongoDBConfiguration getMongoDBConfiguration() {
         return mongoDBConfiguration;
     }
-
 }

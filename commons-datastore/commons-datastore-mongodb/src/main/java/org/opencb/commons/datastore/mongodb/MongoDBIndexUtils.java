@@ -75,6 +75,27 @@ public class MongoDBIndexUtils {
         createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
     }
 
+
+    /**
+     * Create the given index for the given collection. Sharding requires the key to be indexed so we need to individually create indexes
+     * before the data is loaded.
+     *
+     * @param mongoDataStore database
+     * @param collectionName name of collection to index
+     * @param indexes indexes to create on collection
+     */
+    public static void createIndex(MongoDataStore mongoDataStore, String collectionName, List<Map<String, ObjectMap>> indexes) {
+        if (mongoDataStore == null) {
+            throw new MongoException("Unable to connect to MongoDB");
+        }
+        if (collectionName == null || indexes.isEmpty()) {
+            // they've asked to create a collection but didn't provide either the collection or index name. so just give up
+            return;
+        }
+        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+        createIndexes(mongoDBCollection, indexes, false);
+    }
+
     private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream) throws IOException {
         ObjectMapper objectMapper = generateDefaultObjectMapper();
         Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
