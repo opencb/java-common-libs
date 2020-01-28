@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
-            <version>6.6.6</version>
+            <version>8.4.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
