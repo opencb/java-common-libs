@@ -38,23 +38,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Ignacio Medina &lt;imedina@ebi.ac.uk&gt;
  * @author Cristina Yenyxe Gonzalez Garcia &lt;cyenyxe@ebi.ac.uk&gt;
  */
 public class MongoDBCollection {
-
-    @Deprecated public static final String INCLUDE = QueryOptions.INCLUDE;
-    @Deprecated public static final String EXCLUDE = QueryOptions.EXCLUDE;
-    @Deprecated public static final String LIMIT = QueryOptions.LIMIT;
-    @Deprecated public static final String SKIP = QueryOptions.SKIP;
-    @Deprecated public static final String SORT = QueryOptions.SORT;
-    @Deprecated public static final String ORDER = QueryOptions.ORDER;
-    @Deprecated public static final String TIMEOUT = QueryOptions.TIMEOUT;
-    @Deprecated public static final String SKIP_COUNT = QueryOptions.SKIP_COUNT;
-    @Deprecated public static final String ASCENDING = QueryOptions.ASCENDING;
-    @Deprecated public static final String DESCENDING = QueryOptions.DESCENDING;
 
     public static final String BATCH_SIZE = "batchSize";
     public static final String ELEM_MATCH = "elemMatch";
@@ -103,17 +96,6 @@ public class MongoDBCollection {
         int numResults = (result != null) ? result.size() : 0;
 
         DataResult<T> queryResult = new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
-        // If a converter is provided, convert DBObjects to the requested type
-//        if (converter != null) {
-//            List convertedResult = new ArrayList<>(numResults);
-//            for (Object o : result) {
-//                convertedResult.add(converter.convertToDataModelType(o));
-//            }
-//            queryResult.setResult(convertedResult);
-//        } else {
-//            queryResult.setResult(result);
-//        }
-
         return queryResult;
     }
 
@@ -181,25 +163,6 @@ public class MongoDBCollection {
         }
         return endQuery(list, start);
     }
-//
-//    public <DataModelType, StorageType> DataResult<DataModelType> distinct(String key, Bson query, Class<StorageType> clazz,
-//                                                                            ComplexTypeConverter<DataModelType, StorageType> converter) {
-//        long start = startQuery();
-//
-//        List<DataModelType> convertedresultList = new ArrayList<>();
-//        List<StorageType> distinct = new ArrayList<>();
-//        MongoCursor<StorageType> iterator = mongoDBNativeQuery.distinct(key, query, clazz).iterator();
-////        List<O> distinct = mongoDBNativeQuery.distinct(key, query, Object.class);
-//        while (iterator.hasNext()) {
-//            distinct.add(iterator.next());
-//        }
-//
-//        for (StorageType storageType : distinct) {
-//            convertedresultList.add(converter.convertToDataModelType(storageType));
-//        }
-//        return endQuery(convertedresultList);
-//    }
-//
 
     public DataResult<Document> find(Bson query, QueryOptions options) {
         return privateFind(null, query, null, Document.class, null, options);
@@ -264,6 +227,12 @@ public class MongoDBCollection {
                                            ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         long start = startQuery();
 
+        Future<Long> countFuture = null;
+        if (options.getBoolean(QueryOptions.COUNT)) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            countFuture = executor.submit(() -> mongoDBNativeQuery.count(clientSession, query));
+        }
+
         /**
          * Getting the cursor and setting the batchSize from options. Default value set to 20.
          */
@@ -283,9 +252,6 @@ public class MongoDBCollection {
                 } catch (IOException e) {
                     cursor.close();
                     throw new RuntimeException(e.getMessage(), e);
-//                    queryResult = endQuery(null, start);
-//                    queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
-//                    return queryResult;
                 }
             } else {
                 if (converter != null) {
@@ -311,27 +277,21 @@ public class MongoDBCollection {
                 }
             }
 
-            if (options != null && options.getInt(QueryOptions.SKIP) <= 0 && options.getInt(QueryOptions.LIMIT) > 0) {
-                int numTotalResults;
-                if (options.getBoolean(QueryOptions.SKIP_COUNT)) {
+            if (options.getBoolean(QueryOptions.COUNT)) {
+                long numTotalResults;
+                try {
+                    numTotalResults = countFuture.get();
+                } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
                     numTotalResults = -1;
-                } else {
-                    try {
-//                        numTotalResults = findIterable.maxTime(options.getInt("countTimeout"), TimeUnit.MILLISECONDS).count();
-                        numTotalResults = (int) mongoDBNativeQuery.count(clientSession, query);
-                    } catch (MongoExecutionTimeoutException e) {
-                        numTotalResults = -1;
-                    }
                 }
                 queryResult = endQuery(list, numTotalResults, start);
             } else {
-                queryResult = endQuery(list, start);
+                queryResult = endQuery(list, -1, start);
             }
             cursor.close();
         } else {
-            queryResult = endQuery(list, start);
+            queryResult = endQuery(list, -1, start);
         }
-
         return queryResult;
     }
 
@@ -368,9 +328,6 @@ public class MongoDBCollection {
                 queryResultWriter.close();
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage(), e);
-//                queryResult = endQuery(list, start);
-//                queryResult.setErrorMsg(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
-//                return queryResult;
             }
         } else {
             if (converter != null) {
