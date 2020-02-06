@@ -228,7 +228,7 @@ public class MongoDBCollection {
         long start = startQuery();
 
         Future<Long> countFuture = null;
-        if (options.getBoolean(QueryOptions.COUNT)) {
+        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             countFuture = executor.submit(() -> mongoDBNativeQuery.count(clientSession, query));
         }
@@ -277,7 +277,7 @@ public class MongoDBCollection {
                 }
             }
 
-            if (options.getBoolean(QueryOptions.COUNT)) {
+            if (options != null && options.getBoolean(QueryOptions.COUNT)) {
                 long numTotalResults;
                 try {
                     numTotalResults = countFuture.get();
