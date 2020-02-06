@@ -264,11 +264,7 @@ public class MongoDBCollection {
             }
 
             queryResult = endQuery(list, start);
-            try {
-                findIterable.close();
-            } catch (IOException e) {
-                // couldn't close iterator
-            }
+            findIterable.close();
         } else {
             queryResult = endQuery(list, start);
         }

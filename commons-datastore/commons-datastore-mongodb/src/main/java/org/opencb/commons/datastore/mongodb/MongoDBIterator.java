@@ -3,7 +3,6 @@ package org.opencb.commons.datastore.mongodb;
 import com.mongodb.client.FindIterable;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Iterator;
 
 public class MongoDBIterator<E> implements Iterator<E>, Closeable {
@@ -35,7 +34,7 @@ public class MongoDBIterator<E> implements Iterator<E>, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         iterator.iterator().close();
     }
 }
