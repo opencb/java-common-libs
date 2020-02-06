@@ -107,7 +107,7 @@ public class MongoDBNativeQuery {
     public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
 
         Future<Long> countFuture = null;
-        if (options.getBoolean(QueryOptions.COUNT)) {
+        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             countFuture = executor.submit(() -> count(clientSession, query));
         }
@@ -178,7 +178,7 @@ public class MongoDBNativeQuery {
         }
 
         long numMatches = -1;
-        if (options.getBoolean(QueryOptions.COUNT)) {
+        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             try {
                 numMatches = countFuture.get();
             } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
