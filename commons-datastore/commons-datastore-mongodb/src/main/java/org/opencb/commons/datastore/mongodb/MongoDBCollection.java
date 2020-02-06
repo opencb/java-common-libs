@@ -19,11 +19,13 @@ package org.opencb.commons.datastore.mongodb;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.mongodb.MongoExecutionTimeoutException;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.*;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -38,10 +40,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author Ignacio Medina &lt;imedina@ebi.ac.uk&gt;
@@ -226,43 +224,31 @@ public class MongoDBCollection {
     private <T> DataResult<T> privateFind(ClientSession clientSession, Bson query, Bson projection, Class<T> clazz,
                                            ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         long start = startQuery();
-
-        Future<Long> countFuture = null;
-        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            countFuture = executor.submit(() -> mongoDBNativeQuery.count(clientSession, query));
-        }
-
-        /**
-         * Getting the cursor and setting the batchSize from options. Default value set to 20.
-         */
-        FindIterable<Document> findIterable = mongoDBNativeQuery.find(clientSession, query, projection, options);
-        MongoCursor<Document> cursor = findIterable.iterator();
-
+        MongoDBIterator<Document> findIterable = mongoDBNativeQuery.find(clientSession, query, projection, options);
         DataResult<T> queryResult;
         List<T> list = new LinkedList<>();
-        if (cursor != null) {
+
+        if (findIterable != null) {
             if (queryResultWriter != null) {
                 try {
                     queryResultWriter.open();
-                    while (cursor.hasNext()) {
-                        queryResultWriter.write(cursor.next());
+                    while (findIterable.hasNext()) {
+                        queryResultWriter.write(findIterable.next());
                     }
                     queryResultWriter.close();
                 } catch (IOException e) {
-                    cursor.close();
                     throw new RuntimeException(e.getMessage(), e);
                 }
             } else {
                 if (converter != null) {
-                    while (cursor.hasNext()) {
-                        list.add(converter.convertToDataModelType(cursor.next()));
+                    while (findIterable.hasNext()) {
+                        list.add(converter.convertToDataModelType(findIterable.next()));
                     }
                 } else {
                     if (clazz != null && !clazz.equals(Document.class)) {
                         Document document;
-                        while (cursor.hasNext()) {
-                            document = cursor.next();
+                        while (findIterable.hasNext()) {
+                            document = findIterable.next();
                             try {
                                 list.add(objectMapper.readValue(objectWriter.writeValueAsString(document), clazz));
                             } catch (IOException e) {
@@ -270,28 +256,23 @@ public class MongoDBCollection {
                             }
                         }
                     } else {
-                        while (cursor.hasNext()) {
-                            list.add((T) cursor.next());
+                        while (findIterable.hasNext()) {
+                            list.add((T) findIterable.next());
                         }
                     }
                 }
             }
 
-            if (options != null && options.getBoolean(QueryOptions.COUNT)) {
-                long numTotalResults;
-                try {
-                    numTotalResults = countFuture.get();
-                } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
-                    numTotalResults = -1;
-                }
-                queryResult = endQuery(list, numTotalResults, start);
-            } else {
-                queryResult = endQuery(list, -1, start);
+            queryResult = endQuery(list, start);
+            try {
+                findIterable.close();
+            } catch (IOException e) {
+                // couldn't close iterator
             }
-            cursor.close();
         } else {
-            queryResult = endQuery(list, -1, start);
+            queryResult = endQuery(list, start);
         }
+        queryResult.setNumMatches(findIterable.getNumMatches());
         return queryResult;
     }
 
@@ -304,7 +285,6 @@ public class MongoDBCollection {
         }
         return queryResultList;
     }
-
 
     public DataResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         return aggregate(operations, null, options);

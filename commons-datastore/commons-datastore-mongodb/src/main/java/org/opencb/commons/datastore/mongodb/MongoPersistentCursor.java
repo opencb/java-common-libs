@@ -112,7 +112,7 @@ public class MongoPersistentCursor implements MongoCursor<Document> {
     }
 
     protected FindIterable<Document> newFindIterable(Bson query, Bson projection, QueryOptions options) {
-        return this.collection.nativeQuery().find(query, projection, options);
+        return this.collection.nativeQuery().find(query, projection, options).getIterable();
     }
 
     public Object getLastId() {
