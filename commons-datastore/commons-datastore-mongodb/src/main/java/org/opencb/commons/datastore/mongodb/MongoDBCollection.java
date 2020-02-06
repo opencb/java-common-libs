@@ -234,7 +234,7 @@ public class MongoDBCollection {
                 try {
                     queryResultWriter.open();
                     while (cursor.hasNext()) {
-                        queryResultWriter.write(findIterable.next());
+                        queryResultWriter.write(cursor.next());
                     }
                     queryResultWriter.close();
                 } catch (IOException e) {
