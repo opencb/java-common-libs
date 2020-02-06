@@ -1,8 +1,6 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
-import org.bson.conversions.Bson;
 
 import java.io.Closeable;
 import java.io.IOException;
