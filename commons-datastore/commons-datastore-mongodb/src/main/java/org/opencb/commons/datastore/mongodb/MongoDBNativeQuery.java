@@ -16,6 +16,7 @@
 
 package org.opencb.commons.datastore.mongodb;
 
+import com.mongodb.MongoExecutionTimeoutException;
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.getProjection;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.parseQueryOptions;
@@ -80,11 +81,11 @@ public class MongoDBNativeQuery {
     }
 
 
-    public FindIterable<Document> find(Bson query, QueryOptions options) {
+    public MongoDBIterator<Document> find(Bson query, QueryOptions options) {
         return find(null, query, null, options);
     }
 
-    public FindIterable<Document> find(ClientSession clientSession, Bson query, QueryOptions options) {
+    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, QueryOptions options) {
         return find(clientSession, query, null, options);
     }
 
@@ -99,11 +100,17 @@ public class MongoDBNativeQuery {
         return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
     }
 
-    public FindIterable<Document> find(Bson query, Bson projection, QueryOptions options) {
+    public MongoDBIterator<Document> find(Bson query, Bson projection, QueryOptions options) {
         return find(null, query, projection, options);
     }
 
-    public FindIterable<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+
+        Future<Long> countFuture = null;
+        if (options.getBoolean(QueryOptions.COUNT)) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            countFuture = executor.submit(() -> count(clientSession, query));
+        }
 
         if (projection == null) {
             projection = getProjection(projection, options);
@@ -170,7 +177,15 @@ public class MongoDBNativeQuery {
             findIterable.maxTime(options.getLong(QueryOptions.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
-        return findIterable;
+        long numMatches = -1;
+        if (options.getBoolean(QueryOptions.COUNT)) {
+            try {
+                numMatches = countFuture.get();
+            } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
+                numMatches = -1;
+            }
+        }
+        return new MongoDBIterator<Document>(findIterable, numMatches);
     }
 
     /**
