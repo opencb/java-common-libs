@@ -104,14 +104,7 @@ public class MongoDBNativeQuery {
         return find(null, query, projection, options);
     }
 
-    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
-
-        Future<Long> countFuture = null;
-        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            countFuture = executor.submit(() -> count(clientSession, query));
-        }
-
+    public FindIterable<Document> nativeFind(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
         if (projection == null) {
             projection = getProjection(projection, options);
         }
@@ -177,6 +170,18 @@ public class MongoDBNativeQuery {
             findIterable.maxTime(options.getLong(QueryOptions.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
+        return findIterable;
+    }
+
+    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+        Future<Long> countFuture = null;
+        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            countFuture = executor.submit(() -> count(clientSession, query));
+        }
+
+        FindIterable<Document> findIterable = nativeFind(clientSession, query, projection, options);
+
         long numMatches = -1;
         if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             try {
@@ -185,7 +190,7 @@ public class MongoDBNativeQuery {
                 numMatches = -1;
             }
         }
-        return new MongoDBIterator<Document>(findIterable, numMatches);
+        return new MongoDBIterator<>(findIterable.iterator(), numMatches);
     }
 
     /**

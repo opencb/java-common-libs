@@ -1,32 +1,28 @@
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 
 import java.io.Closeable;
 import java.util.Iterator;
 
 public class MongoDBIterator<E> implements Iterator<E>, Closeable {
 
-    private FindIterable<E> iterator;
+    private MongoCursor<E> iterator;
     private long numMatches;
 
-    public MongoDBIterator(FindIterable<E> iterator, long numMatches) {
+    public MongoDBIterator(MongoCursor<E> iterator, long numMatches) {
         this.iterator = iterator;
         this.numMatches = numMatches;
     }
 
     @Override
     public boolean hasNext() {
-        return iterator.iterator().hasNext();
+        return iterator.hasNext();
     }
 
     @Override
     public E next() {
-        return iterator.iterator().next();
-    }
-
-    public FindIterable<E> getIterable() {
-        return iterator;
+        return iterator.next();
     }
 
     public long getNumMatches() {
@@ -35,6 +31,6 @@ public class MongoDBIterator<E> implements Iterator<E>, Closeable {
 
     @Override
     public void close() {
-        iterator.iterator().close();
+        iterator.close();
     }
 }
