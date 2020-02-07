@@ -649,6 +649,12 @@ public class MongoDBCollectionTest {
 
     }
 
+    @Test
+    public void testExplain() throws Exception {
+        Document explain = mongoDBCollection.nativeQuery().explain(new Document(), new Document(), new QueryOptions());
+        assertNotNull(explain.get("queryPlanner"));
+    }
+
     class BasicQueryResultWriter implements QueryResultWriter<Object> {
         int i = 0;
         String outfile = "/tmp/queryResultWriter.log";

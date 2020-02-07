@@ -193,6 +193,12 @@ public class MongoDBNativeQuery {
         return new MongoDBIterator<>(findIterable.iterator(), numMatches);
     }
 
+    public Document explain(Bson query, Bson projection, QueryOptions options) {
+        return nativeFind(null, query, projection, options)
+                .modifiers(new Document("$explain", true))
+                .first();
+    }
+
     /**
      * This method insert a single document into a collection. Params w and wtimeout are read from QueryOptions.
      *
