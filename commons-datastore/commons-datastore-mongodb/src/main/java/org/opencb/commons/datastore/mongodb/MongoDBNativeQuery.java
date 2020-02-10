@@ -25,6 +25,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.QueryOptions;
 
 import java.util.ArrayList;
@@ -174,6 +175,11 @@ public class MongoDBNativeQuery {
     }
 
     public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+        return find(clientSession, query, projection, null, options);
+    }
+
+    public <T> MongoDBIterator<T> find(ClientSession clientSession, Bson query, Bson projection,
+                                          ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         Future<Long> countFuture = null;
         if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -190,7 +196,7 @@ public class MongoDBNativeQuery {
                 numMatches = -1;
             }
         }
-        return new MongoDBIterator<>(findIterable.iterator(), numMatches);
+        return new MongoDBIterator<T>(findIterable.iterator(), converter, numMatches);
     }
 
     public Document explain(Bson query, Bson projection, QueryOptions options) {
