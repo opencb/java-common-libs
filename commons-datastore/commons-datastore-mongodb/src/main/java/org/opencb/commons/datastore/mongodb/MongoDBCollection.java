@@ -221,10 +221,23 @@ public class MongoDBCollection {
         return privateFind(queries, projection, null, converter, options);
     }
 
+    private <T> MongoDBIterator<T> iterator(Bson query, QueryOptions options) {
+        return iterator(null, query, null, null, options);
+    }
+
+    private <T> MongoDBIterator<T> iterator(Bson query, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        return iterator(null, query, null, converter, options);
+    }
+
+    private <T> MongoDBIterator<T> iterator(ClientSession clientSession, Bson query, Bson projection,
+                                          ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        return mongoDBNativeQuery.find(clientSession, query, projection, converter, options);
+    }
+
     private <T> DataResult<T> privateFind(ClientSession clientSession, Bson query, Bson projection, Class<T> clazz,
                                            ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         long start = startQuery();
-        MongoDBIterator<Document> findIterable = mongoDBNativeQuery.find(clientSession, query, projection, options);
+        MongoDBIterator<T> findIterable = iterator(clientSession, query, projection, converter, options);
         DataResult<T> queryResult;
         List<T> list = new LinkedList<>();
 
@@ -240,25 +253,19 @@ public class MongoDBCollection {
                     throw new RuntimeException(e.getMessage(), e);
                 }
             } else {
-                if (converter != null) {
+                if (converter == null && clazz != null && !clazz.equals(Document.class)) {
+                    T document;
                     while (findIterable.hasNext()) {
-                        list.add(converter.convertToDataModelType(findIterable.next()));
+                        document = findIterable.next();
+                        try {
+                            list.add(objectMapper.readValue(objectWriter.writeValueAsString(document), clazz));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 } else {
-                    if (clazz != null && !clazz.equals(Document.class)) {
-                        Document document;
-                        while (findIterable.hasNext()) {
-                            document = findIterable.next();
-                            try {
-                                list.add(objectMapper.readValue(objectWriter.writeValueAsString(document), clazz));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    } else {
-                        while (findIterable.hasNext()) {
-                            list.add((T) findIterable.next());
-                        }
+                    while (findIterable.hasNext()) {
+                        list.add(findIterable.next());
                     }
                 }
             }
@@ -544,6 +551,7 @@ public class MongoDBCollection {
      *
      * @return a new instance of a Native
      */
+    @Deprecated
     public MongoDBNativeQuery nativeQuery() {
         return mongoDBNativeQuery;
     }
