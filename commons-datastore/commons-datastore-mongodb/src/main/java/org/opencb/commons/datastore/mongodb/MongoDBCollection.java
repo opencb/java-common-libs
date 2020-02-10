@@ -221,15 +221,15 @@ public class MongoDBCollection {
         return privateFind(queries, projection, null, converter, options);
     }
 
-    private <T> MongoDBIterator<T> iterator(Bson query, QueryOptions options) {
+    public MongoDBIterator<Document> iterator(Bson query, QueryOptions options) {
         return iterator(null, query, null, null, options);
     }
 
-    private <T> MongoDBIterator<T> iterator(Bson query, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+    public <T> MongoDBIterator<T> iterator(Bson query, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         return iterator(null, query, null, converter, options);
     }
 
-    private <T> MongoDBIterator<T> iterator(ClientSession clientSession, Bson query, Bson projection,
+    public <T> MongoDBIterator<T> iterator(ClientSession clientSession, Bson query, Bson projection,
                                           ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         return mongoDBNativeQuery.find(clientSession, query, projection, converter, options);
     }
