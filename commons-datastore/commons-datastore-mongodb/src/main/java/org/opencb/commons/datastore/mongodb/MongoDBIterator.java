@@ -13,7 +13,7 @@ public class MongoDBIterator<E> implements Iterator<E>, Closeable {
     private ComplexTypeConverter<E, Document> converter;
     private long numMatches;
 
-    public MongoDBIterator(MongoCursor<Document> iterator, ComplexTypeConverter<E, Document> converter,long numMatches) {
+    public MongoDBIterator(MongoCursor<Document> iterator, ComplexTypeConverter<E, Document> converter, long numMatches) {
         this.iterator = iterator;
         this.converter = converter;
         this.numMatches = numMatches;
