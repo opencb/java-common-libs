@@ -493,7 +493,25 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Override
     public boolean containsKey(Object key) {
-        return objectMap.containsKey(key);
+        if (objectMap.containsKey(key)) {
+            return true;
+        } else if (key instanceof String && ((String) key).contains(".")) {
+            String[] keys = ((String) key).split("\\.");
+            ObjectMap auxMap = this;
+            for (int i = 0; i < keys.length; i++) {
+                String tmpKey = keys[i];
+                if (i + 1 == keys.length) {
+                    return auxMap.containsKey(tmpKey);
+                } else {
+                    if (auxMap.containsKey(tmpKey)) {
+                        auxMap = new ObjectMap(auxMap.getMap(tmpKey));
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -503,12 +521,50 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Override
     public Object get(Object key) {
-        return objectMap.get(key);
+        Object value = objectMap.get(key);
+        if (value == null && key instanceof String && ((String) key).contains(".")) {
+            String[] keys = ((String) key).split("\\.");
+            ObjectMap auxMap = this;
+            for (int i = 0; i < keys.length; i++) {
+                String tmpKey = keys[i];
+                if (i + 1 == keys.length) {
+                    return auxMap.get(tmpKey);
+                } else {
+                    if (auxMap.containsKey(tmpKey)) {
+                        auxMap = new ObjectMap(auxMap.getMap(tmpKey));
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+        return value;
     }
 
     @Override
     public Object put(String key, Object value) {
-        return objectMap.put(key, value);
+        return put(key, value, false);
+    }
+
+    public Object put(String key, Object value, boolean nestedKey) {
+        if (nestedKey && key.contains(".")) {
+            String[] keys = key.split("\\.");
+            ObjectMap auxMap = this;
+            for (int i = 0; i < keys.length; i++) {
+                String tmpKey = keys[i];
+                if (i + 1 == keys.length) {
+                    return auxMap.put(tmpKey, value);
+                } else {
+                    if (!auxMap.containsKey(tmpKey)) {
+                        auxMap.put(tmpKey, new ObjectMap());
+                    }
+                    auxMap = new ObjectMap(auxMap.getMap(tmpKey));
+                }
+            }
+            return null;
+        } else {
+            return objectMap.put(key, value);
+        }
     }
 
     @Override
