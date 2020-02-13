@@ -89,8 +89,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public String getString(String field, String defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object o = objectMap.get(field);
+        if (field != null) {
+            Object o = get(field);
             if (o != null) {
                 if (o instanceof Collection) {
                     //Join manually to avoid surrounding brackets
@@ -111,8 +111,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public int getInt(String field, int defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).intValue();
             } else if (obj instanceof String) {
@@ -131,8 +131,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public long getLong(String field, long defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).longValue();
             } else if (obj instanceof String) {
@@ -152,8 +152,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public float getFloat(String field, float defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).floatValue();
             } else if (obj instanceof String) {
@@ -173,8 +173,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public double getDouble(String field, double defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).doubleValue();
             } else if (obj instanceof String) {
@@ -194,12 +194,12 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public boolean getBoolean(String field, boolean defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Boolean) {
                 return ((Boolean) obj);
             } else if (obj instanceof String) {
-                return Boolean.parseBoolean((String) objectMap.get(field));
+                return Boolean.parseBoolean((String) obj);
             }
         }
         return defaultValue;
@@ -222,8 +222,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public <T> T get(final String field, final Class<T> clazz, T defaultValue) {
-        if (objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        Object obj = get(field);
+        if (obj != null) {
             if (clazz.isInstance(obj)) {
                 return clazz.cast(obj);
             }
@@ -242,8 +242,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public List<Object> getList(String field, final List<Object> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (List<Object>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (List<Object>) obj;
+            }
         }
         return defaultValue;
     }
@@ -375,8 +378,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> List<T> getAsList(String field, final Class<T> clazz, List<T> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (List<T>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (List<T>) get(field);
+            }
         }
         return defaultValue;
     }
@@ -422,8 +428,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
 
     public Map<String, Object> getMap(String field, Map<String, Object> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (Map<String, Object>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (Map<String, Object>) obj;
+            }
         }
         return defaultValue;
     }
@@ -446,8 +455,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> Map<String, T> getMapAs(String field, final Class<T> clazz, Map<String, T> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (Map<String, T>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (Map<String, T>) obj;
+            }
         }
         return defaultValue;
     }
