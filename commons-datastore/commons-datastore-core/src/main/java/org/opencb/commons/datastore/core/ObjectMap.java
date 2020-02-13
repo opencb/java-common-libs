@@ -496,20 +496,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         if (objectMap.containsKey(key)) {
             return true;
         } else if (key instanceof String && ((String) key).contains(".")) {
-            String[] keys = ((String) key).split("\\.");
-            ObjectMap auxMap = this;
-            for (int i = 0; i < keys.length; i++) {
-                String tmpKey = keys[i];
-                if (i + 1 == keys.length) {
-                    return auxMap.containsKey(tmpKey);
-                } else {
-                    if (auxMap.containsKey(tmpKey)) {
-                        auxMap = new ObjectMap(auxMap.getMap(tmpKey));
-                    } else {
-                        return false;
-                    }
-                }
-            }
+            return getNested(((String) key)) != null;
         }
         return false;
     }
@@ -523,20 +510,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     public Object get(Object key) {
         Object value = objectMap.get(key);
         if (value == null && key instanceof String && ((String) key).contains(".")) {
-            String[] keys = ((String) key).split("\\.");
-            ObjectMap auxMap = this;
-            for (int i = 0; i < keys.length; i++) {
-                String tmpKey = keys[i];
-                if (i + 1 == keys.length) {
-                    return auxMap.get(tmpKey);
-                } else {
-                    if (auxMap.containsKey(tmpKey)) {
-                        auxMap = new ObjectMap(auxMap.getMap(tmpKey));
-                    } else {
-                        return null;
-                    }
-                }
-            }
+            return getNested(((String) key));
         }
         return value;
     }
@@ -547,24 +521,93 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public Object put(String key, Object value, boolean nestedKey) {
-        if (nestedKey && key.contains(".")) {
-            String[] keys = key.split("\\.");
-            ObjectMap auxMap = this;
-            for (int i = 0; i < keys.length; i++) {
-                String tmpKey = keys[i];
-                if (i + 1 == keys.length) {
-                    return auxMap.put(tmpKey, value);
-                } else {
-                    if (!auxMap.containsKey(tmpKey)) {
-                        auxMap.put(tmpKey, new ObjectMap());
-                    }
-                    auxMap = new ObjectMap(auxMap.getMap(tmpKey));
-                }
-            }
-            return null;
+        return put(key, value, nestedKey, false);
+    }
+
+    public Object put(String key, Object value, boolean nestedKey, boolean parents) {
+        if (nestedKey) {
+            return putNested(key, value, parents);
         } else {
             return objectMap.put(key, value);
         }
+    }
+
+    public Object getNested(String key) {
+        int idx = key.lastIndexOf(".");
+        if (idx < 0) {
+            return get(key);
+        }
+        String mapKey = key.substring(0, idx);
+        String valueKey = key.substring(idx + 1);
+        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, false, false);
+        if (subMap != null) {
+            return subMap.get(valueKey);
+        } else {
+            return null;
+        }
+    }
+
+    public Object putNested(String key, Object value, boolean parents) {
+        int idx = key.lastIndexOf(".");
+        if (idx < 0) {
+            return put(key, value, false);
+        }
+        String mapKey = key.substring(0, idx);
+        String valueKey = key.substring(idx + 1);
+        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, true, parents);
+        if (subMap != null) {
+            return subMap.put(valueKey, value);
+        } else {
+            throw new IllegalArgumentException("Key '" + key + "' not found!");
+        }
+    }
+
+    public ObjectMap getNestedMap(String key) {
+        Map<String, Object> subMap = getNestedMap(key, objectMap, jsonObjectMapper, false, false);
+        return subMap == null ? null : (subMap instanceof ObjectMap ? ((ObjectMap) subMap) : new ObjectMap(subMap));
+    }
+
+    private static Map<String, Object> getNestedMap(String key, Map<String, Object> map, ObjectMapper jsonObjectMapper,
+                                                    boolean convert, boolean parents) {
+        if (map == null) {
+            return map;
+        }
+        int idx = key.indexOf(".");
+        String firstKey;
+        String nextKey;
+        if (idx < 0) {
+            firstKey = key;
+            nextKey = null;
+        } else {
+            firstKey = key.substring(0, idx);
+            nextKey = key.substring(idx + 1);
+        }
+
+        Object value = map.get(firstKey);
+        Map<String, Object> subMap;
+
+        if (value instanceof Map) {
+            subMap = (Map) value;
+        } else if (value instanceof String || value instanceof Number || value instanceof Collection) {
+            // Expected a Map or an Object.
+            subMap = null;
+        } else {
+            subMap = jsonObjectMapper.convertValue(value, Map.class);
+            if (convert) {
+                map.put(firstKey, subMap);
+            }
+        }
+        if (parents && subMap == null) {
+            subMap = new HashMap<>();
+            map.put(firstKey, subMap);
+        }
+
+        if (nextKey == null) {
+            return subMap;
+        } else {
+            return getNestedMap(nextKey, subMap, jsonObjectMapper, convert, parents);
+        }
+
     }
 
     @Override
