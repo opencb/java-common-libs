@@ -24,8 +24,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by imedina on 24/03/14.
@@ -198,19 +197,23 @@ public class ObjectMapTest {
 
     @Test
     public void testContainsKey() {
-        System.out.println("objectMap.getNestedMap(\"l1\") = " + objectMap.getNestedMap("l1").toJson());
-        System.out.println("objectMap.getNestedMap(\"l1.l2\") = " + objectMap.getNestedMap("l1.l2").toJson());
-        System.out.println("objectMap.getNestedMap(\"l1.l2.l3\") = " + objectMap.getNestedMap("l1.l2.l3").toJson());
-        System.out.println("objectMap.getNestedValue(\"l1.l2.l3.l4.value\") = " + objectMap.getNested("l1.l2.l3.l4"));
-        System.out.println("objectMap.getNestedValue(\"map.key\") = " + objectMap.getNested("map.key"));
+        assertEquals("{\"l2\":{\"l3\":{\"l4\":\"value\"}}}" ,objectMap.getNestedMap("l1").toJson());
+        assertEquals("{\"l3\":{\"l4\":\"value\"}}" ,objectMap.getNestedMap("l1.l2").toJson());
+        assertEquals("{\"l4\":\"value\"}" ,objectMap.getNestedMap("l1.l2.l3").toJson());
+        assertEquals("value" ,objectMap.getNested("l1.l2.l3.l4"));
+        assertEquals("value", objectMap.getNested("map.key"));
 
-        System.out.println("objectMap.getNestedValue(\"myModel.key1\") = " + objectMap.getNested("myModel.key1"));
-        System.out.println("objectMap.getNestedValue(\"myModel.key2\") = " + objectMap.getNested("myModel.key2"));
-        System.out.println("objectMap.put(\"myModel.key2\", \"c\", true) = " + objectMap.put("myModel.key2", "c", true));
-        System.out.println("objectMap.getNestedValue(\"myModel.key2\") = " + objectMap.getNested("myModel.key2"));
+        assertEquals("a", objectMap.getNested("myModel.key1"));
+        assertEquals("b", objectMap.getNested("myModel.key2"));
+        assertEquals("b", objectMap.put("myModel.key2", "c", true));
+        assertEquals("c", objectMap.getNested("myModel.key2"));
 
         objectMap.put("l1.l2.l3.l4.l5.l6.l7", "value", true, true);
-        System.out.println("objectMap.getNestedMap(\"l1\") = " + objectMap.getNestedMap("l1").toJson());
+        assertEquals("{\"l2\":{\"l3\":{\"l4\":{\"l5\":{\"l6\":{\"l7\":\"value\"}}}}}}", objectMap.getNestedMap("l1").toJson());
 
+        objectMap.put("transformed", true);
+        assertFalse(objectMap.getBoolean("transformed.isolated"));
+        objectMap.put("transformed.isolated", true);
+        assertTrue(objectMap.getBoolean("transformed.isolated"));
     }
 }

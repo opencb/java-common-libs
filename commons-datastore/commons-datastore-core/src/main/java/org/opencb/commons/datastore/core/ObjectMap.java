@@ -600,7 +600,13 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
         if (value instanceof Map) {
             subMap = (Map) value;
-        } else if (value instanceof String || value instanceof Number || value instanceof Collection) {
+        } else if (value == null
+                || value instanceof CharSequence
+                || value instanceof Number
+                || value instanceof Collection
+                || value instanceof Boolean
+                || value.getClass().isArray()
+                || value.getClass().isEnum()) {
             // Expected a Map or an Object.
             subMap = null;
         } else {
