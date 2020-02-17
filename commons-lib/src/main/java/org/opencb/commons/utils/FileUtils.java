@@ -16,6 +16,9 @@
 
 package org.opencb.commons.utils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.opencb.commons.exec.Command;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -157,4 +160,55 @@ public class FileUtils {
         return bufferedWriter;
     }
 
+    public static String getUser(Path path) throws IOException {
+        return getUser(path, false);
+    }
+
+    public static String getUser(Path path, boolean numericId) throws IOException {
+        return getLsOutput(path, numericId).split(" ")[2];
+    }
+
+    public static String getGroup(Path path) throws IOException {
+        return getGroup(path, false);
+    }
+
+    public static String getGroup(Path path, boolean numericId) throws IOException {
+        return getLsOutput(path, numericId).split(" ")[3];
+    }
+
+    public static String[] getUserAndGroup(Path path) throws IOException {
+        return getUserAndGroup(path, false);
+    }
+
+    public static String[] getUserAndGroup(Path path, boolean numericId) throws IOException {
+        String[] split = getLsOutput(path, numericId).split(" ");
+
+        return new String[]{split[2], split[3]};
+    }
+
+    private static String getLsOutput(Path path, boolean numericId) throws IOException {
+        FileUtils.checkPath(path);
+
+        String dirOption = path.toFile().isDirectory() ? "d" : "";
+        String numericOption = numericId ? "n" : "";
+        String cmdline = "ls -l" + dirOption + numericOption + " " + path.toAbsolutePath().toString();
+
+        // Execute command line
+        Command cmd = new Command(cmdline);
+        cmd.run();
+
+        // Get output and error
+        String output = cmd.getOutput();
+        String error = cmd.getError();
+
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(error)) {
+            throw new IOException(error);
+        }
+
+        if (StringUtils.isEmpty(output)) {
+            throw new IOException("Error accessing to path: " + path);
+        }
+
+        return output;
+    }
 }
