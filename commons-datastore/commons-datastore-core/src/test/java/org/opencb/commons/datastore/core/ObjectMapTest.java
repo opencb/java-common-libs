@@ -24,8 +24,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by imedina on 24/03/14.
@@ -57,7 +56,21 @@ public class ObjectMapTest {
         Map<String, Object> map = new HashMap<>();
         map.put("key", "value");
         objectMap.put("map", map);
+        objectMap.put("l1", new ObjectMap("l2", new ObjectMap("l3", new ObjectMap("l4", "value"))));
+        objectMap.put("myModel", new MyModel("a", "b"));
+    }
 
+    private static class MyModel {
+        public MyModel() {
+        }
+
+        public MyModel(String key1, String key2) {
+            this.key1 = key1;
+            this.key2 = key2;
+        }
+
+        public String key1;
+        public String key2;
     }
 
     @Test
@@ -180,5 +193,27 @@ public class ObjectMapTest {
     @Test
     public void testGetMap() throws Exception {
 
+    }
+
+    @Test
+    public void testContainsKey() {
+        assertEquals("{\"l2\":{\"l3\":{\"l4\":\"value\"}}}" ,objectMap.getNestedMap("l1").toJson());
+        assertEquals("{\"l3\":{\"l4\":\"value\"}}" ,objectMap.getNestedMap("l1.l2").toJson());
+        assertEquals("{\"l4\":\"value\"}" ,objectMap.getNestedMap("l1.l2.l3").toJson());
+        assertEquals("value" ,objectMap.getNested("l1.l2.l3.l4"));
+        assertEquals("value", objectMap.getNested("map.key"));
+
+        assertEquals("a", objectMap.getNested("myModel.key1"));
+        assertEquals("b", objectMap.getNested("myModel.key2"));
+        assertEquals("b", objectMap.put("myModel.key2", "c", true));
+        assertEquals("c", objectMap.getNested("myModel.key2"));
+
+        objectMap.put("l1.l2.l3.l4.l5.l6.l7", "value", true, true);
+        assertEquals("{\"l2\":{\"l3\":{\"l4\":{\"l5\":{\"l6\":{\"l7\":\"value\"}}}}}}", objectMap.getNestedMap("l1").toJson());
+
+        objectMap.put("transformed", true);
+        assertFalse(objectMap.getBoolean("transformed.isolated"));
+        objectMap.put("transformed.isolated", true);
+        assertTrue(objectMap.getBoolean("transformed.isolated"));
     }
 }
