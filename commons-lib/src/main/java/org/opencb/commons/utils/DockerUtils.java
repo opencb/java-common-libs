@@ -1,10 +1,12 @@
 package org.opencb.commons.utils;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.opencb.commons.exec.Command;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 
 public class DockerUtils {
 
@@ -12,36 +14,49 @@ public class DockerUtils {
      * Create and run the command line to execute the docker image.
      *
      * @param image Docker image name
-     * @param user  Array of two strings: the first string, the user; the second, the group
-     * @param bindings Array of bind mounts for docker volumes: source-target pairs
-     * @param params Image command parameter
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBinding Bind mount for docker output volume (source-target)
+     * @param cmdParams Image command parameters
+     * @param dockerParams Docker parameters
      * @return The command line
+     * @throws IOException IO exception
      */
-    public static String run(String image, String[] user, List<Pair<String, String>> bindings, String params) {
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
+                             Map<String, String> dockerParams) throws IOException {
         // Docker run
         StringBuilder commandLine = new StringBuilder("docker run ");
 
-        // User
-        if (ArrayUtils.isNotEmpty(user)) {
-            String u = user[0];
-            if (user.length > 1) {
-                u += (":" + user[1]);
+        // Docker params
+        boolean setUser = true;
+        if (dockerParams != null) {
+            if (dockerParams.containsKey("user")) {
+                setUser = false;
             }
-            commandLine.append("-u ").append(u).append(" ");
+            for (String key : dockerParams.keySet()) {
+                commandLine.append("--").append(key).append(" ").append(dockerParams.get(key)).append(" ");
+            }
+        }
+
+        if (setUser) {
+            // User: array of two strings, the first string, the user; the second, the group
+            String[] user = FileUtils.getUserAndGroup(Paths.get(outputBinding.getKey()), true);
+            commandLine.append("--user ").append(user[0]).append(":").append(user[1]).append(" ");
         }
 
         // Mount management (bindings)
-        for (Pair<String, String> binding : bindings) {
-            commandLine.append("--mount type=bind,source=\"").append(binding.getLeft()).append("\",target=\"").append(binding.getRight())
+        for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
+            commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
                     .append("\" ");
-
         }
+        commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
+                .append(outputBinding.getValue()).append("\" ");
 
         // Docker image and version
         commandLine.append(image).append(" ");
 
         // Image command params
-        commandLine.append(params);
+        commandLine.append(cmdParams);
 
         // Execute command
         Command cmd = new Command(commandLine.toString());
