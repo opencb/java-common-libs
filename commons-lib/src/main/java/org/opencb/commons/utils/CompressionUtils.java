@@ -16,13 +16,8 @@
 
 package org.opencb.commons.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.io.*;
+import java.util.zip.*;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
@@ -43,11 +38,7 @@ public final class CompressionUtils {
                 int count = deflater.deflate(buffer); // returns the generated code... index
                 outputStream.write(buffer, 0, count);
             }
-            byte[] output = outputStream.toByteArray();
-
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Original: {0} Kb", data.length / 1024);
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Compressed: {0} Kb", output.length / 1024);
-            return output;
+            return outputStream.toByteArray();
         } finally {
             deflater.end();
         }
@@ -63,13 +54,38 @@ public final class CompressionUtils {
                 int count = inflater.inflate(buffer);
                 outputStream.write(buffer, 0, count);
             }
-            byte[] output = outputStream.toByteArray();
-
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Original: {0}", data.length);
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Compressed: {0}", output.length);
-            return output;
+            return outputStream.toByteArray();
         } finally {
             inflater.end();
         }
+    }
+
+    public static byte[] gzip(String text) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        BufferedOutputStream bufos = new BufferedOutputStream(new GZIPOutputStream(bos));
+        try {
+            bufos.write(text.getBytes());
+        } finally {
+            bufos.close();
+        }
+        byte[] retval = bos.toByteArray();
+        bos.close();
+        return retval;
+    }
+
+    public static String gunzip(byte[] bytes) throws IOException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        BufferedInputStream bufis = new BufferedInputStream(new GZIPInputStream(bis));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = bufis.read(buffer)) >= 0) {
+            bos.write(buffer, 0, len);
+        }
+        String retval = bos.toString();
+        bis.close();
+        bufis.close();
+        bos.close();
+        return retval;
     }
 }
