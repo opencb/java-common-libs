@@ -17,8 +17,6 @@
 package org.opencb.commons.utils;
 
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.*;
 
 /**
@@ -40,11 +38,7 @@ public final class CompressionUtils {
                 int count = deflater.deflate(buffer); // returns the generated code... index
                 outputStream.write(buffer, 0, count);
             }
-            byte[] output = outputStream.toByteArray();
-
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Original: {0} Kb", data.length / 1024);
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Compressed: {0} Kb", output.length / 1024);
-            return output;
+            return outputStream.toByteArray();
         } finally {
             deflater.end();
         }
@@ -60,11 +54,7 @@ public final class CompressionUtils {
                 int count = inflater.inflate(buffer);
                 outputStream.write(buffer, 0, count);
             }
-            byte[] output = outputStream.toByteArray();
-
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Original: {0}", data.length);
-            Logger.getLogger(CompressionUtils.class.getName()).log(Level.FINE, "Compressed: {0}", output.length);
-            return output;
+            return outputStream.toByteArray();
         } finally {
             inflater.end();
         }

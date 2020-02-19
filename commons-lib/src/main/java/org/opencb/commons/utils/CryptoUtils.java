@@ -40,8 +40,7 @@ public final class CryptoUtils {
     }
 
     public static byte[] encryptAES(String strToEncrypt, byte[] key)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            IllegalBlockSizeException, BadPaddingException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
@@ -66,6 +65,39 @@ public final class CryptoUtils {
         }
     }
 
+    public static byte[] sha1(byte[] input) throws NoSuchAlgorithmException {
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        return sha1.digest(input);
+    }
+
+    public static byte[] sha256(byte[] input) throws NoSuchAlgorithmException {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        return sha256.digest(input);
+    }
+
+    public static String sha1(String text) throws NoSuchAlgorithmException {
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        byte[] digest = sha1.digest(text.getBytes());
+        return bytes2String(digest);
+    }
+
+    public static String sha256(String text) throws NoSuchAlgorithmException {
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        byte[] digest = sha256.digest(text.getBytes());
+        return bytes2String(digest);
+    }
+
+    private static String bytes2String(byte[] bytes) {
+        StringBuilder string = new StringBuilder();
+        for (byte b : bytes) {
+            String hexString = Integer.toHexString(0x00FF & b);
+            string.append(hexString.length() == 1 ? "0" + hexString : hexString);
+        }
+        return string.toString();
+    }
+
+
+    @Deprecated
     public static byte[] encryptSha1(String strToEncrypt) {
         byte[] digest = null;
         try {
