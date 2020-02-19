@@ -33,20 +33,24 @@ import java.util.zip.GZIPOutputStream;
  */
 public class StringUtils {
 
+    @Deprecated
     public static String randomString() {
         return RandomStringUtils.randomAlphanumeric(10);
     }
 
+    @Deprecated
     public static String randomString(int length) {
         return RandomStringUtils.randomAlphanumeric(length);
     }
 
+    @Deprecated
     public static String sha1(String text) throws NoSuchAlgorithmException {
         MessageDigest sha1 = MessageDigest.getInstance("SHA1");
         byte[] digest = sha1.digest((text).getBytes());
         return bytes2String(digest);
     }
 
+    @Deprecated
     public static String bytes2String(byte[] bytes) {
         StringBuilder string = new StringBuilder();
         for (byte b : bytes) {
@@ -56,6 +60,7 @@ public class StringUtils {
         return string.toString();
     }
 
+    @Deprecated
     public static byte[] gzip(String text) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         BufferedOutputStream bufos = new BufferedOutputStream(new GZIPOutputStream(bos));
@@ -69,6 +74,7 @@ public class StringUtils {
         return retval;
     }
 
+    @Deprecated
     public static String gunzip(byte[] bytes) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         BufferedInputStream bufis = new BufferedInputStream(new GZIPInputStream(bis));

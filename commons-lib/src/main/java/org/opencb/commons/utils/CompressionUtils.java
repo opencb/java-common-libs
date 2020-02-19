@@ -16,13 +16,10 @@
 
 package org.opencb.commons.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.zip.*;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
@@ -71,5 +68,34 @@ public final class CompressionUtils {
         } finally {
             inflater.end();
         }
+    }
+
+    public static byte[] gzip(String text) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        BufferedOutputStream bufos = new BufferedOutputStream(new GZIPOutputStream(bos));
+        try {
+            bufos.write(text.getBytes());
+        } finally {
+            bufos.close();
+        }
+        byte[] retval = bos.toByteArray();
+        bos.close();
+        return retval;
+    }
+
+    public static String gunzip(byte[] bytes) throws IOException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        BufferedInputStream bufis = new BufferedInputStream(new GZIPInputStream(bis));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = bufis.read(buffer)) >= 0) {
+            bos.write(buffer, 0, len);
+        }
+        String retval = bos.toString();
+        bis.close();
+        bufis.close();
+        bos.close();
+        return retval;
     }
 }
