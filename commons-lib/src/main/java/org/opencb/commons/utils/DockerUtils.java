@@ -69,6 +69,9 @@ public class DockerUtils {
         Command cmd = new Command(commandLine.toString());
         cmd.run();
 
+        // Debugger
+        System.out.println("Docker command line:\n" + commandLine);
+
         return commandLine.toString();
     }
 }
