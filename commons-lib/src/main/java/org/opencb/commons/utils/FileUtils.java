@@ -201,7 +201,7 @@ public class FileUtils {
         String output = cmd.getOutput();
         String error = cmd.getError();
 
-        if (org.apache.commons.lang3.StringUtils.isNotEmpty(error)) {
+        if (StringUtils.isNotEmpty(error)) {
             throw new IOException(error);
         }
 
