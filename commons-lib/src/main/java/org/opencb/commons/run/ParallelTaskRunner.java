@@ -321,8 +321,8 @@ public class ParallelTaskRunner<I, O> {
         try {
             run(Long.MAX_VALUE, TimeUnit.DAYS);
         } catch (InterruptedException e) {
-            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
-                    + " interruptions.", interruptions.get(0));
+            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
+                    + " interruptions.", interruptions);
         }
     }
 
@@ -459,12 +459,25 @@ public class ParallelTaskRunner<I, O> {
         logger.info("total:                              = " + prettyTime(System.nanoTime() - start) + "s");
 
         if (config.abortOnFail && !exceptions.isEmpty()) {
-            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size()
-                    + " exceptions.", exceptions.get(0));
+            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.",
+                    exceptions);
         }
         if (interrupted) {
             throw interruptions.get(0);
         }
+    }
+
+    private ExecutionException buildExecutionException(String message, List<? extends Throwable> exceptions) {
+        ExecutionException executionException;
+        if (exceptions.size() == 1) {
+            executionException = new ExecutionException(message, exceptions.get(0));
+        } else {
+            executionException = new ExecutionException(message, null);
+            for (Throwable exception : exceptions) {
+                executionException.addSuppressed(exception);
+            }
+        }
+        return executionException;
     }
 
     private String prettyTime(long time) {
@@ -549,6 +562,10 @@ public class ParallelTaskRunner<I, O> {
                 while (!readBlockingQueue.offer(batch, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
                     if (Thread.currentThread().isInterrupted()) {
                         // Break loop if thread is interrupted
+                        break;
+                    }
+                    if (isAbortPending()) {
+                        // Break loop if aborting
                         break;
                     }
                     if (!isJobsRunning()) {

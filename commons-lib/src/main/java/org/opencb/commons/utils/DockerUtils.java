@@ -24,6 +24,11 @@ public class DockerUtils {
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
                              Map<String, String> dockerParams) throws IOException {
+        // Sanity check
+        if (outputBinding == null) {
+           throw new IOException("Missing output binding");
+        }
+
         // Docker run
         StringBuilder commandLine = new StringBuilder("docker run ");
 
@@ -44,10 +49,12 @@ public class DockerUtils {
             commandLine.append("--user ").append(user[0]).append(":").append(user[1]).append(" ");
         }
 
-        // Mount management (bindings)
-        for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
-            commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
-                    .append("\" ");
+        if (inputBindings != null) {
+            // Mount management (bindings)
+            for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
+                commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
+                        .append("\" ");
+            }
         }
         commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
                 .append(outputBinding.getValue()).append("\" ");
@@ -61,6 +68,9 @@ public class DockerUtils {
         // Execute command
         Command cmd = new Command(commandLine.toString());
         cmd.run();
+
+        // Debugger
+        System.out.println("Docker command line:\n" + commandLine);
 
         return commandLine.toString();
     }
