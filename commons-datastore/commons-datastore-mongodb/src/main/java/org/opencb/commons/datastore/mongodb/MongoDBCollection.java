@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -229,6 +228,14 @@ public class MongoDBCollection {
         return iterator(null, query, null, converter, options);
     }
 
+    public MongoDBIterator<Document> iterator(List<Bson> pipeline, QueryOptions options) {
+        return mongoDBNativeQuery.aggregate(pipeline, null, options);
+    }
+
+    public <T> MongoDBIterator<T> iterator(List<Bson> pipeline, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        return mongoDBNativeQuery.aggregate(pipeline, converter, options);
+    }
+
     public <T> MongoDBIterator<T> iterator(ClientSession clientSession, Bson query, Bson projection,
                                           ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         return mongoDBNativeQuery.find(clientSession, query, projection, converter, options);
@@ -299,8 +306,8 @@ public class MongoDBCollection {
         long start = startQuery();
 
         DataResult<T> queryResult;
-        AggregateIterable<Document> output = mongoDBNativeQuery.aggregate(operations, options);
-        MongoCursor<Document> iterator = output.iterator();
+        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
+//        MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
         if (queryResultWriter != null) {
             try {
@@ -313,15 +320,15 @@ public class MongoDBCollection {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
-            if (converter != null) {
-                while (iterator.hasNext()) {
-                    list.add(converter.convertToDataModelType(iterator.next()));
-                }
-            } else {
+//            if (converter != null) {
+//                while (iterator.hasNext()) {
+//                    list.add(converter.convertToDataModelType(iterator.next()));
+//                }
+//            } else {
                 while (iterator.hasNext()) {
                     list.add((T) iterator.next());
                 }
-            }
+//            }
         }
         queryResult = endQuery(list, start);
         return queryResult;

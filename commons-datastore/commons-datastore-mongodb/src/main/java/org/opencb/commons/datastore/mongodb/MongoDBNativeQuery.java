@@ -90,15 +90,48 @@ public class MongoDBNativeQuery {
         return find(clientSession, query, null, options);
     }
 
-    public AggregateIterable<Document> aggregate(List<? extends Bson> operations) {
-        return aggregate(operations, null);
+    public MongoDBIterator<Document> aggregate(List<? extends Bson> operations) {
+        return aggregate(operations, null, null);
     }
 
-    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
+//    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
+//        // we need to be sure that the List is mutable
+//        List<Bson> bsonOperations = new ArrayList<>(operations);
+//        parseQueryOptions(bsonOperations, options);
+//        return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
+//    }
+
+    public <T> MongoDBIterator<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
+                                            QueryOptions options) {
+        Future<AggregateIterable<Document>> countResults = null;
+//        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            List<Bson> countOperations = new ArrayList<>(operations);
+//            countOperations.add(Aggregates.count("id"));
+//            countResults = executor.submit(() -> dbCollection.aggregate(countOperations));
+//        }
+
         // we need to be sure that the List is mutable
         List<Bson> bsonOperations = new ArrayList<>(operations);
         parseQueryOptions(bsonOperations, options);
-        return (bsonOperations.size() > 0) ? dbCollection.aggregate(bsonOperations) : null;
+        MongoDBIterator<T> iterator = null;
+        if (bsonOperations.size() > 0) {
+            long numMatches = -1;
+//            if (options != null && options.getBoolean(QueryOptions.COUNT) && countResults != null) {
+//                try {
+//                    if (countResults.get().iterator().hasNext()) {
+//                        Document results = countResults.get().iterator().next();
+//                        numMatches = results.getInteger("count", -1);
+//                    }
+//                } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
+//                    numMatches = -1;
+//                }
+//            }
+
+            iterator = new MongoDBIterator<T>(dbCollection.aggregate(bsonOperations).iterator(), converter, numMatches);
+        }
+
+        return iterator;
     }
 
     public MongoDBIterator<Document> find(Bson query, Bson projection, QueryOptions options) {
