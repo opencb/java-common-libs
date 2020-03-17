@@ -423,7 +423,7 @@ public class MongoDBQueryUtils {
      * @param type Type of parameter. Expecting one of {@link QueryParam.Type#DATE} or {@link QueryParam.Type#TIMESTAMP}
      * @return the Bson query.
      */
-    private static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
+    protected static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
                                          QueryParam.Type type) {
         Bson filter = null;
 
@@ -435,6 +435,17 @@ public class MongoDBQueryUtils {
         }
 
         if (date != null) {
+//            if (QueryParam.Type.DATE.equals(type) && comparator == ComparisonOperator.EQUALS) {
+//                Date tmpDate = (Date) date;
+//                if (dateValues.get(0).length() == 4) {
+//                    // Only year provided
+//                    tmpDate.
+//                } else if (dateValues.get(0).length() == 6) {
+//                    // Year and month provided
+//                } else if (dateValues.get(0).length() == 8) {
+//                    // Year, month and day provided
+//                }
+//            }
             switch (comparator) {
                 case BETWEEN:
                     if (dateValues.size() == 2) {
@@ -452,7 +463,17 @@ public class MongoDBQueryUtils {
                     }
                     break;
                 case EQUALS:
-                    filter = Filters.eq(mongoDbField, date);
+                    if (dateValues.get(0).length() <= 8 && QueryParam.Type.DATE.equals(type)) {
+                        List<Date> dates = getDateRange(dateValues.get(0));
+                        // We will apply a range of dates. Example: 2020 -> It will query for the whole 2020 year
+                        // 202002 -> It will query for everything in February 2020
+                        // 20200201 -> It will query for everything of the 1st of February 2020
+                        filter = new Document(mongoDbField, new Document()
+                                .append("$gte", dates.get(0))
+                                .append("$lt", dates.get(1)));
+                    } else {
+                        filter = Filters.eq(mongoDbField, date);
+                    }
                     break;
                 case GREATER_THAN:
                     filter = Filters.gt(mongoDbField, date);
@@ -824,6 +845,40 @@ public class MongoDBQueryUtils {
         LocalDateTime localDateTime = LocalDateTime.parse(myDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         // We convert it to date because it is the type used by mongo
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    protected static List<Date> getDateRange(String stringDate) {
+        LocalDateTime from;
+        LocalDateTime to;
+        if (stringDate.length() == 4) {
+            // Only year provided
+            int year = Integer.parseInt(stringDate);
+
+            LocalDateTime time = LocalDateTime.of(year, 1, 1, 0, 0);
+            from = time.minusSeconds(1);
+            to = time.plusYears(1);
+        } else if (stringDate.length() == 6) {
+            // Year and month provided
+            int year = Integer.parseInt(stringDate.substring(0, 4));
+            int month = Integer.parseInt(stringDate.substring(4, 6));
+
+            LocalDateTime time = LocalDateTime.of(year, month, 1, 0, 0);
+            from = time.minusSeconds(1);
+            to = time.plusMonths(1);
+        } else if (stringDate.length() == 8) {
+            // Year, month and day provided
+            int year = Integer.parseInt(stringDate.substring(0, 4));
+            int month = Integer.parseInt(stringDate.substring(4, 6));
+            int day =  Integer.parseInt(stringDate.substring(6, 8));
+
+            LocalDateTime time = LocalDateTime.of(year, month, day, 0, 0);
+            from = time.minusSeconds(1);
+            to = time.plusDays(1);
+        } else {
+            return null;
+        }
+        return Arrays.asList(Date.from(from.atZone(ZoneId.systemDefault()).toInstant()),
+                Date.from(to.atZone(ZoneId.systemDefault()).toInstant()));
     }
 
 }
