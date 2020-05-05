@@ -104,12 +104,12 @@ public class MongoDBNativeQuery {
     public <T> MongoDBIterator<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
                                             QueryOptions options) {
         Future<AggregateIterable<Document>> countResults = null;
-//        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
-//            ExecutorService executor = Executors.newSingleThreadExecutor();
-//            List<Bson> countOperations = new ArrayList<>(operations);
-//            countOperations.add(Aggregates.count("id"));
-//            countResults = executor.submit(() -> dbCollection.aggregate(countOperations));
-//        }
+        if (options != null && options.getBoolean(QueryOptions.COUNT)) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            List<Bson> countOperations = new ArrayList<>(operations);
+            countOperations.add(Aggregates.count("id"));
+            countResults = executor.submit(() -> dbCollection.aggregate(countOperations));
+        }
 
         // we need to be sure that the List is mutable
         List<Bson> bsonOperations = new ArrayList<>(operations);
@@ -117,16 +117,16 @@ public class MongoDBNativeQuery {
         MongoDBIterator<T> iterator = null;
         if (bsonOperations.size() > 0) {
             long numMatches = -1;
-//            if (options != null && options.getBoolean(QueryOptions.COUNT) && countResults != null) {
-//                try {
-//                    if (countResults.get().iterator().hasNext()) {
-//                        Document results = countResults.get().iterator().next();
-//                        numMatches = results.getInteger("count", -1);
-//                    }
-//                } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
-//                    numMatches = -1;
-//                }
-//            }
+            if (options != null && options.getBoolean(QueryOptions.COUNT) && countResults != null) {
+                try {
+                    if (countResults.get().iterator().hasNext()) {
+                        Document results = countResults.get().iterator().next();
+                        numMatches = results.getInteger("count", -1);
+                    }
+                } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
+                    // ignore error, just return default count of -1
+                }
+            }
 
             iterator = new MongoDBIterator<T>(dbCollection.aggregate(bsonOperations).iterator(), converter, numMatches);
         }
@@ -226,7 +226,7 @@ public class MongoDBNativeQuery {
             try {
                 numMatches = countFuture.get();
             } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
-                numMatches = -1;
+                // ignore error, ust return default count of -1
             }
         }
         return new MongoDBIterator<T>(findIterable.iterator(), converter, numMatches);
