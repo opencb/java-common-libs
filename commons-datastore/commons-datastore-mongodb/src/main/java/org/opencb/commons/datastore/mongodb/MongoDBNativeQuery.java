@@ -38,12 +38,10 @@ import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.getProjecti
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.parseQueryOptions;
 
 
-/**
- * Created by imedina on 28/03/14.
- */
 public class MongoDBNativeQuery {
 
     private final MongoCollection<Document> dbCollection;
+
 
     MongoDBNativeQuery(MongoCollection<Document> dbCollection) {
         this.dbCollection = dbCollection;
@@ -73,7 +71,7 @@ public class MongoDBNativeQuery {
         return distinct(key, null, Document.class);
     }
 
-    public <T> DistinctIterable distinct(String key, Class<T> resultClass) {
+    public <T> DistinctIterable<T> distinct(String key, Class<T> resultClass) {
         return distinct(key, null, resultClass);
     }
 
@@ -127,7 +125,6 @@ public class MongoDBNativeQuery {
                     // ignore error, just return default count of -1
                 }
             }
-
             iterator = new MongoDBIterator<T>(dbCollection.aggregate(bsonOperations).iterator(), converter, numMatches);
         }
 
@@ -138,8 +135,10 @@ public class MongoDBNativeQuery {
         return find(null, query, projection, options);
     }
 
-    public FindIterable<Document> nativeFind(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+    public FindIterable<Document> nativeFind(ClientSession clientSession, Bson query, Bson projection,
+                                             QueryOptions options) {
         if (projection == null) {
+            // FIXME projecttion is alwys null, why is it passed as parameter?
             projection = getProjection(projection, options);
         }
 
@@ -166,7 +165,8 @@ public class MongoDBNativeQuery {
                 findIterable.sort(((Bson) sortObject));
             } else if (sortObject instanceof String) {
                 String order = options.getString(QueryOptions.ORDER, "DESC");
-                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC")
+                        || order.equals("1")) {
                     findIterable.sort(Sorts.ascending(((String) sortObject)));
                 } else {
                     findIterable.sort(Sorts.descending(((String) sortObject)));
@@ -185,7 +185,8 @@ public class MongoDBNativeQuery {
                         sortField = field;
                         order = options.getString(QueryOptions.ORDER, "DESC");
                     }
-                    if (QueryOptions.ASCENDING.equalsIgnoreCase(order) || "ASC".equalsIgnoreCase(order) || "1".equals(order)) {
+                    if (QueryOptions.ASCENDING.equalsIgnoreCase(order) || "ASC".equalsIgnoreCase(order)
+                            || "1".equals(order)) {
                         sortedList.add(Sorts.ascending(sortField));
                     } else {
                         sortedList.add(Sorts.descending(sortField));
@@ -207,7 +208,8 @@ public class MongoDBNativeQuery {
         return findIterable;
     }
 
-    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection, QueryOptions options) {
+    public MongoDBIterator<Document> find(ClientSession clientSession, Bson query, Bson projection,
+                                          QueryOptions options) {
         return find(clientSession, query, projection, null, options);
     }
 
@@ -226,7 +228,7 @@ public class MongoDBNativeQuery {
             try {
                 numMatches = countFuture.get();
             } catch (MongoExecutionTimeoutException | InterruptedException | ExecutionException e) {
-                // ignore error, ust return default count of -1
+                // ignore error, just return default count of -1
             }
         }
         return new MongoDBIterator<T>(findIterable.iterator(), converter, numMatches);
@@ -337,8 +339,8 @@ public class MongoDBNativeQuery {
         return replace(null, queries, updates, upsert);
     }
 
-    public BulkWriteResult replace(ClientSession clientSession, List<? extends Bson> queries, List<? extends Bson> updates,
-                                   boolean upsert) {
+    public BulkWriteResult replace(ClientSession clientSession, List<? extends Bson> queries,
+                                   List<? extends Bson> updates, boolean upsert) {
         if (queries.size() != updates.size()) {
             throw wrongQueryUpdateSize(queries, updates);
         }
@@ -377,12 +379,13 @@ public class MongoDBNativeQuery {
         }
     }
 
-    public BulkWriteResult update(List<? extends Bson> documentList, List<? extends Bson> updatesList, boolean upsert, boolean multi) {
+    public BulkWriteResult update(List<? extends Bson> documentList, List<? extends Bson> updatesList, boolean upsert,
+                                  boolean multi) {
         return update(null, documentList, updatesList, upsert, multi);
     }
 
-    public BulkWriteResult update(ClientSession clientSession, List<? extends Bson> documentList, List<? extends Bson> updatesList,
-                                  boolean upsert, boolean multi) {
+    public BulkWriteResult update(ClientSession clientSession, List<? extends Bson> documentList,
+                                  List<? extends Bson> updatesList, boolean upsert, boolean multi) {
         if (documentList.size() != updatesList.size()) {
             throw wrongQueryUpdateSize(documentList, updatesList);
         }
@@ -495,7 +498,8 @@ public class MongoDBNativeQuery {
         return findAndUpdate(null, query, projection, sort, update, options);
     }
 
-    public Document findAndUpdate(ClientSession clientSession, Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
+    public Document findAndUpdate(ClientSession clientSession, Bson query, Bson projection, Bson sort, Bson update,
+                                  QueryOptions options) {
         boolean upsert = false;
         boolean returnNew = false;
 
