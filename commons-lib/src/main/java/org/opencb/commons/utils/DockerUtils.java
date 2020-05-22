@@ -30,7 +30,7 @@ public class DockerUtils {
         }
 
         // Docker run
-        StringBuilder commandLine = new StringBuilder("docker run ");
+        StringBuilder commandLine = new StringBuilder("docker run --rm ");
 
         // Docker params
         boolean setUser = true;
