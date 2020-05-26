@@ -40,7 +40,11 @@ public class MongoDBConfiguration extends ObjectMap {
     public static final String CONNECTIONS_PER_HOST = "connectionsPerHost";
     public static final int CONNECTIONS_PER_HOST_DEFAULT = 20;
     public static final String SSL_ENABLED = "sslEnabled";
-    public static final Boolean SSL_ENABLED_DEFAULT = false;
+    public static final boolean SSL_ENABLED_DEFAULT = false;
+    public static final String SSL_INVALID_HOSTNAME_ALLOWED = "sslInvalidHostnameAllowed";
+    public static final boolean SSL_INVALID_HOSTNAME_ALLOWED_DEFAULT = false;
+    public static final String SSL_INVALID_CERTIFICATES_ALLOWED = "sslInvalidCertificatesAllowed";
+    public static final boolean SSL_INVALID_CERTIFICATES_ALLOWED_DEFAULT = false;
 
     public enum ReadPreference {
         PRIMARY("primary"),
@@ -199,4 +203,10 @@ public class MongoDBConfiguration extends ObjectMap {
 //    }
 
 
+    @Override
+    public String toJson() {
+        ObjectMap copy = new ObjectMap(this);
+        copy.replace(PASSWORD, "xxxxxxxx");
+        return copy.toJson();
+    }
 }
