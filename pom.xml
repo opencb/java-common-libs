@@ -61,6 +61,11 @@
             <name>Joaquin</name>
             <email>joaquintarraga@gmail.com</email>
         </developer>
+        <developer>
+            <id>julie-sullivan</id>
+            <name>Julie</name>
+            <email>julie.sullivan@gmail.com</email>
+        </developer>
     </developers>
 
     <mailingLists>
