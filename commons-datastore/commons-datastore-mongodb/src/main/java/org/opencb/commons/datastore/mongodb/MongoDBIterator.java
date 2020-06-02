@@ -25,7 +25,7 @@ public class MongoDBIterator<E> implements Iterator<E>, Closeable {
 
     @Override
     public boolean hasNext() {
-        return iterator.hasNext();
+        return iterator != null && iterator.hasNext();
     }
 
     @Override
@@ -45,6 +45,8 @@ public class MongoDBIterator<E> implements Iterator<E>, Closeable {
 
     @Override
     public void close() {
-        iterator.close();
+        if (iterator != null) {
+            iterator.close();
+        }
     }
 }

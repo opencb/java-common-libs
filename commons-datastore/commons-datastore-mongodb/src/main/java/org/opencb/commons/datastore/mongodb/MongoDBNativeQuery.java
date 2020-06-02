@@ -221,7 +221,10 @@ public class MongoDBNativeQuery {
             countFuture = executor.submit(() -> count(clientSession, query));
         }
 
-        FindIterable<Document> findIterable = nativeFind(clientSession, query, projection, options);
+        FindIterable<Document> findIterable = null;
+        if (options == null || options.getInt(QueryOptions.LIMIT, Integer.MAX_VALUE) > 0) {
+            findIterable = nativeFind(clientSession, query, projection, options);
+        }
 
         long numMatches = -1;
         if (options != null && options.getBoolean(QueryOptions.COUNT)) {
@@ -231,7 +234,7 @@ public class MongoDBNativeQuery {
                 // ignore error, just return default count of -1
             }
         }
-        return new MongoDBIterator<T>(findIterable.iterator(), converter, numMatches);
+        return new MongoDBIterator<T>(findIterable != null ? findIterable.iterator() : null, converter, numMatches);
     }
 
     public Document explain(Bson query, Bson projection, QueryOptions options) {
