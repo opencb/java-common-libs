@@ -5,6 +5,8 @@ import org.opencb.commons.io.DataWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created on 13/02/18.
@@ -23,6 +25,51 @@ public interface Task<T, R> {
     }
 
     default void post() throws Exception {
+    }
+
+    /**
+     * Create a task given a Lambda function to be applied to each element.
+     * If the function returns null, the element is not propagated.
+     *
+     * @param function The function to be applied
+     * @param <T>   Input type
+     * @param <R>   Return type
+     * @return      A task that executes the function for each element.
+     */
+    static <T, R> Task<T, R> forEach(Function<T, R> function) {
+        return batch -> {
+            if (batch == null || batch.isEmpty()) {
+                return Collections.emptyList();
+            }
+            List<R> list = new ArrayList<>(batch.size());
+            for (T t : batch) {
+                R r = function.apply(t);
+                if (r != null) {
+                    list.add(r);
+                }
+            }
+            return list;
+        };
+    }
+
+    /**
+     * Create a task given a Lambda function to be applied to each element.
+     * The consumer can only modify the input element.
+     *
+     * @param function The function to be applied
+     * @param <T>   Input type
+     * @return      A task that executes the function for each element.
+     */
+    static <T> Task<T, T> forEach(Consumer<T> function) {
+        return batch -> {
+            if (batch == null || batch.isEmpty()) {
+                return Collections.emptyList();
+            }
+            for (T t : batch) {
+                function.accept(t);
+            }
+            return batch;
+        };
     }
 
     /**

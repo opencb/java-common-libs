@@ -23,39 +23,47 @@ import java.util.List;
  */
 public class AbstractResult {
 
+    @Deprecated
     protected String id;
     protected int dbTime;
+    @Deprecated
     protected long numMatches;
-    protected List<Error> warning;
+    protected List<String> warnings;
+    @Deprecated
     protected Error error;
 
     public AbstractResult() {
     }
 
-    public AbstractResult(String id, int dbTime, long numMatches, List<Error> warning, Error error) {
+    @Deprecated
+    public AbstractResult(String id, int dbTime, long numMatches, List<String> warnings, Error error) {
         this.id = id;
         this.dbTime = dbTime;
         this.numMatches = numMatches;
-        this.warning = warning;
+        this.warnings = warnings;
         this.error = error;
+    }
+
+    public AbstractResult(int dbTime, List<String> warnings) {
+        this.dbTime = dbTime;
+        this.warnings = warnings;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("AbstractResult{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", dbTime=").append(dbTime);
-        sb.append(", numMatches=").append(numMatches);
-        sb.append(", warning=").append(warning);
-        sb.append(", error=").append(error);
+        sb.append("dbTime=").append(dbTime);
+        sb.append(", warnings=").append(warnings);
         sb.append('}');
         return sb.toString();
     }
 
+    @Deprecated
     public String getId() {
         return id;
     }
 
+    @Deprecated
     public AbstractResult setId(String id) {
         this.id = id;
         return this;
@@ -70,28 +78,32 @@ public class AbstractResult {
         return this;
     }
 
+    @Deprecated
     public long getNumMatches() {
         return numMatches;
     }
 
+    @Deprecated
     public AbstractResult setNumMatches(long numMatches) {
         this.numMatches = numMatches;
         return this;
     }
 
-    public List<Error> getWarning() {
-        return warning;
+    public List<String> getWarnings() {
+        return warnings;
     }
 
-    public AbstractResult setWarning(List<Error> warning) {
-        this.warning = warning;
+    public AbstractResult setWarnings(List<String> warnings) {
+        this.warnings = warnings;
         return this;
     }
 
+    @Deprecated
     public Error getError() {
         return error;
     }
 
+    @Deprecated
     public AbstractResult setError(Error error) {
         this.error = error;
         return this;

@@ -22,8 +22,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
-import org.opencb.commons.datastore.core.QueryResult;
-import org.opencb.commons.datastore.core.result.FacetQueryResult;
+import org.opencb.commons.datastore.core.DataResult;
+import org.opencb.commons.datastore.core.FacetField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +48,18 @@ public class SolrCollection {
         logger = LoggerFactory.getLogger(SolrCollection.class);
     }
 
-    public <S> QueryResult<S> query(SolrQuery solrQuery, Class<S> clazz) throws IOException, SolrServerException {
+    public <S> DataResult<S> query(SolrQuery solrQuery, Class<S> clazz) throws IOException, SolrServerException {
         logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
-        return new QueryResult<>("", dbTime, solrResponseBeans.size(), solrResponse.getResults().getNumFound(), "", "", solrResponseBeans);
+        return new DataResult<>(dbTime, Collections.emptyList(), solrResponseBeans.size(), solrResponseBeans,
+                solrResponse.getResults().getNumFound());
     }
 
-    public <S, T> QueryResult<T> query(SolrQuery solrQuery, Class<S> clazz, ComplexTypeConverter<T, S> converter)
+    public <S, T> DataResult<T> query(SolrQuery solrQuery, Class<S> clazz, ComplexTypeConverter<T, S> converter)
             throws IOException, SolrServerException {
         logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
@@ -71,14 +72,14 @@ public class SolrCollection {
             results.add(converter.convertToDataModelType(s));
         }
 
-        return new QueryResult<>("", dbTime, results.size(), solrResponse.getResults().getNumFound(), "", "", results);
+        return new DataResult<>(dbTime, Collections.emptyList(), results.size(), results, solrResponse.getResults().getNumFound());
     }
 
-    public FacetQueryResult facet(SolrQuery solrQuery) throws IOException, SolrServerException {
+    public DataResult<FacetField> facet(SolrQuery solrQuery) throws IOException, SolrServerException {
         return facet(solrQuery, null, null);
     }
 
-    public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException,
+    public DataResult<FacetField> facet(SolrQuery solrQuery, Map<String, String> alias) throws IOException,
             SolrServerException {
         return facet(solrQuery, alias, null);
     }
@@ -87,7 +88,7 @@ public class SolrCollection {
         QueryResponse apply(QueryResponse solrQueryResponse);
     }
 
-    public FacetQueryResult facet(SolrQuery solrQuery, Map<String, String> alias, FacetPostprocessing post)
+    public DataResult<FacetField> facet(SolrQuery solrQuery, Map<String, String> alias, FacetPostprocessing post)
             throws IOException, SolrServerException {
         logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
@@ -95,14 +96,13 @@ public class SolrCollection {
         if (post != null) {
             query = post.apply(query);
         }
-        List<FacetQueryResult.Field> results = SolrFacetToFacetQueryResultItemConverter.convert(query, alias);
+        List<FacetField> results = SolrFacetToFacetFieldsConverter.convert(query, alias);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
-        return new FacetQueryResult("Faceted data from Solr", dbTime, results.size(), Collections.emptyList(), null, results,
-                solrQuery.getQuery());
+        return new DataResult<>(dbTime, Collections.emptyList(), results.size(), results, results.size(), null);
     }
 
-    public QueryResult<Long> count(SolrQuery solrQuery) throws IOException, SolrServerException {
+    public DataResult<Long> count(SolrQuery solrQuery) throws IOException, SolrServerException {
         // Only count, no results
         solrQuery.setRows(0);
 
@@ -111,6 +111,6 @@ public class SolrCollection {
         QueryResponse solrResponse = solrClient.query(collection, solrQuery);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
-        return new QueryResult(null, dbTime, 1, 1, null, null, Collections.singletonList(solrResponse.getResults().getNumFound()));
+        return new DataResult(dbTime, Collections.emptyList(), 1, Collections.singletonList(solrResponse.getResults().getNumFound()), 1);
     }
 }

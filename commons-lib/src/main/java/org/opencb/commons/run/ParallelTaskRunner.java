@@ -99,7 +99,8 @@ public class ParallelTaskRunner<I, O> {
     private long timeWriting;
 
     private List<Future> futureTasks;
-    private List<Exception> exceptions;
+    private List<Throwable> exceptions;
+    private List<Error> errors;
     // Main thread interruptions
     private List<InterruptedException> interruptions;
 
@@ -182,6 +183,30 @@ public class ParallelTaskRunner<I, O> {
         private final boolean abortOnFail;
         private final boolean sorted;
         private final int readQueuePutTimeout;
+
+        public int getNumTasks() {
+            return numTasks;
+        }
+
+        public int getBatchSize() {
+            return batchSize;
+        }
+
+        public int getCapacity() {
+            return capacity;
+        }
+
+        public boolean isAbortOnFail() {
+            return abortOnFail;
+        }
+
+        public boolean isSorted() {
+            return sorted;
+        }
+
+        public int getReadQueuePutTimeout() {
+            return readQueuePutTimeout;
+        }
     }
 
     private static final class Batch<T> implements Comparable<Batch<T>> {
@@ -296,8 +321,8 @@ public class ParallelTaskRunner<I, O> {
         try {
             run(Long.MAX_VALUE, TimeUnit.DAYS);
         } catch (InterruptedException e) {
-            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
-                    + " interruptions.", interruptions.get(0));
+            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + interruptions.size()
+                    + " interruptions.", interruptions);
         }
     }
 
@@ -434,20 +459,37 @@ public class ParallelTaskRunner<I, O> {
         logger.info("total:                              = " + prettyTime(System.nanoTime() - start) + "s");
 
         if (config.abortOnFail && !exceptions.isEmpty()) {
-            throw new ExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size()
-                    + " exceptions.", exceptions.get(0));
+            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.",
+                    exceptions);
         }
         if (interrupted) {
             throw interruptions.get(0);
         }
     }
 
+    private ExecutionException buildExecutionException(String message, List<? extends Throwable> exceptions) {
+        ExecutionException executionException;
+        if (exceptions.size() == 1) {
+            executionException = new ExecutionException(message, exceptions.get(0));
+        } else {
+            executionException = new ExecutionException(message, null);
+            for (Throwable exception : exceptions) {
+                executionException.addSuppressed(exception);
+            }
+        }
+        return executionException;
+    }
+
     private String prettyTime(long time) {
         return DECIMAL_FORMAT.format(TimeUnit.NANOSECONDS.toMillis(time) / 1000.0);
     }
 
-    public List<Exception> getExceptions() {
+    public List<Throwable> getExceptions() {
         return exceptions;
+    }
+
+    public List<Error> getErrors() {
+        return errors;
     }
 
     public long getTimeBlockedAtPutRead(TimeUnit unit) {
@@ -520,6 +562,10 @@ public class ParallelTaskRunner<I, O> {
                 while (!readBlockingQueue.offer(batch, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
                     if (Thread.currentThread().isInterrupted()) {
                         // Break loop if thread is interrupted
+                        break;
+                    }
+                    if (isAbortPending()) {
+                        // Break loop if aborting
                         break;
                     }
                     if (!isJobsRunning()) {
@@ -696,6 +742,9 @@ public class ParallelTaskRunner<I, O> {
                         }
                     }
                 }
+            } catch (Error e) {
+                exceptions.add(e);
+                errors.add(e);
             } catch (RuntimeException e) {
                 exceptions.add(e);
             } catch (InterruptedException e) {
@@ -775,6 +824,10 @@ public class ParallelTaskRunner<I, O> {
                     } catch (Exception e) {
                         logger.error("Error writing batch " + batch.position, e);
                         exceptions.add(e);
+                    } catch (Error e) {
+                        errors.add(e);
+                        exceptions.add(e);
+                        throw e;
                     }
 
                     if (isAbortPending()) {

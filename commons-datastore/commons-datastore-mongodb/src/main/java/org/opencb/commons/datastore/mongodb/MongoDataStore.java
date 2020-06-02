@@ -16,11 +16,12 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ReadPreference;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.TransactionBody;
 import org.bson.Document;
+import org.opencb.commons.datastore.core.DataResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,10 +48,19 @@ public class MongoDataStore {
 
     protected Logger logger = LoggerFactory.getLogger(MongoDataStore.class);
 
+    public static final TransactionOptions DEFAULT_TRANSACTION_OPTION =
+            TransactionOptions.builder()
+                    .readPreference(ReadPreference.primary())
+                    .readConcern(ReadConcern.LOCAL)
+                    .writeConcern(WriteConcern.MAJORITY)
+                    .build();
+
     MongoDataStore(MongoClient mongoClient, MongoDatabase db, MongoDBConfiguration mongoDBConfiguration) {
         this.mongoClient = mongoClient;
         this.db = db;
         this.mongoDBConfiguration = mongoDBConfiguration;
+
+
     }
 
     public boolean testConnection() {
@@ -87,6 +97,25 @@ public class MongoDataStore {
     public boolean isReplSet() {
         Document document = getServerStatus();
         return document.containsKey(REPL_SET_KEY);
+    }
+
+    public ClientSession startSession() {
+        return mongoClient.startSession(
+                ClientSessionOptions.builder()
+                        .defaultTransactionOptions(
+                                TransactionOptions.builder().writeConcern(WriteConcern.MAJORITY).build())
+                        .build());
+    }
+
+    public DataResult commitSession(ClientSession clientSession, TransactionBody<DataResult> txnBody) {
+        try {
+            DataResult dataResult = clientSession.withTransaction(txnBody);
+            return dataResult;
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            clientSession.close();
+        }
     }
 
     public MongoDBCollection createCollection(String collectionName) {
@@ -129,6 +158,12 @@ public class MongoDataStore {
         mongoClient.close();
     }
 
+    /**
+     * @return the mongo client for this database. Might be null.
+     */
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }
 
     /*
      * GETTERS, NO SETTERS ARE AVAILABLE TO MAKE THIS CLASS IMMUTABLE
@@ -150,5 +185,4 @@ public class MongoDataStore {
     public MongoDBConfiguration getMongoDBConfiguration() {
         return mongoDBConfiguration;
     }
-
 }

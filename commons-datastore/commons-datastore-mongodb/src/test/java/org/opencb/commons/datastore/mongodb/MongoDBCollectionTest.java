@@ -20,16 +20,14 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.datastore.core.QueryOptions;
-import org.opencb.commons.datastore.core.QueryResult;
 import org.opencb.commons.datastore.core.QueryResultWriter;
 
 import java.io.DataOutputStream;
@@ -56,7 +54,7 @@ public class MongoDBCollectionTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
-    public static final List<String> SURENAMES = Arrays.asList("Doe", "Davis", null);
+    public static final List<String> SURNAMES = Arrays.asList("Doe", "Davis", null);
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -110,7 +108,7 @@ public class MongoDBCollectionTest {
         for (long i = 0; i < size; i++) {
             document = new Document("id", i);
             document.put("name", NAMES.get(random.nextInt(NAMES.size())));
-            document.put("surname", SURENAMES.get(random.nextInt(SURENAMES.size())));
+            document.put("surname", SURNAMES.get(random.nextInt(SURNAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
             mongoDBCollection.nativeQuery().insert(document, null);
@@ -128,21 +126,21 @@ public class MongoDBCollectionTest {
 
         BasicQueryResultWriter queryResultWriter = new BasicQueryResultWriter();
         mongoDBCollection.setQueryResultWriter(queryResultWriter);
-        QueryResult<Document> dbObjectQueryResult = mongoDBCollection.find(new Document("id", new Document("$gt", 50)), null);
+        DataResult<Document> dbObjectQueryResult = mongoDBCollection.find(new Document("id", new Document("$gt", 50)), null);
         System.out.println(dbObjectQueryResult);
-        assert (dbObjectQueryResult.getResult().isEmpty());
+        assert (dbObjectQueryResult.getResults().isEmpty());
 
         mongoDBCollection.setQueryResultWriter(null);
         dbObjectQueryResult = mongoDBCollection.find(new Document("id", new Document("$gt", 50)), null);
         System.out.println(dbObjectQueryResult);
-        assert (!dbObjectQueryResult.getResult().isEmpty());
+        assert (!dbObjectQueryResult.getResults().isEmpty());
 
     }
 
     @Test
     public void testDistinct() throws Exception {
-        QueryResult<Long> id1 = mongoDBCollection.distinct("id", null, Long.class);
-//        QueryResult<Integer> id2 = mongoDBCollection.distinct("id", null, Object.class, new ComplexTypeConverter<Object, Integer>() {
+        DataResult<Long> id1 = mongoDBCollection.distinct("id", null, Long.class);
+//        DataResult<Integer> id2 = mongoDBCollection.distinct("id", null, Object.class, new ComplexTypeConverter<Object, Integer>() {
 //            @Override
 //            public Integer convertToStorageType(Object object) {
 //                if (object instanceof Integer) {
@@ -167,46 +165,68 @@ public class MongoDBCollectionTest {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
                 .append(QueryOptions.ORDER, "asc");
-        List<Document> result = mongoDBCollection.find(query, queryOptions).getResult();
+        List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
         assertEquals(0L, result.get(0).get("number"));
     }
 
     @Test
+    public void testMultipleSortOrder() throws Exception {
+        Document query = new Document();
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 500)
+                .append(QueryOptions.SORT, Arrays.asList("age:ASC", "number:DESC"))
+                .append(QueryOptions.ORDER, "asc");
+        int age = 0;
+        long number = Long.MAX_VALUE;
+        List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
+        for (Document document : result) {
+            if (age < document.getInteger("age")) {
+                number = Long.MAX_VALUE;
+            }
+
+            assertTrue(age <= document.getInteger("age"));
+            assertTrue(number >= document.getLong("number"));
+
+            age = document.getInteger("age");
+            number = document.getLong("number");
+        }
+    }
+
+    @Test
     public void testCount() throws Exception {
-        QueryResult<Long> queryResult = mongoDBCollection.count();
-        assertEquals("The number of documents must be equals", new Long(N), queryResult.getResult().get(0));
+        DataResult<Long> queryResult = mongoDBCollection.count();
+        assertEquals("The number of documents must be equals", N, queryResult.getNumMatches());
     }
 
     @Test
     public void testCount1() throws Exception {
-        QueryResult<Long> queryResult = mongoDBCollection.count();
-        assertEquals("The number must be equals", new Long(N), queryResult.first());
+        DataResult<Long> queryResult = mongoDBCollection.count();
+        assertEquals("The number must be equals", N, queryResult.getNumMatches());
     }
 
     @Test
     public void testDistinct1() throws Exception {
-        QueryResult<Integer> queryResult = mongoDBCollection.distinct("age", null, Integer.class);
+        DataResult<Integer> queryResult = mongoDBCollection.distinct("age", null, Integer.class);
         assertNotNull("Object cannot be null", queryResult);
         assertEquals("ResultType must be 'java.lang.Integer'", "java.lang.Integer", queryResult.getResultType());
     }
 
     @Test
     public void testDistinct2() throws Exception {
-        QueryResult<String> queryResult = mongoDBCollection.distinct("name", null, String.class);
+        DataResult<String> queryResult = mongoDBCollection.distinct("name", null, String.class);
         assertNotNull("Object cannot be null", queryResult);
         assertEquals("ResultType must be 'java.lang.String'", String.class.getName(), queryResult.getResultType());
     }
 
     @Test
     public void testDistinct3() throws Exception {
-        QueryResult<String> queryResult = mongoDBCollection.distinct("surename", null, String.class);
+        DataResult<String> queryResult = mongoDBCollection.distinct("surename", null, String.class);
         assertNotNull("Object cannot be null", queryResult);
         assertEquals("ResultType must be 'java.lang.String'", String.class.getName(), queryResult.getResultType());
     }
 
 //    @Test
 //    public void testDistinct3() throws Exception {
-//        QueryResult<Integer> queryResult = mongoDBCollection.distinct("age", null, new ComplexTypeConverter<Integer, Object>() {
+//        DataResult<Integer> queryResult = mongoDBCollection.distinct("age", null, new ComplexTypeConverter<Integer, Object>() {
 //            @Override
 //            public Integer convertToDataModelType(Object object) {
 //                return Integer.parseInt(object.toString());
@@ -225,8 +245,8 @@ public class MongoDBCollectionTest {
     public void testFind() throws Exception {
         Document dbObject = new Document("id", 4);
         QueryOptions queryOptions = new QueryOptions("include", Arrays.asList("id"));
-        QueryResult<Document> queryResult = mongoDBCollection.find(dbObject, queryOptions);
-        assertNotNull("Object cannot be null", queryResult.getResult());
+        DataResult<Document> queryResult = mongoDBCollection.find(dbObject, queryOptions);
+        assertNotNull("Object cannot be null", queryResult.getResults());
         assertEquals("Returned Id does not match", 4L, queryResult.first().get("id"));
 //        System.out.println("queryResult 'include' = " + queryResult.toString());
     }
@@ -236,8 +256,8 @@ public class MongoDBCollectionTest {
         Document dbObject = new Document("id", 4);
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-        QueryResult<Document> queryResult = mongoDBCollection.find(dbObject, returnFields, queryOptions);
-        assertNotNull("Object cannot be null", queryResult.getResult());
+        DataResult<Document> queryResult = mongoDBCollection.find(dbObject, returnFields, queryOptions);
+        assertNotNull("Object cannot be null", queryResult.getResults());
         assertNull("Field 'name' must not exist", queryResult.first().get("name"));
 //        System.out.println("queryResult 'projection' = " + queryResult);
     }
@@ -247,8 +267,8 @@ public class MongoDBCollectionTest {
         Document dbObject = new Document("id", 4);
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-        QueryResult<HashMap> queryResult = mongoDBCollection.find(dbObject, returnFields, HashMap.class, queryOptions);
-        assertNotNull("Object cannot be null", queryResult.getResult());
+        DataResult<HashMap> queryResult = mongoDBCollection.find(dbObject, returnFields, HashMap.class, queryOptions);
+        assertNotNull("Object cannot be null", queryResult.getResults());
         assertTrue("Returned field must instance of Hashmap", queryResult.first() instanceof HashMap);
     }
 
@@ -257,7 +277,7 @@ public class MongoDBCollectionTest {
 //        final Document dbObject = new Document("id", 4);
 //        Document returnFields = new Document("id", 1);
 //        QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-//        QueryResult<HashMap> queryResult = mongoDBCollection.find(dbObject, returnFields,
+//        DataResult<HashMap> queryResult = mongoDBCollection.find(dbObject, returnFields,
 //                new ComplexTypeConverter<HashMap, Object>() {
 //                    @Override
 //                    public HashMap convertToDataModelType(Object object) {
@@ -269,7 +289,7 @@ public class MongoDBCollectionTest {
 //                        return null;
 //                    }
 //                }, queryOptions);
-//        assertNotNull("Object cannot be null", queryResult.getResult());
+//        assertNotNull("Object cannot be null", queryResult.getResults());
 //        assertTrue("Returned field must instance of Hashmap", queryResult.first() instanceof HashMap);
 //    }
 
@@ -282,9 +302,9 @@ public class MongoDBCollectionTest {
         }
 
         QueryOptions queryOptions = new QueryOptions("include", Arrays.asList("id"));
-        List<QueryResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, queryOptions);
+        List<DataResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, queryOptions);
         assertEquals("List must contain 10 results", 10, queryResultList.size());
-        assertNotNull("Object cannot be null", queryResultList.get(0).getResult());
+        assertNotNull("Object cannot be null", queryResultList.get(0).getResults());
         assertEquals("Returned Id does not match", 9L, queryResultList.get(9).first().get("id"));
     }
 
@@ -297,9 +317,9 @@ public class MongoDBCollectionTest {
         }
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-        List<QueryResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, queryOptions);
+        List<DataResult<Document>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, queryOptions);
         assertEquals("List must contain 10 results", 10, queryResultList.size());
-        assertNotNull("Object cannot be null", queryResultList.get(0).getResult());
+        assertNotNull("Object cannot be null", queryResultList.get(0).getResults());
         assertNull("Field 'name' must not exist", queryResultList.get(0).first().get("name"));
         assertEquals("resultType must be 'org.bson.Document'", "org.bson.Document", queryResultList.get(0).getResultType());
     }
@@ -313,9 +333,9 @@ public class MongoDBCollectionTest {
         }
         Document returnFields = new Document("id", 1);
         QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-        List<QueryResult<HashMap>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, HashMap.class, queryOptions);
+        List<DataResult<HashMap>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, HashMap.class, queryOptions);
         assertNotNull("Object queryResultList cannot be null", queryResultList);
-        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResult());
+        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResults());
         assertTrue("Returned field must instance of HashMap", queryResultList.get(0).first() instanceof HashMap);
         assertEquals("resultType must 'java.util.HashMap'", "java.util.HashMap", queryResultList.get(0).getResultType());
     }
@@ -328,7 +348,7 @@ public class MongoDBCollectionTest {
 //        }
 //        Document returnFields = new Document("id", 1);
 //        QueryOptions queryOptions = new QueryOptions("exclude", Arrays.asList("id"));
-//        List<QueryResult<HashMap>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, new ComplexTypeConverter<HashMap, Object>() {
+//        List<DataResult<HashMap>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, new ComplexTypeConverter<HashMap, Object>() {
 //            @Override
 //            public HashMap convertToDataModelType(Object object) {
 //                return new HashMap(object.toMap());
@@ -340,7 +360,7 @@ public class MongoDBCollectionTest {
 //            }
 //        }, queryOptions);
 //        assertNotNull("Object queryResultList cannot be null", queryResultList);
-//        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResult());
+//        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResults());
 //        assertTrue("Returned field must instance of Hashmap", queryResultList.get(0).first() instanceof HashMap);
 //        assertEquals("resultType must 'java.util.HashMap'", "java.util.HashMap", queryResultList.get(0).getResultType());
 //    }
@@ -355,15 +375,15 @@ public class MongoDBCollectionTest {
         Document returnFields = new Document();
         QueryOptions queryOptions = new QueryOptions();
 //        QueryOptions queryOptions = new QueryOptions("exclude", Collections.singletonList("id"));
-        List<QueryResult<User>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, User.class, queryOptions);
+        List<DataResult<User>> queryResultList = mongoDBCollection.find(dbObjectList, returnFields, User.class, queryOptions);
         assertNotNull("Object queryResultList cannot be null", queryResultList);
-        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResult());
+        assertNotNull("Object queryResultList.get(0) cannot be null", queryResultList.get(0).getResults());
         assertTrue("Returned field must instance of User", queryResultList.get(0).first() instanceof User);
         assertEquals("resultType must '" + User.class.getCanonicalName() + "'", User.class.getCanonicalName(), queryResultList.get(0).getResultType());
-        for (QueryResult<User> queryResult : queryResultList) {
+        for (DataResult<User> queryResult : queryResultList) {
             assertEquals(1, queryResult.getNumResults());
             assertThat(NAMES, CoreMatchers.hasItem(queryResult.first().name));
-            assertThat(SURENAMES, CoreMatchers.hasItem(queryResult.first().surname));
+            assertThat(SURNAMES, CoreMatchers.hasItem(queryResult.first().surname));
         }
     }
 
@@ -413,28 +433,28 @@ public class MongoDBCollectionTest {
         dbObjectList.add(match);
         dbObjectList.add(group);
 
-        QueryResult<Document> queryResult = mongoDBCollection.aggregate(dbObjectList, null);
+        DataResult<Document> queryResult = mongoDBCollection.aggregate(dbObjectList, null);
         assertNotNull("Object queryResult cannot be null", queryResult);
-        assertNotNull("Object queryResult.getResult() cannot be null", queryResult.getResult());
-        assertEquals("There must be 2 results", 2, queryResult.getResult().size());
-        List<Document> result = queryResult.getResult();
+        assertNotNull("Object queryResult.getResults() cannot be null", queryResult.getResults());
+        assertEquals("There must be 2 results", 2, queryResult.getResults().size());
+        List<Document> result = queryResult.getResults();
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 0));
-        assertEquals("There must be 1 results", 1, queryResult.getResult().size());
+        assertEquals("There must be 1 results", 1, queryResult.getResults().size());
         assertEquals(result.get(0), queryResult.first());
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 1));
-        assertEquals("There must be 1 results", 1, queryResult.getResult().size());
+        assertEquals("There must be 1 results", 1, queryResult.getResults().size());
         assertEquals(result.get(1), queryResult.first());
 
     }
 
     @Test
     public void testInsert() throws Exception {
-        Long countBefore = mongoDBCollectionInsertTest.count().first();
+        Long countBefore = mongoDBCollectionInsertTest.count().getNumMatches();
         for (int i = 1; i < 50; i++) {
             mongoDBCollectionInsertTest.insert(new Document("insertedObject", i), null);
-            assertEquals("Insert operation must insert 1 element each time.", countBefore + i, mongoDBCollectionInsertTest.count().first().longValue());
+            assertEquals("Insert operation must insert 1 element each time.", countBefore + i, mongoDBCollectionInsertTest.count().getNumMatches());
         }
     }
 
@@ -449,7 +469,7 @@ public class MongoDBCollectionTest {
 
     @Test
     public void testInsert2() throws Exception {
-        Long countBefore = mongoDBCollectionInsertTest.count().first();
+        Long countBefore = mongoDBCollectionInsertTest.count().getNumMatches();
         int numBulkInsertions = 50;
         int bulkInsertSize = 100;
 
@@ -459,7 +479,7 @@ public class MongoDBCollectionTest {
                 list.add(new Document("bulkInsertedObject", i));
             }
             mongoDBCollectionInsertTest.insert(list, null);
-            assertEquals("Bulk insert operation must insert " + bulkInsertSize + " elements each time.", countBefore + bulkInsertSize * b, mongoDBCollectionInsertTest.count().first().longValue());
+            assertEquals("Bulk insert operation must insert " + bulkInsertSize + " elements each time.", countBefore + bulkInsertSize * b, mongoDBCollectionInsertTest.count().getNumMatches());
         }
     }
 
@@ -491,37 +511,37 @@ public class MongoDBCollectionTest {
     @Test
     public void testUpdate() throws Exception {
         Document query = new Document("name", "John");
-        long count = mongoDBCollectionUpdateTest.count(query).first();
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(query,
+        long count = mongoDBCollectionUpdateTest.count(query).getNumMatches();
+        DataResult writeResult = mongoDBCollectionUpdateTest.update(query,
                 new Document("$set", new Document("modified", true)),
                 new QueryOptions("multi", true)
-        ).first();
-        assertEquals("All the objects are named \"John\", so all objects should be modified", count, writeResult.getModifiedCount());
+        );
+        assertEquals("All the objects are named \"John\", so all objects should be modified", count, writeResult.getNumUpdated());
     }
 
     @Test
     public void testUpdate1() throws Exception {
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
+        DataResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
                 new Document("$set", new Document("modifiedAgain", true)),
                 new QueryOptions("multi", true)
-        ).first();
-        assertEquals("Any objects have the surname \"Johnson\", so any objects should be modified", 0, writeResult.getModifiedCount());
+        );
+        assertEquals("Any objects have the surname \"Johnson\", so any objects should be modified", 0, writeResult.getNumUpdated());
     }
 
     @Test
     public void testUpdate2() throws Exception {
-        UpdateResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
+        DataResult writeResult = mongoDBCollectionUpdateTest.update(new Document("surname", "Johnson"),
                 new Document("$set", new Document("modifiedAgain", true)),
                 new QueryOptions("upsert", true)
-        ).first();
-        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getMatchedCount());
-        assertNotNull("Any objects have the surname \"Johnson\", so one object should be inserted", writeResult.getUpsertedId());
+        );
+        assertEquals("Any objects have the surname \"Johnson\", so there are no matched documents", 0, writeResult.getNumMatches());
+        assertEquals("Any objects have the surname \"Johnson\", so one object should be inserted", 1, writeResult.getNumInserted());
     }
 
     @Test
     public void testUpdate3() throws Exception {
-        int count = mongoDBCollectionUpdateTest.count().first().intValue();
-        int modifiedDocuments = count / 2;
+        long count = mongoDBCollectionUpdateTest.count().getNumMatches();
+        int modifiedDocuments = (int) count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
         ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
 
@@ -529,13 +549,13 @@ public class MongoDBCollectionTest {
             queries.add(new Document("id", i));
             updates.add(new Document("$set", new BasicDBObject("bulkUpdated", i)));
         }
-        com.mongodb.bulk.BulkWriteResult bulkWriteResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false)).first();
-        assertEquals("", modifiedDocuments, bulkWriteResult.getModifiedCount());
+        DataResult writeResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false));
+        assertEquals("", modifiedDocuments, writeResult.getNumUpdated());
     }
 
     @Test
-    public void testUpdate4() throws Exception {
-        int count = mongoDBCollectionUpdateTest.count().first().intValue();
+    public void testUpdate4_error() throws Exception {
+        int count = (int) mongoDBCollectionUpdateTest.count().getNumMatches();
         int modifiedDocuments = count / 2;
         ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
         ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
@@ -551,18 +571,42 @@ public class MongoDBCollectionTest {
     }
 
     @Test
+    public void testUpdate5_upsert() throws Exception {
+        long count = mongoDBCollectionUpdateTest.count().getNumMatches();
+        int modifiedDocuments = (int) count / 2;
+        ArrayList<Bson> queries = new ArrayList<>(modifiedDocuments);
+        ArrayList<Bson> updates = new ArrayList<>(modifiedDocuments);
+
+        for (int i = 0; i < modifiedDocuments; i++) {
+            queries.add(new Document("id", i));
+            updates.add(new Document("$set", new BasicDBObject("bulkUpdated_b", i)));
+        }
+
+        int numUpserts = 10;
+        for (int i = 0; i < numUpserts; i++) {
+            queries.add(new Document("id", 10000 + i));
+            updates.add(new Document("$set", new BasicDBObject("upsert", i)));
+        }
+
+        DataResult writeResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false)
+                .append(MongoDBCollection.UPSERT, true));
+        assertEquals(modifiedDocuments, writeResult.getNumUpdated());
+        assertEquals(numUpserts, writeResult.getNumInserted());
+    }
+
+    @Test
     public void testRemove() throws Exception {
-        int count = mongoDBCollectionRemoveTest.count().first().intValue();
+        int count = (int) mongoDBCollectionRemoveTest.count().getNumMatches();
         Document query = new Document("age", 1);
-        int matchingDocuments = mongoDBCollectionRemoveTest.count(query).first().intValue();
-        DeleteResult writeResult = mongoDBCollectionRemoveTest.remove(query, null).first();
-        assertEquals(matchingDocuments, writeResult.getDeletedCount());
-        assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - matchingDocuments);
+        int matchingDocuments = (int) mongoDBCollectionRemoveTest.count(query).getNumMatches();
+        DataResult writeResult = mongoDBCollectionRemoveTest.remove(query, null);
+        assertEquals(matchingDocuments, writeResult.getNumDeleted());
+        assertEquals(mongoDBCollectionRemoveTest.count().getNumMatches(), count - matchingDocuments);
     }
 
     @Test
     public void testRemove1() throws Exception {
-        int count = mongoDBCollectionRemoveTest.count().first().intValue();
+        int count = (int) mongoDBCollectionRemoveTest.count().getNumMatches();
 
         int numDeletions = 10;
         List<Bson> remove = new ArrayList<>(numDeletions);
@@ -570,9 +614,9 @@ public class MongoDBCollectionTest {
             remove.add(new Document("name", "John"));
         }
 
-        com.mongodb.bulk.BulkWriteResult bulkWriteResult = mongoDBCollectionRemoveTest.remove(remove, null).first();
-        assertEquals(numDeletions, bulkWriteResult.getDeletedCount());
-        assertEquals(mongoDBCollectionRemoveTest.count().first().intValue(), count - numDeletions);
+        DataResult bulkDataResult = mongoDBCollectionRemoveTest.remove(remove, null);
+        assertEquals(numDeletions, bulkDataResult.getNumDeleted());
+        assertEquals(mongoDBCollectionRemoveTest.count().getNumMatches(), count - numDeletions);
     }
 
     @Test
@@ -603,6 +647,12 @@ public class MongoDBCollectionTest {
     @Test
     public void testGetIndex() throws Exception {
 
+    }
+
+    @Test
+    public void testExplain() throws Exception {
+        Document explain = mongoDBCollection.nativeQuery().explain(new Document(), new Document(), new QueryOptions());
+        assertNotNull(explain.get("queryPlanner"));
     }
 
     class BasicQueryResultWriter implements QueryResultWriter<Object> {

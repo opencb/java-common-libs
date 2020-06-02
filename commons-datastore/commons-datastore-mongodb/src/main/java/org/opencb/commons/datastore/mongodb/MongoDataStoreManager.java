@@ -137,29 +137,17 @@ public class MongoDataStoreManager implements AutoCloseable {
             String pass = mongoDBConfiguration.getString(PASSWORD, "");
             MongoCredential mongoCredential = null;
             if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
-//                final DB authenticationDatabase;
                 if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
                         && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
-//                        authenticationDatabase = mc.getDB(mongoDBConfiguration.getString("authenticationDatabase"));
                     mongoCredential = MongoCredential.createScramSha1Credential(user,
                             mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
                 } else {
-//                        authenticationDatabase = db;
                     mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
                 }
-//                    authenticationDatabase.authenticate(user, pass.toCharArray());
             }
-
-
             mc = newMongoClient(mongoClientOptions, mongoCredential);
-
-//                mc.setReadPreference(ReadPreference.secondary(new BasicDBObject("dc", "PG")));
-//                mc.setReadPreference(ReadPreference.primary());
-//                System.out.println("Replica Status: "+mc.getReplicaSetStatus());
             logger.debug(mongoDBConfiguration.toString());
             MongoDatabase db = mc.getDatabase(database);
-//                db.setReadPreference(ReadPreference.secondary(new BasicDBObject("dc", "PG")));
-//                db.setReadPreference(ReadPreference.primary());
 
             long t1 = System.currentTimeMillis();
             logger.debug("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in " + (t0 - t1) + "ms");

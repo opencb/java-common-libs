@@ -21,6 +21,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.opencb.commons.run.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +35,13 @@ import java.util.List;
  *
  * Created by hpccoll1 on 02/04/15.
  */
-public class AvroEncoder<T> {
+public class AvroEncoder<T> implements Task<T, ByteBuffer> {
 
     private final DatumWriter<T> datumWriter;
     private final Encoder encoder;
     private final ByteArrayOutputStream byteArrayOutputStream;
     private int encodeFails = 0;
-    private boolean abortOnFail = false;
+    private boolean abortOnFail;
 
     protected Logger logger = LoggerFactory.getLogger(AvroEncoder.class);
     private static final int SIZE = 1000000;
@@ -54,6 +55,10 @@ public class AvroEncoder<T> {
         this.datumWriter = new SpecificDatumWriter<>(schema);
         this.byteArrayOutputStream = new ByteArrayOutputStream(SIZE);    //Initialize with 1MB
         this.encoder = EncoderFactory.get().binaryEncoder(byteArrayOutputStream, null);
+    }
+
+    public List<ByteBuffer> apply(List<T> batch) throws IOException {
+        return encode(batch);
     }
 
     public List<ByteBuffer> encode(List<T> batch) throws IOException {

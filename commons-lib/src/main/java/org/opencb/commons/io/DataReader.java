@@ -56,6 +56,7 @@ public interface DataReader<T> extends Iterable<T> {
 
     default <O> DataReader<O> then(Task<T, O> task) {
         return new DataReader<O>() {
+            private boolean drained = false;
             @Override
             public boolean open() {
                 return DataReader.this.open();
@@ -103,7 +104,13 @@ public interface DataReader<T> extends Iterable<T> {
                         }
                     }
                     // Reader is exhausted. Drain the task.
-                    return task.drain();
+                    if (!drained) {
+                        // Make sure that only drain once
+                        drained = true;
+                        return task.drain();
+                    } else {
+                        return Collections.emptyList();
+                    }
                 } catch (Exception e) {
                     // TODO: Reader should throw any exception
                     throw new RuntimeException(e);

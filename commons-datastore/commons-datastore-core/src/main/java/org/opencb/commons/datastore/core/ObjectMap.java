@@ -46,7 +46,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         objectMap.put(key, value);
     }
 
-    public ObjectMap(final Map<String, Object> map) {
+    public ObjectMap(final Map<String, ?> map) {
         objectMap = new LinkedHashMap<>(map);
     }
 
@@ -89,8 +89,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public String getString(String field, String defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object o = objectMap.get(field);
+        if (field != null) {
+            Object o = get(field);
             if (o != null) {
                 if (o instanceof Collection) {
                     //Join manually to avoid surrounding brackets
@@ -111,8 +111,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public int getInt(String field, int defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).intValue();
             } else if (obj instanceof String) {
@@ -131,8 +131,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public long getLong(String field, long defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).longValue();
             } else if (obj instanceof String) {
@@ -152,8 +152,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public float getFloat(String field, float defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).floatValue();
             } else if (obj instanceof String) {
@@ -173,8 +173,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public double getDouble(String field, double defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Number) {
                 return ((Number) obj).doubleValue();
             } else if (obj instanceof String) {
@@ -194,12 +194,12 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public boolean getBoolean(String field, boolean defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
             if (obj instanceof Boolean) {
                 return ((Boolean) obj);
             } else if (obj instanceof String) {
-                return Boolean.parseBoolean((String) objectMap.get(field));
+                return Boolean.parseBoolean((String) obj);
             }
         }
         return defaultValue;
@@ -222,8 +222,8 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public <T> T get(final String field, final Class<T> clazz, T defaultValue) {
-        if (objectMap.containsKey(field)) {
-            Object obj = objectMap.get(field);
+        Object obj = get(field);
+        if (obj != null) {
             if (clazz.isInstance(obj)) {
                 return clazz.cast(obj);
             }
@@ -242,8 +242,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public List<Object> getList(String field, final List<Object> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (List<Object>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (List<Object>) obj;
+            }
         }
         return defaultValue;
     }
@@ -375,8 +378,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> List<T> getAsList(String field, final Class<T> clazz, List<T> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (List<T>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (List<T>) get(field);
+            }
         }
         return defaultValue;
     }
@@ -422,8 +428,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
 
     public Map<String, Object> getMap(String field, Map<String, Object> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (Map<String, Object>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (Map<String, Object>) obj;
+            }
         }
         return defaultValue;
     }
@@ -446,8 +455,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Deprecated
     public <T> Map<String, T> getMapAs(String field, final Class<T> clazz, Map<String, T> defaultValue) {
-        if (field != null && objectMap.containsKey(field)) {
-            return (Map<String, T>) objectMap.get(field);
+        if (field != null) {
+            Object obj = get(field);
+            if (obj != null) {
+                return (Map<String, T>) obj;
+            }
         }
         return defaultValue;
     }
@@ -455,6 +467,11 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     public ObjectMap append(String key, Object value) {
         put(key, value);
+        return this;
+    }
+
+    public ObjectMap appendAll(Map<String, ?> m) {
+        putAll(m);
         return this;
     }
 
@@ -488,7 +505,12 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Override
     public boolean containsKey(Object key) {
-        return objectMap.containsKey(key);
+        if (objectMap.containsKey(key)) {
+            return true;
+        } else if (key instanceof String && ((String) key).contains(".")) {
+            return getNested(((String) key)) != null;
+        }
+        return false;
     }
 
     @Override
@@ -498,12 +520,112 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     @Override
     public Object get(Object key) {
-        return objectMap.get(key);
+        Object value = objectMap.get(key);
+        if (value == null && key instanceof String && ((String) key).contains(".")) {
+            return getNested(((String) key));
+        }
+        return value;
     }
 
     @Override
     public Object put(String key, Object value) {
-        return objectMap.put(key, value);
+        return put(key, value, false);
+    }
+
+    public Object put(String key, Object value, boolean nestedKey) {
+        return put(key, value, nestedKey, false);
+    }
+
+    public Object put(String key, Object value, boolean nestedKey, boolean parents) {
+        if (nestedKey) {
+            return putNested(key, value, parents);
+        } else {
+            return objectMap.put(key, value);
+        }
+    }
+
+    public Object getNested(String key) {
+        int idx = key.lastIndexOf(".");
+        if (idx < 0) {
+            return get(key);
+        }
+        String mapKey = key.substring(0, idx);
+        String valueKey = key.substring(idx + 1);
+        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, false, false);
+        if (subMap != null) {
+            return subMap.get(valueKey);
+        } else {
+            return null;
+        }
+    }
+
+    public Object putNested(String key, Object value, boolean parents) {
+        int idx = key.lastIndexOf(".");
+        if (idx < 0) {
+            return put(key, value, false);
+        }
+        String mapKey = key.substring(0, idx);
+        String valueKey = key.substring(idx + 1);
+        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, true, parents);
+        if (subMap != null) {
+            return subMap.put(valueKey, value);
+        } else {
+            throw new IllegalArgumentException("Key '" + key + "' not found!");
+        }
+    }
+
+    public ObjectMap getNestedMap(String key) {
+        Map<String, Object> subMap = getNestedMap(key, objectMap, jsonObjectMapper, false, false);
+        return subMap == null ? null : (subMap instanceof ObjectMap ? ((ObjectMap) subMap) : new ObjectMap(subMap));
+    }
+
+    private static Map<String, Object> getNestedMap(String key, Map<String, Object> map, ObjectMapper jsonObjectMapper,
+                                                    boolean convert, boolean parents) {
+        if (map == null) {
+            return map;
+        }
+        int idx = key.indexOf(".");
+        String firstKey;
+        String nextKey;
+        if (idx < 0) {
+            firstKey = key;
+            nextKey = null;
+        } else {
+            firstKey = key.substring(0, idx);
+            nextKey = key.substring(idx + 1);
+        }
+
+        Object value = map.get(firstKey);
+        Map<String, Object> subMap;
+
+        if (value instanceof Map) {
+            subMap = (Map) value;
+        } else if (value == null
+                || value instanceof CharSequence
+                || value instanceof Number
+                || value instanceof Collection
+                || value instanceof Boolean
+                || value.getClass().isArray()
+                || value.getClass().isEnum()) {
+            // Expected a Map or an Object.
+            subMap = null;
+        } else {
+            subMap = jsonObjectMapper.convertValue(value, Map.class);
+            if (convert) {
+                map.put(firstKey, subMap);
+            }
+        }
+        if (parents && subMap == null) {
+            subMap = new HashMap<>();
+            map.put(firstKey, subMap);
+        }
+
+        if (nextKey == null) {
+            return subMap;
+        } else {
+            return getNestedMap(nextKey, subMap, jsonObjectMapper, convert, parents);
+        }
+
     }
 
     @Override

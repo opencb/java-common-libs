@@ -6,7 +6,7 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
-    <version>3.7.4</version>
+    <version>4.0.0</version>
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
@@ -19,12 +19,12 @@
     </modules>
 
     <properties>
-        <java.commons.version>3.7.4</java.commons.version>
-        <compileSource>1.8</compileSource>
-        <jackson.version>2.9.8</jackson.version>
-        <apache.commons.version>3.8.1</apache.commons.version>
+        <java.commons.version>4.0.0</java.commons.version>
+        <jackson.version>2.10.1</jackson.version>
+        <apache.commons.lang3.version>3.8.1</apache.commons.lang3.version>
         <slf4j.version>1.7.25</slf4j.version>
         <avro.version>1.7.7</avro.version>
+        <compileSource>1.8</compileSource>
     </properties>
 
     <scm>
@@ -61,6 +61,11 @@
             <name>Joaquin</name>
             <email>joaquintarraga@gmail.com</email>
         </developer>
+        <developer>
+            <id>julie-sullivan</id>
+            <name>Julie</name>
+            <email>julie.sullivan@gmail.com</email>
+        </developer>
     </developers>
 
     <mailingLists>
@@ -81,7 +86,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>${apache.commons.version}</version>
+                <version>${apache.commons.lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -90,7 +95,7 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
+                <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
@@ -197,6 +202,13 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <!-- Prevent `gpg` from using pinentry programs -->
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
