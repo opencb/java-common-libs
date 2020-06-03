@@ -16,15 +16,26 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.*;
 import com.mongodb.ReadPreference;
+import com.mongodb.*;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.opencb.commons.datastore.mongodb.MongoDBConfiguration.*;
 
@@ -87,7 +98,6 @@ public class MongoDataStoreManager implements AutoCloseable {
         }
     }
 
-
     public MongoDataStore get(String database) {
         return get(database, builder().init().build());
     }
@@ -95,67 +105,96 @@ public class MongoDataStoreManager implements AutoCloseable {
     public MongoDataStore get(String database, MongoDBConfiguration mongoDBConfiguration) {
         if (!mongoDataStores.containsKey(database)) {
             MongoDataStore mongoDataStore = create(database, mongoDBConfiguration);
-            logger.debug("MongoDataStoreManager: new MongoDataStore database '{}' created", database);
+            logger.info("MongoDataStoreManager: new MongoDataStore database '{}' created", database);
             mongoDataStores.put(database, mongoDataStore);
         }
         return mongoDataStores.get(database);
     }
 
     private MongoDataStore create(String database, MongoDBConfiguration mongoDBConfiguration) {
-        MongoDataStore mongoDataStore = null;
-        MongoClient mc = null;
-        logger.debug("MongoDataStoreManager: creating a MongoDataStore object for database: '" + database + "' ...");
-        long t0 = System.currentTimeMillis();
-        if (database != null && !database.trim().equals("")) {
-            // read DB configuration for that SPECIES.VERSION, by default
-            // PRIMARY_DB is selected
-//            String dbPrefix = applicationProperties.getProperty(speciesVersionPrefix + ".DB", "PRIMARY_DB");
-            // We create the MongoClientOptions
-            MongoClientOptions mongoClientOptions;
-            MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
-                    .connectionsPerHost(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT))
-                    .connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT))
-                    .readPreference(
-                            ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE, READ_PREFERENCE_DEFAULT.getValue())));
-
-            if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
-                logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
-                builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
-            }
-
-            if (mongoDBConfiguration.getBoolean(SSL_ENABLED)) {
-                logger.debug("SSL connections enabled for " + database);
-                builder = builder.sslEnabled(mongoDBConfiguration.getBoolean(SSL_ENABLED));
-            }
-
-            mongoClientOptions = builder.build();
-
-            assert (dataStoreServerAddresses != null);
-
-            // We create the MongoCredential object
-            String user = mongoDBConfiguration.getString(USERNAME, "");
-            String pass = mongoDBConfiguration.getString(PASSWORD, "");
-            MongoCredential mongoCredential = null;
-            if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
-                if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
-                        && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
-                    mongoCredential = MongoCredential.createScramSha1Credential(user,
-                            mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
-                } else {
-                    mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
-                }
-            }
-            mc = newMongoClient(mongoClientOptions, mongoCredential);
-            logger.debug(mongoDBConfiguration.toString());
-            MongoDatabase db = mc.getDatabase(database);
-
-            long t1 = System.currentTimeMillis();
-            logger.debug("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in " + (t0 - t1) + "ms");
-            mongoDataStore = new MongoDataStore(mc, db, mongoDBConfiguration);
-        } else {
-            logger.debug("MongoDB database is null or empty");
+        if (StringUtils.isBlank(database)) {
+            throw new IllegalArgumentException("MongoDB database is null or empty");
         }
-        return mongoDataStore;
+
+        logger.info("MongoDataStoreManager: creating a MongoDataStore object for database: '" + database + "' configuration: "
+                + mongoDBConfiguration.toJson());
+        StopWatch stopWatch = StopWatch.createStarted();
+        // read DB configuration for that SPECIES.VERSION, by default
+        // PRIMARY_DB is selected
+//            String dbPrefix = applicationProperties.getProperty(speciesVersionPrefix + ".DB", "PRIMARY_DB");
+        // We create the MongoClientOptions
+        MongoClientOptions mongoClientOptions;
+        MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
+                .connectionsPerHost(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT))
+                .connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT))
+                .readPreference(
+                        ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE, READ_PREFERENCE_DEFAULT.getValue())));
+
+        if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
+            logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
+            builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
+        }
+
+        if (mongoDBConfiguration.getBoolean(SSL_ENABLED)) {
+            logger.debug("SSL connections enabled for " + database);
+            builder = builder.sslEnabled(true);
+        }
+        if (mongoDBConfiguration.getBoolean(SSL_INVALID_HOSTNAME_ALLOWED)) {
+            logger.debug("SSL invalid hostnames allowed for " + database);
+            builder = builder.sslInvalidHostNameAllowed(true);
+        }
+        if (mongoDBConfiguration.getBoolean(SSL_INVALID_CERTIFICATES_ALLOWED)) {
+            logger.debug("SSL invalid certificates allowed for " + database);
+
+            try {
+                TrustManager[] trustAllCerts = new TrustManager[] {
+                        new X509TrustManager() {
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
+                            }
+
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                            }
+
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+                            }
+                        },
+                };
+
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCerts, new SecureRandom());
+                builder = builder.sslContext(sc);
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        mongoClientOptions = builder.build();
+
+        assert (dataStoreServerAddresses != null);
+
+        // We create the MongoCredential object
+        String user = mongoDBConfiguration.getString(USERNAME, "");
+        String pass = mongoDBConfiguration.getString(PASSWORD, "");
+        MongoCredential mongoCredential = null;
+        if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
+            if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
+                    && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
+                mongoCredential = MongoCredential.createScramSha1Credential(user,
+                        mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
+            } else {
+                mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
+            }
+        }
+        MongoClient mc = newMongoClient(mongoClientOptions, mongoCredential);
+        MongoDatabase db = mc.getDatabase(database);
+
+        logger.info("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in "
+                + stopWatch.getTime(TimeUnit.MILLISECONDS) + "ms");
+
+        return new MongoDataStore(mc, db, mongoDBConfiguration);
     }
 
     public boolean exists(String database) {
@@ -180,7 +219,7 @@ public class MongoDataStoreManager implements AutoCloseable {
                 // Do not close or remove from map
             }
         } else {
-            logger.debug("MongoDB database is null or empty");
+            logger.info("MongoDB database is null or empty");
         }
     }
 
@@ -209,7 +248,7 @@ public class MongoDataStoreManager implements AutoCloseable {
             if (mongoCredential != null) {
                 mc = new MongoClient(
                         new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
-                        Arrays.asList(mongoCredential),
+                        mongoCredential,
                         mongoClientOptions);
             } else {
                 mc = new MongoClient(
