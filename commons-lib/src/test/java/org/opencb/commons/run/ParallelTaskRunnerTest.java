@@ -3,6 +3,7 @@ package org.opencb.commons.run;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
@@ -15,11 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -36,6 +36,7 @@ public class ParallelTaskRunnerTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
+        BasicConfigurator.configure();
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
         for (int l = 0; l < lines; l++) {
@@ -210,6 +211,35 @@ public class ParallelTaskRunnerTest {
             Thread.sleep(10000);
         }
 
+    }
+
+    @Test(timeout = 10000)
+    public void testReaderTimeOut() throws Exception {
+        ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
+                (size) -> Arrays.asList(
+                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16))
+                ),
+                (batch) -> {
+                    if (RandomUtils.nextBoolean()) {
+                        return null;
+                    }
+                    try {
+                        Thread.sleep(100000);
+                    } catch (InterruptedException e) {
+                        System.out.println("[" + Thread.currentThread().getName() + "] Interrupted");
+                    }
+                    return null;
+                },
+                null,
+                new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
+        );
+
+        thrown.expect(ExecutionException.class);
+        runner.run();
     }
 
     @Test
