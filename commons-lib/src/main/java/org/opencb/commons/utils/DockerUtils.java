@@ -1,6 +1,8 @@
 package org.opencb.commons.utils;
 
 import org.opencb.commons.exec.Command;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -10,8 +12,11 @@ import java.util.Map;
 
 public class DockerUtils {
 
+
+    private static Logger logger = LoggerFactory.getLogger(DockerUtils.class);
+
     /**
-     * Create and run the command line to execute the docker image.
+     * Create the command line to execute the docker image.
      *
      * @param image Docker image name
      * @param inputBindings Array of bind mounts for docker input volumes (source-target)
@@ -21,12 +26,12 @@ public class DockerUtils {
      * @return The command line
      * @throws IOException IO exception
      */
-    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
-                             AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
-                             Map<String, String> dockerParams) throws IOException {
+    public static String buildCommandLine(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                                                 AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
+                                                 Map<String, String> dockerParams) throws IOException {
         // Sanity check
         if (outputBinding == null) {
-           throw new IOException("Missing output binding");
+            throw new IllegalArgumentException("Missing output binding");
         }
 
         // Docker run
@@ -64,14 +69,34 @@ public class DockerUtils {
 
         // Image command params
         commandLine.append(cmdParams);
+        return commandLine.toString();
+    }
+
+    /**
+     * Create and run the command line to execute the docker image.
+     *
+     * @param image Docker image name
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBinding Bind mount for docker output volume (source-target)
+     * @param cmdParams Image command parameters
+     * @param dockerParams Docker parameters
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
+                             Map<String, String> dockerParams) throws IOException {
+        String commandLine = buildCommandLine(image, inputBindings, outputBinding, cmdParams, dockerParams);
+
+        logger.info("Run docker command line");
+        logger.info("============================");
+        logger.info(commandLine);
+        logger.info("============================");
 
         // Execute command
-        Command cmd = new Command(commandLine.toString());
+        Command cmd = new Command(commandLine);
         cmd.run();
 
-        // Debugger
-        System.out.println("Docker command line:\n" + commandLine);
-
-        return commandLine.toString();
+        return commandLine;
     }
 }
