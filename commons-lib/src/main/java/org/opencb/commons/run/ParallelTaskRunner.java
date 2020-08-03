@@ -80,6 +80,8 @@ public class ParallelTaskRunner<I, O> {
     private final List<org.opencb.commons.run.Task<I, O>> tasks;
     private final Config config;
 
+    private final List<TaskRunnable> taskRunnables = new ArrayList<>();
+
     private ExecutorService executorService;
     private BlockingQueue<Batch<I>> readBlockingQueue;
     // Unsorted blocking queue
@@ -520,7 +522,13 @@ public class ParallelTaskRunner<I, O> {
         return TimeUnit.NANOSECONDS.convert(timeWriting, unit);
     }
 
-    private void doSubmit(Callable taskRunnable) {
+    private void doSubmit(TaskRunnable taskRunnable) {
+        Future ftask = executorService.submit(taskRunnable);
+        futureTasks.add(ftask);
+        taskRunnables.add(taskRunnable);
+    }
+
+    private void doSubmit(WriterRunnable taskRunnable) {
         Future ftask = executorService.submit(taskRunnable);
         futureTasks.add(ftask);
     }
@@ -569,10 +577,12 @@ public class ParallelTaskRunner<I, O> {
                         break;
                     }
                     if (!isJobsRunning()) {
+                        securePrintStatus();
                         throw new IllegalStateException(String.format("No runners but queue with %s items!!!", readBlockingQueue.size()));
                     }
                     // check if something failed
                     if ((++cntloop) > config.readQueuePutTimeout / TIMEOUT_CHECK) {
+                        securePrintStatus();
                         // something went wrong!!!
                         throw new TimeoutException(String.format("Queue got stuck with %s items!!!", readBlockingQueue.size()));
                     }
@@ -643,6 +653,16 @@ public class ParallelTaskRunner<I, O> {
         return batch;
     }
 
+    enum TaskRunnableStatus {
+        UNSTARTED,
+        READING_BATCH_FROM_QUEUE,
+        PROCESSING_BATCH,
+        DRAINING_TASK,
+        WRITING_BATCH_TO_QUEUE,
+        WRITING_POISON_PILL_TO_QUEUE,
+        STOPPED
+    }
+
     class TaskRunnable implements Callable<Void> {
 
         private final org.opencb.commons.run.Task<I, O> task;
@@ -650,6 +670,9 @@ public class ParallelTaskRunner<I, O> {
         private long threadTimeBlockedAtTakeRead = 0;
         private long threadTimeBlockedAtSendWrite = 0;
         private long threadTimeTaskApply = 0;
+        private Batch<I> batch;
+        private String threadName;
+        private TaskRunnableStatus status = TaskRunnableStatus.UNSTARTED;
 
         TaskRunnable(org.opencb.commons.run.Task<I, O> task) {
             this.task = task;
@@ -658,7 +681,8 @@ public class ParallelTaskRunner<I, O> {
         @Override
         public Void call() throws InterruptedException {
             try {
-                Batch<I> batch = getBatch();
+                threadName = Thread.currentThread().getName();
+                batch = getBatch();
 
                 List<O> batchResult = null;
                 /**
@@ -676,6 +700,7 @@ public class ParallelTaskRunner<I, O> {
                     //logger.trace("task: apply");
                     start = System.nanoTime();
                     try {
+                        status = TaskRunnableStatus.PROCESSING_BATCH;
                         batchResult = task.apply(batch.batch);
                     } catch (Exception e) {
                         logger.error("Error processing batch " + batch.position, e);
@@ -696,6 +721,7 @@ public class ParallelTaskRunner<I, O> {
 
                     start = System.nanoTime();
                     if (writeBlockingQueue != null) {
+                        status = TaskRunnableStatus.WRITING_BATCH_TO_QUEUE;
                         while (!writeBlockingQueue.offer(new Batch<O>(batchResult, batch.position), 1, TimeUnit.SECONDS)) {
                             if (isAbortPending()) {
                                 //Some error happen. Abort
@@ -704,6 +730,7 @@ public class ParallelTaskRunner<I, O> {
                             }
                         }
                     } else if (writeBlockingQueueFuture != null) {
+                        status = TaskRunnableStatus.WRITING_BATCH_TO_QUEUE;
                         CompletableFuture<Batch<O>> future = writeBlockingQueueFutureMap.get(batch.position);
                         future.complete(new Batch<O>(batchResult, batch.position));
                     }
@@ -714,6 +741,7 @@ public class ParallelTaskRunner<I, O> {
                 // Drain won't be called if the ParallelTaskRunner is interrupted.
                 List<O> drain; // empty the system
                 try {
+                    status = TaskRunnableStatus.DRAINING_TASK;
                     drain = task.drain();
                 } catch (Exception e) {
                     drain = null;
@@ -722,6 +750,7 @@ public class ParallelTaskRunner<I, O> {
                 }
                 if (null != drain && !drain.isEmpty()) {
                     if (writeBlockingQueue != null) {
+                        status = TaskRunnableStatus.WRITING_BATCH_TO_QUEUE;
                         // submit final batch received from draining
                         Batch<O> drainBatch = new Batch<>(drain, batch.position + 1);
                         while (!writeBlockingQueue.offer(drainBatch, TIMEOUT_CHECK, TimeUnit.SECONDS)) {
@@ -731,6 +760,7 @@ public class ParallelTaskRunner<I, O> {
                             }
                         }
                     } else if (writeBlockingQueueFuture != null) {
+                        status = TaskRunnableStatus.WRITING_BATCH_TO_QUEUE;
                         // Sorted PTR should not have to drain!
                         CompletableFuture<Batch<O>> future = new CompletableFuture<>();
                         future.complete(new Batch<O>(batchResult, batch.position + 1));
@@ -751,6 +781,7 @@ public class ParallelTaskRunner<I, O> {
                 logger.warn("Catch InterruptedException " + e);
                 throw e;
             } finally {
+                status = TaskRunnableStatus.WRITING_POISON_PILL_TO_QUEUE;
                 synchronized (tasks) {
                     timeBlockedAtPutWrite += threadTimeBlockedAtSendWrite;
                     timeTaskApply += threadTimeTaskApply;
@@ -776,10 +807,37 @@ public class ParallelTaskRunner<I, O> {
                     }
                 }
             }
+            status = TaskRunnableStatus.STOPPED;
             return null;
         }
 
+        public void printStatus(boolean printBatchElements) {
+            // Copy to avoid concurrent changes on the batch
+            Batch<I> batch = this.batch;
+            TaskRunnableStatus status = this.status;
+
+            if (batch == null) {
+                logger.info("TaskRunner [{}] Status: '{}', empty batch (null)", threadName, status);
+            } else if (batch == POISON_PILL) {
+                logger.info("TaskRunner [{}] Status: '{}', empty batch (POISON_PILL)", threadName, status);
+            } else {
+                int size = batch.batch == null ? 0 : batch.batch.size();
+                logger.info("TaskRunner [{}] Status: '{}', batch number {}/{} with {} elements:", threadName, status,
+                        batch.position, numBatches, size);
+                if (printBatchElements && (status == TaskRunnableStatus.PROCESSING_BATCH || status == TaskRunnableStatus.DRAINING_TASK)) {
+                    if (batch.batch != null) {
+                        int i = 0;
+                        for (I element : batch.batch) {
+                            logger.info("   [{}] : {}", i, element);
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+
         private Batch<I> getBatch() throws InterruptedException {
+            status = TaskRunnableStatus.READING_BATCH_FROM_QUEUE;
             Batch<I> batch;
             if (readBlockingQueue == null) {
                 return new Batch<>(Collections.<I>emptyList(), numBatches++);
@@ -905,6 +963,25 @@ public class ParallelTaskRunner<I, O> {
 
     private boolean isAbortPending() {
         return config.abortOnFail && !exceptions.isEmpty() || !interruptions.isEmpty();
+    }
+
+    private void securePrintStatus() {
+        try {
+            printStatus(true);
+        } catch (Exception e) {
+            logger.info("Error printing status", e);
+        }
+    }
+
+    public void printStatus(boolean printBatchElements) {
+        logger.info("Parallel Task Runner with "
+                + (reader == null ? "" : "1 reader thread" + (writer == null ? " and " : ", "))
+                + taskRunnables.size() + " task threads"
+                + (writer == null ? "" : " and 1 writer thread"));
+        logger.info("Num processed batches: " + numBatches);
+        for (TaskRunnable taskRunnable : taskRunnables) {
+            taskRunnable.printStatus(printBatchElements);
+        }
     }
 
 }
