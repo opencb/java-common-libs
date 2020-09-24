@@ -529,6 +529,10 @@ public class MongoDBCollection {
         return dataResult;
     }
 
+    public void dropIndexes() {
+        mongoDBNativeQuery.dropIndexes();
+    }
+
     public DataResult dropIndex(Bson keys) {
         long start = startQuery();
         mongoDBNativeQuery.dropIndex(keys);
