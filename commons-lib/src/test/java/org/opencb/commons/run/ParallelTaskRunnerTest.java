@@ -3,7 +3,6 @@ package org.opencb.commons.run;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
@@ -36,7 +35,6 @@ public class ParallelTaskRunnerTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        BasicConfigurator.configure();
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
         for (int l = 0; l < lines; l++) {
