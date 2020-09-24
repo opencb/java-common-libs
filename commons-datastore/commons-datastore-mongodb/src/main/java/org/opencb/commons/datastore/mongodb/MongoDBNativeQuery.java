@@ -89,7 +89,7 @@ public class MongoDBNativeQuery {
     }
 
     public MongoDBIterator<Document> aggregate(List<? extends Bson> operations) {
-        return aggregate(operations, null, null);
+        return aggregate(null, operations, null, null);
     }
 
 //    public AggregateIterable<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
@@ -101,12 +101,21 @@ public class MongoDBNativeQuery {
 
     public <T> MongoDBIterator<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
                                             QueryOptions options) {
+        return aggregate(null, operations, converter, options);
+    }
+
+    public <T> MongoDBIterator<T> aggregate(ClientSession clientSession, List<? extends Bson> operations,
+                                            ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         Future<AggregateIterable<Document>> countResults = null;
         if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             List<Bson> countOperations = new ArrayList<>(operations);
             countOperations.add(Aggregates.count("id"));
-            countResults = executor.submit(() -> dbCollection.aggregate(countOperations));
+            if (clientSession != null) {
+                countResults = executor.submit(() -> dbCollection.aggregate(clientSession, countOperations));
+            } else {
+                countResults = executor.submit(() -> dbCollection.aggregate(countOperations));
+            }
         }
 
         // we need to be sure that the List is mutable
@@ -125,11 +134,18 @@ public class MongoDBNativeQuery {
                     // ignore error, just return default count of -1
                 }
             }
-            iterator = new MongoDBIterator<T>(dbCollection.aggregate(bsonOperations).iterator(), converter, numMatches);
+            if (clientSession != null) {
+                iterator = new MongoDBIterator<T>(dbCollection.aggregate(clientSession, bsonOperations).iterator(),
+                        converter, numMatches);
+            } else {
+                iterator = new MongoDBIterator<T>(dbCollection.aggregate(bsonOperations).iterator(), converter,
+                        numMatches);
+            }
         }
 
         return iterator;
     }
+
 
     public MongoDBIterator<Document> find(Bson query, Bson projection, QueryOptions options) {
         return find(null, query, projection, options);

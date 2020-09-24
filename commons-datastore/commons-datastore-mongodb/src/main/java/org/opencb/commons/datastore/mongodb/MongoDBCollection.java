@@ -229,11 +229,20 @@ public class MongoDBCollection {
     }
 
     public MongoDBIterator<Document> iterator(List<Bson> pipeline, QueryOptions options) {
-        return mongoDBNativeQuery.aggregate(pipeline, null, options);
+        return iterator(null, pipeline, null, options);
     }
 
     public <T> MongoDBIterator<T> iterator(List<Bson> pipeline, ComplexTypeConverter<T, Document> converter, QueryOptions options) {
-        return mongoDBNativeQuery.aggregate(pipeline, converter, options);
+        return iterator(null, pipeline, converter, options);
+    }
+
+    public MongoDBIterator<Document> iterator(ClientSession clientSession, List<Bson> pipeline, QueryOptions options) {
+        return mongoDBNativeQuery.aggregate(clientSession, pipeline, null, options);
+    }
+
+    public <T> MongoDBIterator<T> iterator(ClientSession clientSession, List<Bson> pipeline,
+                                           ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        return mongoDBNativeQuery.aggregate(clientSession, pipeline, converter, options);
     }
 
     public <T> MongoDBIterator<T> iterator(ClientSession clientSession, Bson query, Bson projection,
