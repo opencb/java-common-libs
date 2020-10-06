@@ -123,18 +123,21 @@ public class MongoDBIndexUtils {
 
     private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes, boolean dropIndexesFirst) {
         Set<String> existingIndexes = null;
-        if (!dropIndexesFirst) {
-            DataResult<Document> index = mongoCollection.getIndex();
-            existingIndexes = index.getResults()
-                    .stream()
-                    .map(document -> (String) document.get("name"))
-                    .collect(Collectors.toSet());
 
+        DataResult<Document> index = mongoCollection.getIndex();
+        existingIndexes = index.getResults()
+                .stream()
+                .map(document -> (String) document.get("name"))
+                .collect(Collectors.toSet());
+
+        if (!dropIndexesFirst) {
             // It is + 1 because mongo always create the _id index by default
             if (index.getNumResults() == indexes.size() + 1) {
                 // We already have the indexes we need, nothing to do here.
                 return;
             }
+        } else {
+            mongoCollection.dropIndexes();
         }
 
         for (Map<String, ObjectMap> userIndex : indexes) {

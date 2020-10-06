@@ -600,4 +600,8 @@ public class MongoDBNativeQuery {
         dbCollection.dropIndex(keys);
     }
 
+    public void dropIndexes() {
+        dbCollection.dropIndexes();
+    }
+
 }
