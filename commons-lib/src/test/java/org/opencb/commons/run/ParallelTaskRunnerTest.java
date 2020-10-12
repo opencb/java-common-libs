@@ -37,6 +37,7 @@ public class ParallelTaskRunnerTest {
     public static void beforeClass() throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
+//        org.apache.logging.log4j.core.config.Configurator.reconfigure();
         for (int l = 0; l < lines; l++) {
             fileOutputStream.write(new StringBuilder()
                     .append(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16))).append(" ")
@@ -57,7 +58,7 @@ public class ParallelTaskRunnerTest {
     }
 
     final Long[] l = {0l, 0l, 0l};
-    ParallelTaskRunner.Task<String, Integer> wc = strings -> {
+    Task<String, Integer> wc = strings -> {
         List<Integer> list = new ArrayList<>(strings.size());
         long lines = 0, words = 0, chars = 0;
         for (String string : strings) {
@@ -119,7 +120,7 @@ public class ParallelTaskRunnerTest {
         Path path = Paths.get(fileName);
         final int[] generatedLines = {0};
 
-        ParallelTaskRunner.Task<String, Integer> generateAndwc = strings -> {
+        Task<String, Integer> generateAndwc = strings -> {
             //Generate data
             int linesToGenerate;
             synchronized (config) {

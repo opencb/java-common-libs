@@ -16,6 +16,7 @@
 
 package org.opencb.commons.run;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.io.DataReader;
 import org.opencb.commons.io.DataWriter;
 import org.slf4j.Logger;
@@ -441,24 +442,25 @@ public class ParallelTaskRunner<I, O> {
         }
         timeWriting += System.nanoTime() - auxTime;
 
+        logger.info(toString());
         if (reader != null) {
-            logger.info("read:  timeReading                  = " + prettyTime(timeReading) + "s");
-            logger.info("read:  timeBlockedAtPutRead         = " + prettyTime(timeBlockedAtPutRead) + "s");
-            logger.info("task;  timeBlockedAtTakeRead        = " + prettyTime(timeBlockedAtTakeRead) + "s(total)"
-                    + "   ~" + prettyTime(timeBlockedAtTakeRead / config.numTasks) + "s/thread");
+            logger.info("read:  timeReading                  = " + durationToString(timeReading));
+            logger.info("read:  timeBlockedAtPutRead         = " + durationToString(timeBlockedAtPutRead));
+            logger.info("task:  timeBlockedAtTakeRead        = " + durationToString(timeBlockedAtTakeRead) + " (total)"
+                    + ",   ~" + durationToString(timeBlockedAtTakeRead / config.numTasks) + " (per thread)");
         }
 
-        logger.info("task;  timeTaskApply                = " + prettyTime(timeTaskApply) + "s(total)"
-                + "   ~" + prettyTime(timeTaskApply / config.numTasks) + "s/thread");
+        logger.info("task:  timeTaskApply                = " + durationToString(timeTaskApply) + " (total)"
+                + ",   ~" + durationToString(timeTaskApply / config.numTasks) + " (per thread)");
 
         if (writer != null) {
-            logger.info("task;  timeBlockedAtPutWrite        = " + prettyTime(timeBlockedAtPutWrite) + "s(total)"
-                    + "   ~" + prettyTime(timeBlockedAtPutWrite / config.numTasks) + "s/thread");
-            logger.info("write: timeBlockedWatingDataToWrite = " + prettyTime(timeBlockedAtTakeWrite) + "s");
-            logger.info("write: timeWriting                  = " + prettyTime(timeWriting) + "s");
+            logger.info("task:  timeBlockedAtPutWrite        = " + durationToString(timeBlockedAtPutWrite) + " (total)"
+                    + ",   ~" + durationToString(timeBlockedAtPutWrite / config.numTasks) + " (per thread)");
+            logger.info("write: timeBlockedWatingDataToWrite = " + durationToString(timeBlockedAtTakeWrite));
+            logger.info("write: timeWriting                  = " + durationToString(timeWriting));
         }
 
-        logger.info("total:                              = " + prettyTime(System.nanoTime() - start) + "s");
+        logger.info("total:                              = " + durationToString(System.nanoTime() - start));
 
         if (config.abortOnFail && !exceptions.isEmpty()) {
             throw buildExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.",
@@ -481,6 +483,18 @@ public class ParallelTaskRunner<I, O> {
         }
         return executionException;
     }
+
+    private static String durationToString(long durationInNanos) {
+        long durationInMillis = TimeUnit.NANOSECONDS.toMillis(durationInNanos);
+        long durationInSeconds = Math.round(durationInMillis / 1000.0);
+        long h = durationInSeconds / 3600;
+        long m = (durationInSeconds % 3600) / 60;
+        long s = durationInSeconds % 60;
+        return (DECIMAL_FORMAT.format(durationInMillis / 1000.0)) + "s [ " + StringUtils.leftPad(String.valueOf(h), 2, '0') + ':'
+                + StringUtils.leftPad(String.valueOf(m), 2, '0') + ':'
+                + StringUtils.leftPad(String.valueOf(s), 2, '0') + " ]";
+    }
+
 
     private String prettyTime(long time) {
         return DECIMAL_FORMAT.format(TimeUnit.NANOSECONDS.toMillis(time) / 1000.0);
@@ -974,14 +988,19 @@ public class ParallelTaskRunner<I, O> {
     }
 
     public void printStatus(boolean printBatchElements) {
-        logger.info("Parallel Task Runner with "
-                + (reader == null ? "" : "1 reader thread" + (writer == null ? " and " : ", "))
-                + taskRunnables.size() + " task threads"
-                + (writer == null ? "" : " and 1 writer thread"));
+        logger.info(toString());
         logger.info("Num processed batches: " + numBatches);
         for (TaskRunnable taskRunnable : taskRunnables) {
             taskRunnable.printStatus(printBatchElements);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Parallel Task Runner ["
+                + (reader == null ? "" : "1 reader thread" + (writer == null ? " and " : ", "))
+                + taskRunnables.size() + " task threads"
+                + (writer == null ? "" : " and 1 writer thread]");
     }
 
 }
