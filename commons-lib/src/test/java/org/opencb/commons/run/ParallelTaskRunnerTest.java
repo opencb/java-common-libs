@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -396,7 +397,7 @@ public class ParallelTaskRunnerTest {
                     }
                     return true;
                 },
-                ParallelTaskRunner.Config.builder().setReadQueuePutTimeout(3).build()
+                ParallelTaskRunner.Config.builder().setReadQueuePutTimeout(3, TimeUnit.SECONDS).build()
         ).run();
     }
 }
