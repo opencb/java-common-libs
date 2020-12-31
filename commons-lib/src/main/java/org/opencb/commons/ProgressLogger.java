@@ -16,13 +16,16 @@
 
 package org.opencb.commons;
 
+import org.opencb.commons.run.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -193,4 +196,23 @@ public class ProgressLogger {
         return future;
     }
 
+    public <T> Task<T, T> asTask() {
+        return asTask(null);
+    }
+
+    public <T> Task<T, T> asTask(Function<T, String> messageBuilder) {
+        return new Task<T, T>() {
+            @Override
+            public List<T> apply(List<T> batch) throws Exception {
+                if (batch == null || batch.isEmpty()) {
+                    return batch;
+                }
+                increment(batch.size(), () -> {
+                    T lastElement = batch.get(batch.size() - 1);
+                    return messageBuilder.apply(lastElement);
+                });
+                return batch;
+            }
+        };
+    }
 }

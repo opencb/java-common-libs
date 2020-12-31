@@ -28,10 +28,13 @@ public final class CompressionUtils {
     }
 
     public static byte[] compress(byte[] data) throws IOException {
+        return compress(data, 0, data.length);
+    }
 
+    public static byte[] compress(byte[] data, int off, int len) throws IOException {
         Deflater deflater = new Deflater();
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length)) {
-            deflater.setInput(data);
+            deflater.setInput(data, off, len);
             deflater.finish();
             byte[] buffer = new byte[1024];
             while (!deflater.finished()) {
@@ -45,10 +48,14 @@ public final class CompressionUtils {
     }
 
     public static byte[] decompress(byte[] data) throws IOException, DataFormatException {
+        return decompress(data, 0, data.length);
+    }
+
+    public static byte[] decompress(byte[] data, int off, int len) throws IOException, DataFormatException {
         Inflater inflater = new Inflater();
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length)) {
-            inflater.setInput(data);
+            inflater.setInput(data, off, len);
             byte[] buffer = new byte[1024];
             while (!inflater.finished()) {
                 int count = inflater.inflate(buffer);
