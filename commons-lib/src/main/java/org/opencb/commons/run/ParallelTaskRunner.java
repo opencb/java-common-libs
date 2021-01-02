@@ -121,13 +121,13 @@ public class ParallelTaskRunner<I, O> {
         }
 
         @Deprecated
-        public Config(int numTasks, int batchSize, int capacity, boolean abortOnFail, boolean sorted, int readQueuePutTimeout) {
+        public Config(int numTasks, int batchSize, int capacity, boolean abortOnFail, boolean sorted, int readQueuePutTimeoutSeconds) {
             this.numTasks = numTasks;
             this.batchSize = batchSize;
             this.capacity = capacity;
             this.abortOnFail = abortOnFail;
             this.sorted = sorted;
-            this.readQueuePutTimeout = readQueuePutTimeout;
+            this.readQueuePutTimeoutSeconds = readQueuePutTimeoutSeconds;
         }
 
         public static Builder builder() {
@@ -140,7 +140,7 @@ public class ParallelTaskRunner<I, O> {
             private int capacity = -1;
             private boolean sorted = false;
             private boolean abortOnFail = true;
-            private int readQueuePutTimeout = 500;
+            private int readQueuePutTimeoutSeconds = 500;
 
             public Builder setNumTasks(int numTasks) {
                 this.numTasks = numTasks;
@@ -167,8 +167,12 @@ public class ParallelTaskRunner<I, O> {
                 return this;
             }
 
-            public Builder setReadQueuePutTimeout(int readQueuePutTimeout) {
-                this.readQueuePutTimeout = readQueuePutTimeout;
+            public Builder setReadQueuePutTimeout(int readQueuePutTimeoutInSeconds) {
+                return setReadQueuePutTimeout(readQueuePutTimeoutInSeconds, TimeUnit.SECONDS);
+            }
+
+            public Builder setReadQueuePutTimeout(int readQueuePutTimeout, TimeUnit timeUnit) {
+                this.readQueuePutTimeoutSeconds = (int) timeUnit.toSeconds(readQueuePutTimeout);
                 return this;
             }
 
@@ -176,7 +180,7 @@ public class ParallelTaskRunner<I, O> {
                 if (capacity < 0) {
                     capacity = numTasks * 2;
                 }
-                return new ParallelTaskRunner.Config(numTasks, batchSize, capacity, abortOnFail, sorted, readQueuePutTimeout);
+                return new ParallelTaskRunner.Config(numTasks, batchSize, capacity, abortOnFail, sorted, readQueuePutTimeoutSeconds);
             }
         }
 
@@ -185,7 +189,7 @@ public class ParallelTaskRunner<I, O> {
         private final int capacity;
         private final boolean abortOnFail;
         private final boolean sorted;
-        private final int readQueuePutTimeout;
+        private final int readQueuePutTimeoutSeconds;
 
         public int getNumTasks() {
             return numTasks;
@@ -208,7 +212,11 @@ public class ParallelTaskRunner<I, O> {
         }
 
         public int getReadQueuePutTimeout() {
-            return readQueuePutTimeout;
+            return getReadQueuePutTimeout(TimeUnit.SECONDS);
+        }
+
+        public int getReadQueuePutTimeout(TimeUnit timeUnit) {
+            return (int) timeUnit.convert(readQueuePutTimeoutSeconds, TimeUnit.SECONDS);
         }
     }
 
@@ -595,7 +603,7 @@ public class ParallelTaskRunner<I, O> {
                         throw new IllegalStateException(String.format("No runners but queue with %s items!!!", readBlockingQueue.size()));
                     }
                     // check if something failed
-                    if ((++cntloop) > config.readQueuePutTimeout / TIMEOUT_CHECK) {
+                    if ((++cntloop) > config.readQueuePutTimeoutSeconds / TIMEOUT_CHECK) {
                         securePrintStatus();
                         // something went wrong!!!
                         throw new TimeoutException(String.format("Queue got stuck with %s items!!!", readBlockingQueue.size()));
