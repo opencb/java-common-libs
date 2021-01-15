@@ -10,96 +10,45 @@ import org.opencb.commons.datastore.core.ObjectMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Creates and validates indexes in specifed Mongo DB instance.
+ */
 public class MongoDBIndexUtils {
 
-    /**
-     * Create indexes in a given database.
-     * @param mongoDataStore Database name
-     * @param indexFile Input stream with the index information
-     * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
-     *                         will not be recreated if they already exist
-     * @throws IOException if index file can't be read
-     */
-    public static void createAllIndexes(MongoDataStore mongoDataStore, Path indexFile, boolean dropIndexesFirst) throws IOException {
+    private MongoDataStore mongoDataStore;
+    private Path indexFile;
+
+    public MongoDBIndexUtils(MongoDataStore mongoDataStore, Path indexFile) {
+        this.mongoDataStore = mongoDataStore;
+        this.indexFile = indexFile;
+
         if (mongoDataStore == null) {
             throw new MongoException("Unable to connect to MongoDB");
         }
-        InputStream inputStream = Files.newInputStream(indexFile);
-        createAllIndexes(mongoDataStore, inputStream, dropIndexesFirst);
-        inputStream.close();
     }
 
     /**
      * Create indexes in a given database.
-     * @param mongoDataStore Database name
-     * @param resourceAsStream Input stream with the index information
      * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
      *                         will not be recreated if they already exist
      * @throws IOException if index file can't be read
      */
-    public static void createAllIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, boolean dropIndexesFirst)
-            throws IOException {
-        if (mongoDataStore == null) {
-            throw new MongoException("Unable to connect to MongoDB");
-        }
-        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexes(resourceAsStream);
+    public void createAllIndexes(boolean dropIndexesFirst) throws IOException {
+        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexesFromFile();
         for (String collectionName : indexes.keySet()) {
-            MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
-            createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
+            createIndexes(collectionName, indexes.get(collectionName), dropIndexesFirst);
         }
     }
 
-    /**
-     * Create indexes for a specific collection in a given database.
-     * @param mongoDataStore Database name
-     * @param resourceAsStream Input stream with the index information
-     * @param collectionName Name of collection to index
-     * @param dropIndexesFirst if TRUE, deletes existing indexes before creating new ones. defaults to FALSE, indexes
-     *                         will not be recreated if they already exist
-     * @throws IOException if index file can't be read
-     */
-    public static void createIndexes(MongoDataStore mongoDataStore, InputStream resourceAsStream, String collectionName,
-                                     boolean dropIndexesFirst) throws IOException {
-        if (mongoDataStore == null) {
-            throw new MongoException("Unable to connect to MongoDB");
-        }
-        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexes(resourceAsStream);
-        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
-        createIndexes(mongoDBCollection, indexes.get(collectionName), dropIndexesFirst);
-    }
-
-
-    /**
-     * Create the given index for the given collection. Sharding requires the key to be indexed so we need to individually create indexes
-     * before the data is loaded.
-     *
-     * @param mongoDataStore database
-     * @param collectionName name of collection to index
-     * @param indexes indexes to create on collection
-     */
-    public static void createIndex(MongoDataStore mongoDataStore, String collectionName, List<Map<String, ObjectMap>> indexes) {
-        if (mongoDataStore == null) {
-            throw new MongoException("Unable to connect to MongoDB");
-        }
-        if (collectionName == null || indexes.isEmpty()) {
-            // they've asked to create a collection but didn't provide either the collection or index name. so just give up
-            return;
-        }
-        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
-        createIndexes(mongoDBCollection, indexes, false);
-    }
-
-    private static Map<String, List<Map<String, ObjectMap>>> getIndexes(InputStream resourceAsStream) throws IOException {
+    private Map<String, List<Map<String, ObjectMap>>> getIndexesFromFile() throws IOException {
         ObjectMapper objectMapper = generateDefaultObjectMapper();
         Map<String, List<Map<String, ObjectMap>>> indexes = new HashMap<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
+        try (BufferedReader bufferedReader = Files.newBufferedReader(indexFile)) {
             bufferedReader.lines()
                     .filter(line -> !line.trim().isEmpty())
                     .forEach(line -> {
@@ -121,11 +70,16 @@ public class MongoDBIndexUtils {
         return indexes;
     }
 
-    private static void createIndexes(MongoDBCollection mongoCollection, List<Map<String, ObjectMap>> indexes, boolean dropIndexesFirst) {
-        Set<String> existingIndexes = null;
+    public void createIndexes(String collectionName, boolean dropIndexesFirst) throws IOException {
+        Map<String, List<Map<String, ObjectMap>>> indexesFromFile = getIndexesFromFile();
+        createIndexes(collectionName, indexesFromFile.get(collectionName), dropIndexesFirst);
+    }
 
-        DataResult<Document> index = mongoCollection.getIndex();
-        existingIndexes = index.getResults()
+    public void createIndexes(String collectionName, List<Map<String, ObjectMap>> indexes, boolean dropIndexesFirst) {
+        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+
+        DataResult<Document> index = mongoDBCollection.getIndex();
+        Set<String> existingIndexes = index.getResults()
                 .stream()
                 .map(document -> (String) document.get("name"))
                 .collect(Collectors.toSet());
@@ -137,13 +91,13 @@ public class MongoDBIndexUtils {
                 return;
             }
         } else {
-            mongoCollection.dropIndexes();
+            mongoDBCollection.dropIndexes();
         }
 
-        for (Map<String, ObjectMap> userIndex : indexes) {
+        for (Map<String, ObjectMap> indexFromFile : indexes) {
             StringBuilder indexName = new StringBuilder();
             Document keys = new Document();
-            for (Map.Entry<String, Object> pair : userIndex.get("fields").entrySet()) {
+            for (Map.Entry<String, Object> pair : indexFromFile.get("fields").entrySet()) {
                 keys.append(pair.getKey(), pair.getValue());
 
                 if (indexName.length() > 0) {
@@ -153,12 +107,12 @@ public class MongoDBIndexUtils {
             }
 
             if (dropIndexesFirst || !existingIndexes.contains(indexName.toString())) {
-                mongoCollection.createIndex(keys, new ObjectMap(userIndex.get("options")));
+                mongoDBCollection.createIndex(keys, new ObjectMap(indexFromFile.get("options")));
             }
         }
     }
 
-    private static ObjectMapper generateDefaultObjectMapper() {
+    private ObjectMapper generateDefaultObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true);
         objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
@@ -166,5 +120,50 @@ public class MongoDBIndexUtils {
         objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         return objectMapper;
+    }
+
+    /**
+     * Validate all indexes in a given database.
+     *
+     * @throws IOException if index file can't be read
+     */
+    public void validateAllIndexes() throws IOException {
+        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexesFromFile();
+        for (String collectionName : indexes.keySet()) {
+            validateIndexes(collectionName, indexes.get(collectionName));
+        }
+    }
+
+    public void validateIndexes(String collectionName) throws IOException {
+        Map<String, List<Map<String, ObjectMap>>> indexes = getIndexesFromFile();
+        validateIndexes(collectionName, indexes.get(collectionName));
+    }
+
+    private void validateIndexes(String collectionName, List<Map<String, ObjectMap>> indexesFromFile) {
+        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(collectionName);
+        DataResult<Document> index = mongoDBCollection.getIndex();
+        Set<String> existingIndexes = index.getResults()
+                .stream()
+                .map(document -> (String) document.get("name"))
+                .collect(Collectors.toSet());
+
+
+        for (Map<String, ObjectMap> indexFromFile : indexesFromFile) {
+            StringBuilder indexName = new StringBuilder();
+            Document keys = new Document();
+            for (Map.Entry<String, Object> pair : indexFromFile.get("fields").entrySet()) {
+                keys.append(pair.getKey(), pair.getValue());
+
+                if (indexName.length() > 0) {
+                    indexName.append("_");
+                }
+                indexName.append(pair.getKey()).append("_").append(pair.getValue());
+            }
+            if (!existingIndexes.contains(indexName.toString())) {
+                System.out.println("ERROR: " + indexName.toString() + " not found");
+            } else {
+                System.out.println("OK: " + indexName.toString() + " exists");
+            }
+        }
     }
 }
