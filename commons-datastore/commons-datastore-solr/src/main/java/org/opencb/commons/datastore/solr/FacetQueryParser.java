@@ -18,6 +18,7 @@ package org.opencb.commons.datastore.solr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.opencb.commons.datastore.core.QueryOptions;
 
 import java.io.IOException;
 import java.util.*;
@@ -53,19 +54,35 @@ public class FacetQueryParser {
      * @throws Exception Any exception related with JSON conversion
      */
     public String parse(String query) throws Exception {
+        return parse(query, QueryOptions.empty());
+    }
+
+    /**
+     * This method accepts a simple facet declaration format and converts it into a rich JSON query.
+     *
+     * @param query A string with the format: chrom>>type,biotype,avg>>gerp,avg;type;biotype>>sadasd
+     * @param options QueryOptions object to define LIMIT and SKIP values
+     * @return A JSON string facet query
+     * @throws Exception Any exception related with JSON conversion
+     */
+    public String parse(String query, QueryOptions options) throws Exception {
         if (StringUtils.isEmpty(query)) {
             return "";
+        }
+
+        if (options == null) {
+            options = new QueryOptions();
         }
 
         Map<String, Object> jsonFacetMap = new LinkedHashMap<>();
         String[] split = query.split(FACET_SEPARATOR);
         for (String facet : split) {
             if (facet.contains(NESTED_FACET_SEPARATOR)) {
-                parseNestedFacet(facet, jsonFacetMap);
+                parseNestedFacet(facet, options, jsonFacetMap);
             } else {
                 List<String> simpleFacets = getSubFacets(facet);
                 for (String simpleFacet : simpleFacets) {
-                    parseSimpleFacet(simpleFacet, jsonFacetMap);
+                    parseSimpleFacet(simpleFacet, options, jsonFacetMap);
                 }
             }
         }
@@ -105,8 +122,9 @@ public class FacetQueryParser {
         }
     }
 
-    private void parseSimpleFacet(String facet, Map<String, Object> jsonFacetMap) throws Exception {
-        Map<String, Object> facetMap = parseFacet(facet);
+    private void parseSimpleFacet(String facet, QueryOptions options, Map<String, Object> jsonFacetMap)
+            throws Exception {
+        Map<String, Object> facetMap = parseFacet(facet, options);
         String label;
         if (facetMap == null) {
             // Aggregation
@@ -146,9 +164,10 @@ public class FacetQueryParser {
      * Parse a facet and return the map containing the facet fields.
      *
      * @param facet facet string
+     * @param options QueryOptions object
      * @return the map containing the facet fields.
      */
-    private Map<String, Object> parseFacet(String facet) throws Exception {
+    private Map<String, Object> parseFacet(String facet, QueryOptions options) throws Exception {
         Map<String, Object> outputMap = new HashMap<>();
         if (facet.contains(AGGREGATION_IDENTIFIER)) {
             // Validate function
@@ -231,7 +250,8 @@ public class FacetQueryParser {
                     Map<String, Object> auxMap = new HashMap<>();
                     auxMap.put("field", matcher.group(1));
                     auxMap.put("type", "terms");
-                    setTermLimit(matcher.group(3), auxMap);
+                    setTermLimit(matcher.group(3), options, auxMap);
+                    setTermSkip(options, auxMap);
 
                     Map<String, Object> tmpMap = new HashMap<>();
                     tmpMap.put(matcher.group(1), auxMap);
@@ -239,7 +259,8 @@ public class FacetQueryParser {
                     outputMap.put("facet", tmpMap);
                 } else {
                     outputMap.put("type", "terms");
-                    setTermLimit(matcher.group(3), outputMap);
+                    setTermLimit(matcher.group(3), options, outputMap);
+                    setTermSkip(options, outputMap);
                 }
             } else {
                 throw new Exception("Invalid categorical facet: " + facet);
@@ -249,19 +270,28 @@ public class FacetQueryParser {
         return outputMap;
     }
 
-    private void setTermLimit(String limit, Map<String, Object> map) {
+    private void setTermLimit(String limit, QueryOptions options, Map<String, Object> map) {
         if (StringUtils.isNotEmpty(limit)) {
             if (limit.contains("*")) {
                 map.put("allBuckets", true);
             } else {
                 map.put("limit", Integer.parseInt(limit.substring(1)));
             }
+        } else if (options.containsKey(QueryOptions.LIMIT)) {
+            map.put("limit", options.getInt(QueryOptions.LIMIT));
         } else {
             map.put("limit", DEFAULT_FACET_LIMIT);
         }
     }
 
-    private void parseNestedFacet(String nestedFacet, Map<String, Object> jsonFacet) throws Exception {
+    private void setTermSkip(QueryOptions options, Map<String, Object> map) {
+        if (options.containsKey(QueryOptions.SKIP) && options.getInt(QueryOptions.SKIP) > 0) {
+            map.put("offset", options.getInt(QueryOptions.SKIP));
+        }
+    }
+
+    private void parseNestedFacet(String nestedFacet, QueryOptions options, Map<String, Object> jsonFacet)
+            throws Exception {
         String[] split = nestedFacet.split(NESTED_FACET_SEPARATOR);
 
         Map<String, Object> rootFacetMap = new HashMap<>();
@@ -270,7 +300,7 @@ public class FacetQueryParser {
             String facet = split[i];
             List<String> subfacets = getSubFacets(facet);
             for (String subfacet: subfacets) {
-                parseSimpleFacet(subfacet, rootFacetMap);
+                parseSimpleFacet(subfacet, options, rootFacetMap);
             }
 
             if (!childFacetMap.isEmpty()) {
