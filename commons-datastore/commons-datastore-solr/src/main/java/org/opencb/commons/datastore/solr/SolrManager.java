@@ -115,13 +115,36 @@ public class SolrManager {
     }
 
     public SolrCollection getCollection(String collection) throws SolrException {
-        if (!isAlive(collection)) {
-            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Solr server is not alive");
-        }
+        checkIsAlive();
         if (!exists(collection)) {
-            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Collection '" + collection + "' does not exist");
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Solr collection '" + collection + "' does not exist");
+        }
+        if (!isAlive(collection)) {
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Solr collection '" + collection + "' is unavailable");
         }
         return new SolrCollection(collection, solrClient);
+    }
+
+    public boolean isAlive() {
+        try {
+            checkIsAlive();
+            return true;
+        } catch (SolrException e) {
+            return false;
+        }
+    }
+
+    public void checkIsAlive() throws SolrException {
+        try {
+            if (isCloud()) {
+//                CollectionAdminResponse response = CollectionAdminRequest.getClusterStatus().process(solrClient);
+                CollectionAdminRequest.listCollections(solrClient);
+            } else {
+                CoreAdminRequest.getStatus(null, solrClient);
+            }
+        } catch (SolrServerException | IOException e) {
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Solr server is not alive", e);
+        }
     }
 
     public boolean isAlive(String collection) {
@@ -211,6 +234,18 @@ public class SolrManager {
         }
     }
 
+    public void checkExists(String dbName) throws SolrException {
+        if (StringUtils.isEmpty(dbName)) {
+            throw new SolrException(SolrException.ErrorCode.CONFLICT, "Missing name when checking collection");
+        }
+
+        if (isCloud()) {
+            checkExistsCollection(dbName);
+        } else {
+            checkExistsCore(dbName);
+        }
+    }
+
     /**
      * Check if a given core exists.
      *
@@ -219,8 +254,33 @@ public class SolrManager {
      */
     public boolean existsCore(String coreName) {
         try {
+            checkExistsCore(coreName);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public void checkExistsCore(String coreName) throws SolrException {
+        try {
             CoreStatus status = CoreAdminRequest.getCoreStatus(coreName, solrClient);
             status.getInstanceDirectory();
+        } catch (Exception e) {
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
+        }
+    }
+
+
+    /**
+     * Returns if a given collection exists.
+     *
+     * @param collectionName Collection name
+     * @return True or false
+     * @throws SolrException SolrException
+     */
+    public boolean existsCollection(String collectionName) throws SolrException {
+        try {
+            checkExistsCollection(collectionName);
         } catch (Exception e) {
             return false;
         }
@@ -234,7 +294,7 @@ public class SolrManager {
      * @return True or false
      * @throws SolrException SolrException
      */
-    public boolean existsCollection(String collectionName) throws SolrException {
+    public boolean checkExistsCollection(String collectionName) throws SolrException {
         try {
             List<String> collections = CollectionAdminRequest.listCollections(solrClient);
             for (String collection : collections) {
@@ -244,7 +304,7 @@ public class SolrManager {
             }
             return false;
         } catch (Exception e) {
-            throw new SolrException(SolrException.ErrorCode.CONFLICT, e);
+            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
         }
     }
 
