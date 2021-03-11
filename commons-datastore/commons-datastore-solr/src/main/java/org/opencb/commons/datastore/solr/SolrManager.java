@@ -291,18 +291,17 @@ public class SolrManager {
      * Check if a given collection exists.
      *
      * @param collectionName Collection name
-     * @return True or false
-     * @throws SolrException SolrException
+     * @throws SolrException SolrException if the collection doesn't exist
      */
-    public boolean checkExistsCollection(String collectionName) throws SolrException {
+    public void checkExistsCollection(String collectionName) throws SolrException {
         try {
             List<String> collections = CollectionAdminRequest.listCollections(solrClient);
             for (String collection : collections) {
                 if (collection.equals(collectionName)) {
-                    return true;
+                    return;
                 }
             }
-            return false;
+            throw new SolrException(SolrException.ErrorCode.NOT_FOUND, "Collection " + collectionName + " not found");
         } catch (Exception e) {
             throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
         }
