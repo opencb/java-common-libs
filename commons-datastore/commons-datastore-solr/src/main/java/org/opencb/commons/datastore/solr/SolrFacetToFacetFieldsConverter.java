@@ -149,7 +149,7 @@ public class SolrFacetToFacetFieldsConverter {
         if (value instanceof ArrayList) {
             values = (List<Double>) value;
         } else {
-            values = Collections.singletonList((Double) value);
+            values = Collections.singletonList(((Number) value).doubleValue());
         }
         return new FacetField(getName(fieldName, alias), aggregationName, values);
     }
