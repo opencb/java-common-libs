@@ -30,6 +30,7 @@ public class MongoDBConfiguration extends ObjectMap {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String AUTHENTICATION_DATABASE = "authenticationDatabase";
+    public static final String AUTHENTICATION_MECHANISM = "authenticationMechanism";
     public static final String REPLICA_SET = "replicaSet";
     public static final String READ_PREFERENCE = "readPreference";
     public static final ReadPreference READ_PREFERENCE_DEFAULT = ReadPreference.PRIMARY;
@@ -151,6 +152,10 @@ public class MongoDBConfiguration extends ObjectMap {
 
         public Builder setSslEnabled(Boolean enabled) {
             optionsMap.put(SSL_ENABLED, enabled);
+            return this;
+        }
+        public Builder setAuthenticationMechanism(String authenticationMechanism) {
+            optionsMap.put(AUTHENTICATION_MECHANISM, authenticationMechanism);
             return this;
         }
 
