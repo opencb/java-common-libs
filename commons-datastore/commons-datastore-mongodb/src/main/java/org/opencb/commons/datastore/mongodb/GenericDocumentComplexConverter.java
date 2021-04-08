@@ -19,6 +19,7 @@ package org.opencb.commons.datastore.mongodb;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.bson.Document;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 
@@ -37,23 +38,26 @@ import java.util.function.Function;
  */
 public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<T, Document> {
 
-    public static final String TO_REPLACE_DOTS = "&#46;";
-
     private final Class<T> clazz;
     private final ObjectMapper objectMapper;
+    private final ObjectReader objectReader;
+
+    public static final String TO_REPLACE_DOTS = "&#46;";
 
     public GenericDocumentComplexConverter(Class<T> clazz) {
         this.clazz = clazz;
 
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
-        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        this.objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        this.objectReader = objectMapper.readerFor(clazz);
     }
 
     public GenericDocumentComplexConverter(Class<T> clazz, ObjectMapper objectMapper) {
         this.clazz = clazz;
         this.objectMapper = objectMapper;
+        this.objectReader = objectMapper.readerFor(clazz);
     }
 
     public ObjectMapper getObjectMapper() {
@@ -65,7 +69,7 @@ public class GenericDocumentComplexConverter<T> implements ComplexTypeConverter<
         try {
             restoreDots(document);
             String json = objectMapper.writeValueAsString(document);
-            return objectMapper.readValue(json, clazz);
+            return objectReader.readValue(json);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

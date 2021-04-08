@@ -116,9 +116,11 @@ public class FileUtils {
      */
     public static InputStream newInputStream(Path path, OpenOption... options) throws IOException {
         FileUtils.checkFile(path);
-        InputStream inputStream = Files.newInputStream(path, options);
+        InputStream inputStream;
         if (path.toFile().getName().endsWith(".gz")) {
-            inputStream = new GZIPInputStream(inputStream);
+            inputStream = new GZIPInputStream(Files.newInputStream(path, options));
+        } else {
+            inputStream = Files.newInputStream(path, options);
         }
         return inputStream;
     }
