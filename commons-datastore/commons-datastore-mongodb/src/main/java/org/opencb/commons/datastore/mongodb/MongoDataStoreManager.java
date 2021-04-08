@@ -180,13 +180,13 @@ public class MongoDataStoreManager implements AutoCloseable {
         String pass = mongoDBConfiguration.getString(PASSWORD, "");
         MongoCredential mongoCredential = null;
         if ((user != null && !user.equals("")) || (pass != null && !pass.equals(""))) {
-            if (mongoDBConfiguration.get(AUTHENTICATION_DATABASE) != null
-                    && !mongoDBConfiguration.getString(AUTHENTICATION_DATABASE).isEmpty()) {
-                mongoCredential = MongoCredential.createScramSha1Credential(user,
-                        mongoDBConfiguration.getString(AUTHENTICATION_DATABASE), pass.toCharArray());
-            } else {
-                mongoCredential = MongoCredential.createScramSha1Credential(user, "", pass.toCharArray());
-            }
+            String authMechanismStr = mongoDBConfiguration
+                    .getString(AUTHENTICATION_MECHANISM, AuthenticationMechanism.SCRAM_SHA_1.toString());
+            String authDatabase = mongoDBConfiguration.getString(AUTHENTICATION_DATABASE, "");
+
+            mongoCredential = MongoCredential.createCredential(user, authDatabase, pass.toCharArray())
+                    .withMechanism(AuthenticationMechanism.fromMechanismName(authMechanismStr));
+            logger.debug("Using " + AUTHENTICATION_MECHANISM + " " + AuthenticationMechanism.fromMechanismName(authMechanismStr));
         }
         MongoClient mc = newMongoClient(mongoClientOptions, mongoCredential);
         MongoDatabase db = mc.getDatabase(database);
