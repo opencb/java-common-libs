@@ -25,7 +25,6 @@ import com.sun.tools.doclets.standard.Standard;
 import java.io.*;
 import java.util.*;
 
-
 /**
  * Processes and stores the command line options.
  *
@@ -39,98 +38,15 @@ public class Options {
     public static final String OPT_GITHUB_SERVER = "-githubServer";
     public static final String OPT_TABLE_TAGS_CLASSES = "-tableTagsClasses";
 
-
     private String githubServer = "https://github.com/opencb/opencga/blob/master/opencga-core/";
     private List<String> classes2Markdown = new ArrayList<>();
 
-
     private List<String> tableTagsClasses = new ArrayList<>();
-
-
     private String outputdir;
-
     private Map<String, String> jsonMap = new HashMap<>();
 
     public Options() {
-    }
 
-
-    /**
-     * Loads the options from the command line.
-     *
-     * @param options The command line options.
-     */
-    public void load(String[][] options) {
-        for (int i = 0; i < options.length; i++) {
-            String[] opt = options[i];
-            if (OPT_OUTPUT_DIR.equals(opt[0])) {
-                if (!opt[1].endsWith(File.separator)) {
-                    opt[1] = opt[1] + File.separator;
-                }
-                setOutputdir(opt[1]);
-            } else if (OPT_CLASSES_TO_MARKDOWN.equals(opt[0])) {
-                String[] aux = opt[1].split(";");
-                setClasses2Markdown(Arrays.asList(aux));
-            } else if (OPT_JSON_DIR.equals(opt[0])) {
-                if (!opt[1].endsWith(File.separator)) {
-                    opt[1] = opt[1] + File.separator;
-                }
-                loadJsonMap(opt[1]);
-            } else if (OPT_GITHUB_SERVER.equals(opt[0])) {
-                if (!opt[1].endsWith(File.separator)) {
-                    opt[1] = opt[1] + File.separator;
-                }
-                setGithubServer(opt[1]);
-            } else if (OPT_TABLE_TAGS_CLASSES.equals(opt[0])) {
-                String[] aux = opt[1].split(";");
-                setTableTagsClasses(Arrays.asList(aux));
-            }
-        }
-
-    }
-
-    /**
-     * Loads the jsonMap listing json folder and store in map the files content as Strings.
-     *
-     * @param jsondir The json folder passed as option.
-     */
-    private void loadJsonMap(String jsondir) {
-        File folder = new File(jsondir);
-        System.out.println("The folder " + jsondir);
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (final File fileEntry : files) {
-                jsonMap.put(fileEntry.getName(), getFileContentAsString(fileEntry.getAbsolutePath()));
-            }
-        }
-    }
-
-    /**
-     * Read file content and returns it as Strings.
-     *
-     * @param path The file path.
-     * @return the content of the file as string
-     */
-    private String getFileContentAsString(String path) {
-        String res = "";
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-            StringBuilder out = new StringBuilder();
-            String line = null;
-
-            while ((line = reader.readLine()) != null) {
-                out.append(line + "\n");
-
-            }
-            reader.close();
-            res = out.toString();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return res;
     }
 
     /**
@@ -159,7 +75,7 @@ public class Options {
     /**
      * Checks the content of the option.
      *
-     * @param options The options to check.
+     * @param options  The options to check.
      * @param reporter The inherited reporter param.
      * @return if are all content options valid
      */
@@ -189,6 +105,88 @@ public class Options {
         return foundOutputdirOption && foundclasses2MarkdownOption;
     }
 
+    /**
+     * Loads the options from the command line.
+     *
+     * @param options The command line options.
+     */
+    public void load(String[][] options) {
+        for (String[] opt : options) {
+            switch (opt[0]) {
+                case OPT_OUTPUT_DIR:
+                    if (!opt[1].endsWith(File.separator)) {
+                        opt[1] = opt[1] + File.separator;
+                    }
+                    setOutputdir(opt[1]);
+                    break;
+                case OPT_CLASSES_TO_MARKDOWN:
+                    String[] aux = opt[1].split(";");
+                    setClasses2Markdown(Arrays.asList(aux));
+                    break;
+                case OPT_JSON_DIR:
+                    if (!opt[1].endsWith(File.separator)) {
+                        opt[1] = opt[1] + File.separator;
+                    }
+                    loadJsonMap(opt[1]);
+                    break;
+                case OPT_GITHUB_SERVER:
+                    if (!opt[1].endsWith(File.separator)) {
+                        opt[1] = opt[1] + File.separator;
+                    }
+                    setGithubServer(opt[1]);
+                    break;
+                case OPT_TABLE_TAGS_CLASSES:
+                    String[] classes = opt[1].split(";");
+                    setTableTagsClasses(Arrays.asList(classes));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Loads the jsonMap listing json folder and store in map the files content as Strings.
+     *
+     * @param jsondir The json folder passed as option.
+     */
+    private void loadJsonMap(String jsondir) {
+        File folder = new File(jsondir);
+        System.out.println("The folder " + jsondir);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (final File fileEntry : files) {
+                jsonMap.put(fileEntry.getName(), getFileContentAsString(fileEntry.getAbsolutePath()));
+            }
+        }
+    }
+
+    /**
+     * Read file content and returns it as Strings.
+     *
+     * @param path The file path.
+     * @return the content of the file as string
+     */
+    private String getFileContentAsString(String path) {
+        String res = "";
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            StringBuilder out = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                out.append(line + "\n");
+            }
+            reader.close();
+            res = out.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public String getOutputdir() {
         return outputdir;
     }
@@ -196,7 +194,6 @@ public class Options {
     public void setOutputdir(String outputdir) {
         this.outputdir = outputdir;
     }
-
 
     public List<String> getClasses2Markdown() {
         return classes2Markdown;
@@ -229,5 +226,4 @@ public class Options {
     public void setTableTagsClasses(List<String> tableTagsClasses) {
         this.tableTagsClasses = tableTagsClasses;
     }
-
 }
