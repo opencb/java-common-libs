@@ -15,6 +15,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests
       - name: Maven Validate
@@ -34,6 +40,12 @@ jobs:
           java-version: 1.8
       - name: Launch MongoDB (${{ matrix.mongodb }})
         run: sudo docker run --name mongo -d -p 27017:27017 mongo:${{ matrix.mongodb }}
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
         run: mvn -T 2 clean install -DskipTests
   deploy:
@@ -46,6 +58,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven CLI
         run: mvn -T 2 clean install -DskipTests
       - name: Deploy to Maven Central respository
