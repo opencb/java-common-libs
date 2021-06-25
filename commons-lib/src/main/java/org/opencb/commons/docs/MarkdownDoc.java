@@ -3,8 +3,11 @@ package org.opencb.commons.docs;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.FieldDoc;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MarkdownDoc {
 
@@ -13,6 +16,10 @@ public class MarkdownDoc {
     private String name;
     private List<MarkdownField> fields = new ArrayList<>();
     private String qualifiedTypeName;
+    private boolean upperClass;
+
+    private boolean enumeration;
+    private List<String> innerClasses = new ArrayList<>();
 
     public MarkdownDoc(ClassDoc doc) {
         this.doc = doc;
@@ -20,14 +27,47 @@ public class MarkdownDoc {
     }
 
     private void initialize() {
-        FieldDoc[] fieldDocs = doc.fields(false);
-        for (FieldDoc f : fieldDocs) {
-            fields.add(new MarkdownField(f));
-        }
+
         description = doc.commentText();
         name = doc.name();
         qualifiedTypeName = doc.qualifiedTypeName();
-        //System.out.println("initialized " + name + " with " + fields.size() + " fields");
+        checkEnumeration();
+        ClassDoc[] innerclass = doc.innerClasses();
+        if (innerclass != null && innerclass.length > 0) {
+            for (ClassDoc inner : innerclass) {
+                innerClasses.add(inner.name());
+            }
+            upperClass = true;
+        }
+        FieldDoc[] fieldDocs = doc.fields(false);
+        for (FieldDoc f : fieldDocs) {
+            MarkdownField mf = new MarkdownField(f);
+            mf.setEnumerationClass(enumeration);
+            fields.add(mf);
+            if (upperClass && innerClasses.contains(f.type().typeName())) {
+                mf.setParentType(name);
+            }
+        }
+    }
+
+    private void checkEnumeration() {
+        String sourceFilePath = Options.getInstance().getSourceClassesDir()
+                + getQualifiedTypeName().replaceAll("\\.", File.separator) + ".java";
+        String className = doc.name();
+        if (className.contains(".")) {
+            className = className.substring(className.lastIndexOf(".") + 1, className.length());
+            sourceFilePath = Options.getInstance().getSourceClassesDir()
+                    + getQualifiedTypeName().substring(0, getQualifiedTypeName().lastIndexOf("."))
+                    .replaceAll("\\.", File.separator) + ".java";
+        }
+        String content = MarkdownUtils.getFileContentAsString(sourceFilePath);
+
+        String reg = "enum " + className;
+        Pattern p = Pattern.compile(reg);
+        Matcher m = p.matcher(content);
+        enumeration = m.find();
+
+        // System.out.println(doc.name() + " ---- > " + className + " es enumeration " + enumeration + " comprobado en " + sourceFilePath);
     }
 
     public ClassDoc getDoc() {
@@ -110,6 +150,33 @@ public class MarkdownDoc {
 
     public MarkdownDoc setQualifiedTypeName(String qualifiedTypeName) {
         this.qualifiedTypeName = qualifiedTypeName;
+        return this;
+    }
+
+    public boolean isUpperClass() {
+        return upperClass;
+    }
+
+    public MarkdownDoc setUpperClass(boolean upperClass) {
+        this.upperClass = upperClass;
+        return this;
+    }
+
+    public List<String> getInnerClasses() {
+        return innerClasses;
+    }
+
+    public MarkdownDoc setInnerClasses(List<String> innerClasses) {
+        this.innerClasses = innerClasses;
+        return this;
+    }
+
+    public boolean isEnumeration() {
+        return enumeration;
+    }
+
+    public MarkdownDoc setEnumeration(boolean enumeration) {
+        this.enumeration = enumeration;
         return this;
     }
 }

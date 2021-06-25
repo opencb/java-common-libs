@@ -33,6 +33,8 @@ public class MarkdownField {
     private String description;
     private String type;
     private boolean collection;
+    private String parentType;
+    private boolean enumerationClass;
 
     public MarkdownField(FieldDoc field) {
         this.field = field;
@@ -76,6 +78,7 @@ public class MarkdownField {
                 since = mt.getDescription().trim();
             }
         }
+        enumerationClass = false;
         type = String.valueOf(field.type());
         int index = type.lastIndexOf('.') + 1;
         className = type.substring(index).trim();
@@ -114,12 +117,13 @@ public class MarkdownField {
     public String getNameClassAsString() {
         String res = "";
         if (isDeprecated()) {
-            res += "**~~" + getName() + "~~** <br> Deprecated";
+            res += "**~~" + getName() + "~~**";
         } else {
-            res += "**" + getName() + "** ";
+            res += "**" + getName() + "**";
         }
-
-        res += "<br> *" + getClassName() + "* ";
+        if (!isEnumerationClass()) {
+            res += "<br> *" + getClassName() + "*";
+        }
 
         return res;
     }
@@ -127,12 +131,10 @@ public class MarkdownField {
     public String getNameLinkedClassAsString(String currentDocument) {
         String res = "";
         if (isDeprecated()) {
-            res += "**~~" + getName() + "~~** <br> Deprecated";
+            res += "**~~" + getName() + "~~**<br>*" + generateLink(currentDocument, getClassName()) + "*";
         } else {
-            res += "**" + getName() + "**";
+            res += "**" + getName() + "**<br>*" + generateLink(currentDocument, getClassName()) + "*";
         }
-
-        res += "<br>*" + generateLink(currentDocument, getClassName()) + "*";
 
         return res;
     }
@@ -157,9 +159,13 @@ public class MarkdownField {
     }
 
     private String generateLink(String currentDocument, String clase) {
-
-        String res = "<a href=\"" + currentDocument + ".md#" + clase + "\"><em>" + clase + "</em></a>";
-
+        String res = "";
+        if (getParentType() != null) {
+            res = "<a href=\"" + currentDocument + ".md#" + getParentType().toLowerCase()
+                    + clase.toLowerCase() + "\"><em>" + clase + "</em></a>";
+        } else {
+            res = "<a href=\"" + currentDocument + ".md#" + clase + "\"><em>" + clase + "</em></a>";
+        }
         return res;
     }
 
@@ -167,26 +173,38 @@ public class MarkdownField {
 
         String res = "";
         if (since != null && since.length() > 0) {
-            res += "<br>since: " + since;
+            res += "<br>_since_: " + since;
+        }
+
+        return res;
+    }
+
+    public String getDeprecatedAsString() {
+
+        String res = "";
+        if (isDeprecated()) {
+            res += "<br>_Deprecated_";
         }
 
         return res;
     }
 
     public String getDescriptionAsString() {
-        String res = "<p>" + getDescription() + "</p>" + renderImplNote() + renderSeeTag(see);
+        String res = "<p>" + getDescription() + "</p>" + renderImplNote();
+        res = renderSeeTag(res);
+        res = getConstraintsAsString(res);
         return res.replaceAll("\\n", "<br>");
     }
 
     private String renderImplNote() {
         if (implNote != null) {
-            return "*" + implNote + "*";
+            return "_Note_: _" + implNote + "_";
         }
         return "";
     }
 
-    private String renderSeeTag(String tag) {
-        String res = "";
+    private String renderSeeTag(String res) {
+        String tag = getSee();
         if (tag != null) {
             StringBuilder target = new StringBuilder();
             if (tag.length() > 1) {
@@ -219,20 +237,35 @@ public class MarkdownField {
                     target.append("\">");
                     target.append(label);
                     target.append("</a>");
-                    res = "</br>" + target.toString();
+                    if (res.endsWith("</p>")) {
+                        res += "_More info at_: " + target.toString();
+                    } else {
+                        res += "</br>_More info at_: " + target.toString();
+                    }
                 } else {
-                    return "</br>" + tag;
+                    if (res.endsWith("</p>")) {
+                        res += "" + tag;
+                    } else {
+                        res += "</br>" + tag;
+                    }
+                    return res;
                 }
             }
         }
         return res;
     }
 
-    public String getConstraintsAsString() {
-        if (getConstraints() == null) {
+    public String getConstraintsAsString(String res) {
+        if (getConstraints() == null || "".equals(getConstraints().trim())) {
             return "";
         }
-        return getConstraints().replaceAll(",", "<br>");
+        if (res.endsWith("</p>")) {
+            res += "_Tags_: _" + getConstraints() + "_";
+        } else {
+            res += "<br>_Tags_: _" + getConstraints() + "_";
+        }
+
+        return res;
     }
 
     public FieldDoc getField() {
@@ -394,6 +427,24 @@ public class MarkdownField {
 
     public MarkdownField setCollection(boolean collection) {
         this.collection = collection;
+        return this;
+    }
+
+    public String getParentType() {
+        return parentType;
+    }
+
+    public MarkdownField setParentType(String parentType) {
+        this.parentType = parentType;
+        return this;
+    }
+
+    public boolean isEnumerationClass() {
+        return enumerationClass;
+    }
+
+    public MarkdownField setEnumerationClass(boolean enumerationClass) {
+        this.enumerationClass = enumerationClass;
         return this;
     }
 }

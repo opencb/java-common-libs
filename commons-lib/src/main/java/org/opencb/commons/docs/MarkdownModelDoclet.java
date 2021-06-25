@@ -19,7 +19,12 @@ import java.util.*;
 public class MarkdownModelDoclet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkdownModelDoclet.class);
-    private static Options options = new Options();
+    private static final String CREABLE = "CREABLE";
+    private static final String UPDATABLE = "UPDATABLE";
+    private static final String UNIQUE = "UNIQUE";
+    private static final String REQUIRED = "REQUIRED";
+    private static final String NOTAGS = "NOTAGS";
+    private static Options options;
     private static Map<String, MarkdownDoc> classes = new HashMap<>();
     private static Set<MarkdownDoc> tablemodels = new HashSet<>();
     private static String currentDocument;
@@ -29,6 +34,7 @@ public class MarkdownModelDoclet {
 
     public static boolean start(RootDoc rootDoc) {
         LOGGER.info("Generating markdown for the data model");
+        options = Options.getInstance();
         options.load(rootDoc.options());
         classes = createMap(rootDoc.classes());
         printDocument();
@@ -76,20 +82,57 @@ public class MarkdownModelDoclet {
 
     private static String generateFieldsAttributesParagraph(List<MarkdownField> fields, String className) {
         StringBuffer res = new StringBuffer();
-        //System.out.println("Checking " + fields.size() + " " + className);
         if ((options.getTableTagsClasses().contains(className)) && (fields.size() > 0)) {
+            Map<String, List<MarkdownField>> mfFields = classifyFields(fields);
             res.append("### Summary \n");
-            res.append("| Field | unique | required | create| updatable|\n| :--- | :---: | :---: |:---: |:---: |\n");
-            if (options.getTableTagsClasses().contains(className)) {
-                for (MarkdownField field : fields) {
-                    res.append("| " + field.getName() + " | " + getFlag(field.isUnique()) + " | "
-                            + getFlag(field.isRequired()) + " |" + getFlag(field.isCreate()) + " | "
-                            + getFlag(field.isUpdatable()) + " |\n");
-                }
-            }
+            res.append("| Field | create | update | unique | required|\n| :--- | :---: | :---: |:---: |:---: |\n");
+            res.append(getRowTicks(mfFields.get(UPDATABLE)));
+            res.append(getRowTicks(mfFields.get(CREABLE)));
+            res.append(getRowTicks(mfFields.get(UNIQUE)));
+            res.append(getRowTicks(mfFields.get(REQUIRED)));
+            res.append(getRowTicks(mfFields.get(NOTAGS)));
         }
         res.append("\n");
         return res.toString();
+    }
+
+    private static String getRowTicks(List<MarkdownField> fields) {
+        String res = "";
+        for (MarkdownField field : fields) {
+            res += "| " + field.getName() + " | " + getFlag(field.isCreate()) + " | "
+                    + getFlag(field.isUpdatable()) + " |" + getFlag(field.isUnique()) + " | "
+                    + getFlag(field.isRequired()) + " |\n";
+        }
+        return res;
+    }
+
+    private static Map<String, List<MarkdownField>> classifyFields(List<MarkdownField> fields) {
+        Map<String, List<MarkdownField>> res = new HashMap<>();
+        List<MarkdownField> updatable = new ArrayList<>();
+        List<MarkdownField> creable = new ArrayList<>();
+        List<MarkdownField> unique = new ArrayList<>();
+        List<MarkdownField> required = new ArrayList<>();
+        List<MarkdownField> notags = new ArrayList<>();
+        for (MarkdownField f : fields) {
+            if (f.isCreate()) {
+                creable.add(f);
+            } else if (f.isUpdatable()) {
+                updatable.add(f);
+            } else if (f.isUnique()) {
+                unique.add(f);
+            } else if (f.isRequired()) {
+                required.add(f);
+            } else {
+                notags.add(f);
+            }
+        }
+
+        res.put(CREABLE, creable);
+        res.put(UPDATABLE, updatable);
+        res.put(UNIQUE, unique);
+        res.put(REQUIRED, required);
+        res.put(NOTAGS, notags);
+        return res;
     }
 
     private static String generateFieldsAttributesParagraph(MarkdownDoc doc) {
@@ -138,17 +181,23 @@ public class MarkdownModelDoclet {
 
         LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
         Set<MarkdownDoc> relatedTableModels = new HashSet<>();
-        res.append("### " + fileName + "\n");
+        res.append("### " + (doc.isEnumeration() ? "Enum " : "") + fileName + "\n");
+
+        //Create link for github Java code
         res.append("You can find the Java code [here](" + options.getGithubServer() + "src/main/java/"
                 + getPackageAsPath(doc.getQualifiedTypeName()) + ".java).\n\n");
+
+        //For each field we make its table row
         if (fields.size() > 0) {
-            res.append("| Field | Tags | Description |\n| :--- | :--- | :--- |\n");
+            res.append("| Field | Description |\n| :---  | :--- |\n");
             for (MarkdownField field : fields) {
-                if (isModel(field.getType())) {
-                    //System.out.println("LA CLASE ES UN MODELO " + field.getClassName());
-                    res.append("| " + field.getNameLinkedClassAsString(currentDocument) + " <br>" + field.getSinceAsString() + " |"
-                            + field.getConstraintsAsString() + " | " + field.getDescriptionAsString() + " |\n");
+                if (isModel(field.getType()) && (!field.isEnumerationClass())) {
+                    //In this case the class is among the models that we can document and therefore
+                    // we must generate the internal link to the table
+                    res.append("| " + field.getNameLinkedClassAsString(currentDocument) + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
                 } else if (field.isCollection()) {
+                    //The field is a collection, we must extract its internal classes and generate the link if necessary
                     String sourceFilePath = options.getSourceClassesDir()
                             + doc.getQualifiedTypeName().replaceAll("\\.", File.separator) + ".java";
                     Map<String, String> innerClasses = MarkdownUtils.getInnerClass(field.getName(), sourceFilePath, field.getClassName());
@@ -157,15 +206,17 @@ public class MarkdownModelDoclet {
                             relatedTableModels.add(classes.get(innerClass));
                         }
                     }
-                    //System.out.println("LA CLASE ES UNA COLECCION Y ES " + field.getClassName());
                     res.append("| " + field.getCollectionClassAsString(classes, innerClasses, currentDocument)
-                            + " <br>" + field.getSinceAsString() + " |"
-                            + field.getConstraintsAsString() + " | " + field.getDescriptionAsString() + " |\n");
+                            + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
                 } else {
-                    //System.out.println("LA CLASE ES " + field.getClassName());
-                    res.append("| " + field.getNameClassAsString() + field.getSinceAsString() + " |"
-                            + field.getConstraintsAsString() + " | " + field.getDescriptionAsString() + " |\n");
+                    //The field is a primitive class and we must print only the name of the class
+                    res.append("| " + field.getNameClassAsString() + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
                 }
+
+                //If the type of the class is among those that we want to document, we add it to the list of related table models to print
+                // it later.
                 if (classes.get(field.getType()) != null) {
                     if ((!tablemodels.contains(classes.get(field.getType())))
                             && (!options.getNoPrintableClasses().contains(field.getType()))) {

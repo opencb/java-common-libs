@@ -1,9 +1,6 @@
 package org.opencb.commons.docs;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -71,15 +68,18 @@ public class MarkdownUtils {
     public static String getFileContentAsString(String path) {
         String res = "";
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-            StringBuilder out = new StringBuilder();
-            String line;
+            File f = new File(path);
+            if (f.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(path));
+                StringBuilder out = new StringBuilder();
+                String line;
 
-            while ((line = reader.readLine()) != null) {
-                out.append(line + "\n");
+                while ((line = reader.readLine()) != null) {
+                    out.append(line + "\n");
+                }
+                reader.close();
+                res = out.toString();
             }
-            reader.close();
-            res = out.toString();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
