@@ -185,10 +185,11 @@ public class MarkdownModelDoclet {
         List<MarkdownField> fields = doc.getFields();
         LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
         Set<MarkdownDoc> relatedTableModels = new HashSet<>();
-
-        res.append("### " + doc.getName() + "\n");
         if (doc.isEnumeration()) {
+            res.append("### Enum " + doc.getName() + "\n");
             res.append("_Enumeration class._\n");
+        } else {
+            res.append("### " + doc.getName() + "\n");
         }
         //Create link for github Java code
         res.append("You can find the Java code [here](" + options.getGithubServer() + "src/main/java/"
