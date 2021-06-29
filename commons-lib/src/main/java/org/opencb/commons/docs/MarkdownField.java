@@ -3,10 +3,7 @@ package org.opencb.commons.docs;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.Tag;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -160,12 +157,23 @@ public class MarkdownField {
 
     private String generateLink(String currentDocument, String clase) {
         String res = "";
-        if (getParentType() != null) {
-            res = "<a href=\"" + currentDocument + ".md#" + getParentType().toLowerCase()
-                    + clase.toLowerCase() + "\"><em>" + clase + "</em></a>";
-        } else {
-            res = "<a href=\"" + currentDocument + ".md#" + clase + "\"><em>" + clase + "</em></a>";
+        String link = "";
+        if (clase.toLowerCase(Locale.ROOT).contains("status")) {
+            System.out.println("Class " + clase);
+            System.out.println("ParentType:::  " + getParentType());
         }
+        if (getParentType() != null) {
+            link = getParentType().toLowerCase()
+                    + clase.toLowerCase();
+            clase = getParentType() + "." + clase;
+        } else {
+            link = clase;
+        }
+
+        if (MarkdownUtils.checkEnumeration(clase, field.qualifiedName())) {
+            link = "enum-" + link;
+        }
+        res = "<a href=\"" + currentDocument + ".md#" + link + "\"><em>" + clase + "</em></a>";
         return res;
     }
 
@@ -207,7 +215,7 @@ public class MarkdownField {
         String tag = getSee();
         if (tag != null) {
             StringBuilder target = new StringBuilder();
-            if (tag.length() > 1) {
+            if (tag.length() > 0) {
                 String text = tag;
                 if (tag.startsWith("\"") && tag.endsWith("\"")) {
                     text = tag.substring(1, tag.length() - 1).trim();
@@ -256,15 +264,13 @@ public class MarkdownField {
     }
 
     public String getConstraintsAsString(String res) {
-        if (getConstraints() == null || "".equals(getConstraints().trim())) {
-            return "";
+        if (!(getConstraints() == null) && !"".equals(getConstraints().trim())) {
+            if (res.endsWith("</p>")) {
+                res += "_Tags_: _" + getConstraints() + "_";
+            } else {
+                res += "<br>_Tags_: _" + getConstraints() + "_";
+            }
         }
-        if (res.endsWith("</p>")) {
-            res += "_Tags_: _" + getConstraints() + "_";
-        } else {
-            res += "<br>_Tags_: _" + getConstraints() + "_";
-        }
-
         return res;
     }
 

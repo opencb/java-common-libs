@@ -87,4 +87,23 @@ public class MarkdownUtils {
         }
         return res;
     }
+
+    public static boolean checkEnumeration(String className, String qualifiedTypeName) {
+        String sourceFilePath = Options.getInstance().getSourceClassesDir()
+                + qualifiedTypeName.replaceAll("\\.", File.separator) + ".java";
+        if (className.contains(".")) {
+            className = className.substring(className.lastIndexOf(".") + 1, className.length());
+            sourceFilePath = Options.getInstance().getSourceClassesDir()
+                    + qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."))
+                    .replaceAll("\\.", File.separator) + ".java";
+        }
+        String content = MarkdownUtils.getFileContentAsString(sourceFilePath);
+
+        String reg = "enum " + className;
+        Pattern p = Pattern.compile(reg);
+        Matcher m = p.matcher(content);
+        return m.find();
+
+        // System.out.println(doc.name() + " ---- > " + className + " es enumeration " + enumeration + " comprobado en " + sourceFilePath);
+    }
 }

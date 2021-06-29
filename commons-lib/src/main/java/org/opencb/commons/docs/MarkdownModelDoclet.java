@@ -28,6 +28,7 @@ public class MarkdownModelDoclet {
     private static Map<String, MarkdownDoc> classes = new HashMap<>();
     private static Set<MarkdownDoc> tablemodels = new HashSet<>();
     private static String currentDocument;
+    private static Set<MarkdownDoc> internalTableModels = new HashSet<>();
 
     public MarkdownModelDoclet() {
     }
@@ -65,7 +66,10 @@ public class MarkdownModelDoclet {
                 res.append("## Overview\n" + doc.getDescription() + "\n");
                 res.append(generateFieldsAttributesParagraph(doc.getFields(), doc.getQualifiedTypeName()));
                 res.append("## Data Model\n");
-                res = getTableModel(doc, doc.getFields(), currentDocument, res);
+                res = getTableModel(doc, currentDocument, res);
+                for (MarkdownDoc internal : internalTableModels) {
+                    res = getTableModel(internal, currentDocument, res);
+                }
                 if (options.getJsonMap().keySet().contains(currentDocument + ".json")) {
                     res.append("## Example\n");
                     res.append("This is a full JSON example:\n");
@@ -176,13 +180,16 @@ public class MarkdownModelDoclet {
         return res;
     }
 
-    private static StringBuffer getTableModel(MarkdownDoc doc, List<MarkdownField> fields, String fileName, StringBuffer res) {
+    private static StringBuffer getTableModel(MarkdownDoc doc, String fileName, StringBuffer res) {
         // StringBuffer res = new StringBuffer();
-
+        List<MarkdownField> fields = doc.getFields();
         LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
         Set<MarkdownDoc> relatedTableModels = new HashSet<>();
-        res.append("### " + (doc.isEnumeration() ? "Enum " : "") + fileName + "\n");
 
+        res.append("### " + doc.getName() + "\n");
+        if (doc.isEnumeration()) {
+            res.append("_Enumeration class._\n");
+        }
         //Create link for github Java code
         res.append("You can find the Java code [here](" + options.getGithubServer() + "src/main/java/"
                 + getPackageAsPath(doc.getQualifiedTypeName()) + ".java).\n\n");
@@ -220,7 +227,11 @@ public class MarkdownModelDoclet {
                 if (classes.get(field.getType()) != null) {
                     if ((!tablemodels.contains(classes.get(field.getType())))
                             && (!options.getNoPrintableClasses().contains(field.getType()))) {
-                        relatedTableModels.add(classes.get(String.valueOf(field.getType())));
+                        if (String.valueOf(field.getType()).endsWith("Internal")) {
+                            internalTableModels.add(classes.get(String.valueOf(field.getType())));
+                        } else {
+                            relatedTableModels.add(classes.get(String.valueOf(field.getType())));
+                        }
                     }
                 }
                 tablemodels.add(classes.get(String.valueOf(field.getType())));
@@ -228,7 +239,7 @@ public class MarkdownModelDoclet {
 
             for (MarkdownDoc tableModel : relatedTableModels) {
                 if (tableModel != null) {
-                    res = getTableModel(tableModel, tableModel.getFields(), tableModel.getName(), res);
+                    res = getTableModel(tableModel, tableModel.getName(), res);
                 }
             }
         }
