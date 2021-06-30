@@ -22,7 +22,7 @@ package org.opencb.commons.docs;
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.tools.doclets.standard.Standard;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -30,23 +30,30 @@ import java.util.*;
  *
  * @author Juanfe
  */
-public class Options {
+public final class Options {
 
     public static final String OPT_OUTPUT_DIR = "-outputdir";
     public static final String OPT_CLASSES_TO_MARKDOWN = "-classes2Markdown";
     public static final String OPT_JSON_DIR = "-jsondir";
     public static final String OPT_GITHUB_SERVER = "-githubServer";
     public static final String OPT_TABLE_TAGS_CLASSES = "-tableTagsClasses";
-
+    public static final String OPT_NO_PRINTABLE_RELATED_CLASSES = "-noPrintableRelatedClasses";
+    public static final String OPT_SOURCE_CLASSES_DIR = "-sourceClassesDir";
+    private static final Options INSTANCE = new Options();
     private String githubServer = "https://github.com/opencb/opencga/blob/master/opencga-core/";
     private List<String> classes2Markdown = new ArrayList<>();
-
     private List<String> tableTagsClasses = new ArrayList<>();
+    private List<String> noPrintableClasses = new ArrayList<>();
     private String outputdir;
+    private String sourceClassesDir;
     private Map<String, String> jsonMap = new HashMap<>();
 
-    public Options() {
+    private Options() {
 
+    }
+
+    public static Options getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -56,6 +63,8 @@ public class Options {
      * @return the valid length of this option
      */
     public static int optionLength(String option) {
+        System.out.println("optionLength .... " + option);
+
         int res = Standard.optionLength(option);
         switch (option) {
             case OPT_CLASSES_TO_MARKDOWN:
@@ -63,6 +72,9 @@ public class Options {
             case OPT_JSON_DIR:
             case OPT_GITHUB_SERVER:
             case OPT_TABLE_TAGS_CLASSES:
+            case OPT_NO_PRINTABLE_RELATED_CLASSES:
+            case OPT_SOURCE_CLASSES_DIR:
+
                 res = 2;
                 break;
             default:
@@ -80,6 +92,8 @@ public class Options {
      * @return if are all content options valid
      */
     public static boolean validOptions(String[][] options, DocErrorReporter reporter) {
+
+        System.out.println("validating options....");
         boolean foundOutputdirOption = false;
         for (int i = 0; i < options.length; i++) {
             String[] opt = options[i];
@@ -139,6 +153,17 @@ public class Options {
                     String[] classes = opt[1].split(";");
                     setTableTagsClasses(Arrays.asList(classes));
                     break;
+                case OPT_NO_PRINTABLE_RELATED_CLASSES:
+                    String[] noPrintableClasses = opt[1].split(";");
+                    setNoPrintableClasses(Arrays.asList(noPrintableClasses));
+                    break;
+                case OPT_SOURCE_CLASSES_DIR:
+                    if (!opt[1].endsWith(File.separator)) {
+                        opt[1] = opt[1] + File.separator;
+                    }
+                    setSourceClassesDir(opt[1]);
+                    break;
+
                 default:
                     break;
             }
@@ -152,39 +177,29 @@ public class Options {
      */
     private void loadJsonMap(String jsondir) {
         File folder = new File(jsondir);
-        System.out.println("The folder " + jsondir);
+        //System.out.println("The folder " + jsondir);
         File[] files = folder.listFiles();
         if (files != null) {
             for (final File fileEntry : files) {
-                jsonMap.put(fileEntry.getName(), getFileContentAsString(fileEntry.getAbsolutePath()));
+                jsonMap.put(fileEntry.getName(), MarkdownUtils.getFileContentAsString(fileEntry.getAbsolutePath()));
             }
         }
     }
 
     /**
-     * Read file content and returns it as Strings.
+     * Loads the jsonMap listing json folder and store in map the files content as Strings.
      *
-     * @param path The file path.
-     * @return the content of the file as string
+     * @param jsondir The json folder passed as option.
      */
-    private String getFileContentAsString(String path) {
-        String res = "";
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(path));
-            StringBuilder out = new StringBuilder();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                out.append(line + "\n");
+    private void getSourceClassesDir(String jsondir) {
+        File folder = new File(jsondir);
+        //System.out.println("The folder " + jsondir);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (final File fileEntry : files) {
+                jsonMap.put(fileEntry.getName(), MarkdownUtils.getFileContentAsString(fileEntry.getAbsolutePath()));
             }
-            reader.close();
-            res = out.toString();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return res;
     }
 
     public String getOutputdir() {
@@ -225,5 +240,23 @@ public class Options {
 
     public void setTableTagsClasses(List<String> tableTagsClasses) {
         this.tableTagsClasses = tableTagsClasses;
+    }
+
+    public List<String> getNoPrintableClasses() {
+        return noPrintableClasses;
+    }
+
+    public Options setNoPrintableClasses(List<String> noPrintableClasses) {
+        this.noPrintableClasses = noPrintableClasses;
+        return this;
+    }
+
+    public String getSourceClassesDir() {
+        return sourceClassesDir;
+    }
+
+    public Options setSourceClassesDir(String sourceClassesDir) {
+        this.sourceClassesDir = sourceClassesDir;
+        return this;
     }
 }
