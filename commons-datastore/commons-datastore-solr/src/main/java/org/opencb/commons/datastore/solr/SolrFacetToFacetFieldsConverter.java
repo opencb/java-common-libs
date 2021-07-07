@@ -26,7 +26,7 @@ public class SolrFacetToFacetFieldsConverter {
     public static List<FacetField> convert(QueryResponse solrResponse, Map<String, String> alias) {
         // Sanity check
         if (solrResponse == null || solrResponse.getResponse() == null || solrResponse.getResponse().get("facets") == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         if (alias == null) {

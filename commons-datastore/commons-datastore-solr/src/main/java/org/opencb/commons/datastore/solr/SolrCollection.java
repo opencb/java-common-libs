@@ -19,6 +19,7 @@ package org.opencb.commons.datastore.solr;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
@@ -51,7 +52,7 @@ public class SolrCollection {
     public <S> DataResult<S> query(SolrQuery solrQuery, Class<S> clazz) throws IOException, SolrServerException {
         logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-        QueryResponse solrResponse = solrClient.query(collection, solrQuery);
+        QueryResponse solrResponse = solrClient.query(collection, solrQuery, SolrRequest.METHOD.POST);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
@@ -63,7 +64,7 @@ public class SolrCollection {
             throws IOException, SolrServerException {
         logger.debug("Executing Solr query: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-        QueryResponse solrResponse = solrClient.query(collection, solrQuery);
+        QueryResponse solrResponse = solrClient.query(collection, solrQuery, SolrRequest.METHOD.POST);
         List<S> solrResponseBeans = solrResponse.getBeans(clazz);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
@@ -92,7 +93,7 @@ public class SolrCollection {
             throws IOException, SolrServerException {
         logger.debug("Executing Solr facet: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-        QueryResponse query = solrClient.query(collection, solrQuery);
+        QueryResponse query = solrClient.query(collection, solrQuery, SolrRequest.METHOD.POST);
         if (post != null) {
             query = post.apply(query);
         }
@@ -108,7 +109,7 @@ public class SolrCollection {
 
         logger.debug("Solr count: {}", solrQuery.toString());
         StopWatch stopWatch = StopWatch.createStarted();
-        QueryResponse solrResponse = solrClient.query(collection, solrQuery);
+        QueryResponse solrResponse = solrClient.query(collection, solrQuery, SolrRequest.METHOD.POST);
         int dbTime = (int) stopWatch.getTime(TimeUnit.MILLISECONDS);
 
         return new DataResult(dbTime, Collections.emptyList(), 1, Collections.singletonList(solrResponse.getResults().getNumFound()), 1);
