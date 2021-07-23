@@ -70,6 +70,7 @@ public class MarkdownModelDoclet {
                 res.append(generateFieldsAttributesParagraph(doc.getFields(), doc.getQualifiedTypeName()));
                 res.append("## Data Model\n");
                 res = getTableModel(doc, currentDocument, res);
+                printedTableModels.add(doc);
                 if (relatedTableModels != null) {
                     //System.out.println("Tenemos " + relatedTableModels.size() + " classes relacionadas con " + doc.getName());
                     for (MarkdownDoc tableModel : relatedTableModels) {
