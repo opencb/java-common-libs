@@ -173,7 +173,6 @@ public final class Options {
      */
     private void loadJsonMap(String jsondir) {
         File folder = new File(jsondir);
-        //System.out.println("The folder " + jsondir);
         File[] files = folder.listFiles();
         if (files != null) {
             for (final File fileEntry : files) {
@@ -189,7 +188,7 @@ public final class Options {
      */
     private void getSourceClassesDir(String jsondir) {
         File folder = new File(jsondir);
-        //System.out.println("The folder " + jsondir);
+        ////System.out.println("The folder " + jsondir);
         File[] files = folder.listFiles();
         if (files != null) {
             for (final File fileEntry : files) {

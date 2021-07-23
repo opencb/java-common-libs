@@ -42,8 +42,8 @@ public class MarkdownDoc {
             mf.setEnumerationClass(enumeration);
             fields.add(mf);
        /*     if (f.type().typeName().toLowerCase(Locale.ROOT).contains("rga")) {
-                System.out.println("Inner classes " + innerClasses);
-                System.out.println("Type:::  " + f.type().typeName() + " upperClass " + upperClass);
+                //System.out.println("Inner classes " + innerClasses);
+                //System.out.println("Type:::  " + f.type().typeName() + " upperClass " + upperClass);
             }*/
             if (upperClass && innerClasses.contains(f.type().typeName())) {
                 mf.setParentType(name);

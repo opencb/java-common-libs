@@ -32,8 +32,8 @@ public class MarkdownUtils {
             }
         }
 
-        //System.out.println("JFS RESULTADO::::: " + res);
-        //System.out.println("JFS *****************************************************************\n\n\n");
+        ////System.out.println("JFS RESULTADO::::: " + res);
+        ////System.out.println("JFS *****************************************************************\n\n\n");
 
         return res;
     }
@@ -45,14 +45,14 @@ public class MarkdownUtils {
         Pattern p = Pattern.compile("import .*" + clase);
         Matcher m3 = p.matcher(content);
         if (m3.find()) {
-            //System.out.println("JFS = qualifiedName " + m3.group(0));
+            ////System.out.println("JFS = qualifiedName " + m3.group(0));
             res = m3.group(0).replaceAll("import ", "");
         } else {
             //si no está en los import es que es del mismo paquete
             p = Pattern.compile("package .*;");
             Matcher m4 = p.matcher(content);
             if (m4.find()) {
-                //System.out.println("package " + m4.group(0) + "." + clase);
+                ////System.out.println("package " + m4.group(0) + "." + clase);
                 res = m4.group(0).replaceAll(";", "." + clase).replaceAll("package ", "");
             }
         }
@@ -97,7 +97,7 @@ public class MarkdownUtils {
                     + qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."))
                     .replaceAll("\\.", File.separator) + ".java";
         }
-        System.out.println("Get file content " + sourceFilePath);
+        //System.out.println("Get file content " + sourceFilePath);
         String content = MarkdownUtils.getFileContentAsString(sourceFilePath);
 
         String reg = "enum " + className;
@@ -105,6 +105,7 @@ public class MarkdownUtils {
         Matcher m = p.matcher(content);
         return m.find();
 
-        // System.out.println(doc.name() + " ---- > " + className + " es enumeration " + enumeration + " comprobado en " + sourceFilePath);
+        // //System.out.println(doc.name() + " ---- > " + className + " es enumeration " + enumeration + " comprobado en " +
+        // sourceFilePath);
     }
 }

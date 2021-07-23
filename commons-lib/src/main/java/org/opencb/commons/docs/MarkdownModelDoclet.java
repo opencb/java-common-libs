@@ -36,7 +36,7 @@ public class MarkdownModelDoclet {
 
     public static boolean start(RootDoc rootDoc) {
         LOGGER.info("Generating markdown for the data model");
-        System.out.println("Generating markdown for the data model");
+        //System.out.println("Generating markdown for the data model");
         options = Options.getInstance();
         options.load(rootDoc.options());
         classes = createMap(rootDoc.classes());
@@ -45,7 +45,7 @@ public class MarkdownModelDoclet {
     }
 
     private static Map<String, MarkdownDoc> createMap(ClassDoc[] classes) {
-        System.out.println("Creating a Map with classes of the data model");
+        //System.out.println("Creating a Map with classes of the data model");
 
         LOGGER.info("Creating a Map with classes of the data model");
         Map<String, MarkdownDoc> res = new HashMap<>();
@@ -62,7 +62,7 @@ public class MarkdownModelDoclet {
         for (MarkdownDoc doc : classes.values()) {
             if (options.getClasses2Markdown().contains(doc.getQualifiedTypeName())) {
                 Set<MarkdownDoc> printedTableModels = new HashSet<>();
-                System.out.println("Creating " + doc.getQualifiedTypeName() + " data model");
+                //System.out.println("Creating " + doc.getQualifiedTypeName() + " data model");
                 currentDocument = doc.getName();
                 StringBuffer res = new StringBuffer();
                 res.append("# " + currentDocument + "\n");
@@ -71,7 +71,7 @@ public class MarkdownModelDoclet {
                 res.append("## Data Model\n");
                 res = getTableModel(doc, currentDocument, res);
                 if (relatedTableModels != null) {
-                    System.out.println("Tenemos " + relatedTableModels.size() + " classes relacionadas con " + doc.getName());
+                    //System.out.println("Tenemos " + relatedTableModels.size() + " classes relacionadas con " + doc.getName());
                     for (MarkdownDoc tableModel : relatedTableModels) {
                         if (tableModel != null && !printedTableModels.contains(tableModel)) {
                             printedTableModels.add(tableModel);
