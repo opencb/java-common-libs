@@ -63,8 +63,6 @@ public final class Options {
      * @return the valid length of this option
      */
     public static int optionLength(String option) {
-        System.out.println("optionLength .... " + option);
-
         int res = Standard.optionLength(option);
         switch (option) {
             case OPT_CLASSES_TO_MARKDOWN:
@@ -92,8 +90,6 @@ public final class Options {
      * @return if are all content options valid
      */
     public static boolean validOptions(String[][] options, DocErrorReporter reporter) {
-
-        System.out.println("validating options....");
         boolean foundOutputdirOption = false;
         for (int i = 0; i < options.length; i++) {
             String[] opt = options[i];

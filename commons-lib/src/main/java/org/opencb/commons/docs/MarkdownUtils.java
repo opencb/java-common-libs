@@ -97,6 +97,7 @@ public class MarkdownUtils {
                     + qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."))
                     .replaceAll("\\.", File.separator) + ".java";
         }
+        System.out.println("Get file content " + sourceFilePath);
         String content = MarkdownUtils.getFileContentAsString(sourceFilePath);
 
         String reg = "enum " + className;

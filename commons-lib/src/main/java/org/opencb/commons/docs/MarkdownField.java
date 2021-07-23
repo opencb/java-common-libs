@@ -3,7 +3,10 @@ package org.opencb.commons.docs;
 import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.Tag;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -158,10 +161,7 @@ public class MarkdownField {
     private String generateLink(String currentDocument, String clase) {
         String res = "";
         String link = "";
-        if (clase.toLowerCase(Locale.ROOT).contains("status")) {
-            System.out.println("Class " + clase);
-            System.out.println("ParentType:::  " + getParentType());
-        }
+
         if (getParentType() != null) {
             link = getParentType().toLowerCase()
                     + clase.toLowerCase();

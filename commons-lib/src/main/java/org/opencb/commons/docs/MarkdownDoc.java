@@ -46,11 +46,7 @@ public class MarkdownDoc {
                 System.out.println("Type:::  " + f.type().typeName() + " upperClass " + upperClass);
             }*/
             if (upperClass && innerClasses.contains(f.type().typeName())) {
-                System.out.println("Type:::  " + f.type().typeName() + " upperClass " + upperClass);
-                System.out.println("name:::  " + name);
-
                 mf.setParentType(name);
-                System.out.println("mf.setParentType():::  " + mf.getParentType());
             }
         }
     }
