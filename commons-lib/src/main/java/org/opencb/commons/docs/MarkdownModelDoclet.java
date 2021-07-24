@@ -1,6 +1,8 @@
 package org.opencb.commons.docs;
 
-import com.sun.javadoc.*;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.DocErrorReporter;
+import com.sun.javadoc.RootDoc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,8 +11,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @jndi-name BasicDoclet
@@ -19,144 +19,163 @@ import java.util.regex.Pattern;
 public class MarkdownModelDoclet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkdownModelDoclet.class);
-    private static final Pattern SIMPLE_LINK = Pattern.compile("(?<label>[^<]*)<(?<url>[^>]+)>");
-    private static final Pattern FULL_LINK = Pattern.compile("\\[(?<label>[^)]+)\\]\\s+?\\((?<url>[^]\\s]+)\\)|\\((?<url2>[^]\\s]+)\\)");
-    private static Options options = new Options();
-    private static Map<String, ClassDoc> classes = new HashMap<>();
-    private static Set<ClassDoc> tablemodels = new HashSet<>();
+    private static final String CREABLE = "CREABLE";
+    private static final String UPDATABLE = "UPDATABLE";
+    private static final String UNIQUE = "UNIQUE";
+    private static final String REQUIRED = "REQUIRED";
+    private static final String NOTAGS = "NOTAGS";
+    private static Options options;
+    private static Map<String, MarkdownDoc> classes = new HashMap<>();
+    private static Set<MarkdownDoc> tablemodels = new HashSet<>();
     private static String currentDocument;
+    private static Set<MarkdownDoc> internalTableModels = new HashSet<>();
+    private static Set<MarkdownDoc> relatedTableModels;
 
     public MarkdownModelDoclet() {
     }
 
     public static boolean start(RootDoc rootDoc) {
         LOGGER.info("Generating markdown for the data model");
+        //System.out.println("Generating markdown for the data model");
+        options = Options.getInstance();
         options.load(rootDoc.options());
         classes = createMap(rootDoc.classes());
         printDocument();
         return true;
     }
 
-    private static Map<String, ClassDoc> createMap(ClassDoc[] classes) {
+    private static Map<String, MarkdownDoc> createMap(ClassDoc[] classes) {
+        //System.out.println("Creating a Map with classes of the data model");
+
         LOGGER.info("Creating a Map with classes of the data model");
-        Map<String, ClassDoc> res = new HashMap<>();
+        Map<String, MarkdownDoc> res = new HashMap<>();
         for (ClassDoc doc : classes) {
-            res.put(String.valueOf(doc), doc);
+            res.put(String.valueOf(doc), new MarkdownDoc(doc));
         }
+
         return res;
     }
 
     public static void printDocument() {
         LOGGER.info("Printing markdowns representing the data model");
-        for (ClassDoc doc : classes.values()) {
-            if (options.getClasses2Markdown().contains(String.valueOf(doc))) {
-                int index = String.valueOf(doc).lastIndexOf('.') + 1;
-                if (index > 0) {
-                    String fileName = String.valueOf(doc).substring(index);
-                    currentDocument = fileName;
-                    StringBuffer res = new StringBuffer();
-                    res.append("# " + fileName + "\n");
-                    res.append("## Overview\n" + doc.commentText() + "\n");
-                    res.append(generateFieldsAttributesParagraph(doc.fields(false), String.valueOf(doc)));
-                    res.append("## Data Model\n");
-                    res = getTableModel(doc, doc.fields(false), fileName, res);
-                    //System.out.println(String.valueOf(options.getJsonMap().keySet()));
-                    if (options.getJsonMap().keySet().contains(fileName + ".json")) {
-                        res.append("## Example\n");
-                        res.append("This is a full JSON example:\n");
-                        res.append("```javascript\n" + options.getJsonMap().get(fileName + ".json") + "\n```");
+
+        for (MarkdownDoc doc : classes.values()) {
+            if (options.getClasses2Markdown().contains(doc.getQualifiedTypeName())) {
+                Set<MarkdownDoc> printedTableModels = new HashSet<>();
+                //System.out.println("Creating " + doc.getQualifiedTypeName() + " data model");
+                currentDocument = doc.getName();
+                StringBuffer res = new StringBuffer();
+                res.append("# " + currentDocument + "\n");
+                res.append("## Overview\n" + doc.getDescription() + "\n");
+                res.append(generateFieldsAttributesParagraph(doc.getFields(), doc.getQualifiedTypeName()));
+                res.append("## Data Model\n");
+                res = getTableModel(doc, currentDocument, res);
+                printedTableModels.add(doc);
+                if (relatedTableModels != null) {
+                    //System.out.println("Tenemos " + relatedTableModels.size() + " classes relacionadas con " + doc.getName());
+                    for (MarkdownDoc tableModel : relatedTableModels) {
+                        if (tableModel != null && !printedTableModels.contains(tableModel)) {
+                            printedTableModels.add(tableModel);
+                            res = getTableModel(tableModel, tableModel.getName(), res);
+                        }
                     }
-                    try {
-                        write2File(options.getOutputdir() + fileName + ".md", res.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                }
+                for (MarkdownDoc internal : internalTableModels) {
+                    res = getTableModel(internal, currentDocument, res);
+                }
+                if (options.getJsonMap().keySet().contains(currentDocument + ".json")) {
+                    res.append("## Example\n");
+                    res.append("This is a full JSON example:\n");
+                    res.append("```javascript\n" + options.getJsonMap().get(currentDocument + ".json") + "\n```");
+                }
+                try {
+                    write2File(options.getOutputdir() + currentDocument + ".md", res.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
-    private static String generateFieldsAttributesParagraph(FieldDoc[] fields, String className) {
+    private static String generateFieldsAttributesParagraph(List<MarkdownField> fields, String className) {
         StringBuffer res = new StringBuffer();
-        List<String> unique = new ArrayList<>();
-        List<String> updatable = new ArrayList<>();
-        List<String> create = new ArrayList<>();
-        List<String> required = new ArrayList<>();
-        List<String> noTagsFields = new ArrayList<>();
-        if (options.getTableTagsClasses().contains(className)) {
-            res.append("### Fields tags \n");
-            res.append("| Field | unique | required | immutable| internal|\n| :--- | :---: | :---: |:---: |:---: |\n");
+        if ((options.getTableTagsClasses().contains(className)) && (fields.size() > 0)) {
+            Map<String, List<MarkdownField>> mfFields = classifyFields(fields);
+            res.append("### Summary \n");
+            res.append("| Field | create | update | unique | required|\n| :--- | :---: | :---: |:---: |:---: |\n");
+            res.append(getRowTicks(mfFields.get(UPDATABLE)));
+            res.append(getRowTicks(mfFields.get(CREABLE)));
+            res.append(getRowTicks(mfFields.get(UNIQUE)));
+            res.append(getRowTicks(mfFields.get(REQUIRED)));
+            res.append(getRowTicks(mfFields.get(NOTAGS)));
+        }
+        res.append("\n");
+        return res.toString();
+    }
+
+    private static String getRowTicks(List<MarkdownField> fields) {
+        String res = "";
+        for (MarkdownField field : fields) {
+            res += "| " + field.getName() + " | " + getFlag(field.isCreate()) + " | "
+                    + getFlag(field.isUpdatable()) + " |" + getFlag(field.isUnique()) + " | "
+                    + getFlag(field.isRequired()) + " |\n";
+        }
+        return res;
+    }
+
+    private static Map<String, List<MarkdownField>> classifyFields(List<MarkdownField> fields) {
+        Map<String, List<MarkdownField>> res = new HashMap<>();
+        List<MarkdownField> updatable = new ArrayList<>();
+        List<MarkdownField> creable = new ArrayList<>();
+        List<MarkdownField> unique = new ArrayList<>();
+        List<MarkdownField> required = new ArrayList<>();
+        List<MarkdownField> notags = new ArrayList<>();
+        for (MarkdownField f : fields) {
+            if (f.isCreate()) {
+                creable.add(f);
+            } else if (f.isUpdatable()) {
+                updatable.add(f);
+            } else if (f.isUnique()) {
+                unique.add(f);
+            } else if (f.isRequired()) {
+                required.add(f);
+            } else {
+                notags.add(f);
+            }
         }
 
-        if (fields.length > 0) {
-            for (int i = 0; i < fields.length; i++) {
-                Tag[] tags = fields[i].tags();
-                String stags = new String();
-                boolean enc = false;
-                for (int j = 0; j < tags.length; j++) {
-                    if (tags[j].name().equals("@apiNote")) {
-                        enc = true;
-                        stags = tags[j].text().toLowerCase();
-                        if (stags.contains("unique")) {
-                            unique.add(fields[i].name());
-                        }
-                        if (stags.contains("required")) {
-                            required.add(fields[i].name());
-                        }
-                        if (!stags.contains("immutable") && !stags.contains("internal")) {
-                            updatable.add(fields[i].name());
-                        }
-                        if (!stags.contains("internal")) {
-                            create.add(fields[i].name());
-                        }
-                    }
-                }
-                if (!enc) {
-                    create.add(fields[i].name());
-                    updatable.add(fields[i].name());
-                }
-                if (options.getTableTagsClasses().contains(className)) {
-                    if (stags.trim().length() > 0) {
-                        res.append("| " + fields[i].name() + " | " + getFlag(stags.contains("unique")) + " | "
-                                + getFlag(stags.contains("required")) + " |" + getFlag(stags.contains("required")) + " | "
-                                + getFlag(stags.contains("internal")) + " |\n");
-                    } else {
-                        noTagsFields.add(fields[i].name());
-                    }
-                }
-            }
-            res.append("### Fields without tags \n");
-            res.append("`");
-            for (String s : noTagsFields) {
-                res.append(s + " ");
-            }
-            res.append("`");
+        res.put(CREABLE, creable);
+        res.put(UPDATABLE, updatable);
+        res.put(UNIQUE, unique);
+        res.put(REQUIRED, required);
+        res.put(NOTAGS, notags);
+        return res;
+    }
 
-            res.append("\n### Fields for Create Operations \n");
-            res.append("`");
-            for (String s : create) {
-                res.append(required.contains(s) ? s + "* " : s + " ");
-            }
-            res.append("`");
+    private static String generateFieldsAttributesParagraph(MarkdownDoc doc) {
+        StringBuffer res = new StringBuffer();
+        res.append("### Fields without tags \n");
+        res.append("`");
+        res.append(doc.getNotTagedFieldAsString());
+        res.append("`");
 
-            res.append("\n### Fields for Update Operations\n");
-            res.append("`");
-            for (String s : updatable) {
-                res.append(s + " ");
-            }
-            res.append("`");
+        res.append("\n### Fields for Create Operations \n");
+        res.append("`");
+        res.append(doc.getCreateFieldsAsString());
 
-            if (unique.size() > 0) {
-                res.append("\n### Fields uniques\n");
+        res.append("`");
 
-                res.append("`");
-                for (String s : unique) {
-                    res.append(s + " ");
-                }
-                res.append("`");
-            }
-            res.append("\n");
-        }
+        res.append("\n### Fields for Update Operations\n");
+        res.append("`");
+        res.append(doc.getUpdateFieldsAsString());
+
+        res.append("`");
+
+        res.append("\n### Fields uniques\n");
+
+        res.append("`");
+        res.append(doc.getUniquesFieldsAsString());
+        res.append("`");
 
         return res.toString();
     }
@@ -174,74 +193,65 @@ public class MarkdownModelDoclet {
         return res;
     }
 
-    private static StringBuffer getTableModel(ClassDoc doc, FieldDoc[] fields, String fileName, StringBuffer res) {
+    private static StringBuffer getTableModel(MarkdownDoc doc, String fileName, StringBuffer res) {
         // StringBuffer res = new StringBuffer();
-
-        LOGGER.info("Generating tables of fields in the data model markdowns for class " + String.valueOf(doc));
-        Set<ClassDoc> relatedTableModels = new HashSet<>();
-        res.append("### " + fileName + "\n");
+        List<MarkdownField> fields = doc.getFields();
+        LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
+        relatedTableModels = new HashSet<>();
+        if (doc.isEnumeration()) {
+            res.append("### Enum " + doc.getName() + "\n");
+            res.append("_Enumeration class._\n");
+        } else {
+            res.append("### " + doc.getName() + "\n");
+        }
+        //Create link for github Java code
         res.append("You can find the Java code [here](" + options.getGithubServer() + "src/main/java/"
-                + getPackageAsPath(String.valueOf(doc)) + ".java).\n\n");
-        if (fields.length > 0) {
-            res.append("| Field | Tags | Description |\n| :--- | :--- | :--- |\n");
-            for (int i = 0; i < fields.length; i++) {
-                boolean deprecated = false;
-                Tag[] tags = fields[i].tags();
-                String constraints = "";
-                String implNote = "";
-                String see = "";
-                String since = "";
-                for (int j = 0; j < tags.length; j++) {
-                    if ("@apiNote".equals(tags[j].name()) && tags[j].text().trim() != null && tags[j].text().trim().length() > 0) {
-                        constraints = "**`" + tags[j].text().trim() + "`**";
+                + getPackageAsPath(doc.getQualifiedTypeName()) + ".java).\n\n");
+
+        //For each field we make its table row
+        if (fields.size() > 0) {
+            res.append("| Field | Description |\n| :---  | :--- |\n");
+            for (MarkdownField field : fields) {
+                if (isModel(field.getType()) && (!field.isEnumerationClass())) {
+                    //In this case the class is among the models that we can document and therefore
+                    // we must generate the internal link to the table
+                    res.append("| " + field.getNameLinkedClassAsString(currentDocument) + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
+                } else if (field.isCollection()) {
+                    //The field is a collection, we must extract its internal classes and generate the link if necessary
+                    String sourceFilePath = options.getSourceClassesDir()
+                            + doc.getQualifiedTypeName().replaceAll("\\.", File.separator) + ".java";
+                    Map<String, String> innerClasses = MarkdownUtils.getInnerClass(field.getName(), sourceFilePath, field.getClassName());
+                    for (String innerClass : innerClasses.values()) {
+                        if (classes.containsKey(innerClass)) {
+                            relatedTableModels.add(classes.get(innerClass));
+                        }
                     }
-                    if ("@deprecated".equals(tags[j].name())) {
-                        deprecated = true;
-                    }
-                    if ("@implNote".equals(tags[j].name())) {
-                        implNote = "**`" + tags[j].text().trim() + "`**";
-                    }
-                    if ("@see".equals(tags[j].name())) {
-                        see = tags[j].text().trim();
-                    }
-                    if ("@since".equals(tags[j].name())) {
-                        since = tags[j].text().trim();
-                    }
-                }
-                int index = String.valueOf(fields[i].type()).lastIndexOf('.') + 1;
-                String className = String.valueOf(fields[i].type()).substring(index);
-                if (!isModel(String.valueOf(fields[i].type()))) {
-                    res.append("| **" + (deprecated ? "~~" + fields[i].name() + "~~ <br> Deprecated" : fields[i].name())
-                            + "**<br>*" + className + "* <br>" + (since != null && since.length() > 0 ? "since: " + since : "") + " |"
-                            + constraints + " | "
-                            + constructDescription(fields[i].commentText(), implNote, see) + " |\n");
+                    res.append("| " + field.getCollectionClassAsString(classes, innerClasses, currentDocument)
+                            + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
                 } else {
-                    res.append("| **" + (deprecated ? "~~" + fields[i].name() + "~~ <br> Deprecated" : fields[i].name())
-                            + "**<br>*<a href=\"" + currentDocument + ".md#" + className + "\"><em>" + className
-                            + "</em></a>*| " + constraints + " | "
-                            + constructDescription(fields[i].commentText(), implNote, see) + " |\n");
-                    if (!tablemodels.contains(classes.get(String.valueOf(fields[i].type())))) {
-                        relatedTableModels.add(classes.get(String.valueOf(fields[i].type())));
-                    }
-                    tablemodels.add(classes.get(String.valueOf(fields[i].type())));
+                    //The field is a primitive class and we must print only the name of the class
+                    res.append("| " + field.getNameClassAsString() + " <br>" + field.getDeprecatedAsString()
+                            + field.getSinceAsString() + " | " + field.getDescriptionAsString() + " |\n");
                 }
-            }
-            if (!res.toString().contains("## Related data models\n") && tablemodels.size() > 0) {
-                res.append("## Related data models\n");
-            }
-            for (ClassDoc tableModel : relatedTableModels) {
-                int index = String.valueOf(tableModel).lastIndexOf('.') + 1;
-                String className = String.valueOf(tableModel).substring(index);
-                res = getTableModel(tableModel, tableModel.fields(false), className, res);
+
+                //If the type of the class is among those that we want to document, we add it to the list of related table models to print
+                // it later.
+                if (classes.get(field.getType()) != null) {
+                    if ((!tablemodels.contains(classes.get(field.getType())))
+                            && (!options.getNoPrintableClasses().contains(field.getType()))) {
+                        if (String.valueOf(field.getType()).endsWith("Internal")) {
+                            internalTableModels.add(classes.get(String.valueOf(field.getType())));
+                        } else {
+                            relatedTableModels.add(classes.get(String.valueOf(field.getType())));
+                        }
+                    }
+                }
+                tablemodels.add(classes.get(String.valueOf(field.getType())));
             }
         }
         return res;
-    }
-
-    private static String constructDescription(String commentText, String implNote, String see) {
-        String res = "<p>" + commentText + "</p>" + implNote + "</br>" + renderSeeTag(see);
-
-        return res.replaceAll("\\n", "<br>");
     }
 
     private static String getPackageAsPath(String spackage) {
@@ -272,45 +282,6 @@ public class MarkdownModelDoclet {
     public static int optionLength(String option) {
         LOGGER.info("Validating input options " + option);
         return Options.optionLength(option);
-    }
-
-    public static String renderSeeTag(String tag) {
-        StringBuilder target = new StringBuilder();
-        if (tag.length() > 1) {
-            String text = tag;
-            if (tag.startsWith("\"") && tag.endsWith("\"")) {
-                text = tag.substring(1, tag.length() - 1).trim();
-            }
-            Matcher matcher = SIMPLE_LINK.matcher(text);
-            if (!matcher.matches()) {
-                matcher = FULL_LINK.matcher(text);
-            } else {
-                //its a correct link
-                return tag;
-            }
-            if (matcher.matches()) {
-                String label = matcher.group("label");
-                String url = matcher.group("url");
-                if ((label == null || label.isEmpty()) && (url == null || url.isEmpty())) {
-                    url = matcher.group("url2");
-                }
-                if (label != null) {
-                    label = label.trim();
-                }
-                if (label == null || label.isEmpty()) {
-                    label = matcher.group("url");
-                }
-
-                target.append("<a href=\"");
-                target.append(url);
-                target.append("\">");
-                target.append(label);
-                target.append("</a>");
-            } else {
-                return tag;
-            }
-        }
-        return target.toString();
     }
 
     public String getCurrentDocument() {

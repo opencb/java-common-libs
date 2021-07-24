@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.opencb.commons</groupId>
         <artifactId>commons</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>jdk.tools</groupId>
             <artifactId>jdk.tools</artifactId>
-            </dependency>
+        </dependency>
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
