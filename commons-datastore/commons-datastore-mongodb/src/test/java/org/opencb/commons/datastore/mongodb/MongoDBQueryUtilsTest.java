@@ -96,5 +96,41 @@ public class MongoDBQueryUtilsTest {
             op = matcher.group(1);
         }
         assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("/hello/");
+        op = "";
+        String op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = matcher.group(3);
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=/hello/");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = matcher.group(3);
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("/hello/i");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = matcher.group(3);
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.CASE_INSENSITIVE_REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=/hello/i");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = matcher.group(3);
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.CASE_INSENSITIVE_REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
     }
 }
