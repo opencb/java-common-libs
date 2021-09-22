@@ -14,8 +14,6 @@ public class DataResult<T> {
     protected List<T> results;
     protected String resultType;
 
-    @Deprecated
-    private long numTotalResults;
     protected long numMatches;
     protected long numInserted;
     protected long numUpdated;
@@ -134,17 +132,6 @@ public class DataResult<T> {
 
     public DataResult<T> setResults(List<T> results) {
         this.results = results;
-        return this;
-    }
-
-    @Deprecated
-    public long getNumTotalResults() {
-        return numMatches;
-    }
-
-    @Deprecated
-    public DataResult<T> setNumTotalResults(long numTotalResults) {
-        this.numMatches = numTotalResults;
         return this;
     }
 
