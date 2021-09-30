@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 /**
  * Created by imedina on 17/01/16.
  */
@@ -34,19 +34,22 @@ public class MongoDBQueryUtilsTest {
 //        }
 //        assertEquals(MongoDBQueryUtils.ComparisonOperator.STARTS_WITH, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
 
-        Matcher matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("^hello");
+        Matcher matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("~/^hello/");
         String op = "";
+        String op2 = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.STARTS_WITH, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
-        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("$hello");
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("~/hello$/");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.ENDS_WITH, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
 //        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=$hello");
 //        op = "";
@@ -59,42 +62,83 @@ public class MongoDBQueryUtilsTest {
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.EQUALS, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.EQUALS, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
         matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("==hello");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.EQUALS, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.EQUALS, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
         matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("!hello");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.NOT_EQUALS, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.NOT_EQUALS, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
         matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("!=hello");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.NOT_EQUALS, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.NOT_EQUALS, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
         matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("~hello");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
 
         matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=~hello");
         op = "";
         if (matcher.find()) {
             op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
         }
-        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, QueryParam.Type.STRING));
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("~/hello/");
+        op = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=~/hello/");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("~/hello/i");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.CASE_INSENSITIVE_REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
+
+        matcher = MongoDBQueryUtils.getPattern(QueryParam.Type.STRING).matcher("=~/hello/i");
+        op = "";
+        op2 = "";
+        if (matcher.find()) {
+            op = matcher.group(1);
+            op2 = MongoDBQueryUtils.getOp2(op, matcher.group(2));
+        }
+        assertEquals(MongoDBQueryUtils.ComparisonOperator.CASE_INSENSITIVE_REGEX, MongoDBQueryUtils.getComparisonOperator(op, op2, QueryParam.Type.STRING));
     }
 }

@@ -161,7 +161,7 @@ public class MarkdownField {
     private String generateLink(String currentDocument, String clase) {
         String res = "";
         String link = "";
-
+        currentDocument = MarkdownUtils.camelToKebabCase(currentDocument);
         if (getParentType() != null) {
             link = getParentType().toLowerCase()
                     + clase.toLowerCase();

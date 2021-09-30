@@ -28,8 +28,7 @@ public class MarkdownModelDoclet {
     private static Map<String, MarkdownDoc> classes = new HashMap<>();
     private static Set<MarkdownDoc> tablemodels = new HashSet<>();
     private static String currentDocument;
-    private static Set<MarkdownDoc> internalTableModels = new HashSet<>();
-    private static Set<MarkdownDoc> relatedTableModels;
+    private static Set<MarkdownDoc> printedTableModels;
 
     public MarkdownModelDoclet() {
     }
@@ -61,7 +60,7 @@ public class MarkdownModelDoclet {
 
         for (MarkdownDoc doc : classes.values()) {
             if (options.getClasses2Markdown().contains(doc.getQualifiedTypeName())) {
-                Set<MarkdownDoc> printedTableModels = new HashSet<>();
+                printedTableModels = new HashSet<>();
                 //System.out.println("Creating " + doc.getQualifiedTypeName() + " data model");
                 currentDocument = doc.getName();
                 StringBuffer res = new StringBuffer();
@@ -69,27 +68,16 @@ public class MarkdownModelDoclet {
                 res.append("## Overview\n" + doc.getDescription() + "\n");
                 res.append(generateFieldsAttributesParagraph(doc.getFields(), doc.getQualifiedTypeName()));
                 res.append("## Data Model\n");
+
                 res = getTableModel(doc, currentDocument, res);
-                printedTableModels.add(doc);
-                if (relatedTableModels != null) {
-                    //System.out.println("Tenemos " + relatedTableModels.size() + " classes relacionadas con " + doc.getName());
-                    for (MarkdownDoc tableModel : relatedTableModels) {
-                        if (tableModel != null && !printedTableModels.contains(tableModel)) {
-                            printedTableModels.add(tableModel);
-                            res = getTableModel(tableModel, tableModel.getName(), res);
-                        }
-                    }
-                }
-                for (MarkdownDoc internal : internalTableModels) {
-                    res = getTableModel(internal, currentDocument, res);
-                }
                 if (options.getJsonMap().keySet().contains(currentDocument + ".json")) {
                     res.append("## Example\n");
                     res.append("This is a full JSON example:\n");
                     res.append("```javascript\n" + options.getJsonMap().get(currentDocument + ".json") + "\n```");
                 }
                 try {
-                    write2File(options.getOutputdir() + currentDocument + ".md", res.toString());
+                    write2File(options.getOutputdir() + MarkdownUtils.camelToKebabCase(currentDocument) + ".md",
+                            res.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -180,16 +168,17 @@ public class MarkdownModelDoclet {
         return res.toString();
     }
 
-    private static String getFlag(boolean unique) {
+    private static String getFlag(boolean flag) {
         String res = "";
-        if (unique) {
-            res += "<img src=\"http://docs.opencb.org/s/en_GB/7101/4f8ce896bdf903a209ab02696e335acf844f5c2c/_/images/icons/emoticons/check"
-                    + ".png\" width=\"16px\" heigth=\"16px\">";
+        if (flag) {
+            res += "<img src=\"https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot"
+                    + ".com/o/assets%2F-MHDrUHq_ezb3NU4DSwA%2F-MUIJxAzWl_EP6qG2ieO%2F-MUINo9MnIFaaG1iqqOY%2Fimage"
+                    + ".png?alt=media&token=c9d3c9c2-573e-4f96-bfae-3a81506d07da\" width=\"16px\" heigth=\"16px\">";
         } else {
-            res += "<img src=\"http://docs.opencb.org/s/en_GB/7101/4f8ce896bdf903a209ab02696e335acf844f5c2c/_/images/icons/emoticons/error"
-                    + ".png\" width=\"16px\" heigth=\"16px\">";
+            res += "<img src=\"https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot"
+                    + ".com/o/assets%2F-MHDrUHq_ezb3NU4DSwA%2F-MfbZE39Donn34_d_VBp%2F-MfbZwelCGkwfxQfbxmv%2Ferror"
+                    + ".png?alt=media&token=5234ec5c-ae30-45b7-aa51-51469162a633\" width=\"16px\" heigth=\"16px\">";
         }
-
         return res;
     }
 
@@ -197,7 +186,8 @@ public class MarkdownModelDoclet {
         // StringBuffer res = new StringBuffer();
         List<MarkdownField> fields = doc.getFields();
         LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
-        relatedTableModels = new HashSet<>();
+        Set<MarkdownDoc> relatedTableModels = new HashSet<>();
+        Set<MarkdownDoc> internalTableModels = new HashSet<>();
         if (doc.isEnumeration()) {
             res.append("### Enum " + doc.getName() + "\n");
             res.append("_Enumeration class._\n");
@@ -239,17 +229,40 @@ public class MarkdownModelDoclet {
                 //If the type of the class is among those that we want to document, we add it to the list of related table models to print
                 // it later.
                 if (classes.get(field.getType()) != null) {
-                    if ((!tablemodels.contains(classes.get(field.getType())))
+                    if ((!printedTableModels.contains(classes.get(field.getType())))
                             && (!options.getNoPrintableClasses().contains(field.getType()))) {
                         if (String.valueOf(field.getType()).endsWith("Internal")) {
                             internalTableModels.add(classes.get(String.valueOf(field.getType())));
                         } else {
                             relatedTableModels.add(classes.get(String.valueOf(field.getType())));
                         }
+                    } else {
+                        System.out.println("La clase " + String.valueOf(field.getType()) + " no está en related tables porque:");
+                        System.out.println("(!tablemodels.contains(classes.get(field.getType()))) -> "
+                                + (!tablemodels.contains(classes.get(field.getType()))));
+                        System.out.println("(!options.getNoPrintableClasses().contains(field.getType())) -> "
+                                + (!options.getNoPrintableClasses().contains(field.getType())));
                     }
+                    tablemodels.add(classes.get(String.valueOf(field.getType())));
                 }
-                tablemodels.add(classes.get(String.valueOf(field.getType())));
             }
+
+            res = printRelatedTableModels(res, relatedTableModels, internalTableModels);
+        }
+        return res;
+    }
+
+    private static StringBuffer printRelatedTableModels(StringBuffer res, Set<MarkdownDoc> relatedTableModels,
+                                                        Set<MarkdownDoc> internalTableModels) {
+
+        for (MarkdownDoc tableModel : relatedTableModels) {
+            if (tableModel != null && !printedTableModels.contains(tableModel)) {
+                printedTableModels.add(tableModel);
+                res = getTableModel(tableModel, tableModel.getName(), res);
+            }
+        }
+        for (MarkdownDoc internal : internalTableModels) {
+            res = getTableModel(internal, currentDocument, res);
         }
         return res;
     }

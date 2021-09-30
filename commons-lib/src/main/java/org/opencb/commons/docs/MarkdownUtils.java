@@ -108,4 +108,8 @@ public class MarkdownUtils {
         // //System.out.println(doc.name() + " ---- > " + className + " es enumeration " + enumeration + " comprobado en " +
         // sourceFilePath);
     }
+
+    public static String camelToKebabCase(String str) {
+        return str.replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase();
+    }
 }

@@ -36,7 +36,7 @@ public class FacetQueryParser {
     private static final String AGGREGATION_IDENTIFIER = "(";
     private static final String[] AGGREGATION_FUNCTIONS = {"sum", "avg", "max", "min", "unique", "percentile", "sumsq", "variance",
             "stddev", };
-    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,*]+])?(:\\*|:\\d+)?$");
+    public static final Pattern CATEGORICAL_PATTERN = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_.]+)(\\[[a-zA-Z0-9,_*]+])?(:\\*|:\\d+)?$");
 
     private static final int DEFAULT_FACET_LIMIT = 50;
 

@@ -17,6 +17,7 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.client.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
@@ -40,10 +41,15 @@ public class MongoDBQueryUtils {
 
     @Deprecated
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
+//    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
+    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~/?|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
+
+    // TODO: Added on 10/08/2021 to deprecate STARTS_WITH and ENDS_WITH regex. They need to be done within '/'.
+    @Deprecated
+    private static final Pattern DEPRECATED_PATTERN = Pattern.compile("^(=?\\^|=?\\$)([^=/<>~!]+[.]*)$");
 
     public static final String OR = ",";
     public static final String AND = ";";
@@ -62,10 +68,8 @@ public class MongoDBQueryUtils {
         ALL,
 
         // String comparators
-        EQUAL_IGNORE_CASE,
-        STARTS_WITH,         // The regular expression will look for "=^" or "^" at the beginning.
-        ENDS_WITH,            // The regular expression will look for "=$" or "$" at the beginning.
-        REGEX,               // The regular expression will look for "=~" or "~" at the beginning.
+        REGEX,                       // The regular expression will look for "=~" or "~" at the beginning.
+        CASE_INSENSITIVE_REGEX,
         TEXT,
 
         // Numeric and Date comparators
@@ -145,10 +149,54 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
+    private static List<String> replaceDeprecatedPatterns(List<String> queryParamList) {
+        List<String> replacedQueryParamList = new ArrayList<>(queryParamList.size());
+        for (String queryItem : queryParamList) {
+            Matcher matcher = DEPRECATED_PATTERN.matcher(queryItem);
+            if (matcher.find()) {
+                String operation = matcher.group(1);
+                if (StringUtils.isNotEmpty(operation)) {
+                    StringBuilder strBuilder = new StringBuilder();
+                    strBuilder.append("=~/");
+                    if ("=^".equals(operation) || "^".equals(operation)) {
+                        strBuilder.append("^");
+                    }
+                    strBuilder.append(matcher.group(2));
+                    if ("=$".equals(operation) || "$".equals(operation)) {
+                        strBuilder.append("$");
+                    }
+                    strBuilder.append("/");
+                    replacedQueryParamList.add(strBuilder.toString());
+                } else {
+                    replacedQueryParamList.add(queryItem);
+                }
+            } else {
+                replacedQueryParamList.add(queryItem);
+            }
+        }
+        return replacedQueryParamList;
+    }
+
+    protected static String getOp2(String op, String value) {
+        String op2 = "";
+        if (op.endsWith("/")) {
+            if (value.endsWith("/")) {
+                op2 = "/";
+            } else if (value.endsWith("/i")) {
+                op2 = "/i";
+            } else {
+                throw new IllegalStateException("Unknown regex query operation " + op + ". Missing "
+                        + "trailing '/'");
+            }
+        }
+        return op2;
+    }
+
     public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, LogicalOperator operator)
             throws NumberFormatException {
 
         List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
+        queryParamList = replaceDeprecatedPatterns(queryParamList);
 
         if (LogicalOperator.OR.equals(operator)
                 && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.EQUALS)) {
@@ -163,12 +211,18 @@ public class MongoDBQueryUtils {
             for (String queryItem : queryParamList) {
                 Matcher matcher = getPattern(type).matcher(queryItem);
                 String op = "";
+                String op2 = "";
                 String queryValueString = queryItem;
                 if (matcher.find()) {
                     op = matcher.group(1);
                     queryValueString = matcher.group(2);
+                    op2 = getOp2(op, queryValueString);
+                    if (StringUtils.isNotEmpty(op2)) {
+                        // Remove the last part that was added as op2
+                        queryValueString = queryValueString.substring(0, queryValueString.length() - op2.length());
+                    }
                 }
-                ComparisonOperator comparator = getComparisonOperator(op, type);
+                ComparisonOperator comparator = getComparisonOperator(op, op2, type);
                 switch (type) {
                     case STRING:
                     case TEXT:
@@ -235,10 +289,12 @@ public class MongoDBQueryUtils {
         for (String queryItem : queryParamList) {
             Matcher matcher = getPattern(type).matcher(queryItem);
             String op = "";
+            String op2 = "";
             if (matcher.find()) {
                 op = matcher.group(1);
+                op2 = getOp2(op, matcher.group(2));
             }
-            if (operator != getComparisonOperator(op, type)) {
+            if (operator != getComparisonOperator(op, op2, type)) {
                 return false;
             }
         }
@@ -308,17 +364,11 @@ public class MongoDBQueryUtils {
                     case NOT_EQUALS:
                         filter = Filters.ne(mongoDbField, queryValue);
                         break;
-                    case EQUAL_IGNORE_CASE:
-                        filter = Filters.regex(mongoDbField, queryValue.toString(), "i");
-                        break;
-                    case STARTS_WITH:
-                        filter = Filters.regex(mongoDbField, "^" + queryValue + "*");
-                        break;
-                    case ENDS_WITH:
-                        filter = Filters.regex(mongoDbField, "*" + queryValue + "$");
-                        break;
                     case REGEX:
                         filter = Filters.regex(mongoDbField, queryValue.toString());
+                        break;
+                    case CASE_INSENSITIVE_REGEX:
+                        filter = Filters.regex(mongoDbField, queryValue.toString(), "i");
                         break;
                     case TEXT:
                         filter = Filters.text(String.valueOf(queryValue));
@@ -629,7 +679,7 @@ public class MongoDBQueryUtils {
         Bson projectionResult = null;
         List<Bson> projections = new ArrayList<>();
 
-        // It is too risky to merge projections, if projection alrady exists we return it as it is, otherwise we create a new one.
+        // It is too risky to merge projections, if projection already exists we return it as it is, otherwise we create a new one.
         if (projection != null) {
 //            projections.add(projection);
             return projection;
@@ -716,7 +766,7 @@ public class MongoDBQueryUtils {
         return projectionResult;
     }
 
-    public static ComparisonOperator getComparisonOperator(String op, QueryParam.Type type) {
+    public static ComparisonOperator getComparisonOperator(String op, String op2, QueryParam.Type type) {
         ComparisonOperator comparator = null;
         if (op != null && op.isEmpty()) {
             comparator = ComparisonOperator.EQUALS;
@@ -738,14 +788,29 @@ public class MongoDBQueryUtils {
                         case "=~":
                             comparator = ComparisonOperator.REGEX;
                             break;
-                        case "^":
-//                        case "=^":
-                            comparator = ComparisonOperator.STARTS_WITH;
+                        case "=~/":
+                        case "~/":
+                            if (StringUtils.isEmpty(op2)) {
+                                throw new IllegalStateException("Unknown regex query operation " + op + ". Missing "
+                                        + "trailing '/'");
+                            }
+                            if ("/".equals(op2)) {
+                                comparator = ComparisonOperator.REGEX;
+                            } else if ("/i".equals(op2)) {
+                                comparator = ComparisonOperator.CASE_INSENSITIVE_REGEX;
+                            } else {
+                                throw new IllegalStateException("Unknown regex query operation " + op + ". Unexpected "
+                                        + "trailing '" + op2 + "'");
+                            }
                             break;
-                        case "$":
-//                        case "=$":
-                            comparator = ComparisonOperator.ENDS_WITH;
-                            break;
+//                        case "^":
+////                        case "=^":
+//                            comparator = ComparisonOperator.STARTS_WITH;
+//                            break;
+//                        case "$":
+////                        case "=$":
+//                            comparator = ComparisonOperator.ENDS_WITH;
+//                            break;
                         default:
                             throw new IllegalStateException("Unknown string query operation " + op);
                     }
