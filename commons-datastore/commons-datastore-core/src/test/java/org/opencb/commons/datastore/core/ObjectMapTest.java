@@ -58,6 +58,12 @@ public class ObjectMapTest {
         objectMap.put("map", map);
         objectMap.put("l1", new ObjectMap("l2", new ObjectMap("l3", new ObjectMap("l4", "value"))));
         objectMap.put("myModel", new MyModel("a", "b"));
+        List<ObjectMap> values = Arrays.asList(
+                new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
+                new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
+                new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
+        );
+        objectMap.put("objectList", values);
     }
 
     private static class MyModel {
@@ -207,6 +213,11 @@ public class ObjectMapTest {
         assertEquals("b", objectMap.getNested("myModel.key2"));
         assertEquals("b", objectMap.put("myModel.key2", "c", true));
         assertEquals("c", objectMap.getNested("myModel.key2"));
+
+        assertEquals("D", objectMap.getNested("objectList.def.nested.value"));
+        assertEquals("DEF", objectMap.getNested("objectList.def.name"));
+        assertNull(objectMap.getNested("objectList.defg.name"));
+        assertTrue(objectMap.getNested("objectList") instanceof List);
 
         objectMap.put("l1.l2.l3.l4.l5.l6.l7", "value", true, true);
         assertEquals("{\"l2\":{\"l3\":{\"l4\":{\"l5\":{\"l6\":{\"l7\":\"value\"}}}}}}", objectMap.getNestedMap("l1").toJson());

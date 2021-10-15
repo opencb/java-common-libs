@@ -18,6 +18,7 @@ package org.opencb.commons.datastore.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -544,14 +545,35 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         }
     }
 
-    public Object getNested(String key) {
+    /**
+     * Get nested attributes.
+     *
+     * @param key     Key that will be looked for.
+     * @param listId  In case of finding an array of objects, the identifier that needs to match. See example below:
+     *        Example:
+     *         List<ObjectMap> values = Arrays.asList(
+     *                 new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
+     *                 new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
+     *                 new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
+     *         );
+     *         objectMap.put("objectList", values);
+     *
+     *         Let's say we send key="objectList.abc.nested.value" and listId="id"
+     *         What that means is that we will look for objectList (map) first. In that scenario, the value is not a map anymore but a list,
+     *              which means that the next key 'abc' will correspond to one unique value that we need to find within the list. This value
+     *              should correspond to the key passed in `listId`, so we will need to iterate and find which of the elements matches
+     *              with 'id=abc'. Once found, we will proceed as usual, taking 'nested.value' as the final result. -> "A"
+     *
+     * @return Object value.
+     */
+    public Object getNested(String key, String listId) {
         int idx = key.lastIndexOf(".");
         if (idx < 0) {
             return get(key);
         }
         String mapKey = key.substring(0, idx);
         String valueKey = key.substring(idx + 1);
-        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, false, false);
+        Map<String, Object> subMap = getNestedMap(mapKey, listId, objectMap, jsonObjectMapper, false, false);
         if (subMap != null) {
             return subMap.get(valueKey);
         } else {
@@ -559,14 +581,19 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         }
     }
 
-    public Object putNested(String key, Object value, boolean parents) {
+    public Object getNested(String key) {
+        // By default, we will assume we need to filter by id in case of finding lists
+        return getNested(key, "id");
+    }
+
+    public Object putNested(String key, String listId, Object value, boolean parents) {
         int idx = key.lastIndexOf(".");
         if (idx < 0) {
             return put(key, value, false);
         }
         String mapKey = key.substring(0, idx);
         String valueKey = key.substring(idx + 1);
-        Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, true, parents);
+        Map<String, Object> subMap = getNestedMap(mapKey, listId, objectMap, jsonObjectMapper, true, parents);
         if (subMap != null) {
             return subMap.put(valueKey, value);
         } else {
@@ -574,12 +601,16 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         }
     }
 
+    public Object putNested(String key, Object value, boolean parents) {
+        return putNested(key, "id", value, parents);
+    }
+
     public ObjectMap getNestedMap(String key) {
-        Map<String, Object> subMap = getNestedMap(key, objectMap, jsonObjectMapper, false, false);
+        Map<String, Object> subMap = getNestedMap(key, "id", objectMap, jsonObjectMapper, false, false);
         return subMap == null ? null : (subMap instanceof ObjectMap ? ((ObjectMap) subMap) : new ObjectMap(subMap));
     }
 
-    private static Map<String, Object> getNestedMap(String key, Map<String, Object> map, ObjectMapper jsonObjectMapper,
+    private static Map<String, Object> getNestedMap(String key, String listId, Map<String, Object> map, ObjectMapper jsonObjectMapper,
                                                     boolean convert, boolean parents) {
         if (map == null) {
             return map;
@@ -596,14 +627,35 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         }
 
         Object value = map.get(firstKey);
-        Map<String, Object> subMap;
+        Map<String, Object> subMap = null;
 
         if (value instanceof Map) {
             subMap = (Map) value;
+        } else if (value instanceof Collection && nextKey != null) {
+            // Recalculate keys. Next key is not supposed to be an object key but the value of the key 'idList'
+            idx = nextKey.indexOf(".");
+            if (idx < 0) {
+                firstKey = nextKey;
+                nextKey = null;
+            } else {
+                firstKey = nextKey.substring(0, idx);
+                nextKey = nextKey.substring(idx + 1);
+            }
+
+            for (Object o : ((Collection) value)) {
+                if (o instanceof Map) {
+                    String tmpValue = String.valueOf(((Map) o).get(listId));
+                    if (StringUtils.isNotEmpty(tmpValue) && tmpValue.equals(firstKey)) {
+                        subMap = (Map) o;
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
         } else if (value == null
                 || value instanceof CharSequence
                 || value instanceof Number
-                || value instanceof Collection
                 || value instanceof Boolean
                 || value.getClass().isArray()
                 || value.getClass().isEnum()) {
@@ -623,7 +675,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         if (nextKey == null) {
             return subMap;
         } else {
-            return getNestedMap(nextKey, subMap, jsonObjectMapper, convert, parents);
+            return getNestedMap(nextKey, listId, subMap, jsonObjectMapper, convert, parents);
         }
 
     }
