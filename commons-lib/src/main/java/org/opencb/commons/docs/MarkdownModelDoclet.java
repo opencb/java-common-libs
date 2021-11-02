@@ -76,8 +76,10 @@ public class MarkdownModelDoclet {
                     res.append("```javascript\n" + options.getJsonMap().get(currentDocument + ".json") + "\n```");
                 }
                 try {
+                    System.out.println("******************************************************************************");
                     write2File(options.getOutputdir() + MarkdownUtils.camelToKebabCase(currentDocument) + ".md",
                             res.toString());
+                    System.out.println(options.getOutputdir() + MarkdownUtils.camelToKebabCase(currentDocument) + ".md");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -90,7 +92,7 @@ public class MarkdownModelDoclet {
         if ((options.getTableTagsClasses().contains(className)) && (fields.size() > 0)) {
             Map<String, List<MarkdownField>> mfFields = classifyFields(fields);
             res.append("### Summary \n");
-            res.append("| Field | create | update | unique | required|\n| :--- | :---: | :---: |:---: |:---: |\n");
+            res.append("| Field | Create | Update | Unique | Required|\n| :--- | :---: | :---: |:---: |:---: |\n");
             res.append(getRowTicks(mfFields.get(UPDATABLE)));
             res.append(getRowTicks(mfFields.get(CREABLE)));
             res.append(getRowTicks(mfFields.get(UNIQUE)));
@@ -142,12 +144,12 @@ public class MarkdownModelDoclet {
 
     private static String generateFieldsAttributesParagraph(MarkdownDoc doc) {
         StringBuffer res = new StringBuffer();
-        res.append("### Fields without tags \n");
+        res.append("### Fields without tags: \n");
         res.append("`");
         res.append(doc.getNotTagedFieldAsString());
         res.append("`");
 
-        res.append("\n### Fields for Create Operations \n");
+        res.append("\n### Fields for Create Operations: \n");
         res.append("`");
         res.append(doc.getCreateFieldsAsString());
 
@@ -169,17 +171,7 @@ public class MarkdownModelDoclet {
     }
 
     private static String getFlag(boolean flag) {
-        String res = "";
-        if (flag) {
-            res += "<img src=\"https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot"
-                    + ".com/o/assets%2F-MHDrUHq_ezb3NU4DSwA%2F-MUIJxAzWl_EP6qG2ieO%2F-MUINo9MnIFaaG1iqqOY%2Fimage"
-                    + ".png?alt=media&token=c9d3c9c2-573e-4f96-bfae-3a81506d07da\" width=\"16px\" heigth=\"16px\">";
-        } else {
-            res += "<img src=\"https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot"
-                    + ".com/o/assets%2F-MHDrUHq_ezb3NU4DSwA%2F-MfbZE39Donn34_d_VBp%2F-MfbZwelCGkwfxQfbxmv%2Ferror"
-                    + ".png?alt=media&token=5234ec5c-ae30-45b7-aa51-51469162a633\" width=\"16px\" heigth=\"16px\">";
-        }
-        return res;
+        return "<img src=\"https://github.com/opencb/opencga/blob/develop/docs/data-models/" + (flag ? "yes" : "no") + ".png?raw=true\">";
     }
 
     private static StringBuffer getTableModel(MarkdownDoc doc, String fileName, StringBuffer res) {
@@ -188,6 +180,7 @@ public class MarkdownModelDoclet {
         LOGGER.info("Generating tables of fields in the data model markdowns for class " + doc.getName());
         Set<MarkdownDoc> relatedTableModels = new HashSet<>();
         Set<MarkdownDoc> internalTableModels = new HashSet<>();
+        res.append("\n");
         if (doc.isEnumeration()) {
             res.append("### Enum " + doc.getName() + "\n");
             res.append("_Enumeration class._\n");
@@ -196,7 +189,7 @@ public class MarkdownModelDoclet {
         }
         //Create link for github Java code
         res.append("You can find the Java code [here](" + options.getGithubServer() + "src/main/java/"
-                + getPackageAsPath(doc.getQualifiedTypeName()) + ".java).\n\n");
+                + getPackageAsPath(doc) + ".java).\n\n");
 
         //For each field we make its table row
         if (fields.size() > 0) {
@@ -236,12 +229,6 @@ public class MarkdownModelDoclet {
                         } else {
                             relatedTableModels.add(classes.get(String.valueOf(field.getType())));
                         }
-                    } else {
-                        System.out.println("La clase " + String.valueOf(field.getType()) + " no está en related tables porque:");
-                        System.out.println("(!tablemodels.contains(classes.get(field.getType()))) -> "
-                                + (!tablemodels.contains(classes.get(field.getType()))));
-                        System.out.println("(!options.getNoPrintableClasses().contains(field.getType())) -> "
-                                + (!options.getNoPrintableClasses().contains(field.getType())));
                     }
                     tablemodels.add(classes.get(String.valueOf(field.getType())));
                 }
@@ -267,7 +254,11 @@ public class MarkdownModelDoclet {
         return res;
     }
 
-    private static String getPackageAsPath(String spackage) {
+    private static String getPackageAsPath(MarkdownDoc doc) {
+        String spackage = doc.getQualifiedTypeName();
+        if (spackage.contains("$")) {
+            spackage = spackage.substring(0, spackage.lastIndexOf("$"));
+        }
         return spackage.replaceAll("\\.", File.separator);
     }
 
