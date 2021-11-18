@@ -97,17 +97,18 @@ public class MongoDBCollection {
     }
 
     private DataResult endWrite(long start) {
-        return endWrite(1, 0, 1, 0, start);
+        return endWrite(1, 0, 1, 0, 0, start);
     }
 
     private DataResult endWrite(long numMatches, long numUpdated, long start) {
         long end = System.currentTimeMillis();
-        return new DataResult((int) (end - start), Collections.emptyList(), numMatches, 0, numUpdated, 0, null);
+        return new DataResult((int) (end - start), Collections.emptyList(), numMatches, 0, numUpdated, 0, 0, null);
     }
 
-    private DataResult endWrite(long numMatches, long numInserted, long numUpdated, long numDeleted, long start) {
+    private DataResult endWrite(long numMatches, long numInserted, long numUpdated, long numDeleted, long numErrors, long start) {
         long end = System.currentTimeMillis();
-        return new DataResult((int) (end - start), Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, null);
+        return new DataResult((int) (end - start), Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, numErrors,
+                null);
     }
 
     public DataResult<Long> count() {
@@ -361,7 +362,7 @@ public class MongoDBCollection {
     public DataResult insert(ClientSession clientSession, List<Document> objects, QueryOptions options) {
         long start = startQuery();
         BulkWriteResult writeResult = mongoDBNativeQuery.insert(clientSession, objects, options);
-        return endWrite(writeResult.getMatchedCount(), writeResult.getInsertedCount(), 0, 0, start);
+        return endWrite(writeResult.getMatchedCount(), writeResult.getInsertedCount(), 0, 0, 0, start);
     }
 
     public DataResult update(Bson query, Bson update, QueryOptions options) {
@@ -387,7 +388,7 @@ public class MongoDBCollection {
             updateResult = mongoDBNativeQuery.update(clientSession, query, update, upsert, multi);
         }
         return endWrite(updateResult.getMatchedCount(), updateResult.getUpsertedId() != null ? 1 : 0,
-                updateResult.getUpsertedId() == null ? updateResult.getModifiedCount() : 0, 0, start);
+                updateResult.getUpsertedId() == null ? updateResult.getModifiedCount() : 0, 0, 0, start);
     }
 
     //Bulk update
@@ -420,6 +421,7 @@ public class MongoDBCollection {
                 wr.getInsertedCount() + wr.getUpserts().size(),
                 wr.getModifiedCount(),
                 wr.getDeletedCount(),
+                0,
                 start);
     }
 
@@ -430,7 +432,7 @@ public class MongoDBCollection {
     public DataResult remove(ClientSession clientSession, Bson query, QueryOptions options) {
         long start = startQuery();
         DeleteResult wr = mongoDBNativeQuery.remove(clientSession, query);
-        return endWrite(wr.getDeletedCount(), 0, 0, wr.getDeletedCount(), start);
+        return endWrite(wr.getDeletedCount(), 0, 0, wr.getDeletedCount(), 0, start);
     }
 
     //Bulk remove
@@ -447,7 +449,7 @@ public class MongoDBCollection {
         }
         com.mongodb.bulk.BulkWriteResult wr = mongoDBNativeQuery.remove(clientSession, query, multi);
 
-        return endWrite(wr.getMatchedCount(), wr.getInsertedCount(), wr.getModifiedCount(), wr.getDeletedCount(), start);
+        return endWrite(wr.getMatchedCount(), wr.getInsertedCount(), wr.getModifiedCount(), wr.getDeletedCount(), 0, start);
     }
 
     public DataResult<Document> findAndUpdate(Bson query, Bson projection, Bson sort, Bson update, QueryOptions options) {
