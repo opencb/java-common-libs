@@ -26,20 +26,38 @@ public class DataResult<T> {
     }
 
     public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches) {
-        this(time, events, numResults, results, numMatches, 0, 0, 0, 0, new ObjectMap());
+        this(time, events, numResults, results, numMatches, 0, 0, 0, new ObjectMap());
     }
 
     public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches, ObjectMap attributes) {
-        this(time, events, numResults, results, numMatches, 0, 0, 0, 0, attributes);
+        this(time, events, numResults, results, numMatches, 0, 0, 0, attributes);
+    }
+
+    public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted) {
+        this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, new ObjectMap());
     }
 
     public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted, long numErrors) {
         this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, numErrors, new ObjectMap());
     }
 
+    public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted,
+                      ObjectMap attributes) {
+        this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, attributes);
+    }
+
     public DataResult(int time, List<Event> events, long numMatches, long numInserted, long numUpdated, long numDeleted, long numErrors,
                       ObjectMap attributes) {
         this(time, events, 0, Collections.emptyList(), numMatches, numInserted, numUpdated, numDeleted, numErrors, attributes);
+    }
+
+    public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches, long numInserted, long numUpdated,
+                      long numDeleted, ObjectMap attributes) {
+        this(time, events, numResults, results, numMatches, numInserted, numUpdated, numDeleted,
+                events == null || events.isEmpty()
+                        ? 0
+                        : events.stream().filter(e -> Event.Type.ERROR.equals(e.getType())).count(),
+                attributes);
     }
 
     public DataResult(int time, List<Event> events, int numResults, List<T> results, long numMatches, long numInserted, long numUpdated,
