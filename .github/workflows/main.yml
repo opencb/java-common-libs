@@ -35,11 +35,11 @@ jobs:
     strategy:
       matrix:
         mongodb: ["4.2"]
-    services:
-      mongodb:
-        image: mongo:${{ matrix.mongodb }}
-        ports:
-          - 27017:27017
+#    services:
+#      mongodb:
+#        image: mongo:${{ matrix.mongodb }}
+#        ports:
+#          - 27017:27017
     steps:
       - uses: actions/checkout@v2
         with:
@@ -57,6 +57,11 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
+      - name: Start MongoDB v${{ matrix.mongodb }}
+        uses: supercharge/mongodb-github-action@1.2.0
+        with:
+          mongodb-version: ${{ matrix.mongodb }}
+          mongodb-replica-set: rs-test
       - name: Build with Maven
         run: mvn -T 2 clean install
   deploy:
