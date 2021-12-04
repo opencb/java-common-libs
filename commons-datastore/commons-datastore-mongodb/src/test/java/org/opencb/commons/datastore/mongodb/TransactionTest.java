@@ -28,7 +28,8 @@ public class TransactionTest {
 //        dataStoreServerAddressList.add(new DataStoreServerAddress("127.0.0.1", 27019));
         mongoDataStoreManager = new MongoDataStoreManager(dataStoreServerAddressList);
         mongoDataStoreManager.get("test").getDb().drop();
-        mongoDataStore = mongoDataStoreManager.get("test", MongoDBConfiguration.builder().init().build());
+        mongoDataStore = mongoDataStoreManager.get("test", MongoDBConfiguration.builder()
+                .setReplicaSet("rs-test").init().build());
     }
 
     @After
