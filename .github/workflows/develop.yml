@@ -90,3 +90,8 @@ jobs:
   deploy:
     uses: opencb/java-common-libs/.github/workflows/maven-deploy-workflow.yml@develop
     needs: test
+    secrets:
+      MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
+      MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}

@@ -2,6 +2,15 @@ name: Reusable workflow to deploy
 
 on:
   workflow_call:
+    secrets:
+      MAVEN_NEXUS_USER:
+        required: true
+      MAVEN_NEXUS_PASSWORD:
+        required: true
+      MAVEN_GPG_PASSPHRASE:
+        required: true
+      MAVEN_GPG_PRIVATE_KEY:
+        required: true
 
 jobs:
   deploy:
