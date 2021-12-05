@@ -58,7 +58,7 @@ jobs:
       - name: Run Maven Tests
         run: mvn -T 2 clean install -DskipTests
   deploy:
-    uses: opencb/java-common-libs/.github/workflows/maven-deploy-workflow.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
     needs: test
     secrets:
       MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
