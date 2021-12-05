@@ -1,9 +1,9 @@
-name: java-common-libs develop CI/CD
+name: Release new java-common-libs version
 
 on:
   push:
-    branches:
-      - develop
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -56,7 +56,7 @@ jobs:
           mongodb-version: ${{ matrix.mongodb }}
           mongodb-replica-set: rs-test
       - name: Run Maven Tests
-        run: mvn -T 2 clean install
+        run: mvn -T 2 clean install -DskipTests
   deploy:
     name: Deploy java-common-libs to Maven
     runs-on: ubuntu-20.04
@@ -87,13 +87,13 @@ jobs:
           MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
           MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-#        run: mvn clean deploy -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PASSPHRASE }} -DskipTests -P deploy
-
-#      - name: Deploy to Maven Central respository
-#        uses: samuelmeuli/action-maven-publish@v1
-#        with:
-#          nexus_username: ${{ secrets.MAVEN_NEXUS_USER }}
-#          nexus_password: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
-#          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-#          gpg_passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-#          maven_args: -DskipTests
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-20.04
+    needs: deploy
+    steps:
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
