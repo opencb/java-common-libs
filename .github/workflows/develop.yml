@@ -88,4 +88,4 @@ jobs:
 #          MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
 #          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
   deploy:
-    uses: opencb/java-common-libs/.github/workflows/maven-deploy-workflow@main
+    uses: opencb/java-common-libs/.github/workflows/maven-deploy-workflow.yml@main
