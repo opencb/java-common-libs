@@ -96,4 +96,6 @@ jobs:
         uses: softprops/action-gh-release@v1
 #        if: startsWith(github.ref, 'refs/tags/')
         with:
+          name: test # ${{ github.ref }}
+          tag_name: test # ${{ github.ref }}
           generate_release_notes: true
