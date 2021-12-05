@@ -1,13 +1,12 @@
-name: Push java-common-libs develop
+name: Reusable workflow to deploy
 
 on:
   workflow_call:
 
 jobs:
   deploy:
-    name: Deploy java-common-libs to Maven
+    name: Deploy to Maven
     runs-on: ubuntu-20.04
-    needs: test
     steps:
       - uses: actions/checkout@v2
         with:
