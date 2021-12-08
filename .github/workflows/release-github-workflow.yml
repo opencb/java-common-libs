@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/download-artifact@v2
+        if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}
-      - name: ls
-        run: ls -R
-      - name: Cat file
-        run: cat ${{ inputs.file }}
+      - name: du -sh
+        if: ${{ inputs.artifact }}
+        run: du -sh ${{ inputs.file }}
       - name: GitHub Release
         uses: softprops/action-gh-release@v1
 #        if: startsWith(github.ref, 'refs/tags/')
