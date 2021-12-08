@@ -1,0 +1,26 @@
+name: Reusable workflow to build Java application
+
+on:
+  workflow_call:
+    inputs:
+      file:
+        type: string
+        required: false
+
+jobs:
+  release-workflow:
+    name: GitHub Release
+    runs-on: ubuntu-20.04
+    steps:
+#      - uses: actions/download-artifact@v2
+#        if: ${{ input.file }}
+#        with:
+#          name: ${{ input.file }}
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v1
+#        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: test # ${{ github.ref }}
+          tag_name: test_tag # ${{ github.ref }}
+          generate_release_notes: true
+          files: ${{ input.file }}

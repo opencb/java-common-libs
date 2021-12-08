@@ -45,3 +45,6 @@ jobs:
       MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+  release:
+    uses: opencb/java-common-libs/.github/workflows/release-github-workflow.yml@develop
+    runs-on: ubuntu-20.04
