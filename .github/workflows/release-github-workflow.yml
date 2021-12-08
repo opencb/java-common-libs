@@ -16,10 +16,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/download-artifact@v2
-        if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}
           path: ${{ inputs.file }}
+      - name: ls
+        run: ls -R
       - name: Cat file
         run: cat ${{ inputs.file }}
       - name: GitHub Release
