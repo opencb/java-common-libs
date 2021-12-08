@@ -3,6 +3,9 @@ name: Reusable workflow to build Java application
 on:
   workflow_call:
     inputs:
+      artifact:
+        type: string
+        required: false
       file:
         type: string
         required: false
@@ -12,10 +15,11 @@ jobs:
     name: GitHub Release
     runs-on: ubuntu-20.04
     steps:
-#      - uses: actions/download-artifact@v2
-#        if: ${{ input.file }}
-#        with:
-#          name: ${{ input.file }}
+      - uses: actions/download-artifact@v2
+        if: ${{ inputs.artifact }}
+        with:
+          name: ${{ inputs.artifact }}
+          path: ${{ inputs.file }}
       - name: Cat file
         run: cat ${{ inputs.file }}
       - name: GitHub Release
