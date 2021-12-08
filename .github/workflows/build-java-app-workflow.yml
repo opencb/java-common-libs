@@ -32,6 +32,6 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: build-folder
-          path: build
+          path: build/
       - name: Maven Validate
         run: mvn validate
