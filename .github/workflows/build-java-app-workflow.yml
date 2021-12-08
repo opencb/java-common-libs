@@ -29,5 +29,9 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-folder
+          path: build
       - name: Maven Validate
         run: mvn validate
