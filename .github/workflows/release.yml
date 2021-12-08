@@ -36,7 +36,7 @@ jobs:
           mongodb-version: ${{ matrix.mongodb }}
           mongodb-replica-set: rs-test
       - name: Run Maven Tests
-        run: mvn -T 2 clean install
+        run: mvn -T 2 clean install -DskipTests
   deploy:
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
     needs: test
@@ -47,17 +47,4 @@ jobs:
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
   release:
     uses: opencb/java-common-libs/.github/workflows/release-github-workflow.yml@develop
-    runs-on: ubuntu-20.04
-#    needs: deploy
-#  release:
-#    name: GitHub Release
-#    runs-on: ubuntu-20.04
-#    needs: deploy
-#    steps:
-#      - name: GitHub Release
-#        uses: softprops/action-gh-release@v1
-#        if: startsWith(github.ref, 'refs/tags/')
-#        with:
-#          name: ${{ github.ref }}
-#          tag_name: ${{ github.ref }}
-#          generate_release_notes: true
+    needs: deploy
