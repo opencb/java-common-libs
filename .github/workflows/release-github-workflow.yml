@@ -23,4 +23,4 @@ jobs:
           name: test # ${{ github.ref }}
           tag_name: test_tag # ${{ github.ref }}
           generate_release_notes: true
-          files: ${{ input.file }}
+          files: ${{ inputs.file }}
