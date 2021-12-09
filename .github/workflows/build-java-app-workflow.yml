@@ -33,7 +33,6 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
-      - run: ls -lh
       - uses: actions/upload-artifact@v2
         with:
           name: build-folder
