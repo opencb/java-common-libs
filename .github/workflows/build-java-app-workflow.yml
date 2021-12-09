@@ -2,6 +2,10 @@ name: Reusable workflow to build Java application
 
 on:
   workflow_call:
+    inputs:
+      maven_opts:
+        type: string
+        required: false
 
 jobs:
   build-workflow:
@@ -28,7 +32,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
       - name: Maven Build (skip tests)
-        run: mvn -T 2 clean install -DskipTests
+        run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
       - run: ls -lh
       - uses: actions/upload-artifact@v2
         with:
