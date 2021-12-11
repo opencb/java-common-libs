@@ -24,7 +24,7 @@ public class MarkdownModelDoclet {
     private static final String UNIQUE = "UNIQUE";
     private static final String REQUIRED = "REQUIRED";
     private static final String NOTAGS = "NOTAGS";
-    private static Options options;
+    private static MarkdownOptions options;
     private static Map<String, MarkdownDoc> classes = new HashMap<>();
     private static Set<MarkdownDoc> tablemodels = new HashSet<>();
     private static String currentDocument;
@@ -36,7 +36,7 @@ public class MarkdownModelDoclet {
     public static boolean start(RootDoc rootDoc) {
         LOGGER.info("Generating markdown for the data model");
         //System.out.println("Generating markdown for the data model");
-        options = Options.getInstance();
+        options = MarkdownOptions.getInstance();
         options.load(rootDoc.options());
         classes = createMap(rootDoc.classes());
         printDocument();
@@ -277,15 +277,15 @@ public class MarkdownModelDoclet {
 
     public static boolean validOptions(String[][] options, DocErrorReporter reporter) {
         LOGGER.info("Validating input options");
-        boolean res = Options.validOptions(options, reporter);
-        Options.validOptions(options, reporter);
+        boolean res = MarkdownOptions.validOptions(options, reporter);
+        MarkdownOptions.validOptions(options, reporter);
         LOGGER.info(res ? "Valid input options" : "Invalid input options");
         return res;
     }
 
     public static int optionLength(String option) {
         LOGGER.info("Validating input options " + option);
-        return Options.optionLength(option);
+        return MarkdownOptions.optionLength(option);
     }
 
     public String getCurrentDocument() {

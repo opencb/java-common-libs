@@ -15,10 +15,10 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>jdk.tools</groupId>
-            <artifactId>jdk.tools</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>jdk.tools</groupId>-->
+<!--            <artifactId>jdk.tools</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>

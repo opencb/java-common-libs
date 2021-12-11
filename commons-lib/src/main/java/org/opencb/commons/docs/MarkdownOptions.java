@@ -30,7 +30,7 @@ import java.util.*;
  *
  * @author Juanfe
  */
-public final class Options {
+public final class MarkdownOptions {
 
     public static final String OPT_OUTPUT_DIR = "-outputdir";
     public static final String OPT_CLASSES_TO_MARKDOWN = "-classes2Markdown";
@@ -39,7 +39,7 @@ public final class Options {
     public static final String OPT_TABLE_TAGS_CLASSES = "-tableTagsClasses";
     public static final String OPT_NO_PRINTABLE_RELATED_CLASSES = "-noPrintableRelatedClasses";
     public static final String OPT_SOURCE_CLASSES_DIR = "-sourceClassesDir";
-    private static final Options INSTANCE = new Options();
+    private static final MarkdownOptions INSTANCE = new MarkdownOptions();
     private String githubServer = "https://github.com/opencb/opencga/blob/master/opencga-core/";
     private List<String> classes2Markdown = new ArrayList<>();
     private List<String> tableTagsClasses = new ArrayList<>();
@@ -48,11 +48,11 @@ public final class Options {
     private String sourceClassesDir;
     private Map<String, String> jsonMap = new HashMap<>();
 
-    private Options() {
+    private MarkdownOptions() {
 
     }
 
-    public static Options getInstance() {
+    public static MarkdownOptions getInstance() {
         return INSTANCE;
     }
 
@@ -241,7 +241,7 @@ public final class Options {
         return noPrintableClasses;
     }
 
-    public Options setNoPrintableClasses(List<String> noPrintableClasses) {
+    public MarkdownOptions setNoPrintableClasses(List<String> noPrintableClasses) {
         this.noPrintableClasses = noPrintableClasses;
         return this;
     }
@@ -250,7 +250,7 @@ public final class Options {
         return sourceClassesDir;
     }
 
-    public Options setSourceClassesDir(String sourceClassesDir) {
+    public MarkdownOptions setSourceClassesDir(String sourceClassesDir) {
         this.sourceClassesDir = sourceClassesDir;
         return this;
     }
