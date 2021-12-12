@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+
   sonar:
     uses: opencb/java-common-libs/.github/workflows/sonar-analysis-workflow.yml@develop
     needs: build
@@ -16,6 +17,7 @@ jobs:
       sonarProjectKey: opencb_java-common-libs
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   test:
     name: Test java-common-libs
     runs-on: ubuntu-20.04
@@ -45,6 +47,7 @@ jobs:
           mongodb-replica-set: rs-test
       - name: Run Maven Tests
         run: mvn -T 2 clean install -DskipTests
+
   deploy:
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
     needs: test
