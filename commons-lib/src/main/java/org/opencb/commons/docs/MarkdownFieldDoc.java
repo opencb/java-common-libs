@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MarkdownField {
+public class MarkdownFieldDoc {
 
     private static final Pattern SIMPLE_LINK = Pattern.compile("(?<label>[^<]*)<(?<url>[^>]+)>");
     private static final Pattern FULL_LINK = Pattern.compile("\\[(?<label>[^)]+)\\]\\s+?\\((?<url>[^]\\s]+)\\)|\\((?<url2>[^]\\s]+)\\)");
@@ -36,7 +36,7 @@ public class MarkdownField {
     private String parentType;
     private boolean enumerationClass;
 
-    public MarkdownField(FieldDoc field) {
+    public MarkdownFieldDoc(FieldDoc field) {
         this.field = field;
         name = field.name();
         Tag[] tagdocs = field.tags();
@@ -139,7 +139,7 @@ public class MarkdownField {
         return res;
     }
 
-    public String getCollectionClassAsString(Map<String, MarkdownDoc> classes, Map<String, String> innerClasses,
+    public String getCollectionClassAsString(Map<String, MarkdownClassDoc> classes, Map<String, String> innerClasses,
                                              String currentDocument) {
 
         String res = "";
@@ -147,7 +147,7 @@ public class MarkdownField {
         res += "**" + getName() + "**<br> " + getClassName() + "<";
 
         for (String s : innerClasses.keySet()) {
-            if (classes.keySet().contains(innerClasses.get(s))) {
+            if (classes.containsKey(innerClasses.get(s))) {
                 res += "*" + generateLink(currentDocument, s) + "*,";
             } else {
                 res += "*" + s.trim() + "*,";
@@ -246,9 +246,9 @@ public class MarkdownField {
                     target.append(label);
                     target.append("</a>");
                     if (res.endsWith("</p>")) {
-                        res += "_More info at_: " + target.toString();
+                        res += "_More info at_: " + target;
                     } else {
-                        res += "</br>_More info at_: " + target.toString();
+                        res += "</br>_More info at_: " + target;
                     }
                 } else {
                     if (res.endsWith("</p>")) {
@@ -278,7 +278,7 @@ public class MarkdownField {
         return field;
     }
 
-    public MarkdownField setField(FieldDoc field) {
+    public MarkdownFieldDoc setField(FieldDoc field) {
         this.field = field;
         return this;
     }
@@ -287,7 +287,7 @@ public class MarkdownField {
         return updatable;
     }
 
-    public MarkdownField setUpdatable(boolean updatable) {
+    public MarkdownFieldDoc setUpdatable(boolean updatable) {
         this.updatable = updatable;
         return this;
     }
@@ -296,7 +296,7 @@ public class MarkdownField {
         return create;
     }
 
-    public MarkdownField setCreate(boolean create) {
+    public MarkdownFieldDoc setCreate(boolean create) {
         this.create = create;
         return this;
     }
@@ -305,7 +305,7 @@ public class MarkdownField {
         return unique;
     }
 
-    public MarkdownField setUnique(boolean unique) {
+    public MarkdownFieldDoc setUnique(boolean unique) {
         this.unique = unique;
         return this;
     }
@@ -314,7 +314,7 @@ public class MarkdownField {
         return required;
     }
 
-    public MarkdownField setRequired(boolean required) {
+    public MarkdownFieldDoc setRequired(boolean required) {
         this.required = required;
         return this;
     }
@@ -323,7 +323,7 @@ public class MarkdownField {
         return tags;
     }
 
-    public MarkdownField setTags(List<MarkdownTag> tags) {
+    public MarkdownFieldDoc setTags(List<MarkdownTag> tags) {
         this.tags = tags;
         return this;
     }
@@ -332,7 +332,7 @@ public class MarkdownField {
         return name;
     }
 
-    public MarkdownField setName(String name) {
+    public MarkdownFieldDoc setName(String name) {
         this.name = name;
         return this;
     }
@@ -341,7 +341,7 @@ public class MarkdownField {
         return noTagged;
     }
 
-    public MarkdownField setNoTagged(boolean noTagged) {
+    public MarkdownFieldDoc setNoTagged(boolean noTagged) {
         this.noTagged = noTagged;
         return this;
     }
@@ -350,7 +350,7 @@ public class MarkdownField {
         return deprecated;
     }
 
-    public MarkdownField setDeprecated(boolean deprecated) {
+    public MarkdownFieldDoc setDeprecated(boolean deprecated) {
         this.deprecated = deprecated;
         return this;
     }
@@ -359,7 +359,7 @@ public class MarkdownField {
         return see;
     }
 
-    public MarkdownField setSee(String see) {
+    public MarkdownFieldDoc setSee(String see) {
         this.see = see;
         return this;
     }
@@ -368,7 +368,7 @@ public class MarkdownField {
         return since;
     }
 
-    public MarkdownField setSince(String since) {
+    public MarkdownFieldDoc setSince(String since) {
         this.since = since;
         return this;
     }
@@ -377,7 +377,7 @@ public class MarkdownField {
         return className;
     }
 
-    public MarkdownField setClassName(String className) {
+    public MarkdownFieldDoc setClassName(String className) {
         this.className = className;
         return this;
     }
@@ -386,7 +386,7 @@ public class MarkdownField {
         return implNote;
     }
 
-    public MarkdownField setImplNote(String implNote) {
+    public MarkdownFieldDoc setImplNote(String implNote) {
         this.implNote = implNote;
         return this;
     }
@@ -395,7 +395,7 @@ public class MarkdownField {
         return qualifiedTypeName;
     }
 
-    public MarkdownField setQualifiedTypeName(String qualifiedTypeName) {
+    public MarkdownFieldDoc setQualifiedTypeName(String qualifiedTypeName) {
         this.qualifiedTypeName = qualifiedTypeName;
         return this;
     }
@@ -404,7 +404,7 @@ public class MarkdownField {
         return constraints;
     }
 
-    public MarkdownField setConstraints(String constraints) {
+    public MarkdownFieldDoc setConstraints(String constraints) {
         this.constraints = constraints;
         return this;
     }
@@ -413,7 +413,7 @@ public class MarkdownField {
         return description;
     }
 
-    public MarkdownField setDescription(String description) {
+    public MarkdownFieldDoc setDescription(String description) {
         this.description = description;
         return this;
     }
@@ -422,7 +422,7 @@ public class MarkdownField {
         return type;
     }
 
-    public MarkdownField setType(String type) {
+    public MarkdownFieldDoc setType(String type) {
         this.type = type;
         return this;
     }
@@ -431,7 +431,7 @@ public class MarkdownField {
         return collection;
     }
 
-    public MarkdownField setCollection(boolean collection) {
+    public MarkdownFieldDoc setCollection(boolean collection) {
         this.collection = collection;
         return this;
     }
@@ -440,7 +440,7 @@ public class MarkdownField {
         return parentType;
     }
 
-    public MarkdownField setParentType(String parentType) {
+    public MarkdownFieldDoc setParentType(String parentType) {
         this.parentType = parentType;
         return this;
     }
@@ -449,7 +449,7 @@ public class MarkdownField {
         return enumerationClass;
     }
 
-    public MarkdownField setEnumerationClass(boolean enumerationClass) {
+    public MarkdownFieldDoc setEnumerationClass(boolean enumerationClass) {
         this.enumerationClass = enumerationClass;
         return this;
     }
