@@ -64,4 +64,8 @@ public class PrintUtils {
         res += format(value, Color.YELLOW);
         return res;
     }
+
+    public static String eraseScreen() {
+        return ansi().eraseScreen().toString();
+    }
 }
