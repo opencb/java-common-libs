@@ -7,7 +7,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class PrintUtils {
 
-    enum Color {
+    public enum Color {
         BLACK("BLACK"),
         RED("RED"),
         GREEN("GREEN"),
