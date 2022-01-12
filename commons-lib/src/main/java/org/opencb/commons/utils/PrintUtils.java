@@ -7,8 +7,27 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class PrintUtils {
 
-    public static void print(String message, Color color) {
-        System.out.print(format(message, color));
+    enum Color {
+        BLACK("BLACK"),
+        RED("RED"),
+        GREEN("GREEN"),
+        YELLOW("YELLOW"),
+        BLUE("BLUE"),
+        MAGENTA("MAGENTA"),
+        CYAN("CYAN"),
+        WHITE("WHITE"),
+        DEFAULT("DEFAULT");
+
+        private final String text;
+
+        Color(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
     }
 
     public static void println(String message) {
@@ -19,6 +38,10 @@ public class PrintUtils {
         System.out.print(message);
     }
 
+    public static void print(String message, Color color) {
+        System.out.print(format(message, color));
+    }
+
     public static void println(String message, Color color) {
         System.out.println(format(message, color));
     }
@@ -27,12 +50,25 @@ public class PrintUtils {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
     }
 
-    public static void printError(String message) {
-        printError(message, null);
+
+    public static void printInfo(String message) {
+        System.out.println(format("INFO: " + message, Color.GREEN));
     }
 
-    public static void printDebugMessage(String message) {
+    public static void printDebug(String message) {
         println(message, Color.YELLOW);
+    }
+
+    public static void printWarn(String message) {
+        System.out.println(format("WARNING: " + message, Color.YELLOW));
+    }
+
+    public static void printWarn(Exception e) {
+        System.out.println(format("WARNING: " + ExceptionUtils.getRootCauseMessage(e), Color.YELLOW));
+    }
+
+    public static void printError(String message) {
+        printError(message, null);
     }
 
     public static void printError(Exception e) {
@@ -45,18 +81,6 @@ public class PrintUtils {
         } else {
             System.out.println(format("ERROR: " + message, Color.RED));
         }
-    }
-
-    public static void printWarn(String message) {
-        System.out.println(format("WARNING: " + message, Color.YELLOW));
-    }
-
-    public static void printWarn(Exception e) {
-        System.out.println(format("WARNING: " + ExceptionUtils.getRootCauseMessage(e), Color.YELLOW));
-    }
-
-    public static void printInfo(String message) {
-        System.out.println(format("INFO: " + message, Color.GREEN));
     }
 
     public static String getKeyValueAsFormattedString(String key, String value) {
