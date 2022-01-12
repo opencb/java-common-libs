@@ -47,7 +47,9 @@ public class DocUtils {
                         || type.isAssignableFrom(Byte.TYPE)
                         || type.isAssignableFrom(Character.TYPE)
                         || type.isAssignableFrom(Boolean.TYPE)
-                        || type.isAssignableFrom(String.class);
+                        || type.isAssignableFrom(String.class)
+                        || "java.lang.Object".equals(type.getCanonicalName());
+
         return simpleType;
     }
 
@@ -105,9 +107,14 @@ public class DocUtils {
 
     public static boolean isUncommentedClass(DataFieldDoc field, Class<?> clazz) {
 
+        if (isSimpleType(clazz)) {
+            return true;
+        }
+
         if (field.getUncommentedClasses() == null || field.getUncommentedClasses().length == 0) {
             return false;
         }
+
         for (String cls : field.getUncommentedClasses()) {
             if (cls.equals(clazz.getSimpleName())) {
                 return true;
@@ -115,4 +122,5 @@ public class DocUtils {
         }
         return false;
     }
+
 }
