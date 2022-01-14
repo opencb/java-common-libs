@@ -46,7 +46,6 @@ public class MarkdownUtils {
                 res += !fieldDoc1.isManaged() ? "a" : "b";
                 res += !fieldDoc1.isImmutable() ? "a" : "b";
                 res += fieldDoc1.isRequired() ? "a" : "b";
-
                 return res;
             }
 
@@ -66,14 +65,11 @@ public class MarkdownUtils {
     public static String getProcessedName(DataFieldDoc fieldDoc, String currentDocument, DocConfiguration config) {
         String res = "";
         String link = generateLink(fieldDoc, currentDocument, fieldDoc.getClazz().getSimpleName(), config);
-
-
         if (fieldDoc.isDeprecated()) {
             res += "**~~" + fieldDoc.getName() + "~~**<br>*" + link + "*";
         } else {
             res += "**" + fieldDoc.getName() + "**<br>*" + link + "*";
         }
-
         return res;
     }
 
@@ -82,17 +78,14 @@ public class MarkdownUtils {
     }
 
     public static String getSinceAsString(DataFieldDoc fieldDoc) {
-
         String res = "";
         if (fieldDoc.getSince() != null && fieldDoc.getSince().length() > 0) {
             res += "<br>_since_: " + fieldDoc.getSince();
         }
-
         return res;
     }
 
     public static String getDeprecatedAsString(DataFieldDoc fieldDoc) {
-
         String res = "";
         if (fieldDoc.isDeprecated()) {
             res += "<br>_Deprecated_";
@@ -108,7 +101,6 @@ public class MarkdownUtils {
 
     private static String generateLink(DataFieldDoc fieldDoc, String currentDocument, String clazz, DocConfiguration config) {
 
-
         if (!config.getGitbookServerURL().endsWith("/")) {
             config.setGitbookServerURL(config.getGitbookServerURL() + "/");
         }
@@ -117,11 +109,9 @@ public class MarkdownUtils {
 
             return "[" + link + "](" + config.getGitbookServerURL() + link.toLowerCase() + ")";
         }
-
         if (fieldDoc.isPrimitive() || fieldDoc.isEnumeration()
                 || (DocUtils.isUncommentedClass(fieldDoc, fieldDoc.getClazz()))
                 || (fieldDoc.isCollection() && ObjectUtils.isEmpty(fieldDoc.getGenericClasses()))) {
-
             return fieldDoc.getClazz().getSimpleName();
         }
 
@@ -135,26 +125,28 @@ public class MarkdownUtils {
                     String res = fieldDoc.getClazz().getSimpleName() + "<";
                     String link = fieldDoc.getGenericClasses().get(0).getSimpleName();
                     if (config.getDocClasses().contains(fieldDoc.getGenericClasses().get(0))) {
-                        res += "[" + link + "](" + config.getGitbookServerURL() + link.toLowerCase() + ")";
+                        res += "<a href=\"" + config.getGitbookServerURL() + link.toLowerCase() + "\"><em>"
+                                + link + "</em></a>";
                     } else {
-                        res += "[" + link + "](" + config.getGitbookServerURL() + currentDocument + "#"
-                                + link.toLowerCase() + ")";
+                        if (DocUtils.isSimpleType(fieldDoc.getGenericClasses().get(0))
+                                || DocUtils.isUncommentedClass(fieldDoc, fieldDoc.getGenericClasses().get(0))) {
+                            res += "<em>" + link + "</em>";
+                        } else {
+                            res += "<a href=\"" + config.getGitbookServerURL() + currentDocument + "#"
+                                    + link.toLowerCase() + "\"><em>" + link + "</em></a>";
+                        }
                     }
-                    res += " >";
+                    res += ">";
                     return res;
                 }
             }
         }
-
         return "[" + clazz + "](" + config.getGitbookServerURL() + currentDocument + "#"
                 + clazz.toLowerCase() + ")";
-
-
     }
 
     private static String getInnerClassesOfMapAsString(DataFieldDoc fieldDoc, String currentDocument,
                                                        DocConfiguration config, String res, int index) {
-
         List<Class<?>> cls = fieldDoc.getGenericClasses();
         for (int i = index; i < cls.size(); i++) {
             if (DocUtils.isMap(cls.get(i))) {
@@ -169,16 +161,12 @@ public class MarkdownUtils {
                 if (DocUtils.isSimpleType(cls.get(i)) || DocUtils.isUncommentedClass(fieldDoc, cls.get(i))) {
                     res += link + ",";
                 } else {
-
-
                     if (config.getDocClasses().contains(cls.get(i))) {
                         res += "<a href=\"" + config.getGitbookServerURL() + link.toLowerCase() + "\"><em>"
                                 + link + "</em></a>,";
-
                     } else {
                         res += "<a href=\"" + config.getGitbookServerURL() + currentDocument + "#"
                                 + link.toLowerCase() + "\"><em>" + link + "</em></a>,";
-
                     }
                 }
             }

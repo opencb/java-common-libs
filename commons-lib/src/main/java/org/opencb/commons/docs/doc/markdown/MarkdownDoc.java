@@ -55,7 +55,9 @@ public class MarkdownDoc extends Doc {
                     } else {
                         final List<Class<?>> genericClasses = field.getGenericClasses();
                         for (Class<?> genericClass : genericClasses) {
-                            printRelatedTable(genericClass, field);
+                            if (!DocUtils.isClassCollection(genericClass)) {
+                                printRelatedTable(genericClass, field);
+                            }
                         }
                     }
                 }
@@ -88,9 +90,10 @@ public class MarkdownDoc extends Doc {
     }
 
     private void printRelatedTable(Class<?> clazz, DataFieldDoc field) {
-        if (!config.getDocClasses().contains(clazz) && DocUtils.isUncommentedClass(field, clazz)) {
+        if (!config.getDocClasses().contains(clazz) && !DocUtils.isUncommentedClass(field, clazz)) {
             final DataClassDoc classDoc = buildClassDoc(clazz);
             classDoc.setName(clazz.getSimpleName());
+            LOGGER.info("Adding " + classDoc.getName() + " related class : " + clazz.getCanonicalName());
             relatedClasses.put(clazz.getCanonicalName(), classDoc);
         }
     }
@@ -165,6 +168,21 @@ public class MarkdownDoc extends Doc {
 
     @Override
     public String getRelatedTables(DataClassDoc doc) {
+        if (relatedClasses != null) {
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("relatedClasses ::: " + relatedClasses.size() + "");
+            LOGGER.info("Class ::: " + doc.getName() + "");
+            for (String s : relatedClasses.keySet()) {
+                LOGGER.info("related Class ::: " + s + "");
+            }
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+            LOGGER.info("==============================================================================================");
+        }
         return printRelatedTableModels().toString();
     }
 
