@@ -7,29 +7,6 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 public class PrintUtils {
 
-    public enum Color {
-        BLACK("BLACK"),
-        RED("RED"),
-        GREEN("GREEN"),
-        YELLOW("YELLOW"),
-        BLUE("BLUE"),
-        MAGENTA("MAGENTA"),
-        CYAN("CYAN"),
-        WHITE("WHITE"),
-        DEFAULT("DEFAULT");
-
-        private final String text;
-
-        Color(final String text) {
-            this.text = text;
-        }
-
-        @Override
-        public String toString() {
-            return text;
-        }
-    }
-
     public static void println(String message) {
         System.out.println(message);
     }
@@ -49,7 +26,6 @@ public class PrintUtils {
     public static String format(String message, Color color) {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
     }
-
 
     public static void printInfo(String message) {
         System.out.println(format("INFO: " + message, Color.GREEN));
@@ -89,7 +65,36 @@ public class PrintUtils {
         return res;
     }
 
+    public static void printCommandHelpFormattedString(String command, String info) {
+        String key = format(command, Color.YELLOW);
+        String value = format(info, Color.GREEN);
+        System.err.printf("%30s  %s\n", key, value);
+    }
+
     public static String eraseScreen() {
         return ansi().eraseScreen().toString();
+    }
+
+    public enum Color {
+        BLACK("BLACK"),
+        RED("RED"),
+        GREEN("GREEN"),
+        YELLOW("YELLOW"),
+        BLUE("BLUE"),
+        MAGENTA("MAGENTA"),
+        CYAN("CYAN"),
+        WHITE("WHITE"),
+        DEFAULT("DEFAULT");
+
+        private final String text;
+
+        Color(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
     }
 }
