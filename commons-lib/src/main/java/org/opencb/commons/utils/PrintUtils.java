@@ -2,6 +2,9 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.fusesource.jansi.Ansi.Color.valueOf;
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -35,6 +38,18 @@ public class PrintUtils {
         println(message, Color.YELLOW);
     }
 
+    public static void printGreen(String message) {
+        print(message, Color.GREEN);
+    }
+
+    public static void printRed(String message) {
+        print(message, Color.RED);
+    }
+
+    public static void printYellow(String message) {
+        print(message, Color.YELLOW);
+    }
+
     public static void printWarn(String message) {
         System.out.println(format("WARNING: " + message, Color.YELLOW));
     }
@@ -65,10 +80,65 @@ public class PrintUtils {
         return res;
     }
 
+    public static String getHelpVersionFormattedString(String key, String value) {
+        String res = format(key, Color.YELLOW);
+        res += format(value, Color.GREEN);
+        return res;
+    }
+
     public static void printCommandHelpFormattedString(String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
         System.err.printf("%30s  %s\n", key, value);
+    }
+
+    public static void printCommandHelpFormattedString(int kpad, int kvalue, String command, String info) {
+        String key = format(command, Color.YELLOW);
+        String value = format(info, Color.GREEN);
+        System.err.printf("%" + kpad + "s  %" + kvalue + "s\n", key, value);
+    }
+
+    public static void printCommandHelpFormattedString(int pad, String command, String info) {
+        String key = format(command, Color.YELLOW);
+        String value = format(info, Color.GREEN);
+        System.err.printf("%" + pad + "s  %s\n", key, value);
+    }
+
+    public static void printCommandHelpFormattedString(int pad, String command, String typ, String info) {
+        String key = format(command, Color.YELLOW);
+        String type = format(typ, Color.GREEN);
+        String value = format(info, Color.GREEN);
+        List<String> lines = null;
+        if (info.length() > 80) {
+            lines = getLines(info);
+            //  value = format(info.substring(0, 80), Color.GREEN);
+        }
+        String print = "%" + pad + "s\t%s" + (type.equals("BOOLEAN") ? "" : "\t") + "%s\n";
+
+        if (lines != null) {
+            System.err.printf(print, key, type, format(lines.remove(0).trim(), Color.GREEN));
+            for (String line : lines) {
+                System.err.printf("%" + pad + "s %s\n", "   ", format(line, Color.GREEN));
+            }
+        } else {
+            System.err.printf(print, key, type, format(value, Color.GREEN));
+        }
+    }
+
+    private static List<String> getLines(String line) {
+        String[] words = line.split(" ");
+        List<String> rows = new ArrayList<String>();
+        String row = "";
+        for (String word : words) {
+            if (row.length() + word.length() < 80) {
+                row += " " + word;
+            } else {
+                rows.add(row);
+                row = word;
+            }
+        }
+        rows.add(row);
+        return rows;
     }
 
     public static String eraseScreen() {

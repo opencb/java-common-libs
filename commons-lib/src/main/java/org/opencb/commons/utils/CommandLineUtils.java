@@ -44,7 +44,7 @@ public class CommandLineUtils {
 
     public static void printCommandUsage(JCommander commander, PrintStream printStream) {
 
-        Integer paramNameMaxSize = Math.max(commander.getParameters().stream()
+    /*    Integer paramNameMaxSize = Math.max(commander.getParameters().stream()
                 .map(pd -> pd.getNames().length())
                 .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(20), 20);
         Integer typeMaxSize = Math.max(commander.getParameters().stream()
@@ -53,10 +53,20 @@ public class CommandLineUtils {
 
         int nameAndTypeLength = paramNameMaxSize + typeMaxSize + 8;
         int maxLineLength = nameAndTypeLength + DESCRIPTION_LENGTH;  //160
-
+*/
         Comparator<ParameterDescription> parameterDescriptionComparator =
                 Comparator.comparing((ParameterDescription p) -> p.getDescription().contains("DEPRECATED"))
                         .thenComparing(ParameterDescription::getLongestName);
+        int maxLength = 0;
+        for (ParameterDescription parameterDescription : commander.getParameters()) {
+            String desc = (parameterDescription.getParameterized().getParameter() != null
+                    && parameterDescription.getParameterized().getParameter().required()) ? "*" : "";
+            desc += parameterDescription.getNames();
+            if (desc.length() > maxLength) {
+                maxLength = desc.length();
+            }
+        }
+        final int pad = maxLength + 12;
         commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
             if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
                 String type = getType(parameterDescription);
@@ -71,6 +81,12 @@ public class CommandLineUtils {
                         defaultValue = " [" + parameterDescription.getDefault() + "]";
                     }
                 }
+                PrintUtils.printCommandHelpFormattedString(pad, ((parameterDescription.getParameterized().getParameter() != null
+                        && parameterDescription.getParameterized().getParameter().required()) ? "*" : "")
+                        + parameterDescription.getNames(), type, parameterDescription.getDescription() + " "
+                        + defaultValue);
+/*
+
                 String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s%s\n",
                         (parameterDescription.getParameterized().getParameter() != null
                                 && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
@@ -92,7 +108,7 @@ public class CommandLineUtils {
                 // this is empty for short lines and so no prints anything
                 lines.forEach(printStream::print);
                 // in long lines this prints the last trimmed line
-                printStream.print(usage);
+                printStream.print(usage);*/
             }
         });
     }
@@ -156,8 +172,8 @@ public class CommandLineUtils {
                 + "$" + "{COMP_WORDS[COMP_CWORD]} \n prev=" + "$" + "{COMP_WORDS[COMP_CWORD-1]} \n");
 
         autoComplete.append("commands=\"").append(mainCommands.toString().trim()).append('"').append('\n');
-        autoComplete.append(subCommmands.toString());
-        autoComplete.append(subCommmandsOptions.toString());
+        autoComplete.append(subCommmands);
+        autoComplete.append(subCommmandsOptions);
         autoComplete.append("if [[ ${#COMP_WORDS[@]} > 2 && ${#COMP_WORDS[@]} < 4 ]] ; then \n local options \n case "
                 + "$" + "{prev} in \n");
 
