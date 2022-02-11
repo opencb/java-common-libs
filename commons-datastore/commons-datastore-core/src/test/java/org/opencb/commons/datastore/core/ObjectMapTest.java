@@ -58,6 +58,34 @@ public class ObjectMapTest {
         objectMap.put("map", map);
         objectMap.put("l1", new ObjectMap("l2", new ObjectMap("l3", new ObjectMap("l4", "value"))));
         objectMap.put("myModel", new MyModel("a", "b"));
+        List<ObjectMap> values = Arrays.asList(
+                new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
+                new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
+                new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
+        );
+        objectMap.put("objectList", values);
+
+        List<ObjectMap> aValues = Arrays.asList(
+                new ObjectMap("id", "Aabc").append("name", "AABC").append("nested", new ObjectMap("value", "AA")),
+                new ObjectMap("id", "Adef").append("name", "ADEF").append("nested", new ObjectMap("value", "AD")),
+                new ObjectMap("id", "Aghi").append("name", "AGHI").append("nested", new ObjectMap("value", "AG"))
+        );
+        List<ObjectMap> bValues = Arrays.asList(
+                new ObjectMap("id", "Babc").append("name", "BABC").append("nested", new ObjectMap("value", "BA")),
+                new ObjectMap("id", "Bdef").append("name", "BDEF").append("nested", new ObjectMap("value", "BD")),
+                new ObjectMap("id", "Bghi").append("name", "BGHI").append("nested", new ObjectMap("value", "BG"))
+        );
+        List<ObjectMap> cValues = Arrays.asList(
+                new ObjectMap("id", "Cabc").append("name", "CABC").append("nested", new ObjectMap("value", "CA")),
+                new ObjectMap("id", "Cdef").append("name", "CDEF").append("nested", new ObjectMap("value", "CD")),
+                new ObjectMap("id", "Cghi").append("name", "CGHI").append("nested", new ObjectMap("value", "CG"))
+        );
+        List<ObjectMap> nestedListValues = Arrays.asList(
+                new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A").append("list", aValues)),
+                new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D").append("list", bValues)),
+                new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G").append("list", cValues))
+        );
+        objectMap.put("nestedList", nestedListValues);
     }
 
     private static class MyModel {
@@ -208,6 +236,11 @@ public class ObjectMapTest {
         assertEquals("b", objectMap.put("myModel.key2", "c", true));
         assertEquals("c", objectMap.getNested("myModel.key2"));
 
+        assertEquals("D", objectMap.getNested("objectList[def].nested.value"));
+        assertEquals("DEF", objectMap.getNested("objectList[def].name"));
+        assertNull(objectMap.getNested("objectList[defg].name"));
+        assertTrue(objectMap.getNested("objectList") instanceof List);
+
         objectMap.put("l1.l2.l3.l4.l5.l6.l7", "value", true, true);
         assertEquals("{\"l2\":{\"l3\":{\"l4\":{\"l5\":{\"l6\":{\"l7\":\"value\"}}}}}}", objectMap.getNestedMap("l1").toJson());
 
@@ -215,5 +248,17 @@ public class ObjectMapTest {
         assertFalse(objectMap.getBoolean("transformed.isolated"));
         objectMap.put("transformed.isolated", true);
         assertTrue(objectMap.getBoolean("transformed.isolated"));
+    }
+
+    @Test
+    public void testGetWithFilterFromList() {
+        assertEquals("DEF", objectMap.get("objectList[def].name"));
+        assertEquals("DEF", objectMap.get("objectList[id=def].name"));
+        assertEquals("GHI", objectMap.get("objectList[id=ghi].name"));
+        assertEquals("DEF", objectMap.get("objectList[nested.value=D].name"));
+        assertEquals("D", objectMap.get("objectList[def].nested.value"));
+        assertEquals("BA", objectMap.get("nestedList[def].nested.list[name=BABC].nested.value"));
+        assertEquals("CG", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].nested.value"));
+        assertEquals("CGHI", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].name"));
     }
 }

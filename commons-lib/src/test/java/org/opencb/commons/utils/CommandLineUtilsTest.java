@@ -6,11 +6,11 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import static org.opencb.commons.utils.CommandLineUtils.DEPRECATED;
 
 /**
@@ -26,6 +26,31 @@ public class CommandLineUtilsTest {
         JCommander commander = new JCommander(command);
         CommandLineUtils.printCommandUsage(commander);
         commander.parse("-2", "4", "-D", "2=A", "-D4=g", "-F4:2,5");
+    }
+
+    @Test
+    public void cutLine() {
+        String line = "";
+        for (int i = 0; i < 240; i++) {
+            line += "a";
+        }
+        for (int i = 0; i < 240; i++) {
+            line += "b";
+        }
+        for (int i = 0; i < 239; i++) {
+            line += "c";
+        }
+        List<String> lines = new ArrayList<String>();
+        String row = "";
+        do {
+            row = line.substring(0, 80);
+            line = line.substring(80);
+            lines.add(row);
+        } while (line.length() > 80);
+        lines.add(line);
+        for (String l : lines) {
+            System.out.println(l);
+        }
     }
 
     @Parameters(commandNames = "myCommand")

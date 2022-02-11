@@ -7,6 +7,7 @@ import java.util.Collection;
  *
  * @author Jacobo Coll &lt;jacobo167@gmail.com&gt;
  */
+@Deprecated
 public class CollectionUtils {
 
     @Deprecated

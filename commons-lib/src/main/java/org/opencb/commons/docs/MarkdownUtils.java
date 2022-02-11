@@ -89,11 +89,11 @@ public class MarkdownUtils {
     }
 
     public static boolean checkEnumeration(String className, String qualifiedTypeName) {
-        String sourceFilePath = Options.getInstance().getSourceClassesDir()
+        String sourceFilePath = MarkdownOptions.getInstance().getSourceClassesDir()
                 + qualifiedTypeName.replaceAll("\\.", File.separator) + ".java";
         if (className.contains(".")) {
             className = className.substring(className.lastIndexOf(".") + 1, className.length());
-            sourceFilePath = Options.getInstance().getSourceClassesDir()
+            sourceFilePath = MarkdownOptions.getInstance().getSourceClassesDir()
                     + qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."))
                     .replaceAll("\\.", File.separator) + ".java";
         }

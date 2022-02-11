@@ -6,7 +6,7 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
-    <version>4.1.2</version>
+    <version>4.2.0</version>
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
@@ -19,11 +19,15 @@
     </modules>
 
     <properties>
-        <java.commons.version>4.1.2</java.commons.version>
-        <jackson.version>2.10.1</jackson.version>
-        <apache.commons.lang3.version>3.8.1</apache.commons.lang3.version>
+        <java.commons.version>4.2.0</java.commons.version>
+        <jackson.version>2.10.5.1</jackson.version>
+        <apache.commons.lang3.version>3.11</apache.commons.lang3.version>
         <slf4j.version>1.7.25</slf4j.version>
         <avro.version>1.7.7</avro.version>
+
+        <sonar.organization>opencb</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
         <compileSource>1.8</compileSource>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -79,13 +83,13 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>jdk.tools</groupId>
-                <artifactId>jdk.tools</artifactId>
-                <version>1.8</version>
-                <scope>system</scope>
-                <systemPath>${java.home}/../lib/tools.jar</systemPath>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>jdk.tools</groupId>-->
+<!--                <artifactId>jdk.tools</artifactId>-->
+<!--                <version>1.8</version>-->
+<!--                <scope>system</scope>-->
+<!--                <systemPath>${java.home}/../lib/tools.jar</systemPath>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -116,7 +120,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -136,6 +140,9 @@
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <encoding>UTF-8</encoding>
+                    <excludes>
+                        <exclude>**/*Mark*.java</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -236,6 +243,7 @@
             </build>
         </profile>
     </profiles>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

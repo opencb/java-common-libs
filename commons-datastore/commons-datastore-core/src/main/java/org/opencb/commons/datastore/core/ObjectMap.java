@@ -18,11 +18,14 @@ package org.opencb.commons.datastore.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +35,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     private Map<String, Object> objectMap;
     protected ObjectMapper jsonObjectMapper = new ObjectMapper();
+
+    private static final Pattern KEY_SPLIT_PATTERN = Pattern.compile("(^[^\\[\\].]+(?:\\[[^\\]]+\\])?)(?:\\.(.*))*");
+    private static final Pattern LIST_FILTER_PATTERN = Pattern.compile("([^\\[\\]]+)\\[([^=]*?)(?:[=]?)([^=]+)\\]$");
 
     public ObjectMap() {
         objectMap = new LinkedHashMap<>();
@@ -544,6 +550,28 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         }
     }
 
+    /**
+     * Get nested attributes.
+     *
+     * Example:
+     *    List<ObjectMap> values = Arrays.asList(
+     *               new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
+     *               new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
+     *               new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
+     *       );
+     *    objectMap.put("objectList", value
+     *
+     *    Let's say we send key="objectList[abc].nested.value"
+     *    What that means is that we will look for objectList first. In this case, we find something between [], meaning that the
+     *    objectList value is a list and we want to filter by  what's between those []. For this example, it would have been
+     *    equivalent to [abc] writing [id=abc], [name=ABC] or [nested.value=A]. All those would have matched the first element of the
+     *    array. If no filter key is written such as in the example, it will always use as filter key 'id'.
+     *    Once found the element, we will proceed as usual, taking 'nested.value' as the final result. -> "A"
+     *
+     * @param key     Key that will be looked for.
+     *
+     * @return Object value.
+     */
     public Object getNested(String key) {
         int idx = key.lastIndexOf(".");
         if (idx < 0) {
@@ -579,23 +607,55 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         return subMap == null ? null : (subMap instanceof ObjectMap ? ((ObjectMap) subMap) : new ObjectMap(subMap));
     }
 
-    private static Map<String, Object> getNestedMap(String key, Map<String, Object> map, ObjectMapper jsonObjectMapper,
-                                                    boolean convert, boolean parents) {
+    private static Map<String, Object> getNestedMap(String key, Map<String, Object> map, ObjectMapper jsonObjectMapper, boolean convert,
+                                                    boolean parents) {
         if (map == null) {
             return map;
         }
-        int idx = key.indexOf(".");
-        String firstKey;
-        String nextKey;
-        if (idx < 0) {
-            firstKey = key;
-            nextKey = null;
-        } else {
-            firstKey = key.substring(0, idx);
-            nextKey = key.substring(idx + 1);
+        Matcher splitMatcher = KEY_SPLIT_PATTERN.matcher(key);
+        if (!splitMatcher.matches()) {
+            throw new RuntimeException("Internal error: Could not match regular expression pattern over key '" + key + "'");
         }
+        String firstKey = splitMatcher.group(1);
+        String nextKey = splitMatcher.group(2);
 
-        Object value = map.get(firstKey);
+        Object value;
+        Matcher matcher = LIST_FILTER_PATTERN.matcher(firstKey);
+        if (matcher.find()) {
+            firstKey = matcher.group(1);
+            String filterId = matcher.group(2);
+            String filterValue = matcher.group(3);
+
+            // If filterId is empty, we will use default filterId 'id'
+            filterId = StringUtils.isNotEmpty(filterId) ? filterId : "id";
+
+            if (StringUtils.isEmpty(filterValue)) {
+                throw new RuntimeException("Unexpected " + matcher.group(0) + " string. Expected a value within [].");
+            }
+
+            value = map.get(firstKey);
+            if (!(value instanceof Collection)) {
+                throw new RuntimeException("Unexpected " + matcher.group(0) + " string. " + firstKey + " field doesn't seem to be a list.");
+            }
+
+            Object objectValue = null;
+            for (Object o : ((Collection) value)) {
+                if (o instanceof Map) {
+                    ObjectMap tmpObjectMap = new ObjectMap((Map) o);
+                    String tmpValue = String.valueOf(tmpObjectMap.get(filterId));
+                    if (tmpValue.equals(filterValue)) {
+                        objectValue = o;
+                        break;
+                    }
+                } else {
+                    throw new RuntimeException("Unexpected " + matcher.group(0) + " string. " + firstKey
+                            + " field doesn't seem to be a list of objects.");
+                }
+            }
+            value = objectValue;
+        } else {
+            value = map.get(firstKey);
+        }
         Map<String, Object> subMap;
 
         if (value instanceof Map) {
@@ -603,7 +663,6 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         } else if (value == null
                 || value instanceof CharSequence
                 || value instanceof Number
-                || value instanceof Collection
                 || value instanceof Boolean
                 || value.getClass().isArray()
                 || value.getClass().isEnum()) {
@@ -620,7 +679,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
             map.put(firstKey, subMap);
         }
 
-        if (nextKey == null) {
+        if (StringUtils.isEmpty(nextKey)) {
             return subMap;
         } else {
             return getNestedMap(nextKey, subMap, jsonObjectMapper, convert, parents);
