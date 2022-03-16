@@ -3,7 +3,9 @@ package org.opencb.commons.utils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.fusesource.jansi.Ansi.Color.valueOf;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -12,6 +14,18 @@ public class PrintUtils {
 
     public static void println(String message) {
         System.out.println(message);
+    }
+
+    public static void printlnerr(String message) {
+        System.err.println(message);
+    }
+
+    public static void println() {
+        System.out.println();
+    }
+
+    public static void printlnerr() {
+        System.err.println();
     }
 
     public static void print(String message) {
@@ -26,6 +40,10 @@ public class PrintUtils {
         System.out.println(format(message, color));
     }
 
+    public static void printlnerr(String message, Color color) {
+        System.err.println(format(message, color));
+    }
+
     public static String format(String message, Color color) {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
     }
@@ -35,7 +53,7 @@ public class PrintUtils {
     }
 
     public static void printDebug(String message) {
-        println(message, Color.YELLOW);
+        printlnerr(message, Color.YELLOW);
     }
 
     public static void printGreen(String message) {
@@ -68,9 +86,9 @@ public class PrintUtils {
 
     public static void printError(String message, Exception e) {
         if (e != null) {
-            System.out.println(format("ERROR: " + message + "\n" + ExceptionUtils.getStackTrace(e), Color.RED));
+            System.err.println(format("ERROR: " + message + "\n" + ExceptionUtils.getStackTrace(e), Color.RED));
         } else {
-            System.out.println(format("ERROR: " + message, Color.RED));
+            System.err.println(format("ERROR: " + message, Color.RED));
         }
     }
 
@@ -122,6 +140,26 @@ public class PrintUtils {
             }
         } else {
             System.err.printf(print, key, type, format(value, Color.GREEN));
+        }
+    }
+
+
+    public static void printAsTable(Map<String, String> map, Color firstColumn, Color secondColumn, int margin) {
+
+        Map<String, String> formattedMap = new HashMap<>();
+        int maxLength = 0;
+        for (String key : map.keySet()) {
+            if (format(key, firstColumn).length() > maxLength) {
+                maxLength = format(key, firstColumn).length();
+            }
+            formattedMap.put(format(key, firstColumn), format(map.get(key), secondColumn));
+        }
+        maxLength += margin;
+
+        String leftAlignFormat = " %-" + maxLength + "s  %s %n";
+
+        for (String key : formattedMap.keySet()) {
+            System.out.format(leftAlignFormat, key, formattedMap.get(key));
         }
     }
 
