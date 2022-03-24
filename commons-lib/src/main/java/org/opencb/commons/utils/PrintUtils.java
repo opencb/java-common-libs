@@ -16,17 +16,11 @@ public class PrintUtils {
         System.out.println(message);
     }
 
-    public static void printlnerr(String message) {
-        System.err.println(message);
-    }
 
     public static void println() {
         System.out.println();
     }
 
-    public static void printlnerr() {
-        System.err.println();
-    }
 
     public static void print(String message) {
         System.out.print(message);
@@ -40,9 +34,6 @@ public class PrintUtils {
         System.out.println(format(message, color));
     }
 
-    public static void printlnerr(String message, Color color) {
-        System.err.println(format(message, color));
-    }
 
     public static String format(String message, Color color) {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
@@ -53,7 +44,7 @@ public class PrintUtils {
     }
 
     public static void printDebug(String message) {
-        printlnerr(message, Color.YELLOW);
+        println(message, Color.YELLOW);
     }
 
     public static void printGreen(String message) {
@@ -86,9 +77,9 @@ public class PrintUtils {
 
     public static void printError(String message, Exception e) {
         if (e != null) {
-            System.err.println(format("ERROR: " + message + "\n" + ExceptionUtils.getStackTrace(e), Color.RED));
+            System.out.println(format("ERROR: " + message + "\n" + ExceptionUtils.getStackTrace(e), Color.RED));
         } else {
-            System.err.println(format("ERROR: " + message, Color.RED));
+            System.out.println(format("ERROR: " + message, Color.RED));
         }
     }
 
@@ -107,19 +98,19 @@ public class PrintUtils {
     public static void printCommandHelpFormattedString(String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%30s  %s\n", key, value);
+        System.out.printf("%30s  %s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int kpad, int kvalue, String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%" + kpad + "s  %" + kvalue + "s\n", key, value);
+        System.out.printf("%" + kpad + "s  %" + kvalue + "s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int pad, String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%" + pad + "s  %s\n", key, value);
+        System.out.printf("%" + pad + "s  %s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int pad, String command, String typ, String info) {
@@ -134,12 +125,12 @@ public class PrintUtils {
         String print = "%" + pad + "s\t%s" + (type.equals("BOOLEAN") ? "" : "\t") + "%s\n";
 
         if (lines != null) {
-            System.err.printf(print, key, type, format(lines.remove(0).trim(), Color.GREEN));
+            System.out.printf(print, key, type, format(lines.remove(0).trim(), Color.GREEN));
             for (String line : lines) {
-                System.err.printf("%" + pad + "s %s\n", "   ", format(line, Color.GREEN));
+                System.out.printf("%" + pad + "s %s\n", "   ", format(line, Color.GREEN));
             }
         } else {
-            System.err.printf(print, key, type, format(value, Color.GREEN));
+            System.out.printf(print, key, type, format(value, Color.GREEN));
         }
     }
 
