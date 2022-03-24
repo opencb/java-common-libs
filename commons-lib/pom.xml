@@ -60,5 +60,11 @@
             <artifactId>jansi</artifactId>
             <version>2.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.opencb.commons</groupId>
+            <artifactId>commons-datastore-core</artifactId>
+            <version>${java.commons.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
