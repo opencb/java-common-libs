@@ -71,6 +71,11 @@
             <name>Julie</name>
             <email>julie.sullivan@gmail.com</email>
         </developer>
+        <developer>
+            <id>juanfeSanahuja</id>
+            <name>Juanfe</name>
+            <email>juanfesanahuja@gmail.com</email>
+        </developer>
     </developers>
 
     <mailingLists>
@@ -83,13 +88,6 @@
 
     <dependencyManagement>
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>jdk.tools</groupId>-->
-<!--                <artifactId>jdk.tools</artifactId>-->
-<!--                <version>1.8</version>-->
-<!--                <scope>system</scope>-->
-<!--                <systemPath>${java.home}/../lib/tools.jar</systemPath>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
