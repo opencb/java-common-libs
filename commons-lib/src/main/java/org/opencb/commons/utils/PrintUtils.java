@@ -95,19 +95,19 @@ public class PrintUtils {
     public static void printCommandHelpFormattedString(String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%30s  %s\n", key, value);
+        System.out.printf("%30s  %s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int kpad, int kvalue, String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%" + kpad + "s  %" + kvalue + "s\n", key, value);
+        System.out.printf("%" + kpad + "s  %" + kvalue + "s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int pad, String command, String info) {
         String key = format(command, Color.YELLOW);
         String value = format(info, Color.GREEN);
-        System.err.printf("%" + pad + "s  %s\n", key, value);
+        System.out.printf("%" + pad + "s  %s\n", key, value);
     }
 
     public static void printCommandHelpFormattedString(int pad, String command, String typ, String info) {
@@ -122,15 +122,14 @@ public class PrintUtils {
         String print = "%" + pad + "s\t%s" + (type.equals("BOOLEAN") ? "" : "\t") + "%s\n";
 
         if (lines != null) {
-            System.err.printf(print, key, type, format(lines.remove(0).trim(), Color.GREEN));
+            System.out.printf(print, key, type, format(lines.remove(0).trim(), Color.GREEN));
             for (String line : lines) {
-                System.err.printf("%" + pad + "s %s\n", "   ", format(line, Color.GREEN));
+                System.out.printf("%" + pad + "s %s\n", "   ", format(line, Color.GREEN));
             }
         } else {
-            System.err.printf(print, key, type, format(value, Color.GREEN));
+            System.out.printf(print, key, type, format(value, Color.GREEN));
         }
     }
-
 
     public static void printAsTable(Map<String, String> map, Color firstColumn, Color secondColumn, int margin) {
 
