@@ -6,7 +6,7 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
-    <version>4.2.0</version>
+    <version>4.2.1</version>
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
@@ -19,7 +19,7 @@
     </modules>
 
     <properties>
-        <java.commons.version>4.2.0</java.commons.version>
+        <java.commons.version>4.2.1</java.commons.version>
         <jackson.version>2.10.5.1</jackson.version>
         <apache.commons.lang3.version>3.11</apache.commons.lang3.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -71,6 +71,11 @@
             <name>Julie</name>
             <email>julie.sullivan@gmail.com</email>
         </developer>
+        <developer>
+            <id>juanfeSanahuja</id>
+            <name>Juanfe</name>
+            <email>juanfesanahuja@gmail.com</email>
+        </developer>
     </developers>
 
     <mailingLists>
@@ -83,13 +88,6 @@
 
     <dependencyManagement>
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>jdk.tools</groupId>-->
-<!--                <artifactId>jdk.tools</artifactId>-->
-<!--                <version>1.8</version>-->
-<!--                <scope>system</scope>-->
-<!--                <systemPath>${java.home}/../lib/tools.jar</systemPath>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
