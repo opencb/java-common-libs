@@ -32,6 +32,11 @@ public class PrintUtils {
         System.out.println(format(message, color));
     }
 
+    public static void println(String message, Color color, String message2, Color color2) {
+        System.out.print(format(message, color));
+        System.out.println(format(message2, color2));
+    }
+
     public static String format(String message, Color color) {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
     }

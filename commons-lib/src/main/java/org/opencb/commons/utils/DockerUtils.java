@@ -78,13 +78,21 @@ public class DockerUtils {
 
     public static String buildMountPathsCommandLine(String image, String entryPoint) {
         String res = "docker run ";
-        List<String> paths = getPaths(entryPoint);
+
+        String prefix = entryPoint;
+        String suffix = "";
+        if (prefix.contains(">")) {
+            prefix = entryPoint.substring(0, entryPoint.indexOf(">"));
+            suffix = entryPoint.substring(entryPoint.indexOf(">"));
+        }
+
+        List<String> paths = getPaths(prefix);
         String mappedPaths = "";
         for (int i = 0; i < paths.size(); i++) {
             mappedPaths += MAPPING_PATH.replace(PATH_KEY, paths.get(i)) + MAPPED_PATH + i + "/ ";
-            entryPoint = entryPoint.replace(paths.get(i), MAPPED_PATH + i + "/");
+            prefix = prefix.replace(paths.get(i), MAPPED_PATH + i + "/");
         }
-        res += mappedPaths + image + " " + entryPoint;
+        res += mappedPaths + image + " " + prefix + suffix;
         return res;
     }
 
@@ -92,7 +100,7 @@ public class DockerUtils {
         // clean '//' because it's not valid path and the regex extracts to '/'
         entryPoint = entryPoint.replace("//", "/");
         Set<String> res = new HashSet<>();
-        String regex = "((\\/([A-z0-9-_+]+\\/)+)|(\\/))";
+        String regex = "((\\/([A-z0-9-_+\\.]+\\/)+)|(\\/))";
         Pattern regexPattern = Pattern.compile(regex);
         Matcher match = regexPattern.matcher(entryPoint);
         Set<String> aux = new HashSet<>();
