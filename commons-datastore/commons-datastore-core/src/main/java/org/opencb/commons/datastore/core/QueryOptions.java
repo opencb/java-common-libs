@@ -37,7 +37,6 @@ public class QueryOptions extends ObjectMap {
     public static final String DESCENDING = "descending";
 
     public static final String TIMEOUT = "timeout";
-    public static final String NO_CURSOR_TIMEOUT = "noCursorTimeout";
     public static final String SKIP_COUNT = "skipCount";
 
     public static final String FACET = "facet";

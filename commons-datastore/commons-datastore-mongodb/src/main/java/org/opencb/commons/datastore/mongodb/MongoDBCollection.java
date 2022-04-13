@@ -58,6 +58,8 @@ public class MongoDBCollection {
     public static final String SPARSE = "sparse";
     public static final String NAME = "index_name";
 
+    public static final String NO_CURSOR_TIMEOUT = "noCursorTimeout";
+
     private MongoDBNativeQuery mongoDBNativeQuery;
     private QueryResultWriter<Object> queryResultWriter;
 

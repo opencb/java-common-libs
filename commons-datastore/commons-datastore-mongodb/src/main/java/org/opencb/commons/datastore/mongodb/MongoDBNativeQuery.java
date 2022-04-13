@@ -221,7 +221,7 @@ public class MongoDBNativeQuery {
             findIterable.maxTime(options.getLong(QueryOptions.TIMEOUT), TimeUnit.MILLISECONDS);
         }
 
-        if (options != null && options.getBoolean(QueryOptions.NO_CURSOR_TIMEOUT)) {
+        if (options != null && options.getBoolean(MongoDBCollection.NO_CURSOR_TIMEOUT)) {
             findIterable.noCursorTimeout(true);
         }
 
