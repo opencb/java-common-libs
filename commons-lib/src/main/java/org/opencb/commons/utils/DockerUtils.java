@@ -1,5 +1,6 @@
 package org.opencb.commons.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.exec.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,11 @@ public class DockerUtils {
     }
 
 
-    public static String buildMountPathsCommandLine(String image, String entryPoint) {
+    public static String buildMountPathsCommandLine(String image, String entryPoint, List<String> dockerOpts) {
         String res = "docker run ";
+        if (dockerOpts != null && !dockerOpts.isEmpty()) {
+            res += StringUtils.join(dockerOpts, " ") + " ";
+        }
 
         String prefix = entryPoint;
         String suffix = "";

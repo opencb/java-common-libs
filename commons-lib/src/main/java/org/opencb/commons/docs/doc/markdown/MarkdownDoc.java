@@ -93,7 +93,7 @@ public class MarkdownDoc extends Doc {
         if (!config.getDocClasses().contains(clazz) && !DocUtils.isUncommentedClass(field, clazz)) {
             final DataClassDoc classDoc = buildClassDoc(clazz);
             classDoc.setName(clazz.getSimpleName());
-            LOGGER.info("Adding " + classDoc.getName() + " related class : " + clazz.getCanonicalName());
+            //   LOGGER.info("Adding " + classDoc.getName() + " related class : " + clazz.getCanonicalName());
             relatedClasses.put(clazz.getCanonicalName(), classDoc);
         }
     }
