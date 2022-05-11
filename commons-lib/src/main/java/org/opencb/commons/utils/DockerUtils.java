@@ -76,6 +76,9 @@ public class DockerUtils {
         return commandLine.toString();
     }
 
+    public static String buildMountPathsCommandLine(String image, String entryPoint) {
+        return buildMountPathsCommandLine(image, entryPoint, Collections.emptyList());
+    }
 
     public static String buildMountPathsCommandLine(String image, String entryPoint, List<String> dockerOpts) {
         String res = "docker run ";

@@ -13,7 +13,7 @@ public class DockerUtilsTest {
     public void buildMountPathsCommandLine() throws IOException {
         List<String> dockerOpts = new ArrayList<>();
         dockerOpts.add("--rm");
-        dockerOpts.add("--log-driver none");
+        dockerOpts.add("--log-driver=none");
 
         String command = "samtools view -bS /home/user/trainning/dataset/corpasome-grch38/test1.sam > /home/user/trainning/dataset/corpasome-grch38/test1.bam";
         System.out.println(DockerUtils.buildMountPathsCommandLine("opencb/opencga-ext-tools:2.3.0", command, Collections.EMPTY_LIST));
