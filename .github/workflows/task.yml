@@ -3,8 +3,7 @@ name: Push java-common-libs develop
 on:
   push:
     branches:
-      - develop
-      - release-4.2.x
+      - TASK-*
 
 jobs:
   build:
@@ -48,12 +47,3 @@ jobs:
           mongodb-replica-set: rs-test
       - name: Run Maven Tests
         run: mvn -T 2 clean install -DskipTests
-
-  deploy:
-    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
-    needs: test
-    secrets:
-      MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
-      MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
-      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}

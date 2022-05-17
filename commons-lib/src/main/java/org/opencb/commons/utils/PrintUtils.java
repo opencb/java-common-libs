@@ -2,10 +2,7 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.fusesource.jansi.Ansi.Color.valueOf;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -16,11 +13,9 @@ public class PrintUtils {
         System.out.println(message);
     }
 
-
     public static void println() {
         System.out.println();
     }
-
 
     public static void print(String message) {
         System.out.print(message);
@@ -34,6 +29,10 @@ public class PrintUtils {
         System.out.println(format(message, color));
     }
 
+    public static void println(String message, Color color, String message2, Color color2) {
+        System.out.print(format(message, color));
+        System.out.println(format(message2, color2));
+    }
 
     public static String format(String message, Color color) {
         return ansi().fg(valueOf(color.toString())).a(message).reset().toString();
@@ -134,7 +133,6 @@ public class PrintUtils {
         }
     }
 
-
     public static void printAsTable(Map<String, String> map, Color firstColumn, Color secondColumn, int margin) {
 
         Map<String, String> formattedMap = new HashMap<>();
@@ -172,6 +170,66 @@ public class PrintUtils {
 
     public static String eraseScreen() {
         return ansi().eraseScreen().toString();
+    }
+
+    public static void printTimeElapsed(Date startDate, Date endDate) {
+
+        String format = "%-30s%s%n";
+        println("----------------------------------------------------------");
+        long elapsed = endDate.getTime() - startDate.getTime();
+        System.out.printf(format, format("    Start date: ", Color.CYAN), format("" + startDate, Color.WHITE));
+        System.out.printf(format, format("    End date: ", Color.CYAN), format("" + endDate, Color.WHITE));
+        //System.out.printf(format, format("\t\tElapsed: ", Color.CYAN), format(" " + elapsed, Color.WHITE));
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+
+        long elapsedDays = elapsed / daysInMilli;
+        elapsed = elapsed % daysInMilli;
+
+        long elapsedHours = elapsed / hoursInMilli;
+        elapsed = elapsed % hoursInMilli;
+
+        long elapsedMinutes = elapsed / minutesInMilli;
+        elapsed = elapsed % minutesInMilli;
+
+        long elapsedSeconds = elapsed / secondsInMilli;
+        if (elapsedDays > 0) {
+            System.out.printf(format, format("    Total time:", Color.CYAN), elapsedDays
+                    + " days " + elapsedHours + " hours " + elapsedMinutes + " minutes " + elapsedSeconds + " seconds");
+        } else if (elapsedHours > 0) {
+            System.out.printf(format, format("    Total time:", Color.CYAN), elapsedHours
+                    + " hours " + elapsedMinutes + " minutes " + elapsedSeconds + " seconds");
+        } else if (elapsedMinutes > 0) {
+            System.out.printf(format, format("    Total time:", Color.CYAN), elapsedMinutes
+                    + " minutes " + elapsedSeconds + " seconds");
+        } else if (elapsedSeconds > 0) {
+            System.out.printf(format, format("    Total time:", Color.CYAN), elapsedSeconds
+                    + " seconds");
+        }
+        println("----------------------------------------------------------");
+        println();
+
+
+    }
+
+    public static void printShellHeader(Color color) {
+
+        println();
+        println("     ███████                                    █████████    █████████    █████████  ", color);
+        println("   ███░░░░░███                                 ███░░░░░███  ███░░░░░███  ███░░░░░███ ", color);
+        println("  ███     ░░███ ████████   ██████  ████████   ███     ░░░  ███     ░░░  ░███    ░███ ", color);
+        println("  ███      ░███░░███░░███ ███░░███░░███░░███ ░███         ░███          ░███████████ ", color);
+        println("  ███      ░███ ░███ ░███░███████  ░███ ░███ ░███         ░███    █████ ░███░░░░░███ ", color);
+        println("  ░███     ███  ░███ ░███░███░░░   ░███ ░███ ░░███     ███░░███  ░░███  ░███    ░███ ", color);
+        println("  ░░░███████░   ░███████ ░░██████  ████ █████ ░░█████████  ░░█████████  █████   █████", color);
+        println("    ░░░░░░░     ░███░░░   ░░░░░░  ░░░░ ░░░░░   ░░░░░░░░░    ░░░░░░░░░  ░░░░░   ░░░░░ ", color);
+        println("                ░███                                                                 ", color);
+        println("                █████                                                                ", color);
+        println("               ░░░░░                                                                 ", color);
+        println();
     }
 
     public enum Color {
