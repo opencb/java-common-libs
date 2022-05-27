@@ -160,10 +160,15 @@
                         <phase>validate</phase>
                         <configuration>
                             <configLocation>checkstyle.xml</configLocation>
+                            <excludes>
+                                org/opencb/commons/api/**,
+                                org/opencb/commons/utils/**,
+                            </excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
                         </goals>
+
                     </execution>
                 </executions>
             </plugin>
