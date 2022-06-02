@@ -58,7 +58,8 @@ public class DocUtils {
             return ((Class) field.getGenericType()).getComponentType();
         }
         if (((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0] instanceof ParameterizedType) {
-            ParameterizedType parameterizedtype = (ParameterizedType) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            ParameterizedType parameterizedtype = (ParameterizedType)
+                    ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
             Class res = null;
             try {
                 System.err.println(parameterizedtype.getRawType().toString());
