@@ -57,6 +57,18 @@ public class DocUtils {
         if (field.getType().isArray()) {
             return ((Class) field.getGenericType()).getComponentType();
         }
+        if (((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0] instanceof ParameterizedType) {
+            ParameterizedType parameterizedtype = (ParameterizedType) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            Class res = null;
+            try {
+                System.err.println(parameterizedtype.getRawType().toString());
+                res = Class.forName(parameterizedtype.getRawType().toString().split(" ")[1]);
+            } catch (Exception e) {
+                System.err.println(field.getName() + " :::: " + parameterizedtype.getTypeName());
+                throw new RuntimeException(e);
+            }
+            return res;
+        }
         return (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
     }
 

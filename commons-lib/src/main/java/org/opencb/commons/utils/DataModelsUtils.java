@@ -2,6 +2,7 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.datastore.core.QueryParam;
+import org.opencb.commons.docs.DocUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -9,9 +10,26 @@ import java.util.*;
 
 public class DataModelsUtils {
 
+    static final Map<Class<?>, String> PRIMITIVE_VALUES;
+
     public static Map<String, Type> dataModelToMap(Class<?> clazz) {
         return dataModelToMap(clazz, "");
     }
+
+    static {
+        PRIMITIVE_VALUES = new HashMap<Class<?>, String>();
+        PRIMITIVE_VALUES.put(boolean.class, "false");
+        PRIMITIVE_VALUES.put(byte.class, "0");
+        PRIMITIVE_VALUES.put(char.class, "0");
+        PRIMITIVE_VALUES.put(double.class, "0.0");
+        PRIMITIVE_VALUES.put(float.class, "0.0");
+        PRIMITIVE_VALUES.put(int.class, "0");
+        PRIMITIVE_VALUES.put(long.class, "0.0");
+        PRIMITIVE_VALUES.put(short.class, "0");
+
+
+    }
+
 
     public static Map<String, Type> dataModelToMap(Class<?> clazz, String field) {
         return dataModelToMap(clazz, field, new HashMap<String, Type>());
@@ -109,28 +127,44 @@ public class DataModelsUtils {
     }
 
     public static String dataModelToJsonString(Class<?> clazz) {
-        return getClassAsJSON(clazz, 0);
+        return getClassAsJSON(clazz, 0, true, true);
     }
 
-    private static String getClassAsJSON(Class<?> clazz, int margin) {
+    public static String dataModelToJsonString(Class<?> clazz, boolean formatted) {
+        return getClassAsJSON(clazz, 0, formatted, true);
+    }
+
+
+    private static String getClassAsJSON(Class<?> clazz, int margin, boolean formatted, boolean deep) {
 
         List<Field> declaredFields = getAllUnderlyingDeclaredFields(clazz);
         try {
           /*  List<Field> declaredFields = new LinkedList<>();
             declaredFields.addAll(Arrays.asList(clazz.getDeclaredFields()));*/
-            String res = "{\n";
+
+            String res = "{" + (formatted ? "\n" : "");
             for (Field declaredField : declaredFields) {
-                res += getTypeAsJSON(declaredField, margin);
+                if (!declaredField.getType().equals(clazz)) {
+                    res += getTypeAsJSON(declaredField, clazz, margin, formatted, deep);
+                } else {
+                    res += (formatted ? addMargin(margin + 4) : "") + "\"" + declaredField.getName() + "\" : \""
+                            + declaredField.getType().getName() + "\"," + (formatted ? "\n" : "");
+                }
+            }
+            if (res.trim().endsWith(",")) {
+                res = res.trim().substring(0, res.trim().length() - 1);
             }
             res += (addMargin(margin) + "}");
             return res;
         } catch (Exception e) {
+            e.printStackTrace();
             return "";
         }
 
     }
 
-    private static String getTypeAsJSON(Field field, int margin) throws ClassNotFoundException {
+    private static String getTypeAsJSON(Field field, Class<?> clazz, int margin, boolean formatted, boolean deep)
+            throws ClassNotFoundException {
         int modifiers = field.getModifiers();
         if ((Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers))
                 && !Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers)) {
@@ -153,24 +187,63 @@ public class DataModelsUtils {
                     value = "0";
                     break;
                 case "java.util.List":
-                    value = "[]";
+
+                    value = getListRepresentation(field, clazz);
+
                     break;
                 case "java.util.Date":
                     value = "\"dd/mm/yyyy\"";
                     break;
                 case "java.util.Map":
-                    value = "[\"key\",\"value\"]";
+                    value = "{\"key\":\"value\"}";
+                    break;
+                case "java.lang.Class":
+                    value = "\"java.lang.Class\"";
+                    break;
+                case "java.lang.Object":
+                    value = "\"java.lang.Object\"";
                     break;
                 default:
-
-                    value += getClassAsJSON(Class.forName(field.getType().getName()), margin + 4);
+                    if (deep) {
+                        if (!Class.forName(field.getType().getName()).equals(clazz)) {
+                            value += getClassAsJSON(Class.forName(field.getType().getName()),
+                                    (formatted ? margin + 4 : 0), formatted, true);
+                        } else {
+                            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : \""
+                                    + field.getType().getName() + "\"," + (formatted ? "\n" : "");
+                        }
+                    } else {
+                        return "";
+                    }
 
                     break;
             }
 
-            return addMargin(margin + 4) + "\"" + field.getName() + "\" : " + value + ",\n";
+            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : " + value + "," + (formatted ? "\n" : "");
         }
         return "";
+    }
+
+    private static String getListRepresentation(Field field, Class<?> clazz) {
+        String res = "[]";
+        Class collectionGenericType = DocUtils.getCollectionGenericType(field);
+
+        if (collectionGenericType.equals(clazz)) {
+            return "\"List<" + clazz.getName() + ">\"";
+        }
+        if (collectionGenericType.isPrimitive()) {
+            res = "[" + PRIMITIVE_VALUES.get(collectionGenericType) + "]";
+        } else if (collectionGenericType.getCanonicalName().equals("java.lang.String")) {
+            res = "[\"\"]";
+        } else if (collectionGenericType.getCanonicalName().equals("java.lang.Class")) {
+            res = "[\"java.lang.Class\"]";
+        } else {
+            System.out.println(collectionGenericType.getCanonicalName());
+            res = "[" + getClassAsJSON(collectionGenericType, 0, false, false) + "]";
+            // res = "[" + collectionGenericType.getCanonicalName() + "]";
+        }
+
+        return res;
     }
 
     private static String addMargin(int margin) {
