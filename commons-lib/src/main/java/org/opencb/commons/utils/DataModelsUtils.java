@@ -157,7 +157,6 @@ public class DataModelsUtils {
             res += (addMargin(margin) + "}");
             return res;
         } catch (Exception e) {
-            e.printStackTrace();
             return "";
         }
 
