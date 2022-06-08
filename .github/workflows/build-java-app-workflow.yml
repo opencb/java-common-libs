@@ -11,6 +11,8 @@ jobs:
   build-workflow:
     name: Build Java app
     runs-on: ubuntu-20.04
+    outputs:
+      version: ${{ steps.get_project_version.outputs.version }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -21,17 +23,23 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
           cache: 'maven'
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
+#      - name: Cache Maven packages
+#        uses: actions/cache@v2
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-maven
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
       - uses: actions/upload-artifact@v2
         with:
           name: build-folder
           path: build/
-      - name: Maven Validate
-        run: mvn validate
+      - id: get_project_version
+        uses: avides/actions-project-version-check@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          file-to-check: pom.xml
+      - name: use-version-from-check
+        run:
+          echo "New version is " ${{ steps.get_project_version.outputs.version }}
