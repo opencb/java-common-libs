@@ -19,9 +19,6 @@ jobs:
         if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}
-      - name: du -sh
-        if: ${{ inputs.artifact }}
-        run: du -sh ${{ inputs.file }}
       - name: GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
