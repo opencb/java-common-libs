@@ -23,6 +23,8 @@ jobs:
         if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}
+      - name: Chmod
+        run: chmod +x ./clients/python/*sh
       - name: Build Python package for PyPI
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_TWINE_USER }}
