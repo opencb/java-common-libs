@@ -1,0 +1,30 @@
+name: Reusable workflow to release in PyPI
+
+on:
+  workflow_call:
+    inputs:
+      cli:
+        type: string
+        required: true
+      artifact:
+        type: string
+        required: false
+    secrets:
+      PYPI_TWINE_USER:
+        required: true
+      PYPI_TWINE_PASSWORD:
+        required: true
+jobs:
+  pypi:
+    name: Deploy Python package in PyPI
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/download-artifact@v2
+        if: ${{ inputs.artifact }}
+        with:
+          name: ${{ inputs.artifact }}
+      - name: Build Python package for PyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_TWINE_USER }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TWINE_PASSWORD }}
+        run: ${{ inputs.cli }}
