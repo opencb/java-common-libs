@@ -19,8 +19,6 @@ jobs:
     name: Deploy Python package in PyPI
     runs-on: ubuntu-20.04
     steps:
-      - name: Chmod
-        run: chmod +x build/bin/*sh
       - uses: actions/download-artifact@v2
         if: ${{ inputs.artifact }}
         with:
