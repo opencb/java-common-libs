@@ -1,10 +1,11 @@
 package org.opencb.commons.utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Map;
 
 public class DataModelUtilsTest {
 
@@ -18,16 +19,12 @@ public class DataModelUtilsTest {
     }
 
     public boolean isJSONValid(String test) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            new JSONObject(test);
-        } catch (JSONException ex) {
-            // edited, to include @Arthur's comment
-            // e.g. in case JSONArray is valid as well...
-            try {
-                new JSONArray(test);
-            } catch (JSONException ex1) {
-                return false;
-            }
+            objectMapper.readValue(test, Map.class);
+        } catch (JsonProcessingException e) {
+            return false;
+
         }
         return true;
     }

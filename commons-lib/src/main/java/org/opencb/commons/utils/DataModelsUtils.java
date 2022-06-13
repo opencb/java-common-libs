@@ -26,10 +26,7 @@ public class DataModelsUtils {
         PRIMITIVE_VALUES.put(int.class, "0");
         PRIMITIVE_VALUES.put(long.class, "0.0");
         PRIMITIVE_VALUES.put(short.class, "0");
-
-
     }
-
 
     public static Map<String, Type> dataModelToMap(Class<?> clazz, String field) {
         return dataModelToMap(clazz, field, new HashMap<String, Type>());
@@ -42,7 +39,6 @@ public class DataModelsUtils {
             if (declaredField.getType().getName().equals("org.apache.avro.Schema")) {
                 continue;
             }
-
             String key = getMapKey(field, declaredField.getName());
             if (declaredField.getType().getName().startsWith("org.opencb") && !declaredField.getType().isEnum()
                     && !declaredField.getType().getName().endsWith("ObjectMap")) {
@@ -63,7 +59,6 @@ public class DataModelsUtils {
                 } else {
                     QueryParam.Type type = getType(declaredField.getType(), subclass);
                     map.put(key, new Type(type));
-
                 }
             } else {
                 QueryParam.Type type = getType(declaredField.getType());
@@ -83,7 +78,6 @@ public class DataModelsUtils {
             clazz = subclazz;
             isList = true;
         }
-
         switch (clazz.getName()) {
             case "java.lang.String":
                 return isList ? QueryParam.Type.TEXT_ARRAY : QueryParam.Type.TEXT;
@@ -136,12 +130,8 @@ public class DataModelsUtils {
 
 
     private static String getClassAsJSON(Class<?> clazz, int margin, boolean formatted, boolean deep) {
-
         List<Field> declaredFields = getAllUnderlyingDeclaredFields(clazz);
         try {
-          /*  List<Field> declaredFields = new LinkedList<>();
-            declaredFields.addAll(Arrays.asList(clazz.getDeclaredFields()));*/
-
             String res = "{" + (formatted ? "\n" : "");
             for (Field declaredField : declaredFields) {
                 if (!declaredField.getType().equals(clazz)) {
@@ -159,7 +149,6 @@ public class DataModelsUtils {
         } catch (Exception e) {
             return "";
         }
-
     }
 
     private static String getTypeAsJSON(Field field, Class<?> clazz, int margin, boolean formatted, boolean deep)
@@ -186,9 +175,7 @@ public class DataModelsUtils {
                     value = "0";
                     break;
                 case "java.util.List":
-
                     value = getListRepresentation(field, clazz);
-
                     break;
                 case "java.util.Date":
                     value = "\"dd/mm/yyyy\"";
@@ -226,7 +213,6 @@ public class DataModelsUtils {
     private static String getListRepresentation(Field field, Class<?> clazz) {
         String res = "[]";
         Class collectionGenericType = DocUtils.getCollectionGenericType(field);
-
         if (collectionGenericType.equals(clazz)) {
             return "\"List<" + clazz.getName() + ">\"";
         }
@@ -241,7 +227,6 @@ public class DataModelsUtils {
             res = "[" + getClassAsJSON(collectionGenericType, 0, false, false) + "]";
             // res = "[" + collectionGenericType.getCanonicalName() + "]";
         }
-
         return res;
     }
 
@@ -253,11 +238,9 @@ public class DataModelsUtils {
         return res;
     }
 
-
     public static String dataModelToJsonSchema(Class<?> clazz) {
         return null;
     }
-
 
     private static class Type {
         private QueryParam.Type type;
