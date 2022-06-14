@@ -57,6 +57,7 @@ public interface DataReader<T> extends Iterable<T> {
     default <O> DataReader<O> then(Task<T, O> task) {
         return new DataReader<O>() {
             private boolean drained = false;
+
             @Override
             public boolean open() {
                 return DataReader.this.open();

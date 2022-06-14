@@ -15,6 +15,7 @@
 
     <modules>
         <module>commons-lib</module>
+        <module>commons-api</module>
         <module>commons-datastore</module>
     </modules>
 

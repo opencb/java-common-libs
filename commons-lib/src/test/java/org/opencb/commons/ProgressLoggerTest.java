@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,7 +43,7 @@ public class ProgressLoggerTest {
         };
 
         int increment = 1;
-        for (int i = 0; i < totalCount; i+= increment) {
+        for (int i = 0; i < totalCount; i += increment) {
             progressLogger.increment(increment);
         }
 
@@ -67,7 +66,7 @@ public class ProgressLoggerTest {
         progressLogger.setApproximateTotalCount(totalCount * 2);
 
         int increment = 1;
-        for (int i = 0; i < totalCount; i+= increment) {
+        for (int i = 0; i < totalCount; i += increment) {
             if (i > totalCount / 2) {
                 future.complete(((long) totalCount));
             }

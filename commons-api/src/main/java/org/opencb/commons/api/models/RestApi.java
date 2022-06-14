@@ -16,9 +16,6 @@
 
 package org.opencb.commons.api.models;
 
-import org.opencb.commons.utils.GitRepositoryState;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class RestApi {
@@ -27,10 +24,10 @@ public class RestApi {
     private String commit;
     private List<RestCategory> categories;
 
-    public RestApi() {
-        this(GitRepositoryState.get().getBuildVersion(), GitRepositoryState.get().getCommitId(), new ArrayList<>());
-    }
-
+    /* public RestApi() {
+         this(GitRepositoryState.get().getBuildVersion(), GitRepositoryState.get().getCommitId(), new ArrayList<>());
+     }
+ */
     public RestApi(String version, String commit, List<RestCategory> categories) {
         this.version = version;
         this.commit = commit;

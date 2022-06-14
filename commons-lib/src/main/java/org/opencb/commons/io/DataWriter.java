@@ -62,7 +62,7 @@ public interface DataWriter<T> {
      * Create a Task from the DataWriter.
      *
      * @param synchronizeWrites Do not execute parallel writes.
-     * @return                  Task
+     * @return Task
      */
     default Task<T, T> asTask(boolean synchronizeWrites) {
         AtomicBoolean pre = new AtomicBoolean(false);

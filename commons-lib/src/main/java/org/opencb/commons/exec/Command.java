@@ -148,43 +148,43 @@ public class Command extends RunnableProcess {
     private Thread readStream(String outputName, OutputStream outputStream, StringBuffer stringBuffer, InputStream in) {
         Thread thread = new Thread(() -> {
             try {
-                    int bytesRead = 0;
-                    int bufferLength;
-                    byte[] buffer;
+                int bytesRead = 0;
+                int bufferLength;
+                byte[] buffer;
 
-                    while (bytesRead != -1) {
-                        // int x=in.available();
-                        // if (x<=0)
-                        // continue ;
+                while (bytesRead != -1) {
+                    // int x=in.available();
+                    // if (x<=0)
+                    // continue ;
 
-                        bufferLength = in.available();
-                        bufferLength = Math.max(bufferLength, 1);
+                    bufferLength = in.available();
+                    bufferLength = Math.max(bufferLength, 1);
 
-                        buffer = new byte[bufferLength];
-                        bytesRead = in.read(buffer, 0, bufferLength);
+                    buffer = new byte[bufferLength];
+                    bytesRead = in.read(buffer, 0, bufferLength);
 
-                        if (bytesRead == 0) {
-                            Thread.sleep(500);
-                            logger.trace(outputName + " - Sleep");
-                        } else if (bytesRead > 0) {
-                            logger.trace(outputName + " - last bytesRead = {})", bytesRead);
-                            if (printOutput) {
-                                System.err.print(new String(buffer));
-                            }
+                    if (bytesRead == 0) {
+                        Thread.sleep(500);
+                        logger.trace(outputName + " - Sleep");
+                    } else if (bytesRead > 0) {
+                        logger.trace(outputName + " - last bytesRead = {})", bytesRead);
+                        if (printOutput) {
+                            System.err.print(new String(buffer));
+                        }
 
-                            if (outputStream == null) {
-                                stringBuffer.append(new String(buffer));
-                            } else {
-                                outputStream.write(buffer);
-                                outputStream.flush();
-                            }
+                        if (outputStream == null) {
+                            stringBuffer.append(new String(buffer));
+                        } else {
+                            outputStream.write(buffer);
+                            outputStream.flush();
                         }
                     }
-                    logger.debug("Read {} - Exit while", outputName);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    exception = ex.toString();
                 }
+                logger.debug("Read {} - Exit while", outputName);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                exception = ex.toString();
+            }
         }, outputName + "_reader");
         thread.start();
         return thread;

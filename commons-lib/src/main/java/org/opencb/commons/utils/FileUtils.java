@@ -97,7 +97,7 @@ public class FileUtils {
     /**
      * This method is able to determine whether a file is GZipped and return a {@link BufferedReader} in any case.
      *
-     * @param path to be read
+     * @param path    to be read
      * @param charset to be read
      * @return BufferedReader object
      * @throws java.io.IOException IOException
@@ -109,10 +109,10 @@ public class FileUtils {
     /**
      * This method is able to determine whether a file is GZipped and return an {@link InputStream} in any case.
      *
-     * @param path     the path to the file to open
-     * @param options   options specifying how the file is opened
-     * @return          a new input stream
-     * @throws IOException  if an I/O error occurs
+     * @param path    the path to the file to open
+     * @param options options specifying how the file is opened
+     * @return a new input stream
+     * @throws IOException if an I/O error occurs
      */
     public static InputStream newInputStream(Path path, OpenOption... options) throws IOException {
         FileUtils.checkFile(path);
@@ -146,7 +146,7 @@ public class FileUtils {
     /**
      * This method is able to determine whether a file is GZipped and return a {@link BufferedWriter} in any case.
      *
-     * @param path to be write
+     * @param path    to be write
      * @param charset to be write
      * @return BufferedWriter object
      * @throws java.io.IOException IOException

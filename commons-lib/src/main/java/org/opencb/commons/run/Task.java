@@ -32,9 +32,9 @@ public interface Task<T, R> {
      * If the function returns null, the element is not propagated.
      *
      * @param function The function to be applied
-     * @param <T>   Input type
-     * @param <R>   Return type
-     * @return      A task that executes the function for each element.
+     * @param <T>      Input type
+     * @param <R>      Return type
+     * @return A task that executes the function for each element.
      */
     static <T, R> Task<T, R> forEach(Function<T, R> function) {
         return batch -> {
@@ -57,8 +57,8 @@ public interface Task<T, R> {
      * The consumer can only modify the input element.
      *
      * @param function The function to be applied
-     * @param <T>   Input type
-     * @return      A task that executes the function for each element.
+     * @param <T>      Input type
+     * @return A task that executes the function for each element.
      */
     static <T> Task<T, T> forEach(Consumer<T> function) {
         return batch -> {
@@ -74,12 +74,12 @@ public interface Task<T, R> {
 
     /**
      * Use to concatenate Tasks.
-     *
+     * <p>
      * task1.then(task2).then(task3);
      *
-     * @param nextTask  Task to concatenate
-     * @param <NR>      New return type.
-     * @return          Task that concatenates the current and the given task.
+     * @param nextTask Task to concatenate
+     * @param <NR>     New return type.
+     * @return Task that concatenates the current and the given task.
      */
     default <NR> Task<T, NR> then(Task<R, NR> nextTask) {
         Task<T, R> thisTask = this;
@@ -117,11 +117,11 @@ public interface Task<T, R> {
 
     /**
      * Use to concatenate a DataWriter as a task. Allows parallel writing.
-     *
+     * <p>
      * task1.then(writer);
      *
-     * @param writer    Write step to concatenate
-     * @return          Task that concatenates the current task with the given writer.
+     * @param writer Write step to concatenate
+     * @return Task that concatenates the current task with the given writer.
      */
     default Task<T, R> then(DataWriter<R> writer) {
         return then(writer.asTask(false));
@@ -131,14 +131,14 @@ public interface Task<T, R> {
     /**
      * Use to execute multiple Tasks with the same input.
      * Only the output of the main task will be propagated.
-     *
+     * <p>
      * task = Task.join(task1, task2);
      *
-     * @param mainTask    Main task to propagate
-     * @param otherTask   Task to execute with the same input. The output will be lost.
-     * @param <T>         Input type.
-     * @param <R>         Return type.
-     * @return            Task that runs both tasks with the same input.
+     * @param mainTask  Main task to propagate
+     * @param otherTask Task to execute with the same input. The output will be lost.
+     * @param <T>       Input type.
+     * @param <R>       Return type.
+     * @return Task that runs both tasks with the same input.
      */
     static <T, R> Task<T, R> join(Task<T, R> mainTask, Task<T, ?> otherTask) {
         return new Task<T, R>() {

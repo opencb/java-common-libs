@@ -71,7 +71,7 @@ public class ParallelTaskRunnerTest {
             words += string.split("[\n\t ]").length;     //words
             chars += string.length() + 1;                //chars
             for (int i = 1; i < 100; i++) {
-                int ignored = (int)(string.length()*0.5+5*Math.log10(string.split("[\n\t ]").length*50.0*Math.abs(Math.sin(l[1]))));  //stupid operation
+                int ignored = (int) (string.length() * 0.5 + 5 * Math.log10(string.split("[\n\t ]").length * 50.0 * Math.abs(Math.sin(l[1]))));  //stupid operation
             }
         }
         synchronized (l) {
@@ -110,7 +110,6 @@ public class ParallelTaskRunnerTest {
         os.close();
 
     }
-
 
 
     @Test
@@ -178,7 +177,7 @@ public class ParallelTaskRunnerTest {
                         }
                     } catch (InterruptedException e) {
                         boolean exit = false;
-                        while(!exit) {
+                        while (!exit) {
                             try {
                                 System.err.println("Sleep! No ok!");
                                 Thread.sleep(2000L);

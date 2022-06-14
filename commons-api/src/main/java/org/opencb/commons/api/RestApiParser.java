@@ -13,6 +13,7 @@ import org.opencb.commons.api.models.RestEndpoint;
 import org.opencb.commons.api.models.RestParameter;
 import org.opencb.commons.api.utils.CommandLineUtils;
 import org.opencb.commons.utils.FileUtils;
+import org.opencb.commons.utils.GitRepositoryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +53,18 @@ public class RestApiParser {
 
 
     public RestApi parse(List<Class<?>> classes, boolean summary) {
-        RestApi restApi = new RestApi();
+        RestApi restApi = getRestApi();
         restApi.getCategories().addAll(getCategories(classes, summary));
+        return restApi;
+    }
+
+    private RestApi getRestApi() {
+        RestApi restApi = null;
+        try {
+            restApi = new RestApi(GitRepositoryState.get().getBuildVersion(), GitRepositoryState.get().getCommitId(), new ArrayList<>());
+        } catch (Throwable e) {
+            restApi = new RestApi("x.x.x", "xxxx", new ArrayList<>());
+        }
         return restApi;
     }
 
@@ -62,7 +73,7 @@ public class RestApiParser {
         FileUtils.checkDirectory(path.getParent(), true);
 
         // Parse REST API
-        RestApi restApi = new RestApi();
+        RestApi restApi = getRestApi();
         restApi.getCategories().addAll(getCategories(classes, false));
 
         // Prepare Jackson to create JSON pretty string

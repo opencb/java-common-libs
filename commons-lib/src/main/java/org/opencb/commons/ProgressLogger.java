@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 /**
  * Log the progress of a long operation.
- *
+ * <p>
  * Created on 13/04/16
  *
  * @author Jacobo Coll &lt;jacobo167@gmail.com&gt;
@@ -73,10 +73,9 @@ public class ProgressLogger {
     }
 
     /**
-     *
-     * @param message               Starting message of the logger. Common for all the lines
-     * @param totalCountCallable    Callable function to get asynchronously the total count of elements
-     * @param numLinesLog           Number of lines to print
+     * @param message            Starting message of the logger. Common for all the lines
+     * @param totalCountCallable Callable function to get asynchronously the total count of elements
+     * @param numLinesLog        Number of lines to print
      */
     public ProgressLogger(String message, Callable<Long> totalCountCallable, int numLinesLog) {
         this(message, 0, getFuture(totalCountCallable), numLinesLog);

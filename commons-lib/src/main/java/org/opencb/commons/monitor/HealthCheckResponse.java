@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class HealthCheckResponse {
 
-    public enum Status { OK, DEGRADED, DOWN, NOT_CONFIGURED }
+    public enum Status {OK, DEGRADED, DOWN, NOT_CONFIGURED}
 
     private String serviceName;
     private String requestUrl;

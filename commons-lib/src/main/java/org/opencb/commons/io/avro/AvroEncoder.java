@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * Created by hpccoll1 on 02/04/15.
  */
 public class AvroEncoder<T> implements Task<T, ByteBuffer> {
