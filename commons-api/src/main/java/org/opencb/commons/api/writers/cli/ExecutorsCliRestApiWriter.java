@@ -26,7 +26,7 @@ import org.opencb.commons.api.models.RestApi;
 import org.opencb.commons.api.models.RestCategory;
 import org.opencb.commons.api.models.RestEndpoint;
 import org.opencb.commons.api.models.RestParameter;
-import org.opencb.commons.api.utils.CommandLineUtils;
+import org.opencb.commons.api.utils.RestApiUtils;
 import org.opencb.commons.api.writers.ParentClientRestApiWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +142,7 @@ public class ExecutorsCliRestApiWriter extends ParentClientRestApiWriter {
         if (string.endsWith(";")) {
             string = string.substring(0, string.length() - 1);
         }
-        if (CommandLineUtils.isPrimitiveType(string)) {
+        if (RestApiUtils.isPrimitiveType(string)) {
             return false;
         }
         String[] excluded = new String[]{"java.lang.Object", "java.lang."};

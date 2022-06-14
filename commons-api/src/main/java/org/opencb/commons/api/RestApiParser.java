@@ -11,9 +11,8 @@ import org.opencb.commons.api.models.RestApi;
 import org.opencb.commons.api.models.RestCategory;
 import org.opencb.commons.api.models.RestEndpoint;
 import org.opencb.commons.api.models.RestParameter;
-import org.opencb.commons.api.utils.CommandLineUtils;
+import org.opencb.commons.api.utils.RestApiUtils;
 import org.opencb.commons.utils.FileUtils;
-import org.opencb.commons.utils.GitRepositoryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,9 @@ public class RestApiParser {
     private final ObjectMapper objectMapper;
     private final SerializerProvider serializerProvider;
 
-    private List<RestParameter> flatternParams = new ArrayList<>();
+    private String version;
+    private String commit;
+    private final List<RestParameter> flatternParams = new ArrayList<>();
 
 
     // This class might accept some configuration in the future
@@ -47,33 +48,33 @@ public class RestApiParser {
     }
 
 
-    public RestApi parse(Class<?> clazz, boolean summary) {
-        return parse(Collections.singletonList(clazz), summary);
+    public RestApi parse(Class<?> clazz, boolean summary, String version, String commit) {
+        return parse(Collections.singletonList(clazz), summary, version, commit);
     }
 
 
-    public RestApi parse(List<Class<?>> classes, boolean summary) {
-        RestApi restApi = getRestApi();
+    public RestApi parse(List<Class<?>> classes, boolean summary, String version, String commit) {
+        RestApi restApi = getRestApi(version, commit);
         restApi.getCategories().addAll(getCategories(classes, summary));
         return restApi;
     }
 
-    private RestApi getRestApi() {
+    private RestApi getRestApi(String version, String commit) {
         RestApi restApi = null;
         try {
-            restApi = new RestApi(GitRepositoryState.get().getBuildVersion(), GitRepositoryState.get().getCommitId(), new ArrayList<>());
+            restApi = new RestApi(version, commit, new ArrayList<>());
         } catch (Throwable e) {
             restApi = new RestApi("x.x.x", "xxxx", new ArrayList<>());
         }
         return restApi;
     }
 
-    public void parseToFile(List<Class<?>> classes, java.nio.file.Path path) throws IOException {
+    public void parseToFile(List<Class<?>> classes, java.nio.file.Path path, String version, String commit) throws IOException {
         // Check if parent folder exists and is writable
         FileUtils.checkDirectory(path.getParent(), true);
 
         // Parse REST API
-        RestApi restApi = getRestApi();
+        RestApi restApi = getRestApi(version, commit);
         restApi.getCategories().addAll(getCategories(classes, false));
 
         // Prepare Jackson to create JSON pretty string
@@ -97,8 +98,8 @@ public class RestApiParser {
 
     private RestCategory getCategory(Class<?> clazz, boolean flatten) {
         RestCategory restCategory = new RestCategory();
-        restCategory.setName(((Api) clazz.getAnnotation(Api.class)).value());
-        restCategory.setPath(((Path) clazz.getAnnotation(Path.class)).value());
+        restCategory.setName(clazz.getAnnotation(Api.class).value());
+        restCategory.setPath(clazz.getAnnotation(Path.class).value());
 
         String categoryName = restCategory.getName().toUpperCase() + "_";
         List<RestEndpoint> restEndpoints = new ArrayList<>();
@@ -296,7 +297,7 @@ public class RestApiParser {
         param.setRequired(isRequired(property));
 //        innerParam.setDefaultValue(property.getMetadata().getDefaultValue());
         param.setDefaultValue("");
-        param.setComplex(!CommandLineUtils.isPrimitiveType(propertyClass.getName()));
+        param.setComplex(!RestApiUtils.isPrimitiveType(propertyClass.getName()));
         param.setDescription(getDescriptionField(variablePrefix, property));
 
         if (propertyClass.isEnum()) {

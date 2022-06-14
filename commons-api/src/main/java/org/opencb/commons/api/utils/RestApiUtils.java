@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class CommandLineUtils {
+public class RestApiUtils {
 
     private static final Set<String> primitiveTypes;
     private static final Map<String, String> numericTypes;
@@ -21,7 +21,6 @@ public class CommandLineUtils {
     static {
         primitiveTypes = new HashSet<>();
         numericTypes = new HashMap<>();
-
         primitiveTypes.add("String");
         primitiveTypes.add("string");
         primitiveTypes.add("object");
@@ -115,7 +114,6 @@ public class CommandLineUtils {
         return res;
     }
 
-
     public static ObjectMapper generateDefaultObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true);
@@ -123,8 +121,7 @@ public class CommandLineUtils {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
         objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-        // objectMapper.addMixIn(GenericRecord.class, GenericRecordAvroJsonMixin.class);
         return objectMapper;
     }
+    
 }

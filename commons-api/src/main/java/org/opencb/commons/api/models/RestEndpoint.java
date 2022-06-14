@@ -3,7 +3,7 @@ package org.opencb.commons.api.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.opencb.commons.annotations.RestParamType;
 import org.opencb.commons.api.config.CategoryConfig;
-import org.opencb.commons.api.utils.CommandLineUtils;
+import org.opencb.commons.api.utils.RestApiUtils;
 import org.opencb.commons.utils.CollectionUtils;
 
 import java.util.List;
@@ -77,7 +77,7 @@ public class RestEndpoint {
                 if (config.isAvailableSubCommand(restParameter.getName(), commandName)
                         && (!restParameter.isComplex() || restParameter.isStringList())
                         && restParameter.isRequired()) {
-                    sb.append("commandOptions.").append(CommandLineUtils.getAsVariableName(restParameter.getName())).append(", ");
+                    sb.append("commandOptions.").append(RestApiUtils.getAsVariableName(restParameter.getName())).append(", ");
                 }
             }
         }

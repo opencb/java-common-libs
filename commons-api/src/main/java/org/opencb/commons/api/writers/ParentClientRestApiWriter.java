@@ -23,7 +23,7 @@ import org.opencb.commons.api.models.RestApi;
 import org.opencb.commons.api.models.RestCategory;
 import org.opencb.commons.api.models.RestEndpoint;
 import org.opencb.commons.api.models.RestParameter;
-import org.opencb.commons.api.utils.CommandLineUtils;
+import org.opencb.commons.api.utils.RestApiUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -151,7 +151,7 @@ public abstract class ParentClientRestApiWriter {
     }
 
     public String getAsVariableName(String path) {
-        return CommandLineUtils.getAsVariableName(path);
+        return RestApiUtils.getAsVariableName(path);
     }
 
     public String getAsClassName(String name) {
