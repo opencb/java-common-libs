@@ -55,13 +55,13 @@ public class ParserCliRestApiWriter extends ParentClientRestApiWriter {
         sb.append("* limitations under the License.\n");
         sb.append("*/\n");
         sb.append("\n");
-        sb.append("package ").append(config.getOptions().getParserPackage()).append(";\n");
+        sb.append("package ").append(config.getOptions().getBasePackage()).append(";\n");
         sb.append("\n");
 
         sb.append("import com.beust.jcommander.JCommander;\n");
-        sb.append("import org.opencb.opencga.app.cli.GeneralCliOptions;\n");
-        sb.append("import org.opencb.opencga.app.cli.main.options.*;\n");
-        sb.append("import org.opencb.opencga.app.cli.main.parent.ParentCliOptionsParser;\n");
+        sb.append("import " + config.getOptions().getCliPackage() + ".GeneralCliOptions;\n");
+        sb.append("import " + config.getOptions().getOptionsPackage() + ".*;\n");
+        sb.append("import " + config.getOptions().getBasePackage() + ".parent.ParentCliOptionsParser;\n");
         sb.append("\n");
         sb.append("\n");
         sb.append("/*\n");

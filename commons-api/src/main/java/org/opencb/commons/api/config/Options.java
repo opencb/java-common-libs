@@ -70,12 +70,17 @@ public class Options {
         return res;
     }
 
-    public String getParserPackage() {
+    public String getBasePackage() {
         String res = "";
         if (outputDir != null && !StringUtils.isEmpty(outputDir)) {
             res = getFolderAsPackage(outputDir);
         }
         return res;
+    }
+
+    public String getCliPackage() {
+
+        return getBasePackage().replace(".main", "");
     }
 
     public List<String> getIgnoreTypes() {

@@ -49,8 +49,8 @@ public class ExecutorsCliRestApiWriter extends ParentClientRestApiWriter {
         CategoryConfig categoryConfig = availableCategoryConfigs.get(key);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sb.append("package ").append(config.getOptions().getExecutorsPackage()).append(";\n\n");
-        sb.append("import org.opencb.opencga.app.cli.main.executors.OpencgaCommandExecutor;\n");
-        sb.append("import org.opencb.opencga.app.cli.main.*;\n");
+        sb.append("import " + config.getOptions().getBasePackage() + ".executors.OpencgaCommandExecutor;\n");
+        sb.append("import " + config.getOptions().getBasePackage() + ".*;\n");
         sb.append("import org.opencb.opencga.core.response.RestResponse;\n");
         sb.append("import org.opencb.opencga.client.exceptions.ClientException;\n");
         sb.append("import org.opencb.commons.datastore.core.ObjectMap;\n\n");
@@ -65,7 +65,7 @@ public class ExecutorsCliRestApiWriter extends ParentClientRestApiWriter {
 
         sb.append("import " + config.getOptions().getOptionsPackage() + "." + getAsClassName(restCategory.getName()) + "CommandOptions;\n\n");
         if (categoryConfig.isExecutorExtended()) {
-            sb.append("import org.opencb.opencga.app.cli.main.parent."
+            sb.append("import " + config.getOptions().getBasePackage() + ".parent."
                     + getExtendedClass(getAsClassName(restCategory.getName()), categoryConfig) + ";\n\n");
         }
         Set<String> imports = new TreeSet<>();
