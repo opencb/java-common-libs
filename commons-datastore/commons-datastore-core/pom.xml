@@ -11,7 +11,6 @@
     </parent>
 
     <artifactId>commons-datastore-core</artifactId>
-    <version>${java.commons.version}</version>
     <packaging>jar</packaging>
 
     <dependencies>

@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>org.opencb.commons</groupId>
                 <artifactId>commons-datastore-core</artifactId>
-                <version>${java.commons.version}</version>
+                <version>${project.parent.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -27,7 +27,6 @@
     </parent>
 
     <artifactId>commons-datastore-solr</artifactId>
-    <version>${java.commons.version}</version>
     <packaging>jar</packaging>
 
     <dependencies>
