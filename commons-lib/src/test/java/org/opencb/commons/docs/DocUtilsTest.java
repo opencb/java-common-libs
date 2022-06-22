@@ -6,6 +6,8 @@ import org.opencb.commons.docs.models.DataClassDoc;
 import org.opencb.commons.docs.models.DataFieldDoc;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,41 @@ public class DocUtilsTest {
         }
     }
 
+    @Test
+    public void getCollectionGenericTypetest() {
+        Class<?> aClass = null;
+        try {
+            aClass = Class.forName("org.opencb.commons.utils.TestBeanClass");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        Field[] declaredFields = aClass.getDeclaredFields();
+        for (Field f : declaredFields) {
+            Type genericParameterType = f.getGenericType();
+            //  System.out.println(genericParameterType.getTypeName());
+            if (genericParameterType instanceof ParameterizedType) {
+                ParameterizedType aType = (ParameterizedType) genericParameterType;
+                System.out.println(genericParameterType.getTypeName());
+                List<Class> classes = getInnerClasses(aType);
+                System.out.println("result :::: " + classes);
+            }
+        }
+    }
+
+    private List<Class> getInnerClasses(ParameterizedType aType) {
+        List<Class> classes = new ArrayList<>();
+        Type[] parameterArgTypes = aType.getActualTypeArguments();
+        for (Type parameterArgType : parameterArgTypes) {
+            if (parameterArgType instanceof Class) {
+                classes.add((Class) parameterArgType);
+            } else if (parameterArgType instanceof ParameterizedType) {
+                classes.addAll(getInnerClasses((ParameterizedType) parameterArgType));
+            }
+            //System.out.println("parameterArgClass = " + parameterArgClass);
+        }
+        return classes;
+    }
 
     @Test
     public void testMap() throws Exception {
