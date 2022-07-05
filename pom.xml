@@ -16,6 +16,7 @@
     <modules>
         <module>commons-lib</module>
         <module>commons-api</module>
+        <module>commons-cli</module>
         <module>commons-datastore</module>
     </modules>
 
@@ -162,13 +163,13 @@
                             <configLocation>checkstyle.xml</configLocation>
                             <excludes>
                                 org/opencb/commons/api/**,
+                                org/opencb/commons/app/cli/**,
                                 org/opencb/commons/utils/**,
                             </excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
                         </goals>
-
                     </execution>
                 </executions>
             </plugin>

@@ -54,7 +54,7 @@ public class AutoCompleteWriter extends ParentClientRestApiWriter {
         sb.append("* limitations under the License.\n");
         sb.append("*/\n");
         sb.append("\n");
-        sb.append("package ").append(config.getOptions().getBasePackage()).append(";\n");
+        sb.append("package ").append(config.getOptions().getBasePackage()).append(".completer;\n");
         sb.append("\n");
 
         sb.append("import org.jline.reader.Candidate;\n");
@@ -163,6 +163,6 @@ public class AutoCompleteWriter extends ParentClientRestApiWriter {
 
     @Override
     protected String getClassFileName(String key) {
-        return config.getOptions().getOutputDir() + "/OpenCgaCompleter.java";
+        return config.getOptions().getOutputDir() + "/completer/OpenCgaCompleter.java";
     }
 }

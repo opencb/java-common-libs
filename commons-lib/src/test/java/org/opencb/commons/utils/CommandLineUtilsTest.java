@@ -1,7 +1,6 @@
 package org.opencb.commons.utils;
 
 import com.beust.jcommander.DynamicParameter;
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import org.junit.Test;
@@ -20,13 +19,6 @@ import static org.opencb.commons.utils.CommandLineUtils.DEPRECATED;
  */
 public class CommandLineUtilsTest {
 
-    @Test
-    public void printCommandUsage() throws Exception {
-        Command command = new Command();
-        JCommander commander = new JCommander(command);
-        CommandLineUtils.printCommandUsage(commander);
-        commander.parse("-2", "4", "-D", "2=A", "-D4=g", "-F4:2,5");
-    }
 
     @Test
     public void cutLine() {

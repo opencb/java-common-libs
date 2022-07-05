@@ -21,12 +21,11 @@ import com.beust.jcommander.ParameterDescription;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by imedina on 05/11/15.
@@ -38,80 +37,6 @@ public class CommandLineUtils {
     private static final int DESCRIPTION_INDENT = 2;
     private static final int DESCRIPTION_LENGTH = 100;
 
-    public static void printCommandUsage(JCommander commander) {
-        printCommandUsage(commander, System.err);
-    }
-
-    public static void printCommandUsage(JCommander commander, PrintStream printStream) {
-
-    /*    Integer paramNameMaxSize = Math.max(commander.getParameters().stream()
-                .map(pd -> pd.getNames().length())
-                .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(20), 20);
-        Integer typeMaxSize = Math.max(commander.getParameters().stream()
-                .map(pd -> getType(pd).length())
-                .collect(Collectors.maxBy(Comparator.naturalOrder())).orElse(10), 10);
-
-        int nameAndTypeLength = paramNameMaxSize + typeMaxSize + 8;
-        int maxLineLength = nameAndTypeLength + DESCRIPTION_LENGTH;  //160
-*/
-        Comparator<ParameterDescription> parameterDescriptionComparator =
-                Comparator.comparing((ParameterDescription p) -> p.getDescription().contains("DEPRECATED"))
-                        .thenComparing(ParameterDescription::getLongestName);
-        int maxLength = 0;
-        for (ParameterDescription parameterDescription : commander.getParameters()) {
-            String desc = (parameterDescription.getParameterized().getParameter() != null
-                    && parameterDescription.getParameterized().getParameter().required()) ? "*" : "";
-            desc += parameterDescription.getNames();
-            if (desc.length() > maxLength) {
-                maxLength = desc.length();
-            }
-        }
-        final int pad = maxLength + 12;
-        commander.getParameters().stream().sorted(parameterDescriptionComparator).forEach(parameterDescription -> {
-            if (parameterDescription.getParameter() != null && !parameterDescription.getParameter().hidden()) {
-                String type = getType(parameterDescription);
-                String defaultValue = "";
-                if (parameterDescription.getDefault() != null) {
-                    if (parameterDescription.isDynamicParameter()) {
-                        Object def = parameterDescription.getDefault();
-                        if (def instanceof Map && !((Map) def).isEmpty()) {
-                            defaultValue = " [" + def + "]";
-                        }
-                    } else {
-                        defaultValue = " [" + parameterDescription.getDefault() + "]";
-                    }
-                }
-                PrintUtils.printCommandHelpFormattedString(pad, ((parameterDescription.getParameterized().getParameter() != null
-                        && parameterDescription.getParameterized().getParameter().required()) ? "*" : "")
-                        + parameterDescription.getNames(), type, parameterDescription.getDescription() + " "
-                        + defaultValue);
-/*
-
-                String usage = String.format("%5s %-" + paramNameMaxSize + "s %-" + typeMaxSize + "s %s%s\n",
-                        (parameterDescription.getParameterized().getParameter() != null
-                                && parameterDescription.getParameterized().getParameter().required()) ? "*" : "",
-                        parameterDescription.getNames(),
-                        type,
-                        parameterDescription.getDescription(),
-                        defaultValue);
-
-                // if lines are longer than the maximum they are trimmed and printed in several lines
-                List<String> lines = new LinkedList<>();
-                while (usage.length() > maxLineLength + 1) {
-                    int splitPosition = Math.min(1 + usage.lastIndexOf(" ", maxLineLength), usage.length());
-                    if (splitPosition <= nameAndTypeLength + DESCRIPTION_INDENT) {
-                        splitPosition = Math.min(1 + usage.indexOf(" ", maxLineLength), usage.length());
-                    }
-                    lines.add(usage.substring(0, splitPosition) + "\n");
-                    usage = String.format("%" + (nameAndTypeLength + DESCRIPTION_INDENT) + "s", "") + "" + usage.substring(splitPosition);
-                }
-                // this is empty for short lines and so no prints anything
-                lines.forEach(printStream::print);
-                // in long lines this prints the last trimmed line
-                printStream.print(usage);*/
-            }
-        });
-    }
 
     /**
      * Create the following strings from the jCommander to create AutoComplete bash script:
@@ -223,54 +148,5 @@ public class CommandLineUtils {
         }
     }
 
-    private static String getType(ParameterDescription parameterDescription) {
-        String type = "";
-        if (parameterDescription.getParameter().arity() == 0) {
-            return type;
-        } else {
-            if (parameterDescription.isDynamicParameter()) {
-                Type genericType = parameterDescription.getParameterized().getGenericType();
-                if (genericType instanceof ParameterizedType) {
-                    ParameterizedType parameterizedType = (ParameterizedType) genericType;
-                    Type rawType = parameterizedType.getRawType();
-                    if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                        String key = getType(parameterizedType.getActualTypeArguments()[0]);
-                        String assignment = parameterDescription.getParameter().getAssignment();
-                        String value = getType(parameterizedType.getActualTypeArguments()[1]);
-                        type = key + assignment + value;
-                    }
-                } else {
-                    type = getType(genericType);
-                }
-            } else {
-                Type genericType = parameterDescription.getParameterized().getGenericType();
-                type = getType(genericType);
-                if (type.equals("BOOLEAN") && parameterDescription.getParameterized().getParameter().arity() == -1) {
-                    type = "";
-                }
-            }
-        }
-        return type;
-    }
 
-    private static String getType(Type genericType) {
-        String type;
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) genericType;
-            Type rawType = parameterizedType.getRawType();
-            if (rawType instanceof Class && Collection.class.isAssignableFrom((Class) rawType)) {
-                return getType(parameterizedType.getActualTypeArguments()[0]) + "*";
-            }
-        }
-        type = genericType.getTypeName();
-        type = type.substring(1 + Math.max(type.lastIndexOf("."), type.lastIndexOf("$")));
-        type = Arrays.asList(org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(type)).stream()
-                .map(String::toUpperCase)
-                .collect(Collectors.joining("_"));
-
-        if (type.equals("INTEGER")) {
-            type = "INT";
-        }
-        return type;
-    }
 }

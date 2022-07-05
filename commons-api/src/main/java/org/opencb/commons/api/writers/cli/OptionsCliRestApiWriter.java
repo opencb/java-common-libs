@@ -59,7 +59,7 @@ public class OptionsCliRestApiWriter extends ParentClientRestApiWriter {
             sb.append("import " + config.getOptions().getBasePackage() + ".parent."
                     + getExtendedClass(getAsClassName(restCategory.getName()), categoryConfig) + ";\n\n");
         }
-        sb.append("import static " + config.getOptions().getCliPackage() + ".GeneralCliOptions.*;\n");
+        sb.append("import static org.opencb.commons.app.cli.GeneralCliOptions.*;\n");
         sb.append("\n");
         sb.append("\n");
         sb.append("/*\n");

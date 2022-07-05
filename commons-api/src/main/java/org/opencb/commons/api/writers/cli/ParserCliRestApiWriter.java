@@ -55,11 +55,11 @@ public class ParserCliRestApiWriter extends ParentClientRestApiWriter {
         sb.append("* limitations under the License.\n");
         sb.append("*/\n");
         sb.append("\n");
-        sb.append("package ").append(config.getOptions().getBasePackage()).append(";\n");
+        sb.append("package ").append(config.getOptions().getBasePackage()).append(".parser;\n");
         sb.append("\n");
 
         sb.append("import com.beust.jcommander.JCommander;\n");
-        sb.append("import " + config.getOptions().getCliPackage() + ".GeneralCliOptions;\n");
+        sb.append("import org.opencb.commons.app.cli.GeneralCliOptions;\n");
         sb.append("import " + config.getOptions().getOptionsPackage() + ".*;\n");
         sb.append("import " + config.getOptions().getBasePackage() + ".parent.ParentCliOptionsParser;\n");
         sb.append("\n");
@@ -161,6 +161,6 @@ public class ParserCliRestApiWriter extends ParentClientRestApiWriter {
 
     @Override
     protected String getClassFileName(String key) {
-        return config.getOptions().getOutputDir() + "/OpencgaCliOptionsParser.java";
+        return config.getOptions().getOutputDir() + "/parser/OpencgaCliOptionsParser.java";
     }
 }
