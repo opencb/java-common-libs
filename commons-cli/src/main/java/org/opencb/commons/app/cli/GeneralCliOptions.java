@@ -21,6 +21,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,17 +89,8 @@ public class GeneralCliOptions {
         @DynamicParameter(names = "-D", description = "Storage engine specific parameters go here comma separated, ie. -Dmongodb" +
                 ".compression=snappy", hidden = true)
         public Map<String, String> params = new HashMap<>(); //Dynamic parameters must be initialized
-
-        @Parameter(names = {"--skip"}, description = "Number of results to skip", arity = 1)
-        public int skip;
-
-        @Parameter(names = {"--limit"}, description = "Maximum number of results to be returned", arity = 1)
-        public int limit;
-
-        @Parameter(names = {"--count"}, description = "Total number of results. Default = false", arity = 0)
-        public boolean count;
     }
-/*
+
     public static class StudyOption {
 
         @Parameter(names = {"-s", "--study"}, description = "Study [[user@]project:]study where study and project can be either the ID or UUID", arity = 1)
@@ -123,7 +115,14 @@ public class GeneralCliOptions {
 
     public static class NumericOptions {
 
+        @Parameter(names = {"--skip"}, description = "Number of results to skip", arity = 1)
+        public int skip;
 
+        @Parameter(names = {"--limit"}, description = "Maximum number of results to be returned", arity = 1)
+        public int limit;
+
+        @Parameter(names = {"--count"}, description = "Total number of results. Default = false", arity = 0)
+        public boolean count;
     }
 
     public static class JobOptions {
@@ -139,5 +138,5 @@ public class GeneralCliOptions {
 
         @Parameter(names = {"--job-tags"}, description = "Job tags", arity = 1)
         public List<String> jobTags;
-    }*/
+    }
 }
