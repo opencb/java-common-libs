@@ -1,5 +1,6 @@
 package org.opencb.commons.utils;
 
+import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.docs.models.DataFieldDoc;
 
 import java.util.List;
@@ -29,5 +30,17 @@ public class TestBeanClass {
     private List<List<DataFieldDoc>> genericClasses;
     private boolean enumeration;
     private String[] uncommentedClasses;
+
+
+    private ObjectMap configuration;
+
+    public ObjectMap getConfiguration() {
+        return configuration;
+    }
+
+    public TestBeanClass setConfiguration(ObjectMap configuration) {
+        this.configuration = configuration;
+        return this;
+    }
 
 }

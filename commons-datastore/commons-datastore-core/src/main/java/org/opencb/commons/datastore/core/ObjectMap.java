@@ -341,7 +341,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         List list = getAsList(field, separator);
 
         if (list.isEmpty()) {
-            return Collections.<N>emptyList();
+            return Collections.emptyList();
         } else {
             boolean valid = true;
             for (Object o : list) {
@@ -374,7 +374,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
      *
      * @param field List field name
      * @param clazz Class to be returned
-     * @param <T> Element class
+     * @param <T>   Element class
      * @return A List representation of the field
      */
     @Deprecated
@@ -401,7 +401,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
      * Get the field as List. If field was not a list, returns an UnmodifiableList.
      * Do not modify the ObjectMap content.
      *
-     * @param field List field name
+     * @param field     List field name
      * @param separator Item separator
      * @return A list of objects
      */
@@ -416,7 +416,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 Collection x = (Collection) value;
                 return new ArrayList<Object>(x);
             } else {
-                return Arrays.<Object>asList(value.toString().split(separator));
+                return Arrays.asList(value.toString().split(separator));
             }
         }
     }
@@ -451,7 +451,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
      *
      * @param field List field name
      * @param clazz Class to be returned
-     * @param <T> Element class
+     * @param <T>   Element class
      * @return A Map representation of the field
      */
     @Deprecated
@@ -552,24 +552,23 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     /**
      * Get nested attributes.
-     *
+     * <p>
      * Example:
-     *    List<ObjectMap> values = Arrays.asList(
-     *               new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
-     *               new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
-     *               new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
-     *       );
-     *    objectMap.put("objectList", value
+     * List<ObjectMap> values = Arrays.asList(
+     * new ObjectMap("id", "abc").append("name", "ABC").append("nested", new ObjectMap("value", "A")),
+     * new ObjectMap("id", "def").append("name", "DEF").append("nested", new ObjectMap("value", "D")),
+     * new ObjectMap("id", "ghi").append("name", "GHI").append("nested", new ObjectMap("value", "G"))
+     * );
+     * objectMap.put("objectList", value
+     * <p>
+     * Let's say we send key="objectList[abc].nested.value"
+     * What that means is that we will look for objectList first. In this case, we find something between [], meaning that the
+     * objectList value is a list and we want to filter by  what's between those []. For this example, it would have been
+     * equivalent to [abc] writing [id=abc], [name=ABC] or [nested.value=A]. All those would have matched the first element of the
+     * array. If no filter key is written such as in the example, it will always use as filter key 'id'.
+     * Once found the element, we will proceed as usual, taking 'nested.value' as the final result. -> "A"
      *
-     *    Let's say we send key="objectList[abc].nested.value"
-     *    What that means is that we will look for objectList first. In this case, we find something between [], meaning that the
-     *    objectList value is a list and we want to filter by  what's between those []. For this example, it would have been
-     *    equivalent to [abc] writing [id=abc], [name=ABC] or [nested.value=A]. All those would have matched the first element of the
-     *    array. If no filter key is written such as in the example, it will always use as filter key 'id'.
-     *    Once found the element, we will proceed as usual, taking 'nested.value' as the final result. -> "A"
-     *
-     * @param key     Key that will be looked for.
-     *
+     * @param key Key that will be looked for.
      * @return Object value.
      */
     public Object getNested(String key) {
@@ -601,6 +600,25 @@ public class ObjectMap implements Map<String, Object>, Serializable {
             throw new IllegalArgumentException("Key '" + key + "' not found!");
         }
     }
+
+    public Object putNestedIfNotNull(String key, Object value, boolean parents) {
+        if (value != null) {
+            int idx = key.lastIndexOf(".");
+            if (idx < 0) {
+                return put(key, value, false);
+            }
+            String mapKey = key.substring(0, idx);
+            String valueKey = key.substring(idx + 1);
+            Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, true, parents);
+            if (subMap != null) {
+                return subMap.put(valueKey, value);
+            } else {
+                throw new IllegalArgumentException("Key '" + key + "' not found!");
+            }
+        }
+        return null;
+    }
+
 
     public ObjectMap getNestedMap(String key) {
         Map<String, Object> subMap = getNestedMap(key, objectMap, jsonObjectMapper, false, false);

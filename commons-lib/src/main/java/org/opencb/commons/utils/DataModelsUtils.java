@@ -180,6 +180,7 @@ public class DataModelsUtils {
                 case "java.util.Date":
                     value = "\"dd/mm/yyyy\"";
                     break;
+                case "org.opencb.commons.datastore.core.ObjectMap":
                 case "java.util.Map":
                     value = "{\"key\":\"value\"}";
                     break;
