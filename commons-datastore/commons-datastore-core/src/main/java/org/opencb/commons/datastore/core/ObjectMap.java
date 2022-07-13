@@ -603,22 +603,17 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     public Object putNestedIfNotNull(String key, Object value, boolean parents) {
         if (value != null) {
-            int idx = key.lastIndexOf(".");
-            if (idx < 0) {
-                return put(key, value, false);
-            }
-            String mapKey = key.substring(0, idx);
-            String valueKey = key.substring(idx + 1);
-            Map<String, Object> subMap = getNestedMap(mapKey, objectMap, jsonObjectMapper, true, parents);
-            if (subMap != null) {
-                return subMap.put(valueKey, value);
-            } else {
-                throw new IllegalArgumentException("Key '" + key + "' not found!");
-            }
+            putNested(key, value, parents);
         }
         return null;
     }
 
+    public Object putNestedIfNotEmpty(String key, String value, boolean parents) {
+        if (StringUtils.isNotEmpty(value)) {
+            putNested(key, value, parents);
+        }
+        return null;
+    }
 
     public ObjectMap getNestedMap(String key) {
         Map<String, Object> subMap = getNestedMap(key, objectMap, jsonObjectMapper, false, false);
