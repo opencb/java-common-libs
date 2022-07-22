@@ -128,6 +128,22 @@ public class DataModelsUtils {
         return getClassAsJSON(clazz, 0, formatted, true);
     }
 
+    public static String dataModelToJsonString(String clazz, boolean formatted) {
+        return getClassAsJSON(clazz, 0, formatted, true);
+    }
+
+    private static String getClassAsJSON(String sclazz, int margin, boolean formatted, boolean deep) {
+        if (StringUtils.isEmpty(sclazz)) {
+            return "No model found. The model parameter is required";
+        }
+        Class clazz = null;
+        try {
+            clazz = Class.forName(sclazz);
+        } catch (ClassNotFoundException e) {
+            return e.getMessage() + " Invalid model parameter.";
+        }
+        return getClassAsJSON(clazz, 0, formatted, true);
+    }
 
     private static String getClassAsJSON(Class<?> clazz, int margin, boolean formatted, boolean deep) {
         List<Field> declaredFields = getAllUnderlyingDeclaredFields(clazz);
