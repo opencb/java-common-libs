@@ -12,10 +12,6 @@ public class DataModelsUtils {
 
     static final Map<Class<?>, String> PRIMITIVE_VALUES;
 
-    public static Map<String, Type> dataModelToMap(Class<?> clazz) {
-        return dataModelToMap(clazz, "");
-    }
-
     static {
         PRIMITIVE_VALUES = new HashMap<Class<?>, String>();
         PRIMITIVE_VALUES.put(boolean.class, "false");
@@ -26,6 +22,10 @@ public class DataModelsUtils {
         PRIMITIVE_VALUES.put(int.class, "0");
         PRIMITIVE_VALUES.put(long.class, "0.0");
         PRIMITIVE_VALUES.put(short.class, "0");
+    }
+
+    public static Map<String, Type> dataModelToMap(Class<?> clazz) {
+        return dataModelToMap(clazz, "");
     }
 
     public static Map<String, Type> dataModelToMap(Class<?> clazz, String field) {
@@ -144,7 +144,7 @@ public class DataModelsUtils {
             if (res.trim().endsWith(",")) {
                 res = res.trim().substring(0, res.trim().length() - 1);
             }
-            res += (addMargin(margin) + "}");
+            res += "\n" + (addMargin(margin) + "}");
             return res;
         } catch (Exception e) {
             return "";
@@ -180,6 +180,7 @@ public class DataModelsUtils {
                 case "java.util.Date":
                     value = "\"dd/mm/yyyy\"";
                     break;
+                case "org.opencb.commons.datastore.core.ObjectMap":
                 case "java.util.Map":
                     value = "{\"key\":\"value\"}";
                     break;
