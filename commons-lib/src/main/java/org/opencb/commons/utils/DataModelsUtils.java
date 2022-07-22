@@ -12,10 +12,6 @@ public class DataModelsUtils {
 
     static final Map<Class<?>, String> PRIMITIVE_VALUES;
 
-    public static Map<String, Type> dataModelToMap(Class<?> clazz) {
-        return dataModelToMap(clazz, "");
-    }
-
     static {
         PRIMITIVE_VALUES = new HashMap<Class<?>, String>();
         PRIMITIVE_VALUES.put(boolean.class, "false");
@@ -26,6 +22,10 @@ public class DataModelsUtils {
         PRIMITIVE_VALUES.put(int.class, "0");
         PRIMITIVE_VALUES.put(long.class, "0.0");
         PRIMITIVE_VALUES.put(short.class, "0");
+    }
+
+    public static Map<String, Type> dataModelToMap(Class<?> clazz) {
+        return dataModelToMap(clazz, "");
     }
 
     public static Map<String, Type> dataModelToMap(Class<?> clazz, String field) {
