@@ -138,7 +138,7 @@ public class DataModelsUtils {
                 if (!declaredField.getType().equals(clazz)) {
                     res += getTypeAsJSON(declaredField, clazz, margin, formatted, deep);
                 } else {
-                    res += (formatted ? addMargin(margin + 4) : "") + "\"" + declaredField.getName() + "\" : \""
+                    res += (formatted ? addMargin(margin + 4) : "") + "\"" + declaredField.getName() + "\": \""
                             + declaredField.getType().getName() + "\"," + (formatted ? "\n" : "");
                 }
             }
@@ -183,7 +183,7 @@ public class DataModelsUtils {
                     break;
                 case "org.opencb.commons.datastore.core.ObjectMap":
                 case "java.util.Map":
-                    value = "{\"key\":\"value\"}";
+                    value = "{\"key\": \"value\"}";
                     break;
                 case "java.lang.Class":
                     value = "\"java.lang.Class\"";
@@ -199,7 +199,7 @@ public class DataModelsUtils {
                             value += getClassAsJSON(Class.forName(field.getType().getName()),
                                     (formatted ? margin + 4 : 0), formatted, true);
                         } else {
-                            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : \""
+                            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\": \""
                                     + field.getType().getName() + "\"," + (formatted ? "\n" : "");
                         }
                     } else {
@@ -209,7 +209,7 @@ public class DataModelsUtils {
                     break;
             }
 
-            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : " + value + "," + (formatted ? "\n" : "");
+            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\": " + value + "," + (formatted ? "\n" : "");
         }
         return "";
     }
@@ -219,7 +219,7 @@ public class DataModelsUtils {
             return Arrays.stream(type.getEnumConstants()).map(Object::toString)
                     .collect(Collectors.joining("|"));
         }
-        return "Where I say say I say Diego";
+        return "";
     }
 
     private static String getListRepresentation(Field field, Class<?> clazz, int margin, boolean formatted) {
