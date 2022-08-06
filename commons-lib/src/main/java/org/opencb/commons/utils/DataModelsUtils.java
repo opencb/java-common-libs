@@ -7,6 +7,7 @@ import org.opencb.commons.docs.DocUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DataModelsUtils {
 
@@ -153,7 +154,7 @@ public class DataModelsUtils {
                 if (!declaredField.getType().equals(clazz)) {
                     res += getTypeAsJSON(declaredField, clazz, margin, formatted, deep);
                 } else {
-                    res += (formatted ? addMargin(margin + 4) : "") + "\"" + declaredField.getName() + "\" : \""
+                    res += (formatted ? addMargin(margin + 4) : "") + "\"" + declaredField.getName() + "\": \""
                             + declaredField.getType().getName() + "\"," + (formatted ? "\n" : "");
                 }
             }
@@ -191,14 +192,14 @@ public class DataModelsUtils {
                     value = "0";
                     break;
                 case "java.util.List":
-                    value = getListRepresentation(field, clazz);
+                    value = getListRepresentation(field, clazz, margin, formatted);
                     break;
                 case "java.util.Date":
                     value = "\"dd/mm/yyyy\"";
                     break;
                 case "org.opencb.commons.datastore.core.ObjectMap":
                 case "java.util.Map":
-                    value = "{\"key\":\"value\"}";
+                    value = "{\"key\": \"value\"}";
                     break;
                 case "java.lang.Class":
                     value = "\"java.lang.Class\"";
@@ -207,12 +208,14 @@ public class DataModelsUtils {
                     value = "\"java.lang.Object\"";
                     break;
                 default:
-                    if (deep) {
+                    if (field.getType().isEnum()) {
+                        value = "\"" + printEnum(field.getType()) + "\"";
+                    } else if (deep) {
                         if (!Class.forName(field.getType().getName()).equals(clazz)) {
                             value += getClassAsJSON(Class.forName(field.getType().getName()),
                                     (formatted ? margin + 4 : 0), formatted, true);
                         } else {
-                            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : \""
+                            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\": \""
                                     + field.getType().getName() + "\"," + (formatted ? "\n" : "");
                         }
                     } else {
@@ -222,12 +225,20 @@ public class DataModelsUtils {
                     break;
             }
 
-            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\" : " + value + "," + (formatted ? "\n" : "");
+            return (formatted ? addMargin(margin + 4) : "") + "\"" + field.getName() + "\": " + value + "," + (formatted ? "\n" : "");
         }
         return "";
     }
 
-    private static String getListRepresentation(Field field, Class<?> clazz) {
+    private static String printEnum(Class<?> type) {
+        if (type.isEnum()) {
+            return Arrays.stream(type.getEnumConstants()).map(Object::toString)
+                    .collect(Collectors.joining("|"));
+        }
+        return "";
+    }
+
+    private static String getListRepresentation(Field field, Class<?> clazz, int margin, boolean formatted) {
         String res = "[]";
         Class collectionGenericType = DocUtils.getCollectionGenericType(field);
         if (collectionGenericType.equals(clazz)) {
@@ -240,8 +251,8 @@ public class DataModelsUtils {
         } else if (collectionGenericType.getCanonicalName().equals("java.lang.Class")) {
             res = "[\"java.lang.Class\"]";
         } else {
-            System.out.println(collectionGenericType.getCanonicalName());
-            res = "[" + getClassAsJSON(collectionGenericType, 0, false, false) + "]";
+            // System.out.println(collectionGenericType.getCanonicalName());
+            res = "[" + getClassAsJSON(collectionGenericType, (formatted ? margin + 4 : 0), true, false) + "]";
             // res = "[" + collectionGenericType.getCanonicalName() + "]";
         }
         return res;
