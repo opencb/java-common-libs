@@ -21,7 +21,7 @@ jobs:
           name: build-folder
           path: build
       - name: Chmod
-        run: chmod +x build/bin/*sh
+        run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
       - uses: docker/login-action@v1
         if: ${{ inputs.cli }}
         with:
