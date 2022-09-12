@@ -113,17 +113,17 @@ public class MongoDBCollection {
                 null);
     }
 
-    public DataResult<Long> count() {
+    public <T> DataResult<T> count() {
         long start = startQuery();
         long l = mongoDBNativeQuery.count();
         return endQuery(Collections.emptyList(), l, start);
     }
 
-    public DataResult<Long> count(Bson query) {
+    public <T> DataResult<T> count(Bson query) {
         return count(null, query);
     }
 
-    public DataResult<Long> count(ClientSession clientSession, Bson query) {
+    public <T> DataResult<T> count(ClientSession clientSession, Bson query) {
         long start = startQuery();
         long l = mongoDBNativeQuery.count(clientSession, query);
         return endQuery(Collections.emptyList(), l, start);
