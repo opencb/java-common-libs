@@ -32,6 +32,8 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,6 +66,8 @@ public class MongoDBCollection {
 
     private ObjectMapper objectMapper;
     private ObjectWriter objectWriter;
+
+    protected Logger logger = LoggerFactory.getLogger(MongoDBCollection.class);
 
     MongoDBCollection(MongoCollection<Document> dbCollection) {
         this(dbCollection, null);
@@ -151,7 +155,9 @@ public class MongoDBCollection {
             } else if (value.isBoolean()) {
                 l.add(value.asBoolean().getValue());
             } else {
-                throw new IllegalArgumentException("Found result with BsonType is not valid: " + value.getBsonType());
+                logger.error("Invalid field param: \"" + key + "\". Found result with not valid BsonType: "
+                        + value.getBsonType());
+                throw new IllegalArgumentException("Invalid field param: " + key);
             }
         }
         return endQuery(l, start);
