@@ -38,6 +38,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     private static final Pattern KEY_SPLIT_PATTERN = Pattern.compile("(^[^\\[\\].]+(?:\\[[^\\]]+\\])?)(?:\\.(.*))*");
     private static final Pattern LIST_FILTER_PATTERN = Pattern.compile("([^\\[\\]]+)\\[([^=]*?)(?:[=]?)([^=]+)\\]$");
+    private static final Pattern COMMA_SEPARATED_LIST_SPLIT_PATTERN = Pattern.compile("((?:(?!,\\S).)+)+");
 
     public ObjectMap() {
         objectMap = new LinkedHashMap<>();
@@ -258,7 +259,24 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public List<String> getAsStringList(String field) {
-        return getAsStringList(field, ",");
+        Object value = get(field);
+        if (value == null) {
+            return Collections.emptyList();
+        } else {
+            if (value instanceof List) {
+                return (List) value;
+            } else if (value instanceof Collection) {
+                Collection x = (Collection) value;
+                return new ArrayList<String>(x);
+            } else {
+                List<String> groups = new ArrayList<>();
+                Matcher m = COMMA_SEPARATED_LIST_SPLIT_PATTERN.matcher(String.valueOf(value));
+                while (m.find()) {
+                    groups.add(m.group());
+                }
+                return groups;
+            }
+        }
     }
 
     public List<String> getAsStringList(String field, String separator) {

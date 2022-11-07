@@ -17,6 +17,7 @@
 package org.opencb.commons.datastore.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -260,5 +261,15 @@ public class ObjectMapTest {
         assertEquals("BA", objectMap.get("nestedList[def].nested.list[name=BABC].nested.value"));
         assertEquals("CG", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].nested.value"));
         assertEquals("CGHI", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].name"));
+    }
+
+    @Test
+    public void testListSplit() {
+        List<String> originalValues = Arrays.asList("disorder1", "disorder2, blabla", "disorder3");
+        objectMap.put("key", StringUtils.join(originalValues, ","));
+        List<String> values = objectMap.getAsStringList("key");
+        System.out.println(StringUtils.join(values, ";"));
+        assertEquals(originalValues.size(), values.size());
+        assertTrue(originalValues.containsAll(values));
     }
 }
