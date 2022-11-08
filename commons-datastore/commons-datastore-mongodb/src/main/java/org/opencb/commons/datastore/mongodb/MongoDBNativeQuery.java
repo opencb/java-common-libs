@@ -259,8 +259,7 @@ public class MongoDBNativeQuery {
 
     public Document explain(Bson query, Bson projection, QueryOptions options) {
         return nativeFind(null, query, projection, options)
-                .modifiers(new Document("$explain", true))
-                .first();
+                .explain();
     }
 
     /**
@@ -372,14 +371,14 @@ public class MongoDBNativeQuery {
         Iterator<? extends Bson> updateIterator = updates.iterator();
 
         List<WriteModel<Document>> actions = new ArrayList<>(queries.size());
-        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(upsert);
 
 
         while (queryIterator.hasNext()) {
             Bson query = queryIterator.next();
             Bson update = updateIterator.next();
 
-            actions.add(new ReplaceOneModel<>(query, (Document) update, updateOptions));
+            actions.add(new ReplaceOneModel<>(query, (Document) update, replaceOptions));
         }
 
         if (clientSession != null) {
@@ -394,11 +393,11 @@ public class MongoDBNativeQuery {
     }
 
     public UpdateResult replace(ClientSession clientSession, Bson query, Bson updates, boolean upsert) {
-        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        ReplaceOptions replaceOptions = new ReplaceOptions().upsert(upsert);
         if (clientSession != null) {
-            return dbCollection.replaceOne(clientSession, query, (Document) updates, updateOptions);
+            return dbCollection.replaceOne(clientSession, query, (Document) updates, replaceOptions);
         } else {
-            return dbCollection.replaceOne(query, (Document) updates, updateOptions);
+            return dbCollection.replaceOne(query, (Document) updates, replaceOptions);
         }
     }
 

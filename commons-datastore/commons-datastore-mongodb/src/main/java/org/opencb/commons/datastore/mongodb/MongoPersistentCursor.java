@@ -167,6 +167,11 @@ public class MongoPersistentCursor implements MongoCursor<Document> {
     }
 
     @Override
+    public int available() {
+        return this.mongoCursor.available();
+    }
+
+    @Override
     public Document tryNext() {
         Document next;
         try {

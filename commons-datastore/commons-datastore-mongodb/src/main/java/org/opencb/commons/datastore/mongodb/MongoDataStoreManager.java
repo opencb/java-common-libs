@@ -18,8 +18,10 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.ReadPreference;
 import com.mongodb.*;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.internal.MongoClientImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
@@ -123,25 +125,27 @@ public class MongoDataStoreManager implements AutoCloseable {
         // PRIMARY_DB is selected
 //            String dbPrefix = applicationProperties.getProperty(speciesVersionPrefix + ".DB", "PRIMARY_DB");
         // We create the MongoClientOptions
-        MongoClientOptions mongoClientOptions;
-        MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
-                .connectionsPerHost(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT))
-                .connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT))
-                .readPreference(
-                        ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE, READ_PREFERENCE_DEFAULT.getValue())));
+        MongoClientSettings mongoClientSettings;
+        MongoClientSettings.Builder builder = MongoClientSettings.builder()
+                .applyToSocketSettings(b -> b.connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT,
+                        CONNECT_TIMEOUT_DEFAULT), TimeUnit.SECONDS))
+                .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE,
+                        READ_PREFERENCE_DEFAULT.getValue())))
+                .applyToConnectionPoolSettings(b -> b.maxSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST,
+                        CONNECTIONS_PER_HOST_DEFAULT)));
 
         if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
             logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
-            builder = builder.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET));
+            builder.applyToClusterSettings(b -> b.requiredReplicaSetName(mongoDBConfiguration.getString(REPLICA_SET)));
         }
 
         if (mongoDBConfiguration.getBoolean(SSL_ENABLED)) {
             logger.debug("SSL connections enabled for " + database);
-            builder = builder.sslEnabled(true);
+            builder.applyToSslSettings(b -> b.enabled(true));
         }
         if (mongoDBConfiguration.getBoolean(SSL_INVALID_HOSTNAME_ALLOWED)) {
             logger.debug("SSL invalid hostnames allowed for " + database);
-            builder = builder.sslInvalidHostNameAllowed(true);
+            builder.applyToSslSettings(b -> b.invalidHostNameAllowed(true));
         }
         if (mongoDBConfiguration.getBoolean(SSL_INVALID_CERTIFICATES_ALLOWED)) {
             logger.debug("SSL invalid certificates allowed for " + database);
@@ -165,13 +169,11 @@ public class MongoDataStoreManager implements AutoCloseable {
 
                 SSLContext sc = SSLContext.getInstance("SSL");
                 sc.init(null, trustAllCerts, new SecureRandom());
-                builder = builder.sslContext(sc);
+                builder.applyToSslSettings(b -> b.context(sc));
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 throw new RuntimeException(e);
             }
         }
-
-        mongoClientOptions = builder.build();
 
         assert (dataStoreServerAddresses != null);
 
@@ -184,11 +186,11 @@ public class MongoDataStoreManager implements AutoCloseable {
                     .getString(AUTHENTICATION_MECHANISM, AuthenticationMechanism.SCRAM_SHA_1.toString());
             String authDatabase = mongoDBConfiguration.getString(AUTHENTICATION_DATABASE, "");
 
+            logger.debug("Using " + AUTHENTICATION_MECHANISM + " " + AuthenticationMechanism.fromMechanismName(authMechanismStr));
             mongoCredential = MongoCredential.createCredential(user, authDatabase, pass.toCharArray())
                     .withMechanism(AuthenticationMechanism.fromMechanismName(authMechanismStr));
-            logger.debug("Using " + AUTHENTICATION_MECHANISM + " " + AuthenticationMechanism.fromMechanismName(authMechanismStr));
         }
-        MongoClient mc = newMongoClient(mongoClientOptions, mongoCredential);
+        MongoClient mc = newMongoClient(builder, mongoCredential);
         MongoDatabase db = mc.getDatabase(database);
 
         logger.info("MongoDataStoreManager: MongoDataStore object for database: '" + database + "' created in "
@@ -239,34 +241,28 @@ public class MongoDataStoreManager implements AutoCloseable {
     }
 
     private MongoClient newMongoClient() {
-        return newMongoClient(new MongoClientOptions.Builder().build(), null);
+        return new MongoClientImpl(MongoClientSettings.builder().build(), MongoDriverInformation.builder().build());
     }
 
-    private MongoClient newMongoClient(MongoClientOptions mongoClientOptions, MongoCredential mongoCredential) {
-        MongoClient mc;
+    private MongoClient newMongoClient(MongoClientSettings.Builder builder, MongoCredential mongoCredential) {
+        List<ServerAddress> serverAddressList;
         if (dataStoreServerAddresses.size() == 1) {
-            if (mongoCredential != null) {
-                mc = new MongoClient(
-                        new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
-                        mongoCredential,
-                        mongoClientOptions);
-            } else {
-                mc = new MongoClient(
-                        new ServerAddress(dataStoreServerAddresses.get(0).getHost(), dataStoreServerAddresses.get(0).getPort()),
-                        mongoClientOptions);
-            }
+            serverAddressList = Collections.singletonList(new ServerAddress(dataStoreServerAddresses.get(0).getHost(),
+                    dataStoreServerAddresses.get(0).getPort()));
         } else {
-            List<ServerAddress> serverAddresses = new ArrayList<>(dataStoreServerAddresses.size());
+            serverAddressList = new ArrayList<>(dataStoreServerAddresses.size());
             for (DataStoreServerAddress serverAddress : dataStoreServerAddresses) {
-                serverAddresses.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
-            }
-            if (mongoCredential != null) {
-                mc = new MongoClient(serverAddresses, Arrays.asList(mongoCredential), mongoClientOptions);
-            } else {
-                mc = new MongoClient(serverAddresses, mongoClientOptions);
+                serverAddressList.add(new ServerAddress(serverAddress.getHost(), serverAddress.getPort()));
             }
         }
-        return mc;
+
+        builder.applyToClusterSettings(b -> b.hosts(serverAddressList));
+        if (mongoCredential != null) {
+            builder.credential(mongoCredential);
+        }
+        MongoClientSettings mongoClientSettings = builder.build();
+
+        return new MongoClientImpl(mongoClientSettings, MongoDriverInformation.builder().build());
     }
 
     /*
