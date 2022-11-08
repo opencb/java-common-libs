@@ -128,7 +128,7 @@ public class MongoDataStoreManager implements AutoCloseable {
         MongoClientSettings mongoClientSettings;
         MongoClientSettings.Builder builder = MongoClientSettings.builder()
                 .applyToSocketSettings(b -> b.connectTimeout(mongoDBConfiguration.getInt(CONNECT_TIMEOUT,
-                        CONNECT_TIMEOUT_DEFAULT), TimeUnit.SECONDS))
+                        CONNECT_TIMEOUT_DEFAULT), TimeUnit.MILLISECONDS))
                 .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE,
                         READ_PREFERENCE_DEFAULT.getValue())))
                 .applyToConnectionPoolSettings(b -> b.maxSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST,
