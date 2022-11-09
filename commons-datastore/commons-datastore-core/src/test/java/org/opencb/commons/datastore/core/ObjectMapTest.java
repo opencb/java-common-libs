@@ -264,12 +264,22 @@ public class ObjectMapTest {
     }
 
     @Test
-    public void testListSplit() {
+    public void testPatternListSplit() {
         List<String> originalValues = Arrays.asList("disorder1", "disorder2, blabla", "disorder3");
         objectMap.put("key", StringUtils.join(originalValues, ","));
-        List<String> values = objectMap.getAsStringList("key");
-        System.out.println(StringUtils.join(values, ";"));
+        objectMap.put("key1", "");
+        objectMap.put("key2", "my value");
+
+        List<String> values = objectMap.getAsStringList("key", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
         assertEquals(originalValues.size(), values.size());
         assertTrue(originalValues.containsAll(values));
+
+        values = objectMap.getAsStringList("key1", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(1, values.size());
+        assertEquals("", values.get(0));
+
+        values = objectMap.getAsStringList("key2", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(1, values.size());
+        assertEquals("my value", values.get(0));
     }
 }

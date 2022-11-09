@@ -38,7 +38,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     private static final Pattern KEY_SPLIT_PATTERN = Pattern.compile("(^[^\\[\\].]+(?:\\[[^\\]]+\\])?)(?:\\.(.*))*");
     private static final Pattern LIST_FILTER_PATTERN = Pattern.compile("([^\\[\\]]+)\\[([^=]*?)(?:[=]?)([^=]+)\\]$");
-    private static final Pattern COMMA_SEPARATED_LIST_SPLIT_PATTERN = Pattern.compile("((?:(?!,\\S).)+)+");
+    public static final Pattern COMMA_SEPARATED_LIST_SPLIT_PATTERN = Pattern.compile("((?:(?!,\\S).)+)+");
 
     public ObjectMap() {
         objectMap = new LinkedHashMap<>();
@@ -259,24 +259,7 @@ public class ObjectMap implements Map<String, Object>, Serializable {
     }
 
     public List<String> getAsStringList(String field) {
-        Object value = get(field);
-        if (value == null) {
-            return Collections.emptyList();
-        } else {
-            if (value instanceof List) {
-                return (List) value;
-            } else if (value instanceof Collection) {
-                Collection x = (Collection) value;
-                return new ArrayList<String>(x);
-            } else {
-                List<String> groups = new ArrayList<>();
-                Matcher m = COMMA_SEPARATED_LIST_SPLIT_PATTERN.matcher(String.valueOf(value));
-                while (m.find()) {
-                    groups.add(m.group());
-                }
-                return groups;
-            }
-        }
+        return getAsStringList(field, ",");
     }
 
     public List<String> getAsStringList(String field, String separator) {
@@ -289,6 +272,32 @@ public class ObjectMap implements Map<String, Object>, Serializable {
                 stringList.add(o == null ? null : o.toString());
             }
             return stringList;
+        }
+    }
+
+    public List<String> getAsStringList(String field, Pattern pattern) {
+        Object value = get(field);
+        if (value == null) {
+            return Collections.emptyList();
+        } else {
+            if (value instanceof List) {
+                return (List) value;
+            } else if (value instanceof Collection) {
+                Collection x = (Collection) value;
+                return new ArrayList<String>(x);
+            } else {
+                String stringValue = String.valueOf(value);
+                if (StringUtils.isEmpty(stringValue)) {
+                    return Collections.singletonList(stringValue);
+                } else {
+                    List<String> groups = new ArrayList<>();
+                    Matcher m = pattern.matcher(String.valueOf(value));
+                    while (m.find()) {
+                        groups.add(m.group());
+                    }
+                    return groups;
+                }
+            }
         }
     }
 //
