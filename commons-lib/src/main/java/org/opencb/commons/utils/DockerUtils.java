@@ -141,6 +141,8 @@ public class DockerUtils {
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
                              Map<String, String> dockerParams) throws IOException {
+        checkDockerDaemonAlive();
+
         String commandLine = buildCommandLine(image, inputBindings, outputBinding, cmdParams, dockerParams);
 
         LOGGER.info("Run docker command line");
@@ -153,5 +155,27 @@ public class DockerUtils {
         cmd.run();
 
         return commandLine;
+    }
+
+    public static void checkDockerDaemonAlive() throws IOException {
+        int maxAttempts = 12;
+        for (int i = 0; i < maxAttempts; i++) {
+            Command command = new Command("docker stats --no-stream");
+            command.run();
+            if (command.getExitValue() == 0) {
+                // Docker is alive
+                if (i != 0) {
+                    LOGGER.info("Docker daemon up and running!");
+                }
+                return;
+            }
+            LOGGER.info("Waiting for docker to start... (sleep 5s) [" + i + "/" + maxAttempts + "]");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
+        }
+        throw new IOException("Docker daemon is not available on this node!");
     }
 }
