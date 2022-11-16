@@ -138,11 +138,9 @@ public class MongoDBCollection {
         MongoCursor<BsonValue> iterator = mongoDBNativeQuery.distinct(key, query, BsonValue.class).iterator();
         while (iterator.hasNext()) {
             BsonValue value = iterator.next();
-            if (value == null || value.isNull()) {
-                l.add(null);
-            } else if (value.isString()) {
+            if (value != null && value.isString()) {
                 l.add(value.asString().getValue());
-            } else if (value.isNumber()) {
+            } else if (value != null && value.isNumber()) {
                 if (value.isInt32()) {
                     l.add(value.asInt32().getValue());
                 } else if (value.isInt64()) {
@@ -150,11 +148,11 @@ public class MongoDBCollection {
                 } else {
                     l.add(value.asDouble().getValue());
                 }
-            } else if (value.isDateTime()) {
+            } else if (value != null && value.isDateTime()) {
                 l.add(value.asDateTime().getValue());
-            } else if (value.isBoolean()) {
+            } else if (value != null && value.isBoolean()) {
                 l.add(value.asBoolean().getValue());
-            } else {
+            } else if (value != null) {
                 logger.error("Invalid field param: \"" + key + "\". Found result with not valid BsonType: "
                         + value.getBsonType());
                 throw new IllegalArgumentException("Invalid field param: " + key);
