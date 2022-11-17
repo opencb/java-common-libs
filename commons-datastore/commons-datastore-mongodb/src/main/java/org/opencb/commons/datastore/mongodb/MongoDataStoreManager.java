@@ -23,7 +23,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.internal.MongoClientImpl;
-import com.mongodb.connection.ClusterConnectionMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
