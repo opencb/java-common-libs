@@ -23,7 +23,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.internal.MongoClientImpl;
-import com.mongodb.connection.ClusterConnectionMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
@@ -132,8 +131,8 @@ public class MongoDataStoreManager implements AutoCloseable {
                         CONNECT_TIMEOUT_DEFAULT), TimeUnit.MILLISECONDS))
                 .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE,
                         READ_PREFERENCE_DEFAULT.getValue())))
-                .applyToConnectionPoolSettings(b -> b.maxSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST,
-                        CONNECTIONS_PER_HOST_DEFAULT)));
+                .applyToConnectionPoolSettings(b -> b
+                        .minSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT)));
 
         if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
             logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
