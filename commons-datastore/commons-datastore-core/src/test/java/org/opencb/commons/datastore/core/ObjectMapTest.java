@@ -17,6 +17,7 @@
 package org.opencb.commons.datastore.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -260,5 +261,25 @@ public class ObjectMapTest {
         assertEquals("BA", objectMap.get("nestedList[def].nested.list[name=BABC].nested.value"));
         assertEquals("CG", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].nested.value"));
         assertEquals("CGHI", objectMap.get("nestedList[nested.value=G].nested.list[id=Cghi].name"));
+    }
+
+    @Test
+    public void testPatternListSplit() {
+        List<String> originalValues = Arrays.asList("disorder1", "disorder2, blabla", "disorder3");
+        objectMap.put("key", StringUtils.join(originalValues, ","));
+        objectMap.put("key1", "");
+        objectMap.put("key2", "my value");
+
+        List<String> values = objectMap.getAsStringList("key", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(originalValues.size(), values.size());
+        assertTrue(originalValues.containsAll(values));
+
+        values = objectMap.getAsStringList("key1", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(1, values.size());
+        assertEquals("", values.get(0));
+
+        values = objectMap.getAsStringList("key2", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(1, values.size());
+        assertEquals("my value", values.get(0));
     }
 }
