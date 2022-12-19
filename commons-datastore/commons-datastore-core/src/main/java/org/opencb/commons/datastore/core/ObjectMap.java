@@ -280,11 +280,9 @@ public class ObjectMap implements Map<String, Object>, Serializable {
         if (value == null) {
             return Collections.emptyList();
         } else {
-            if (value instanceof List) {
-                return (List) value;
-            } else if (value instanceof Collection) {
-                Collection x = (Collection) value;
-                return new ArrayList<String>(x);
+            if (value instanceof Collection) {
+                // The value is already a collection, therefore we can not use the pattern.
+                return getAsStringList(field);
             } else {
                 String stringValue = String.valueOf(value);
                 if (StringUtils.isEmpty(stringValue)) {

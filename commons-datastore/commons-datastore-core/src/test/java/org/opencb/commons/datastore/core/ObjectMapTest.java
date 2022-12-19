@@ -269,6 +269,8 @@ public class ObjectMapTest {
         objectMap.put("key", StringUtils.join(originalValues, ","));
         objectMap.put("key1", "");
         objectMap.put("key2", "my value");
+        objectMap.put("key3", Arrays.asList("1", "2"));
+        objectMap.put("key4", Arrays.asList(1, 2));
 
         List<String> values = objectMap.getAsStringList("key", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
         assertEquals(originalValues.size(), values.size());
@@ -281,5 +283,15 @@ public class ObjectMapTest {
         values = objectMap.getAsStringList("key2", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
         assertEquals(1, values.size());
         assertEquals("my value", values.get(0));
+
+        values = objectMap.getAsStringList("key3", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(2, values.size());
+        assertEquals("1", values.get(0));
+        assertEquals("2", values.get(1));
+
+        values = objectMap.getAsStringList("key4", ObjectMap.COMMA_SEPARATED_LIST_SPLIT_PATTERN);
+        assertEquals(2, values.size());
+        assertEquals("1", values.get(0));
+        assertEquals("2", values.get(1));
     }
 }
