@@ -18,6 +18,7 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.*;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.TransactionBody;
 import org.bson.Document;

@@ -425,7 +425,7 @@ public class MongoDBCollectionTest {
     }
 
     @Test
-    public void testAggregate() throws Exception {
+    public void testAggregate() {
         List<Bson> dbObjectList = new ArrayList<>();
         Document match = new Document("$match", new Document("age", new BasicDBObject("$gt", 2)));
         Document group = new Document("$group", new Document("_id", "$age"));
