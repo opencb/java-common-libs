@@ -132,7 +132,7 @@ public class MongoDataStoreManager implements AutoCloseable {
                 .readPreference(ReadPreference.valueOf(mongoDBConfiguration.getString(READ_PREFERENCE,
                         READ_PREFERENCE_DEFAULT.getValue())))
                 .applyToConnectionPoolSettings(b -> b
-                        .minSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT)));
+                        .maxSize(mongoDBConfiguration.getInt(CONNECTIONS_PER_HOST, CONNECTIONS_PER_HOST_DEFAULT)));
 
         if (mongoDBConfiguration.getString(REPLICA_SET) != null && !mongoDBConfiguration.getString(REPLICA_SET).isEmpty()) {
             logger.debug("Setting replicaSet to " + mongoDBConfiguration.getString(REPLICA_SET));
