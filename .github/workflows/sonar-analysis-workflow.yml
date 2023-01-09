@@ -29,10 +29,10 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Start MongoDB v${{ matrix.mongodb }}
+      - name: Start MongoDB v5.0
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: ${{ matrix.mongodb }}
+          mongodb-version: 5.0
           mongodb-replica-set: rs-test
       - name: Build and analyze
         env:
