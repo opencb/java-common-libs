@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+    with:
+      maven_opts: -DskipTests
 
   sonar:
     uses: opencb/java-common-libs/.github/workflows/sonar-analysis-workflow.yml@develop

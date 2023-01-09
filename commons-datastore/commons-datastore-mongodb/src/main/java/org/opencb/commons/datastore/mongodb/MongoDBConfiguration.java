@@ -46,6 +46,8 @@ public class MongoDBConfiguration extends ObjectMap {
     public static final boolean SSL_INVALID_HOSTNAME_ALLOWED_DEFAULT = false;
     public static final String SSL_INVALID_CERTIFICATES_ALLOWED = "sslInvalidCertificatesAllowed";
     public static final boolean SSL_INVALID_CERTIFICATES_ALLOWED_DEFAULT = false;
+    public static final String RETRY_WRITES = "retryWrites";
+    public static final Boolean RETRY_WRITES_DEFAULT = true;
 
     public enum ReadPreference {
         PRIMARY("primary"),
@@ -68,6 +70,24 @@ public class MongoDBConfiguration extends ObjectMap {
     MongoDBConfiguration(final Map<String, Object> inputOptions) {
         super(inputOptions);
         this.putAll(inputOptions);
+    }
+
+
+    /**
+     * Create a new Native instance.  This is a convenience method, equivalent to {@code new MongoClientOptions.Native()}.
+     *
+     * @return a new instance of a Native
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+
+    @Override
+    public String toJson() {
+        ObjectMap copy = new ObjectMap(this);
+        copy.replace(PASSWORD, "xxxxxxxx");
+        return copy.toJson();
     }
 
     /**
@@ -154,8 +174,14 @@ public class MongoDBConfiguration extends ObjectMap {
             optionsMap.put(SSL_ENABLED, enabled);
             return this;
         }
+
         public Builder setAuthenticationMechanism(String authenticationMechanism) {
             optionsMap.put(AUTHENTICATION_MECHANISM, authenticationMechanism);
+            return this;
+        }
+
+        public Builder setRetryWrites(Boolean retryWrites) {
+            optionsMap.put(RETRY_WRITES, retryWrites);
             return this;
         }
 
@@ -165,53 +191,4 @@ public class MongoDBConfiguration extends ObjectMap {
 
     }
 
-    /**
-     * Create a new Native instance.  This is a convenience method, equivalent to {@code new MongoClientOptions.Native()}.
-     *
-     * @return a new instance of a Native
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-//    public void add(final String key, final Object value) {
-//        if(dataStoreConfiguration == null) {
-//            dataStoreConfiguration = new DataStoreConfiguration();
-//        }
-//        dataStoreConfiguration.put(key, value);
-//    }
-//
-//    public void remove(final String key) {
-//        if(dataStoreConfiguration != null) {
-//            dataStoreConfiguration.remove(key);
-//        }
-//    }
-//
-//    public void addConfiguration(final Map<String, Object> inputOptions) {
-//        if(dataStoreConfiguration == null) {
-//            dataStoreConfiguration = new DataStoreConfiguration();
-//        }
-//        Iterator<String> iter = inputOptions.keySet().iterator();
-//        while (iter.hasNext()) {
-//            String next =  iter.next();
-//            dataStoreConfiguration.put(next, inputOptions.get(next));
-//        }
-//    }
-//
-//    public void setConfiguration(final Map<String, Object> inputOptions) {
-//        dataStoreConfiguration = new DataStoreConfiguration(inputOptions);
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return dataStoreConfiguration.toString();
-//    }
-
-
-    @Override
-    public String toJson() {
-        ObjectMap copy = new ObjectMap(this);
-        copy.replace(PASSWORD, "xxxxxxxx");
-        return copy.toJson();
-    }
 }

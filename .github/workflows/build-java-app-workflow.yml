@@ -34,7 +34,7 @@ jobs:
 #          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 #          restore-keys: ${{ runner.os }}-maven
       - name: Maven Build (skip tests)
-        run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
+        run: mvn -T 2 clean install ${{ inputs.maven_opts }}
       - uses: actions/upload-artifact@v2
         with:
           name: build-folder
