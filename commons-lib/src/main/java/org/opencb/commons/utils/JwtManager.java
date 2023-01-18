@@ -1,0 +1,194 @@
+/*
+ * Copyright 2015-2020 OpenCB
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.opencb.commons.utils;
+
+import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.security.Key;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+public class JwtManager {
+
+    private SignatureAlgorithm algorithm;
+
+    private Key privateKey;
+    private Key publicKey;
+
+    private final Logger logger;
+
+    // 32 characters to ensure it is at least 256 bits long
+    public static final int SECRET_KEY_MIN_LENGTH = 32;
+
+    public JwtManager(String algorithm) {
+        this(algorithm, null, null);
+    }
+
+    public JwtManager(String algorithm, Key secretKey) {
+        this(algorithm, secretKey, secretKey);
+    }
+
+    public JwtManager(String algorithm, Key privateKey, Key publicKey) {
+        this.algorithm = SignatureAlgorithm.forName(algorithm);
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+
+        logger = LoggerFactory.getLogger(JwtManager.class);
+    }
+
+    public SignatureAlgorithm getAlgorithm() {
+        return algorithm;
+    }
+
+    public JwtManager setAlgorithm(SignatureAlgorithm algorithm) {
+        this.algorithm = algorithm;
+        return this;
+    }
+
+    public Key getPrivateKey() {
+        return privateKey;
+    }
+
+    public JwtManager setPrivateKey(Key privateKey) {
+        this.privateKey = privateKey;
+        return this;
+    }
+
+    public Key getPublicKey() {
+        return publicKey;
+    }
+
+    public JwtManager setPublicKey(Key publicKey) {
+        this.publicKey = publicKey;
+        return this;
+    }
+
+    public String createJWTToken(String userId, long expiration) {
+        return createJWTToken(userId, Collections.emptyMap(), expiration);
+    }
+
+    public String createJWTToken(String userId, Map<String, Object> claims, long expiration) {
+        long currentTime = System.currentTimeMillis();
+
+        JwtBuilder jwtBuilder = Jwts.builder();
+        if (claims != null && !claims.isEmpty()) {
+            jwtBuilder.setClaims(claims);
+        }
+        jwtBuilder.setSubject(userId)
+                .setAudience("OpenCGA users")
+                .setIssuedAt(new Date(currentTime))
+                .signWith(privateKey, algorithm);
+
+        // Set the expiration in number of seconds only if 'expiration' is greater than 0
+        if (expiration > 0) {
+            jwtBuilder.setExpiration(new Date(currentTime + expiration * 1000L));
+        }
+
+        return jwtBuilder.compact();
+    }
+
+    public void validateToken(String token) {
+        validateToken(token, this.publicKey);
+    }
+
+    public void validateToken(String token, Key publicKey) {
+        parseClaims(token, publicKey);
+    }
+
+    public String getAudience(String token) {
+        return getAudience(token, this.publicKey);
+    }
+
+    public String getAudience(String token, Key publicKey) {
+        return parseClaims(token, publicKey).getBody().getAudience();
+    }
+
+    public String getUser(String token) {
+        return getUser(token, this.publicKey);
+    }
+
+    public String getUser(String token, Key publicKey) {
+        return parseClaims(token, publicKey).getBody().getSubject();
+    }
+
+    public String getUser(String token, String fieldKey) {
+        return String.valueOf(parseClaims(token, publicKey).getBody().get(fieldKey));
+    }
+
+    public List<String> getGroups(String token, String fieldKey) {
+        return getGroups(token, fieldKey, this.publicKey);
+    }
+
+    public List<String> getGroups(String token, String fieldKey, Key publicKey) {
+        Object o = parseClaims(token, publicKey).getBody().get(fieldKey);
+
+        if (o instanceof List) {
+            return (List<String>) o;
+        } else {
+            return Collections.singletonList(String.valueOf(o));
+        }
+    }
+
+    public Date getExpiration(String token) {
+        return getExpiration(token, this.publicKey);
+    }
+
+    public Date getExpiration(String token, Key publicKey) {
+        return parseClaims(token, publicKey).getBody().getExpiration();
+    }
+
+    public Object getClaim(String token, String claimId) {
+        return getClaim(token, claimId, this.publicKey);
+    }
+
+    public Object getClaim(String token, String claimId, Key publicKey) {
+        return parseClaims(token, publicKey).getBody().get(claimId);
+    }
+
+    private Jws<Claims> parseClaims(String token, Key publicKey) throws JwtException {
+        try {
+            return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token);
+        } catch (JwtException e) {
+            logger.error("JWT Error: '{}'", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Check if the token contains the key and any of the values from 'filters'
+    public boolean passFilters(String token, Map<String, List<String>> filters) {
+        return passFilters(token, filters, this.publicKey);
+    }
+
+    public boolean passFilters(String token, Map<String, List<String>> filters, Key publicKey) {
+        if (filters == null || filters.isEmpty()) {
+            return true;
+        }
+
+        Claims body = parseClaims(token, publicKey).getBody();
+        for (Map.Entry<String, List<String>> entry : filters.entrySet()) {
+            if (!entry.getValue().contains(String.valueOf(body.get(entry.getKey())))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
