@@ -15,7 +15,6 @@ jobs:
     needs: build
     strategy:
       matrix:
-        mongodb: [ "5.0" ]
         module: [ "","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - uses: actions/checkout@v2
@@ -27,10 +26,10 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
-      - name: Start MongoDB v${{ matrix.mongodb }}
+      - name: Start MongoDB v5.0
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: ${{ matrix.mongodb }}
+          mongodb-version: 5.0
           mongodb-replica-set: rs-test
       - name: Test and Analyze
         env:
