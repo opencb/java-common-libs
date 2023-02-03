@@ -9,13 +9,6 @@ env:
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
-  sonar:
-    uses: opencb/java-common-libs/.github/workflows/sonar-analysis-workflow.yml@develop
-    needs: build
-    with:
-      sonarProjectKey: opencb_java-common-libs
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   test:
     name: Test java-common-libs
     runs-on: ubuntu-20.04
@@ -23,6 +16,7 @@ jobs:
     strategy:
       matrix:
         mongodb: [ "5.0" ]
+        module: [ "","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -46,8 +40,8 @@ jobs:
       - name: Deploy unit tests web recursively to remote
         uses: garygrossgarten/github-action-scp@release
         with:
-          local: java-common-libs/target/site
-          remote: /var/www/html/reports/development/${{ env.xb_version }}/${{ github.ref_name }}/${{ github.sha }}/unit/java-common-libs
+          local: ${{ matrix.module }}/target/site
+          remote: /var/www/html/reports/development/${{ env.xb_version }}/${{ github.ref_name }}/${{ github.sha }}/unit/java-common-libs/${{ matrix.module }}
           host: ${{ secrets.SSH_TESTING_SERVER_HOST}}
           port: ${{ secrets.SSH_TESTING_SERVER_PORT}}
           username: ${{ secrets.SSH_TESTING_SERVER_USER }}
