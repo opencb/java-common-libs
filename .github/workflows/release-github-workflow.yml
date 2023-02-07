@@ -12,8 +12,8 @@ on:
 
 jobs:
   release-workflow:
-    name: GitHub Release
-    runs-on: ubuntu-20.04
+    name: Create GitHub Release
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/download-artifact@v2
         if: ${{ inputs.artifact }}

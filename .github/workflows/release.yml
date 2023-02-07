@@ -9,20 +9,11 @@ env:
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
-  sonar:
-    uses: opencb/java-common-libs/.github/workflows/sonar-analysis-workflow.yml@develop
-    needs: build
-    with:
-      sonarProjectKey: opencb_java-common-libs
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   test:
     name: Test java-common-libs
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: build
-    strategy:
-      matrix:
-        mongodb: [ "5.0" ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -33,10 +24,10 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
-      - name: Start MongoDB v${{ matrix.mongodb }}
+      - name: Start MongoDB v5.0
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: ${{ matrix.mongodb }}
+          mongodb-version: 5.0
           mongodb-replica-set: rs-test
       - name: Test and Analyze
         env:
@@ -48,13 +39,14 @@ jobs:
         with:
           name: workdir
           path: .
+
   publish-test:
     name: Publish test results
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: test
     strategy:
       matrix:
-        module: [ ".","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
+        module: [ ".","commons-lib","commons-datastore","commons-datastore/commons-datastore-core","commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - name: Download result dir
         uses: actions/download-artifact@v3
@@ -78,6 +70,7 @@ jobs:
       MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+
   release:
     uses: opencb/java-common-libs/.github/workflows/release-github-workflow.yml@develop
-    needs: deploy-maven
+    needs: test
