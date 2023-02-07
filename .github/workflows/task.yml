@@ -13,9 +13,6 @@ jobs:
     name: Test java-common-libs
     runs-on: ubuntu-20.04
     needs: build
-    strategy:
-      matrix:
-        module: [ ".","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -36,6 +33,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify surefire-report:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs
+  publish-test:
+    name: Publish test results
+    runs-on: ubuntu-20.04
+    needs: test
+    strategy:
+      matrix:
+        module: [ ".","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
+    steps:
       - name: Deploy unit tests web recursively to remote
         uses: garygrossgarten/github-action-scp@release
         with:
