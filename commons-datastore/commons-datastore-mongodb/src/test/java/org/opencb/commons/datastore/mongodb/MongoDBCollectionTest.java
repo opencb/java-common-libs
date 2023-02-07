@@ -445,7 +445,11 @@ public class MongoDBCollectionTest {
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 1));
         assertEquals("There must be 1 results", 1, queryResult.getResults().size());
-//        assertTrue(queryResult.getResults().contains(result.get(1)));
+
+        System.out.println("result = " + result);
+        System.out.println("queryResult.getResults() = " + queryResult.getResults());
+
+        assertTrue(queryResult.getResults().contains(result.get(1)));
     }
 
     @Test
