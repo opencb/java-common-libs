@@ -34,10 +34,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify surefire-report:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs
       - name: Upload result dir
-          uses: actions/upload-artifact@v3
-          with:
-            name: workdir
-            path: .
+        uses: actions/upload-artifact@v3
+        with:
+          name: workdir
+          path: .
   publish-test:
     name: Publish test results
     runs-on: ubuntu-20.04
@@ -47,9 +47,9 @@ jobs:
         module: [ ".","commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - name: Download result dir
-          uses: actions/download-artifact@v3
-          with:
-            name: workdir
+        uses: actions/download-artifact@v3
+        with:
+          name: workdir
       - name: Deploy unit tests web recursively to remote
         uses: garygrossgarten/github-action-scp@release
         with:
