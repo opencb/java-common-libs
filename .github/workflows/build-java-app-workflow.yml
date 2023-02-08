@@ -18,7 +18,7 @@ jobs:
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '10'
       - name: Set up JDK 8
@@ -29,7 +29,7 @@ jobs:
           cache: 'maven'
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: build-folder
           path: build/

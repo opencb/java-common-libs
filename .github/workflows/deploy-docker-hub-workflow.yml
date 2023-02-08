@@ -11,18 +11,19 @@ on:
         required: true
       DOCKER_HUB_PASSWORD:
         required: true
+
 jobs:
   deploy-docker-hub:
     name: Push Docker image
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: build-folder
           path: build
       - name: Chmod
         run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
-      - uses: docker/login-action@v1
+      - uses: docker/login-action@v2
         if: ${{ inputs.cli }}
         with:
           username: DOCKER_HUB_USER

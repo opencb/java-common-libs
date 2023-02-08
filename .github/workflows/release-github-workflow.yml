@@ -15,7 +15,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}

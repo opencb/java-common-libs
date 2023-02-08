@@ -14,12 +14,13 @@ on:
         required: true
       PYPI_TWINE_PASSWORD:
         required: true
+
 jobs:
   pypi:
     name: Deploy Python package in PyPI
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         if: ${{ inputs.artifact }}
         with:
           name: ${{ inputs.artifact }}
