@@ -1,4 +1,4 @@
-name: Buid and test java-common-libs
+name: Push java-common-libs task
 
 on:
   push:
