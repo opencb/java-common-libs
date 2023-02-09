@@ -1,4 +1,4 @@
-name: Reusable workflow to release in DockerHub
+name: Reusable workflow to push in DockerHub
 
 on:
   workflow_call:
