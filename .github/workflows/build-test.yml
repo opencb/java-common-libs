@@ -56,7 +56,7 @@ jobs:
     needs: test
     strategy:
       matrix:
-        module: [ ".","commons-lib","commons-datastore","commons-datastore/commons-datastore-core","commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
+        module: [ "commons-lib","commons-datastore","commons-datastore/commons-datastore-core","commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - name: Download result dir
         uses: actions/download-artifact@v3
