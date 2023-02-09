@@ -24,7 +24,7 @@ jobs:
       - name: Chmod
         run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
       - uses: docker/login-action@v2
-        if: ${{ inputs.cli }}
+#        if: ${{ inputs.cli }}
         with:
           username: DOCKER_HUB_USER
           password: DOCKER_HUB_PASSWORD

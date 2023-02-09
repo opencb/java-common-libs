@@ -2,12 +2,14 @@ name: Delete docker workflow from DockerHub
 
 on:
   workflow_call:
+    inputs:
+      cli:
+        type: string
+        required: true
     secrets:
       DOCKER_HUB_USER:
         required: true
       DOCKER_HUB_PASSWORD:
-        required: true
-      DOCKER_HUB_ORGANISATION:
         required: true
 
 jobs:
@@ -20,4 +22,4 @@ jobs:
           username: DOCKER_HUB_USER
           password: DOCKER_HUB_PASSWORD
       - name: Deploy in Docker Hub
-        run: ./docker/docker-build.py delete --organisation ${{ secrets.DOCKER_HUB_ORGANISATION }} --image app --tag ${{ github.head_ref }} --username ${{ secrets.DOCKER_HUB_USER }} --password ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: ${{ inputs.cli }}
