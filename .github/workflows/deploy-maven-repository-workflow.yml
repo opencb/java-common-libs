@@ -6,15 +6,15 @@ on:
       maven_opts:
         type: string
         required: false
-#    secrets:
+    secrets:
 #      MAVEN_NEXUS_USER:
 #        required: true
 #      MAVEN_NEXUS_PASSWORD:
 #        required: true
 #      MAVEN_GPG_PASSPHRASE:
 #        required: true
-#      MAVEN_GPG_PRIVATE_KEY:
-#        required: true
+      MAVEN_GPG_PRIVATE_KEY:
+        required: true
 
 jobs:
   deploy-workflow:
