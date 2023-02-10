@@ -1,4 +1,4 @@
-name: Reusable workflow to push in DockerHub
+name: Delete docker workflow from DockerHub
 
 on:
   workflow_call:
@@ -17,14 +17,7 @@ jobs:
     name: Push Docker image
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: build-folder
-          path: build
-      - name: Chmod
-        run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
       - uses: docker/login-action@v2
-#        if: ${{ inputs.cli }}
         with:
           username: DOCKER_HUB_USER
           password: DOCKER_HUB_PASSWORD
