@@ -14,8 +14,10 @@ on:
         required: false
     secrets:
       DOCKER_HUB_USER:
+        type: string
         required: true
       DOCKER_HUB_PASSWORD:
+        type: string
         required: true
 
 jobs:
