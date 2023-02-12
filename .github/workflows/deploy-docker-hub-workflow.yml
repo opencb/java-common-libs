@@ -6,6 +6,12 @@ on:
       cli:
         type: string
         required: true
+      repository:
+        type: string
+        required: false
+      branch:
+        type: string
+        required: false
     secrets:
       DOCKER_HUB_USER:
         required: true
@@ -17,6 +23,14 @@ jobs:
     name: Push Docker image
     runs-on: ubuntu-22.04
     steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@v3
+        if: inputs.repository != '' && inputs.branch != ''
+        with:
+#          token: ${{ secrets.GH_PRIVATE_TOKEN }}
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.branch }}
+#          path: custom-sites
       - uses: actions/download-artifact@v3
         with:
           name: build-folder
