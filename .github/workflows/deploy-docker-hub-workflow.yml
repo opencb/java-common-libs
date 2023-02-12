@@ -26,7 +26,7 @@ jobs:
       - uses: docker/login-action@v2
 #        if: ${{ inputs.cli }}
         with:
-          username: DOCKER_HUB_USER
-          password: DOCKER_HUB_PASSWORD
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Deploy in Docker Hub
         run: ${{ inputs.cli }}
