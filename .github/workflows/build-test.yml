@@ -3,19 +3,14 @@ on:
   workflow_call:
     secrets:
       SONAR_TOKEN:
-        type: string
         required: true
       SSH_TESTING_SERVER_HOST:
-        type: string
         required: true
       SSH_TESTING_SERVER_PORT:
-        type: string
         required: true
       SSH_TESTING_SERVER_USER:
-        type: string
         required: true
       SSH_TESTING_SERVER_PASSWORD:
-        type: string
         required: true
 
 env:
