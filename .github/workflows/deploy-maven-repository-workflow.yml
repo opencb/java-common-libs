@@ -8,16 +8,12 @@ on:
         required: false
     secrets:
       MAVEN_NEXUS_USER:
-        type: string
         required: true
       MAVEN_NEXUS_PASSWORD:
-        type: string
         required: true
       MAVEN_GPG_PASSPHRASE:
-        type: string
         required: true
       MAVEN_GPG_PRIVATE_KEY:
-        type: string
         required: true
 
 jobs:
