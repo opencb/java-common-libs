@@ -28,3 +28,12 @@ jobs:
       MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+
+  version:
+    name: Check snapshot version
+    needs: [ build,test ]
+    runs-on: ubuntu-22.04
+    if: contains(${{ needs.build.outputs.version }},"SNAPSHOT")
+    steps:
+      - name: test-version-from-check
+        run: echo "Project version is " ${{ needs.build.outputs.version }}
