@@ -6,8 +6,12 @@ on:
       - TASK-*
 
 jobs:
+  build:
+    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+
   test:
     uses: opencb/java-common-libs/.github/workflows/build-test.yml@develop
+    needs: build
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SSH_TESTING_SERVER_HOST: ${{ secrets.SSH_TESTING_SERVER_HOST}}
@@ -15,3 +19,12 @@ jobs:
       SSH_TESTING_SERVER_USER: ${{ secrets.SSH_TESTING_SERVER_USER }}
       SSH_TESTING_SERVER_PASSWORD: ${{ secrets.SSH_TESTING_SERVER_PASSWORD }}
 
+  deploy-maven:
+    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
+    needs: [ build,test ]
+    if: contains(${{ needs.build.outputs.version }},"TASK")
+    secrets:
+      MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
+      MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
