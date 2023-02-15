@@ -29,10 +29,19 @@ jobs:
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
 
-  version:
-    name: Check snapshot version
+  snapshot-version:
+    name: Check SNAPSHOT version
     needs: [ build,test ]
     if: contains(${{ needs.build.outputs.version }},"SNAPSHOT")
+    runs-on: ubuntu-22.04
+    steps:
+      - name: test-version-from-check
+        run: echo "Project version is " ${{ needs.build.outputs.version }}
+
+  task-version:
+    name: Check TASK version
+    needs: [ build,test ]
+    if: contains(${{ needs.build.outputs.version }},"TASK")
     runs-on: ubuntu-22.04
     steps:
       - name: test-version-from-check
