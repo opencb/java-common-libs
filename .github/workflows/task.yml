@@ -20,7 +20,7 @@ jobs:
       SSH_TESTING_SERVER_PASSWORD: ${{ secrets.SSH_TESTING_SERVER_PASSWORD }}
 
   deploy-maven:
-    if: contains(${{ needs.build.outputs.version }},"TASK")
+    if: contains( needs.build.outputs.version ,'TASK')
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
     needs: [ build, test ]
     secrets:
@@ -32,7 +32,7 @@ jobs:
   snapshot-version:
     name: Check SNAPSHOT version
     needs: [ build,test ]
-    if: contains(${{ needs.build.outputs.version }},"SNAPSHOT")
+    if: contains(needs.build.outputs.version ,'SNAPSHOT')
     runs-on: ubuntu-22.04
     steps:
       - name: test-version-from-check
@@ -41,7 +41,7 @@ jobs:
   task-version:
     name: Check TASK version
     needs: [ build,test ]
-    if: contains(${{ needs.build.outputs.version }},"TASK")
+    if: contains(needs.build.outputs.version ,'TASK')
     runs-on: ubuntu-22.04
     steps:
       - name: test-version-from-check
