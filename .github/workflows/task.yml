@@ -10,7 +10,7 @@ jobs:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
 
   test:
-    uses: opencb/java-common-libs/.github/workflows/build-test.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/build-analysis.yml@TASK-2270
     needs: build
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -29,6 +29,8 @@ jobs:
       MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
       MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
 
+
+  #The following jobs are to see that the previous if does not fail and that the maven deploy is executed because it is true
   snapshot-version:
     name: Check SNAPSHOT version
     needs: [ build,test ]
