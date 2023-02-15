@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
-    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@TASK-2270
 
   test:
-    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@TASK-2270
     needs: build
     secrets: inherit
 #      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -21,7 +21,7 @@ jobs:
 
   deploy-maven:
     name: Deploy in maven only for renamed versions
-    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@TASK-2270
     needs: [ build, test ]
 #    if: contains( needs.build.outputs.version, 'TASK')
     secrets:
