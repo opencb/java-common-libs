@@ -24,11 +24,11 @@ jobs:
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@TASK-2270
     needs: [ build ]
     if: contains( needs.build.outputs.version, 'SNAPSHOT')
-    secrets:
-      MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
-      MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
-      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+    secrets: inherit
+#      MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
+#      MAVEN_NEXUS_PASSWORD: ${{ secrets.MAVEN_NEXUS_PASSWORD }}
+#      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+#      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
 
   #The following jobs are to see that the previous if does not fail and that the maven deploy is executed because it is true
   snapshot-version:
