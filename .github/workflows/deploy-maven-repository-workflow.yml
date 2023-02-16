@@ -37,7 +37,7 @@ jobs:
           server-id: ossrh                                        # Value of the distributionManagement/repository/id field of the pom.xml
           #          server-username: ${{ secrets.MAVEN_NEXUS_USER }}        # env variable for username in deploy
           #          server-password: ${{ secrets.MAVEN_NEXUS_PASSWORD }}    # env variable for token in deploy
-          gpg-private-key: MAVEN_GPG_PRIVATE_KEY   # Value of the GPG private key to import
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}   # Value of the GPG private key to import
       #          gpg-passphrase: MAVEN_GPG_PASSPHRASE                    # env variable for GPG private key passphrase
       - name: Deploy to Maven Central repository
         run: mvn clean deploy -DskipTests -P deploy ${{ inputs.maven_opts }}
