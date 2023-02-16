@@ -32,7 +32,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: build-folder
-          path: build/
+          path: build
       - id: get_project_version
         uses: avides/actions-project-version-check@v1.3.0
         with:

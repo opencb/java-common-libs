@@ -22,7 +22,7 @@ jobs:
   deploy-maven:
     name: Deploy in maven only for renamed versions
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@TASK-2270
-    needs: [ build, test ]
+    needs: [ build ]
     if: contains( needs.build.outputs.version, 'SNAPSHOT')
     secrets:
       MAVEN_NEXUS_USER: ${{ secrets.MAVEN_NEXUS_USER }}
