@@ -6,6 +6,9 @@ on:
       - develop
       - release-*
 
+env:
+  xb_version: "1.5.1"
+
 jobs:
 
   build:
@@ -16,7 +19,7 @@ jobs:
     needs: build
     secrets: inherit
     with:
-      report_dir: development
+      report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
   #      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   #      SSH_TESTING_SERVER_HOST: ${{ secrets.SSH_TESTING_SERVER_HOST}}
   #      SSH_TESTING_SERVER_PORT: ${{ secrets.SSH_TESTING_SERVER_PORT}}
