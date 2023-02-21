@@ -21,7 +21,6 @@ env:
   xb_version: "1.5.1"
 
 jobs:
-
   test:
     name: Test and push Sonar analysis
     runs-on: ubuntu-22.04
