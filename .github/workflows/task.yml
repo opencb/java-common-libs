@@ -5,28 +5,23 @@ on:
     branches:
       - TASK-*
 
-env:
-  xb_version: "1.5.1"
-
 jobs:
-
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
 
   test:
-    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@TASK-3991
+    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@develop
     needs: build
     secrets: inherit
     with:
       report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
-
+        
   deploy-maven:
     name: Deploy in maven only for renamed versions
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
     needs: [ build, test ]
     if: contains( needs.build.outputs.version ,'TASK')
     secrets: inherit
-
 
   #The following jobs are to see that the previous 'if' doesn't fail and that the maven deploy is executed because it is true
   snapshot-version:
