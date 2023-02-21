@@ -5,9 +5,6 @@ on:
     tags:
       - '*'
 
-env:
-  xb_version: "1.5.1"
-
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
@@ -17,7 +14,8 @@ jobs:
     needs: build
     secrets: inherit
     with:
-      report_dir: xetabase/${{ env.xb_version }}/java-common-libs/unit/
+      report_context: xetabase
+      report_dir: java-common-libs
 
   deploy-maven:
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
