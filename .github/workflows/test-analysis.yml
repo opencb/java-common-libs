@@ -19,11 +19,11 @@ on:
       report_context:
         type: string
         required: true
+        
 env:
   xb_version: "1.5.0"
 
 jobs:
-
   test:
     name: Test and push Sonar analysis
     runs-on: ubuntu-22.04
