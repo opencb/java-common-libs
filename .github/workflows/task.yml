@@ -5,7 +5,8 @@ on:
     branches:
       - TASK-*
 
-
+env:
+  xb_version: "1.5.1"
 
 jobs:
 
@@ -16,10 +17,8 @@ jobs:
     uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@TASK-3991
     needs: build
     secrets: inherit
-    env:
-      xb_version: "1.5.1"
     with:
-      report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
+      report_dir: development/$xb_version/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
   #      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   #      SSH_TESTING_SERVER_HOST: ${{ secrets.SSH_TESTING_SERVER_HOST}}
   #      SSH_TESTING_SERVER_PORT: ${{ secrets.SSH_TESTING_SERVER_PORT}}
