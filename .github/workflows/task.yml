@@ -17,7 +17,7 @@ jobs:
     needs: build
     secrets: inherit
     with:
-      report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
+      report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}
 
   deploy-maven:
     name: Deploy in maven only for renamed versions
