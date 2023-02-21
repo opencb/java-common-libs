@@ -16,7 +16,9 @@ on:
         required: true
       SSH_TESTING_SERVER_PASSWORD:
         required: true
-
+env:
+  xb_version: "1.5.1"
+  
 jobs:
   test:
     name: Test and push Sonar analysis
