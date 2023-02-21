@@ -7,8 +7,9 @@ on:
 
 env:
   xb_version: "1.5.1"
-  
+
 jobs:
+
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
 
