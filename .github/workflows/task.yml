@@ -5,6 +5,9 @@ on:
     branches:
       - TASK-*
 
+env:
+  xb_version: "1.5.1"
+
 jobs:
   build:
     uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
@@ -15,7 +18,7 @@ jobs:
     secrets: inherit
     with:
       report_dir: development/${{ env.xb_version }}/${{ github.ref_name }}/java-common-libs/${{ github.sha }}/unit/${{ matrix.module }}
-        
+
   deploy-maven:
     name: Deploy in maven only for renamed versions
     uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
