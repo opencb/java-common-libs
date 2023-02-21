@@ -1,6 +1,10 @@
 name: Build and test the project
 on:
   workflow_call:
+    inputs:
+      report_dir:
+        type: string
+        required: true
     secrets:
       SONAR_TOKEN:
         required: true
@@ -12,10 +16,7 @@ on:
         required: true
       SSH_TESTING_SERVER_PASSWORD:
         required: true
-    inputs:
-      report_dir:
-        type: string
-        required: true
+
 env:
   xb_version: "1.5.1"
 
