@@ -19,8 +19,10 @@ on:
       report_context:
         type: string
         required: true
+
 env:
-  xb_version: "1.5.2"
+  xb_version: "1.5.0"
+
 jobs:
   test:
     name: Test and push Sonar analysis
@@ -40,23 +42,28 @@ jobs:
         with:
           mongodb-version: 5.0
           mongodb-replica-set: rs-test
+      - name: Install Samtools
+        run: sudo apt-get install samtools
+      - name: Install Samtools
+        run: sudo apt-get install samtools
       - name: Test and Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify surefire-report:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs
+          run: mvn -B verify surefire-report:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs
       - name: Upload result dir
         uses: actions/upload-artifact@v3
         with:
           name: workdir
           path: "**/target/site"
+
   publish-test:
     name: Publish test results
     runs-on: ubuntu-22.04
     needs: test
     strategy:
       matrix:
-        module: ["commons-lib", "commons-datastore", "commons-datastore/commons-datastore-core", "commons-datastore/commons-datastore-mongodb", "commons-datastore/commons-datastore-solr"]
+        module: [ "commons-lib","commons-datastore","commons-datastore/commons-datastore-core","commons-datastore/commons-datastore-mongodb","commons-datastore/commons-datastore-solr" ]
     steps:
       - name: Download result dir
         uses: actions/download-artifact@v3
