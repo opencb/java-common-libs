@@ -18,7 +18,7 @@ on:
 
 jobs:
   deploy-workflow:
-    name: Deploy to Maven
+    name: Deploy to Maven and GitHub Packages
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '8'
-      - name: Publish to GitHub Packages
+      - name: Deploy to GitHub Packages repository
         run: mvn clean deploy -DskipTests -P deploy-github ${{ inputs.maven_opts }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
