@@ -55,7 +55,7 @@
         </repository>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/opencb/java-common-libs</url>
+            <url>https://maven.pkg.github.com/opencb</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
