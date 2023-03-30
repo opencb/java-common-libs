@@ -9,7 +9,8 @@ on:
 jobs:
 
   build:
-    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+#    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml
 
   test:
     uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@develop
