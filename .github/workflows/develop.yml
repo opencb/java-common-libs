@@ -9,11 +9,11 @@ on:
 jobs:
 
   build:
-#    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@develop
+    #    uses: ./.github/workflows/build-java-app-workflow.yml@develop
     uses: ./.github/workflows/build-java-app-workflow.yml
 
   test:
-    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@develop
+    uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
     with:
@@ -21,6 +21,6 @@ jobs:
       report_dir: ${{ github.ref_name }}/java-common-libs/${{ github.sha }}
 
   deploy-maven:
-    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@develop
+    uses: ./.github/workflows/deploy-maven-repository-workflow.yml
     needs: test
     secrets: inherit

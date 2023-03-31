@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
-    uses: opencb/java-common-libs/.github/workflows/build-java-app-workflow.yml@release-4.7.x
+    uses: ./.github/workflows/build-java-app-workflow.yml
 
   test:
-    uses: opencb/java-common-libs/.github/workflows/test-analysis.yml@release-4.7.x
+    uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
     with:
@@ -19,7 +19,7 @@ jobs:
 
   deploy-maven:
     name: Deploy in maven only for renamed versions
-    uses: opencb/java-common-libs/.github/workflows/deploy-maven-repository-workflow.yml@release-4.7.x
+    uses: ./.github/workflows/deploy-maven-repository-workflow.yml
     needs: [ build, test ]
     if: contains( needs.build.outputs.version ,'TASK')
     secrets: inherit
