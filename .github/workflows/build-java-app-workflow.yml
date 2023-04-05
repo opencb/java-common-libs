@@ -29,8 +29,12 @@ jobs:
           cache: 'maven'
       - name: Install dependencies branches
         run: |
-          chmod +x ./.github/workflows/scripts/get_same_branch.sh
-          ./.github/workflows/scripts/get_same_branch.sh ${GITHUB_REF}
+          if [ -f "./.github/workflows/scripts/get_same_branch.sh" ]; then
+            chmod +x ./.github/workflows/scripts/get_same_branch.sh
+            ./.github/workflows/scripts/get_same_branch.sh ${GITHUB_REF}
+          else
+             echo "./.github/workflows/scripts/get_same_branch.sh does not exist."         
+          fi
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
       - uses: actions/upload-artifact@v3
