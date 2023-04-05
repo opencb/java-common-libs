@@ -6,8 +6,8 @@ if [[ -z $BRANCH_NAME  ]]; then
   echo "The first parameter is mandatory and must be a valid branch name."
   exit 1
 fi
-
-if [[ $BRANCH_NAME != "TASK-"*   ]]; then
+echo "Branch to check $BRANCH_NAME"
+if [[ $BRANCH_NAME != "TASK-"* ]]; then
   echo "No need to check dependencies."
   exit 0
 fi
