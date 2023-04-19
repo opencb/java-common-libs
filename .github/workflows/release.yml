@@ -24,4 +24,4 @@ jobs:
 
   release:
     uses: ./.github/workflows/release-github-workflow.yml
-    needs: test
+    needs: deploy-maven

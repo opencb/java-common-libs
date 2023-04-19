@@ -21,7 +21,7 @@ on:
         required: true
 
 env:
-  xb_version: "1.5.0"
+  xb_version: "1.6.0"
 
 jobs:
   test:
@@ -37,15 +37,11 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
-      - name: Start MongoDB v5.0
+      - name: Start MongoDB v6.0
         uses: supercharge/mongodb-github-action@1.8.0
         with:
-          mongodb-version: 5.0
+          mongodb-version: 6.0
           mongodb-replica-set: rs-test
-      - name: Install Samtools
-        run: sudo apt-get install samtools
-      - name: Install Samtools
-        run: sudo apt-get install samtools
       - name: Test and Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
