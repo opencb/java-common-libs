@@ -15,6 +15,7 @@ jobs:
   build-workflow:
     name: Build Java app
     runs-on: ubuntu-22.04
+    #runs-on: self-hosted
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
     steps:
