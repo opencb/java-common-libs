@@ -37,7 +37,6 @@ jobs:
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
       - uses: actions/upload-artifact@v3
-        #        id: github.refName === 'cellbase' || github.refName === 'opencga'
         with:
           name: build-folder
           path: build
