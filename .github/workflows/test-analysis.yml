@@ -1,5 +1,4 @@
 name: Build and test the project
-
 on:
   workflow_call:
     secrets:
@@ -20,10 +19,8 @@ on:
       report_context:
         type: string
         required: true
-
 env:
-  xb_version: "1.7.0"
-
+  xb_version: "1.8.0"
 jobs:
   test:
     name: Test and push Sonar analysis
@@ -53,7 +50,6 @@ jobs:
         with:
           name: workdir
           path: "**/target/site"
-
   publish-test:
     name: Publish test results
     runs-on: ubuntu-22.04
