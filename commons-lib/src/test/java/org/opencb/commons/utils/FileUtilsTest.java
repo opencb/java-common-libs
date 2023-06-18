@@ -16,7 +16,7 @@ public class FileUtilsTest {
     @Test
     public void getUser() throws IOException {
         String user = FileUtils.getUser(path);
-        Assert.assertEquals("roo", user);
+        Assert.assertEquals("root", user);
     }
 
     @Test
