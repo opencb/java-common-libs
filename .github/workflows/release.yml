@@ -13,9 +13,9 @@ jobs:
     uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
-    with:
-      report_context: xetabase
-      report_dir: java-common-libs
+#    with:
+#      report_context: xetabase
+#      report_dir: java-common-libs
 
   deploy-maven:
     uses: ./.github/workflows/deploy-maven-repository-workflow.yml
