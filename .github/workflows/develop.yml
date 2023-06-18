@@ -1,4 +1,4 @@
-name: Push java-common-libs develop
+name: Merge/Push in java-common-libs develop branch
 
 on:
   push:
