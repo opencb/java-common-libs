@@ -13,6 +13,3 @@ jobs:
     uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
-#    with:
-#      report_context: development
-#      report_dir: ${{ github.ref_name }}/java-common-libs/${{ github.sha }}
