@@ -11,7 +11,7 @@ jobs:
 
   deploy-maven:
     uses: ./.github/workflows/deploy-maven-repository-workflow.yml
-    needs: test
+    needs: build
     secrets: inherit
 
   release:
