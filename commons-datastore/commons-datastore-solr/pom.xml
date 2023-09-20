@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.opencb.commons</groupId>
         <artifactId>commons-datastore</artifactId>
-        <version>4.11.0</version>
+        <version>4.12.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
