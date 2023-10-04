@@ -21,6 +21,10 @@ public class PrintUtils {
         System.out.print(message);
     }
 
+    public static void printSpace() {
+        System.out.print(" ");
+    }
+
     public static void print(String message, Color color) {
         System.out.print(format(message, color));
     }
