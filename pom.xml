@@ -17,6 +17,7 @@
         <module>commons-lib</module>
         <module>commons-datastore</module>
     </modules>
+
     <!-- Properties for dependency versions -->
     <properties>
         <jackson.version>2.11.4</jackson.version>
