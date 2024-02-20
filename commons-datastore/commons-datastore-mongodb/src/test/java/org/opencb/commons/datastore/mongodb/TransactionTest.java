@@ -3,10 +3,9 @@ package org.opencb.commons.datastore.mongodb;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.TransactionBody;
 import org.bson.Document;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
 import org.opencb.commons.datastore.core.QueryOptions;
@@ -19,7 +18,7 @@ public class TransactionTest {
     private MongoDataStoreManager mongoDataStoreManager;
     private MongoDataStore mongoDataStore;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         List<DataStoreServerAddress> dataStoreServerAddressList = new ArrayList<>(1);
         dataStoreServerAddressList.add(new DataStoreServerAddress("127.0.0.1", 27017));
@@ -31,13 +30,13 @@ public class TransactionTest {
                 .setReplicaSet("rs-test").init().build());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         mongoDataStoreManager.close("test");
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testGet() throws Exception {
         ClientSession clientSession = mongoDataStore.startSession();
 

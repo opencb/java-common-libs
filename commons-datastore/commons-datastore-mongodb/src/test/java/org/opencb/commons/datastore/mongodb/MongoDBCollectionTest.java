@@ -24,6 +24,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
 import org.junit.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
@@ -56,7 +58,7 @@ public class MongoDBCollectionTest {
     public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
     public static final List<String> SURNAMES = Arrays.asList("Doe", "Davis", null);
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("localhost", 27017);
 
@@ -70,13 +72,13 @@ public class MongoDBCollectionTest {
         mongoDBCollectionRemoveTest = createTestCollection("remove_test", 50);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
 
 
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws Exception {
 //        mongoDataStoreManager.drop("datastore_test");
         mongoDataStore.close();
@@ -388,7 +390,7 @@ public class MongoDBCollectionTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testPermanentCursor() throws Exception {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions();

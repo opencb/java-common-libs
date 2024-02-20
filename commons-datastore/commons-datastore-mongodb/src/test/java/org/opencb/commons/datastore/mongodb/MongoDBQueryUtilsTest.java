@@ -1,6 +1,6 @@
 package org.opencb.commons.datastore.mongodb;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencb.commons.datastore.core.QueryParam;
 
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 import static org.junit.Assert.assertEquals;
+
 /**
  * Created by imedina on 17/01/16.
  */

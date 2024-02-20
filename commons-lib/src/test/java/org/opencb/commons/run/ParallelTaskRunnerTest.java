@@ -4,6 +4,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.io.StringDataReader;
@@ -34,7 +36,7 @@ public class ParallelTaskRunnerTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
@@ -48,7 +50,7 @@ public class ParallelTaskRunnerTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws IOException {
         if (Files.exists(Paths.get(fileName))) {
             Files.delete(Paths.get(fileName));
@@ -212,7 +214,8 @@ public class ParallelTaskRunnerTest {
 
     }
 
-    @Test(timeout = 10000)
+    @Test
+    @Timeout(10)
     public void testReaderTimeOut() throws Exception {
         ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
                 (size) -> Arrays.asList(
@@ -377,26 +380,31 @@ public class ParallelTaskRunnerTest {
 
     }
 
-    @Test(expected = ExecutionException.class, timeout = 10000)
+    @Test
+    @Timeout(10)
     public void testBlockAtWriterFailure() throws ExecutionException {
-        AtomicInteger i = new AtomicInteger();
-        new ParallelTaskRunner<String, String>(
-                b -> IntStream.range(0, b).mapToObj(String::valueOf).collect(Collectors.toList()),
-                b -> b,
-                b -> {
-                    try {
-                        if (i.get() == 1) {
-                            throw new RuntimeException("Fail!");
+        Assertions.assertThrows(ExecutionException.class, () -> {
+
+
+            AtomicInteger i = new AtomicInteger();
+            new ParallelTaskRunner<String, String>(
+                    b -> IntStream.range(0, b).mapToObj(String::valueOf).collect(Collectors.toList()),
+                    b -> b,
+                    b -> {
+                        try {
+                            if (i.get() == 1) {
+                                throw new RuntimeException("Fail!");
+                            }
+                            i.getAndIncrement();
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
                         }
-                        i.getAndIncrement();
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException(e);
-                    }
-                    return true;
-                },
-                ParallelTaskRunner.Config.builder().setReadQueuePutTimeout(3, TimeUnit.SECONDS).build()
-        ).run();
+                        return true;
+                    },
+                    ParallelTaskRunner.Config.builder().setReadQueuePutTimeout(3, TimeUnit.SECONDS).build()
+            ).run();
+        });
     }
 }

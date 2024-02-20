@@ -1,7 +1,7 @@
 package org.opencb.commons.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created on 02/12/15

@@ -18,9 +18,9 @@ package org.opencb.commons.datastore.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.*;
@@ -37,7 +37,7 @@ public class ObjectMapTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         objectMap = new ObjectMap();
         objectMap.put("string", "hello");
@@ -175,7 +175,7 @@ public class ObjectMapTest {
     public void testGetList() throws Exception {
         List<Object> list = objectMap.getList("list");
         System.out.println(list);
-        System.out.println((String)list.get(0));
+        System.out.println((String) list.get(0));
     }
 
     @Test
@@ -226,10 +226,10 @@ public class ObjectMapTest {
 
     @Test
     public void testContainsKey() {
-        assertEquals("{\"l2\":{\"l3\":{\"l4\":\"value\"}}}" ,objectMap.getNestedMap("l1").toJson());
-        assertEquals("{\"l3\":{\"l4\":\"value\"}}" ,objectMap.getNestedMap("l1.l2").toJson());
-        assertEquals("{\"l4\":\"value\"}" ,objectMap.getNestedMap("l1.l2.l3").toJson());
-        assertEquals("value" ,objectMap.getNested("l1.l2.l3.l4"));
+        assertEquals("{\"l2\":{\"l3\":{\"l4\":\"value\"}}}", objectMap.getNestedMap("l1").toJson());
+        assertEquals("{\"l3\":{\"l4\":\"value\"}}", objectMap.getNestedMap("l1.l2").toJson());
+        assertEquals("{\"l4\":\"value\"}", objectMap.getNestedMap("l1.l2.l3").toJson());
+        assertEquals("value", objectMap.getNested("l1.l2.l3.l4"));
         assertEquals("value", objectMap.getNested("map.key"));
 
         assertEquals("a", objectMap.getNested("myModel.key1"));

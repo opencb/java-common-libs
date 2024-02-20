@@ -1,6 +1,6 @@
 package org.opencb.commons.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opencb.commons.docs.doc.markdown.MarkdownDoc;
 import org.opencb.commons.docs.models.DataClassDoc;
 import org.opencb.commons.docs.models.DataFieldDoc;

@@ -16,10 +16,10 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by imedina on 27/03/14.
@@ -29,14 +29,14 @@ public class MongoDataStoreManagerTest {
     private MongoDataStoreManager mongoDataStoreManager;
     private MongoDataStore mongoDataStore;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("127.0.0.1", 27017);
         mongoDataStoreManager.get("test").getDb().drop();
         mongoDataStore = mongoDataStoreManager.get("test", MongoDBConfiguration.builder().init().build());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         mongoDataStoreManager.close("test");
     }

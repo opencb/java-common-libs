@@ -1,7 +1,7 @@
 package org.opencb.commons.datastore.mongodb;
 
 import org.bson.Document;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 

@@ -16,9 +16,9 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +31,7 @@ public class MongoDataStoreTest {
     private static MongoDataStoreManager mongoDataStoreManager;
     private static MongoDataStore mongoDataStore;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         mongoDataStoreManager = new MongoDataStoreManager("localhost", 27017);
 
@@ -41,7 +41,7 @@ public class MongoDataStoreTest {
         mongoDataStore.createCollection("JUnitTest");
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
         mongoDataStoreManager.close("datastore_test");
     }

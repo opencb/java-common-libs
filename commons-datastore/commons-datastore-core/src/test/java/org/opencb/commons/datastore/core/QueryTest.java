@@ -1,7 +1,7 @@
 package org.opencb.commons.datastore.core;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 /**
@@ -29,9 +29,20 @@ public class QueryTest {
         Type type;
         String description;
 
-        @Override public String key() {return key;}
-        @Override public String description() {return description;}
-        @Override public Type type() {return type;}
+        @Override
+        public String key() {
+            return key;
+        }
+
+        @Override
+        public String description() {
+            return description;
+        }
+
+        @Override
+        public Type type() {
+            return type;
+        }
     }
 
     @Test

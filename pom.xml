@@ -136,13 +136,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-                <scope>test</scope>
-                <optional>true</optional>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
@@ -190,18 +183,6 @@
                 <version>${hamcrest.version}</version>
                 <scope>test</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>junit</groupId>-->
-<!--                <artifactId>junit</artifactId>-->
-<!--                <version>${junit.version}</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.junit.jupiter</groupId>-->
-<!--                <artifactId>junit-jupiter-api</artifactId>-->
-<!--                <version>${junit.version}</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>

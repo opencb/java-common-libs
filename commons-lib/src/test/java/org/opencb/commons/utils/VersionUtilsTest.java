@@ -1,7 +1,7 @@
 package org.opencb.commons.utils;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VersionUtilsTest {
     public static String getComparation(String minVersion, String version) {

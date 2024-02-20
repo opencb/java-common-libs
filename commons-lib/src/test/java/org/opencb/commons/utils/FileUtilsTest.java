@@ -1,13 +1,11 @@
 package org.opencb.commons.utils;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static org.junit.Assert.*;
 
 public class FileUtilsTest {
 
