@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 /**
  * Created by imedina on 17/01/16.

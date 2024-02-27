@@ -16,15 +16,15 @@
 
 package org.opencb.commons.datastore.core;
 
-import org.junit.Assert;
-import org.junit.Rule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by jacobo on 25/03/15.
@@ -32,15 +32,12 @@ import java.util.List;
 public class QueryOptionsTest {
 
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
     public void addtoList() {
         QueryOptions options = new QueryOptions("include", "csv1,csv2,csv3");
         options.addToListOption("include", "value4");
         options.addToListOption("include", "value5");
-        Assert.assertEquals(Arrays.asList("csv1", "csv2", "csv3", "value4", "value5"), options.get("include"));
+        assertEquals(Arrays.asList("csv1", "csv2", "csv3", "value4", "value5"), options.get("include"));
     }
 
     @Test
@@ -49,7 +46,7 @@ public class QueryOptionsTest {
         options.addToListOption("include", "value1");
         options.addToListOption("include", "value2");
         options.addToListOption("include", "value3");
-        Assert.assertEquals(Arrays.asList("value1", "value2", "value3"), options.get("include"));
+        assertEquals(Arrays.asList("value1", "value2", "value3"), options.get("include"));
     }
 
     @Test
@@ -58,7 +55,7 @@ public class QueryOptionsTest {
         options.addToListOption("include", "value1");
         options.addToListOption("include", 2);
         options.addToListOption("include", '3');
-        Assert.assertEquals(Arrays.asList("value1", 2, '3'), options.get("include"));
+        assertEquals(Arrays.asList("value1", 2, '3'), options.get("include"));
     }
 
     @Test
@@ -68,6 +65,6 @@ public class QueryOptionsTest {
         include.add("value2");
         QueryOptions options = new QueryOptions("include", Collections.unmodifiableList(include));
         options.addToListOption("include", "value1");
-        Assert.assertEquals(3, options.getAsList("include").size());
+        assertEquals(3, options.getAsList("include").size());
     }
 }

@@ -16,11 +16,12 @@
 
 package org.opencb.commons;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created on 07/07/16
@@ -46,8 +47,7 @@ public class ProgressLoggerTest {
         for (int i = 0; i < totalCount; i += increment) {
             progressLogger.increment(increment);
         }
-
-        Assert.assertEquals(numLinesLog, prints.get());
+        assertEquals(numLinesLog, prints.get());
     }
 
     @Test
@@ -64,7 +64,6 @@ public class ProgressLoggerTest {
             }
         };
         progressLogger.setApproximateTotalCount(totalCount * 2);
-
         int increment = 1;
         for (int i = 0; i < totalCount; i += increment) {
             if (i > totalCount / 2) {
@@ -72,8 +71,7 @@ public class ProgressLoggerTest {
             }
             progressLogger.increment(increment);
         }
-
-        Assert.assertEquals(numLinesLog - numLinesLog / 4, prints.get());
+        assertEquals(numLinesLog - numLinesLog / 4, prints.get());
     }
 
 }

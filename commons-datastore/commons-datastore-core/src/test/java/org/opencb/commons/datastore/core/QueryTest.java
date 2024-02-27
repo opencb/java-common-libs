@@ -1,16 +1,14 @@
 package org.opencb.commons.datastore.core;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Jacobo Coll &lt;jacobo167@gmail.com&gt;
  */
 public class QueryTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     enum TestQueryParam implements QueryParam {
         TEST_PARAM_DECIMAL("testParamDecimal", Type.DECIMAL, ""),
@@ -56,21 +54,22 @@ public class QueryTest {
 
     @Test
     public void testValidateError() throws Exception {
-        Query query = new Query(TestQueryParam.TEST_PARAM_BOOLEAN.key(), true)
-                .append(TestQueryParam.TEST_PARAM_INTEGER_ARRAY.key(), "1,2,3,A,FFF")
-                .append(TestQueryParam.TEST_PARAM_TEXT.key(), "asdf");
+        assertThrows(NumberFormatException.class, () -> {
+            Query query = new Query(TestQueryParam.TEST_PARAM_BOOLEAN.key(), true)
+                    .append(TestQueryParam.TEST_PARAM_INTEGER_ARRAY.key(), "1,2,3,A,FFF")
+                    .append(TestQueryParam.TEST_PARAM_TEXT.key(), "asdf");
 
-        thrown.expect(NumberFormatException.class);
-        query.validate(TestQueryParam.class);
+            query.validate(TestQueryParam.class);
+        });
     }
 
     @Test
     public void testValidateError2() throws Exception {
-        Query query = new Query(TestQueryParam.TEST_PARAM_BOOLEAN.key(), true)
-                .append("NotAField", "1,2,3,A,FFF")
-                .append(TestQueryParam.TEST_PARAM_TEXT.key(), "asdf");
-
-        thrown.expect(EnumConstantNotPresentException.class);
-        query.validate(TestQueryParam.class);
+        assertThrows(EnumConstantNotPresentException.class, () -> {
+            Query query = new Query(TestQueryParam.TEST_PARAM_BOOLEAN.key(), true)
+                    .append("NotAField", "1,2,3,A,FFF")
+                    .append(TestQueryParam.TEST_PARAM_TEXT.key(), "asdf");
+            query.validate(TestQueryParam.class);
+        });
     }
 }

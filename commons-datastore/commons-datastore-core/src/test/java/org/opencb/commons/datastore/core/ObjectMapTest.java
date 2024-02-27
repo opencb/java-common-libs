@@ -19,9 +19,8 @@ package org.opencb.commons.datastore.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
+
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.*;
 
@@ -34,8 +33,6 @@ public class ObjectMapTest {
 
     private ObjectMap objectMap;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -209,14 +206,16 @@ public class ObjectMapTest {
 
     @Test
     public void getBadList() {
-        thrown.expect(NumberFormatException.class);
-        objectMap.getAsIntegerList("listCsvBad");
+        assertThrows(NumberFormatException.class, () -> {
+            objectMap.getAsIntegerList("listCsvBad");
+        });
     }
 
     @Test
     public void getBadList2() {
-        thrown.expect(NumberFormatException.class);
-        objectMap.getAsDoubleList("listCsvBad");
+        assertThrows(NumberFormatException.class, () -> {
+            objectMap.getAsDoubleList("listCsvBad");
+        });
     }
 
     @Test

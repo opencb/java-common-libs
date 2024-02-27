@@ -36,7 +36,6 @@ public class TransactionTest {
     }
 
     @Test
-    @Disabled
     public void testGet() throws Exception {
         ClientSession clientSession = mongoDataStore.startSession();
 

@@ -17,9 +17,11 @@
 package org.opencb.commons.datastore.mongodb;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by imedina on 27/03/14.
@@ -43,13 +45,13 @@ public class MongoDataStoreManagerTest {
 
     @Test
     public void testGet() throws Exception {
-        Assert.assertTrue("MongoDB check connection to 'test' database failed", mongoDataStore.testConnection());
+        assertTrue(mongoDataStore.testConnection(), "MongoDB check connection to 'test' database failed");
     }
 
     @Test
     public void testsGet() throws Exception {
-        Assert.assertTrue(!mongoDataStoreManager.exists("test"));
+        assertTrue(!mongoDataStoreManager.exists("test"));
         mongoDataStore.createCollection("collection1");
-        Assert.assertTrue(mongoDataStoreManager.exists("test"));
+        assertTrue(mongoDataStoreManager.exists("test"));
     }
 }

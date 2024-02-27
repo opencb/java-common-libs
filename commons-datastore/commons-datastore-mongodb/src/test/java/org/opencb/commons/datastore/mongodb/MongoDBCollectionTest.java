@@ -23,10 +23,8 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
-import org.junit.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.ObjectMap;
 import org.opencb.commons.datastore.core.QueryOptions;
@@ -53,8 +51,6 @@ public class MongoDBCollectionTest {
 
     private static int N = 1000;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
     public static final List<String> SURNAMES = Arrays.asList("Doe", "Davis", null);
 
@@ -468,8 +464,9 @@ public class MongoDBCollectionTest {
         Document uniqueObject = new Document("_id", "myUniqueId");
         mongoDBCollectionInsertTest.insert(uniqueObject, null);
 
-        thrown.expect(MongoWriteException.class);
-        mongoDBCollectionInsertTest.insert(uniqueObject, null);
+        assertThrows(MongoWriteException.class, () -> {
+            mongoDBCollectionInsertTest.insert(uniqueObject, null);
+        });
     }
 
     @Test
@@ -496,9 +493,9 @@ public class MongoDBCollectionTest {
         for (int i = 0; i < 10; i++) {
             list.add(uniqueObject);
         }
-
-        thrown.expect(MongoBulkWriteException.class);
-        mongoDBCollectionInsertTest.insert(list, null);
+        assertThrows(MongoBulkWriteException.class, () -> {
+            mongoDBCollectionInsertTest.insert(list, null);
+        });
     }
 
     @Test
@@ -509,8 +506,9 @@ public class MongoDBCollectionTest {
 
         uniqueIndexTest.insert(uniqueObject, null);
 
-        thrown.expect(MongoWriteException.class);
-        uniqueIndexTest.insert(uniqueObject, null);
+        assertThrows(MongoWriteException.class, () -> {
+            uniqueIndexTest.insert(uniqueObject, null);
+        });
     }
 
     @Test
@@ -571,8 +569,9 @@ public class MongoDBCollectionTest {
         }
         updates.remove(updates.size() - 1);
 
-        thrown.expect(IndexOutOfBoundsException.class);
-        mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false));
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false));
+        });
     }
 
     @Test

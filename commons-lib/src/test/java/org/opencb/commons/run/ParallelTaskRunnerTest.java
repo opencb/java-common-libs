@@ -3,10 +3,8 @@ package org.opencb.commons.run;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.opencb.commons.io.DataWriter;
 import org.opencb.commons.io.StringDataReader;
 
@@ -26,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ParallelTaskRunnerTest {
 
 
@@ -33,8 +33,6 @@ public class ParallelTaskRunnerTest {
     protected static final String fileName = "/tmp/dummyFile.txt";
     protected static final String outputFileName = "/tmp/output.log";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @BeforeAll
     public static void beforeClass() throws IOException {
@@ -164,84 +162,85 @@ public class ParallelTaskRunnerTest {
 
     @Test
     public void testTimeOut() throws Exception {
-        final AtomicInteger i = new AtomicInteger(0);
-        ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
-                (size) -> {
-                    return Collections.singletonList(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16)));
-                },
-                (batch) -> {
-                    try {
-                        if (i.addAndGet(1) > 10) {
-                            System.out.println(Thread.currentThread().getName() + " -- sleeping 5s");
-                            Thread.sleep(5000L);
-                        } else {
-                            System.out.println(Thread.currentThread().getName() + " -- don't sleep! " + i.get());
-                        }
-                    } catch (InterruptedException e) {
-                        boolean exit = false;
-                        while (!exit) {
-                            try {
-                                System.err.println("Sleep! No ok!");
-                                Thread.sleep(2000L);
-                                exit = true;
-                            } catch (InterruptedException ee) {
+        assertThrows(ExecutionException.class, () -> {
+            final AtomicInteger i = new AtomicInteger(0);
+            ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
+                    (size) -> {
+                        return Collections.singletonList(RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(0, 16)));
+                    },
+                    (batch) -> {
+                        try {
+                            if (i.addAndGet(1) > 10) {
+                                System.out.println(Thread.currentThread().getName() + " -- sleeping 5s");
+                                Thread.sleep(5000L);
+                            } else {
+                                System.out.println(Thread.currentThread().getName() + " -- don't sleep! " + i.get());
+                            }
+                        } catch (InterruptedException e) {
+                            boolean exit = false;
+                            while (!exit) {
+                                try {
+                                    //  System.err.println("Sleep! No ok!");
+                                    Thread.sleep(2000L);
+                                    exit = true;
+                                } catch (InterruptedException ee) {
 //                                exit = true;
-                                //                              e.printStackTrace();
+                                    //                              e.printStackTrace();
+                                }
                             }
                         }
-                    }
-                    try {
-                        System.out.println("[" + Thread.currentThread().getName() + "] Start Sleep");
-                        long start = System.currentTimeMillis();
-                        Thread.sleep(1000);
-                        System.out.println("[" + Thread.currentThread().getName() + "] Finish Sleep : " + (System.currentTimeMillis() - start));
-                    } catch (Exception e) {
-                        System.out.println("[" + Thread.currentThread().getName() + "] Sleep interrupted!! ###### ");
-                    }
-                    return null;
-                },
-                null,
-                new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
-        );
-
-        thrown.expect(ExecutionException.class);
-        try {
-            runner.run();
-        } finally {
-            System.out.println("Sleep 10s");
-            Thread.sleep(10000);
-        }
-
+                        try {
+                            System.out.println("[" + Thread.currentThread().getName() + "] Start Sleep");
+                            long start = System.currentTimeMillis();
+                            Thread.sleep(1000);
+                            System.out.println("[" + Thread.currentThread().getName() + "] Finish Sleep : " + (System.currentTimeMillis() - start));
+                        } catch (Exception e) {
+                            System.out.println("[" + Thread.currentThread().getName() + "] Sleep interrupted!! ###### ");
+                        }
+                        return null;
+                    },
+                    null,
+                    new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
+            );
+            try {
+                runner.run();
+            } finally {
+                System.out.println("Sleep 10s");
+                Thread.sleep(10000);
+            }
+        });
     }
 
     @Test
     @Timeout(10)
     public void testReaderTimeOut() throws Exception {
-        ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
-                (size) -> Arrays.asList(
-                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
-                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
-                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
-                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
-                        RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16))
-                ),
-                (batch) -> {
-                    if (RandomUtils.nextBoolean()) {
+        assertThrows(ExecutionException.class, () -> {
+            ParallelTaskRunner<String, Void> runner = new ParallelTaskRunner<>(
+                    (size) -> Arrays.asList(
+                            RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                            RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                            RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                            RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16)),
+                            RandomStringUtils.randomAlphanumeric(RandomUtils.nextInt(1, 16))
+                    ),
+                    (batch) -> {
+                        if (RandomUtils.nextBoolean()) {
+                            return null;
+                        }
+                        try {
+                            Thread.sleep(100000);
+                        } catch (InterruptedException e) {
+                            System.out.println("[" + Thread.currentThread().getName() + "] Interrupted");
+                        }
                         return null;
-                    }
-                    try {
-                        Thread.sleep(100000);
-                    } catch (InterruptedException e) {
-                        System.out.println("[" + Thread.currentThread().getName() + "] Interrupted");
-                    }
-                    return null;
-                },
-                null,
-                new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
-        );
+                    },
+                    null,
+                    new ParallelTaskRunner.Config(5, 1, 2, true, false, 2)
+            );
 
-        thrown.expect(ExecutionException.class);
-        runner.run();
+
+            runner.run();
+        });
     }
 
     @Test
@@ -283,7 +282,7 @@ public class ParallelTaskRunnerTest {
         watch.stop();
 
         System.out.println(watch.getTime());
-        Assert.assertTrue(watch.getTime() < 100);
+        assertTrue(watch.getTime() < 100);
 
     }
 
@@ -335,7 +334,7 @@ public class ParallelTaskRunnerTest {
         watch.stop();
 
         System.out.println(watch.getTime());
-        Assert.assertTrue(watch.getTime() < 100);
+        assertTrue(watch.getTime() < 100);
 
     }
 
@@ -376,16 +375,14 @@ public class ParallelTaskRunnerTest {
         for (int i = 0; i < limit; i++) {
             expected.add(i);
         }
-        Assert.assertEquals(expected, values);
+        assertEquals(expected, values);
 
     }
 
     @Test
     @Timeout(10)
     public void testBlockAtWriterFailure() throws ExecutionException {
-        Assertions.assertThrows(ExecutionException.class, () -> {
-
-
+        assertThrows(ExecutionException.class, () -> {
             AtomicInteger i = new AtomicInteger();
             new ParallelTaskRunner<String, String>(
                     b -> IntStream.range(0, b).mapToObj(String::valueOf).collect(Collectors.toList()),

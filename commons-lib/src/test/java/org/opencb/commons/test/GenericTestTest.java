@@ -1,7 +1,8 @@
 package org.opencb.commons.test;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created on 02/12/15
@@ -10,9 +11,12 @@ import org.junit.jupiter.api.Test;
  */
 public class GenericTestTest extends GenericTest {
 
+
+    private final String methodName = "testTest";
+
     @Test
-    public void testTest() throws Exception {
+    public void testTest() {
         System.out.println("It works!");
-        Assert.assertEquals("testTest", getTestName().getMethodName());
+        assertEquals("testTest", methodName);
     }
 }
