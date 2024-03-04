@@ -6,7 +6,11 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
+<<<<<<< HEAD
     <version>5.0.0</version>
+=======
+    <version>5.1.0-SNAPSHOT</version>
+>>>>>>> release-5.0.x
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
