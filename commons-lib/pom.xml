@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opencb.commons</groupId>
         <artifactId>commons</artifactId>
-        <version>5.0.0</version>
+        <version>4.12.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -67,6 +67,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
