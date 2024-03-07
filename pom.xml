@@ -6,7 +6,7 @@
 
     <groupId>org.opencb.commons</groupId>
     <artifactId>commons</artifactId>
-    <version>4.12.0</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>OpenCB commons project</name>
@@ -17,7 +17,6 @@
         <module>commons-lib</module>
         <module>commons-datastore</module>
     </modules>
-
     <properties>
         <!-- All dependency versions must be defined here -->
         <jackson.version>2.11.4</jackson.version>
