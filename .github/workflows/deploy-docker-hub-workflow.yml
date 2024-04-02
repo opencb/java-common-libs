@@ -24,12 +24,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: "Checkout optional repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: inputs.repository != '' && inputs.branch != ''
         with:
           repository: ${{ inputs.repository }}
           ref: ${{ inputs.branch }}
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build-folder
           path: build
