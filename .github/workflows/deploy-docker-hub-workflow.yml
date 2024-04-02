@@ -35,7 +35,7 @@ jobs:
           path: build
       - name: Chmod
         run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
-      - uses: docker/login-action@v2
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
