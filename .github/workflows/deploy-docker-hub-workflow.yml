@@ -12,6 +12,10 @@ on:
       branch:
         type: string
         required: false
+      build_folder:
+        type: string
+        required: false
+        default: "build-folder"
     secrets:
       DOCKER_HUB_USER:
         required: true
@@ -31,7 +35,7 @@ jobs:
           ref: ${{ inputs.branch }}
       - uses: actions/download-artifact@v4
         with:
-          name: build-folder
+          name: ${{ inputs.build_folder }}
           path: build
       - name: Chmod
         run: "find build -regex '.*sh' | while read file ; do chmod u+x $file ; done"
