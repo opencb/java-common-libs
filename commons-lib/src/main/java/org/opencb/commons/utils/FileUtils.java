@@ -64,7 +64,21 @@ public class FileUtils {
     }
 
     public static void checkFile(Path path, boolean writable) throws IOException {
-        checkPath(path, writable);
+        if (path == null) {
+            throw new IOException("Path is null");
+        }
+
+        if (!existsFile(path.toFile())) {
+            throw new IOException("Path '" + path.toAbsolutePath() + "' does not exist");
+        }
+
+        if (!Files.isReadable(path)) {
+            throw new IOException("Path '" + path.toAbsolutePath() + "' cannot be read");
+        }
+
+        if (writable && !Files.isWritable(path)) {
+            throw new IOException("Path '" + path.toAbsolutePath() + "' cannot be written");
+        }
 
         if (Files.isDirectory(path)) {
             throw new IOException("Path '" + path.toAbsolutePath() + "' must be a file and not a directory");
@@ -186,6 +200,14 @@ public class FileUtils {
         String[] split = getLsOutput(path, numericId).split(" ");
 
         return new String[]{split[2], split[3]};
+    }
+
+    public static boolean existsFile(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static String getLsOutput(Path path, boolean numericId) throws IOException {
