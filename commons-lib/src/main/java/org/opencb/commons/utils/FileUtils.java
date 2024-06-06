@@ -18,6 +18,8 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.exec.Command;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -36,6 +38,11 @@ import java.util.zip.GZIPOutputStream;
  */
 public class FileUtils {
 
+    private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
+    private FileUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void checkPath(Path path) throws IOException {
         checkPath(path, false);
@@ -204,8 +211,10 @@ public class FileUtils {
 
     public static boolean existsFile(File file) {
         try (FileInputStream fis = new FileInputStream(file)) {
+            logger.info("The file {} was opened successfully to check that it exists", file);
             return true;
         } catch (Exception e) {
+            logger.info("The file {} could not be opened, so it is assumed that it does not exists", file);
             return false;
         }
     }
