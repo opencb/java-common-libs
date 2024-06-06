@@ -36,8 +36,7 @@ import java.util.zip.GZIPOutputStream;
  * Time: 1:06 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileUtils {
-
+public final class FileUtils {
     private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     private FileUtils() {
