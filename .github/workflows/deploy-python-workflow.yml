@@ -20,6 +20,14 @@ jobs:
     name: Deploy Python package in PyPI
     runs-on: ubuntu-22.04
     steps:
+      - name: Retrieve secrets from Keeper
+        id: ksecrets
+        uses: Keeper-Security/ksm-action@master
+        with:
+          keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
+          secrets: |
+            ID_PYPI_TWINE_USER/custom_field/PYPI_TWINE_USER > env:PYPI_TWINE_USER
+            ID_PYPI_TWINE_PASSWORD/custom_field/PYPI_TWINE_PASSWORD > env:PYPI_TWINE_PASSWORD
       - uses: actions/download-artifact@v4
         if: ${{ inputs.artifact }}
         with:
@@ -28,6 +36,6 @@ jobs:
         run: chmod +x ./clients/python/*sh
       - name: Build Python package for PyPI
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_TWINE_USER }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_TWINE_PASSWORD }}
+          TWINE_USERNAME: ${{ env.PYPI_TWINE_USER }}
+          TWINE_PASSWORD: ${{ env.PYPI_TWINE_PASSWORD }}
         run: ${{ inputs.cli }}
