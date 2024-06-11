@@ -1,0 +1,21 @@
+name: Test Keeper Secrets integration with Github Actions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  buildexecutable:
+    runs-on: ubuntu-22.04
+    name: Build with Keeper secrets
+    steps:
+      - name: Retrieve secrets from Keeper
+        id: ksecrets
+        uses: Keeper-Security/ksm-action@master
+        with:
+          keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
+          secrets: |
+            Sc-LWzJuO-mj9RCSCrjM6w/custom_field/TOKEN > env:KEEPERTOKEN
+
+      - name: Print Login & Password & URL
+        run: |
+          echo "Login is ${{ env.KEEPERTOKEN }}"
