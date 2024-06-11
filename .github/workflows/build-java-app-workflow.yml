@@ -6,6 +6,10 @@ on:
       maven_opts:
         type: string
         required: false
+      build_folder:
+        type: string
+        required: false
+        default: "build-folder"
     outputs:
       version:
         description: "Project version"
@@ -37,7 +41,7 @@ jobs:
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
       - uses: actions/upload-artifact@v4
         with:
-          name: build-folder
+          name: ${{ inputs.build_folder }}
           path: build
       - id: get_project_version
         name: Get project version
