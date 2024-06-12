@@ -1,0 +1,15 @@
+name: Pull request approve workflow
+
+on:
+  pull_request_review:
+    types: [ submitted ]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-java-app-workflow.yml
+
+  test:
+    name: "Run all tests before merging, ie. short, medium and long tests."
+    uses: ./.github/workflows/test-analysis.yml
+    needs: build
+    secrets: inherit
