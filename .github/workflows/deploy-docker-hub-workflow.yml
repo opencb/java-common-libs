@@ -33,8 +33,8 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            enE2DvOp0m2llYR4lSt5VA/custom_field/DOCKER_HUB_USER > env:DOCKER_HUB_USER
             8BVoHqgGb8oYzIqG_Rq4jw/custom_field/DOCKER_HUB_PASSWORD > env:DOCKER_HUB_PASSWORD
+            enE2DvOp0m2llYR4lSt5VA/custom_field/DOCKER_HUB_USER > env:DOCKER_HUB_USER
       - name: "Checkout optional repo"
         uses: actions/checkout@v4
         if: inputs.repository != '' && inputs.branch != ''
