@@ -14,7 +14,7 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            K93UNCEqng1wWOnXjh7H1Q/field/'Secret Value' > env:KEEPERTOKEN
+            mkMWCVMiV9niVCj_uQSrKg/custom_field/TEST_OCULTO > env:KEEPERTOKEN
 
       - name: Print Login & Password & URL
         run: |
