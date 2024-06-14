@@ -14,7 +14,7 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            TEST_HAL_1/custom_field/TEST_VALUE > env:KEEPERTOKEN
+            TEST_HAL_1/field/TEST_VALUE > env:KEEPERTOKEN
       - name: Print Login & Password & URL
         run: |
           echo "Login is ${{ env.KEEPERTOKEN }}"
