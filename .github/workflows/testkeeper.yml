@@ -14,7 +14,8 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            TEST_HAL_1/field/TEST_VALUE > env:KEEPERTOKEN
+            AZURE_KUBE_CONFIG/field/Secret Value > env:KEEPERTOKEN
+
       - name: Print Login & Password & URL
         run: |
           echo "Login is ${{ env.KEEPERTOKEN }}"
