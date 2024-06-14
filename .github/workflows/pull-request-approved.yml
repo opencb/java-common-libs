@@ -9,7 +9,7 @@ jobs:
     uses: ./.github/workflows/build-java-app-workflow.yml
 
   test:
-    name: "Run all tests before merging, ie. short, medium and long tests."
+    name: "Run all tests before merging"
     uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
