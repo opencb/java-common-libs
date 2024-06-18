@@ -14,7 +14,7 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            Sc-LWzJuO-mj9RCSCrjM6w/custom_field/TOKEN > env:KEEPERTOKEN
+            AZURE_KUBE_CONFIG/field/Secret Value > env:KEEPERTOKEN
 
       - name: Print Login & Password & URL
         run: |
