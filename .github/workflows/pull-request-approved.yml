@@ -9,6 +9,8 @@ jobs:
     name: Execute JUnit and Jacoco tests
     runs-on: ubuntu-22.04
     steps:
+      - name: Clone java-common-libs
+        uses: actions/checkout@v4
       - id: get_xetabase_branch
         name: Get current branch for Xetabase from 'pom.xml' property
         run: |
