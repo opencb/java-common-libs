@@ -210,10 +210,10 @@ public final class FileUtils {
 
     public static boolean existsFile(File file) {
         try (FileInputStream fis = new FileInputStream(file)) {
-            logger.info("The file {} was opened successfully to check that it exists", file);
             return true;
         } catch (Exception e) {
-            logger.info("The file {} could not be opened, so it is assumed that it does not exists", file);
+            logger.info("The file {} could not be opened, so it is assumed to not exist. {}", file,
+                    StringUtils.join(e.getStackTrace(), "\n"));
             return false;
         }
     }
