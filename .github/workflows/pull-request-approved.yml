@@ -15,7 +15,7 @@ jobs:
         name: Get current branch for Xetabase from 'pom.xml' property
         run: |
           chmod +x ./.github/workflows/scripts/xetabase-branch.sh
-          xetabase_branch=$(./.github/workflows/scripts/xetabase-branch.sh ${{ github.event.pull_request.base.ref }}
+          xetabase_branch=$(./.github/workflows/scripts/xetabase-branch.sh ${{ github.event.pull_request.base.ref }})
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
       - name: "Run all tests before merging"
