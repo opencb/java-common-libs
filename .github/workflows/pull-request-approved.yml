@@ -5,11 +5,19 @@ on:
     types: [ submitted ]
 
 jobs:
-  build:
-    uses: ./.github/workflows/build-java-app-workflow.yml
-
   test:
-    name: "Run all tests before merging"
-    uses: ./.github/workflows/test-analysis.yml
-    needs: build
-    secrets: inherit
+    name: Execute JUnit and Jacoco tests
+    runs-on: ubuntu-22.04
+    steps:
+      - id: get_xetabase_branch
+        name: Get current branch for Xetabase from 'pom.xml' property
+        run: |
+          chmod +x ./.github/workflows/scripts/xetabase-branch.sh
+          xetabase_branch=$(./.github/workflows/scripts/xetabase-branch.sh ${{ github.event.pull_request.base.ref }}
+          echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
+          echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
+      - name: "Run all tests before merging"
+        uses: ./.github/workflows/test-xetabase-workflow.yml
+        with:
+          branch: ${{ steps.get_xetabase_branch.outputs.xetabase_branch }}
+          task: ${{ github.event.pull_request.head.ref }}
