@@ -22,10 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -209,6 +211,10 @@ public final class FileUtils {
     }
 
     public static boolean existsFile(File file) {
+        logger.info("file = {}; Files.exists ? {}", file, Files.exists(file.toPath());
+        URI uri = file.toURI();
+        logger.info("uri = {}; Files.exists ? {}", uri, Files.exists(Paths.get(uri));
+
         try (InputStream is = Files.newInputStream(file.toPath())) {
             return true;
         } catch (Exception e) {
