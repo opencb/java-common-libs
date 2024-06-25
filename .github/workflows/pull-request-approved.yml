@@ -4,10 +4,6 @@ run-name: 'Pull request approve workflow ${{ github.event.pull_request.head.ref 
 on:
   pull_request_review:
     types: [ submitted ]
-    outputs:
-      version:
-        description: "XetaBase branch to test"
-        value: ${{ jobs.calculate-xetabase-branch.outputs.xetabase_branch }}
 
 jobs:
   calculate-xetabase-branch:
