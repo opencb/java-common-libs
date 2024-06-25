@@ -1,4 +1,4 @@
-name: Pull request approve workflow
+name: TEST Xetabase and publish report workflow
 
 on:
   workflow_call:
@@ -20,7 +20,7 @@ jobs:
         with:
           repository: zetta-genomics/opencga-enterprise
           ref: ${{ github.event.inputs.branch }}
-          token: ${{ secrets.GH_PRIVATE_TOKEN }}
+          token: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
           path: opencga-enterprise
           fetch-depth: "10"
       - id: get_opencga_branch
