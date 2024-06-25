@@ -15,6 +15,10 @@ jobs:
     name: Execute JUnit and Jacoco tests
     runs-on: ubuntu-22.04
     steps:
+      - name: Log inputs
+        run: |
+          echo "__OpenCGA-enterprise branch:__ \"${{ github.event.inputs.branch }}\"" | tee -a $GITHUB_STEP_SUMMARY
+          echo "__Task to test:__ \"${{ github.event.inputs.task }}\"" | tee -a $GITHUB_STEP_SUMMARY
       - name: Clone OpenCGA Enterprise branch '${{ github.event.inputs.branch }}'
         uses: actions/checkout@v4
         with:
