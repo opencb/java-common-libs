@@ -17,13 +17,13 @@ jobs:
     steps:
       - name: Log inputs
         run: |
-          echo "__OpenCGA-enterprise branch:__ \"${{ github.event.inputs.branch }}\"" | tee -a $GITHUB_STEP_SUMMARY
-          echo "__Task to test:__ \"${{ github.event.inputs.task }}\"" | tee -a $GITHUB_STEP_SUMMARY
-      - name: Clone OpenCGA Enterprise branch '${{ github.event.inputs.branch }}'
+          echo "__OpenCGA-enterprise branch:__ \"${{ inputs.branch }}\"" | tee -a $GITHUB_STEP_SUMMARY
+          echo "__Task to test:__ \"${{ inputs.task }}\"" | tee -a $GITHUB_STEP_SUMMARY
+      - name: Clone OpenCGA Enterprise branch '${{ inputs.branch }}'
         uses: actions/checkout@v4
         with:
           repository: zetta-genomics/opencga-enterprise
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ inputs.branch }}
           token: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
           path: opencga-enterprise
           fetch-depth: "10"
@@ -32,7 +32,7 @@ jobs:
         run: |
           pwd
           chmod +x ./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh
-          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh ${{ github.event.inputs.task }})
+          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh ${{ inputs.task }})
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
         with:
@@ -72,7 +72,7 @@ jobs:
         run: |
           ln -s opencga opencga-enterprise/opencga-home
           cd opencga-enterprise
-          ./build.sh -t -l runShortTests,runMediumTests,runLongTests -b -s -f -T ${{ github.event.inputs.task }} -c localhost:27018 -H hdp3.1
+          ./build.sh -t -l runShortTests,runMediumTests,runLongTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
@@ -87,7 +87,7 @@ jobs:
         uses: garygrossgarten/github-action-scp@release
         with:
           local: opencga-enterprise/reports/test
-          remote: /var/www/html/reports/xetabase/${{ github.event.inputs.task }}/
+          remote: /var/www/html/reports/xetabase/${{ inputs.task }}/
           host: ${{ secrets.SSH_TESTING_SERVER_HOST}}
           port: ${{ secrets.SSH_TESTING_SERVER_PORT}}
           username: ${{ secrets.SSH_TESTING_SERVER_USER }}
