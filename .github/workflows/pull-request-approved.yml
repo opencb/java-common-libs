@@ -6,7 +6,7 @@ on:
     types: [ submitted ]
 
 jobs:
-  test:
+  calculate-xetabase-branch:
     name: Execute JUnit and Jacoco tests
     runs-on: ubuntu-22.04
     steps:
@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: '10'
       - id: get_xetabase_branch
-        name: "Get current branch for Xetabase from 'pom.xml' property"
+        name: "Get current branch for Xetabase from target branch"
         run: |
           chmod +x ./.github/workflows/scripts/xetabase-branch.sh
           ls ./.github/workflows/scripts/
@@ -23,8 +23,11 @@ jobs:
           xetabase_branch=$(./.github/workflows/scripts/xetabase-branch.sh ${{ github.event.pull_request.base.ref }})
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
-      - name: "Run all tests before merging"
-        uses: opencb/java-common-libs/.github/workflows/test-xetabase-workflow.yml@TASK-6399
-        with:
-          branch: ${{ steps.get_xetabase_branch.outputs.xetabase_branch }}
-          task: ${{ github.event.pull_request.head.ref }}
+
+  test:
+    name: "Run all tests before merging"
+    needs: calculate-xetabase-branch
+    uses: opencb/java-common-libs/.github/workflows/test-xetabase-workflow.yml@TASK-6399
+    with:
+      branch: ${{ needs.calculate-xetabase-branch.outputs.xetabase_branch }}
+      task: ${{ github.event.pull_request.head.ref }}
