@@ -83,10 +83,13 @@ jobs:
           pwd
           ls -lrtha 
           echo "------------------------------------"
-          ls -lrtha /home/runner/work/java-common-libs/java-common-libs
-          echo "------------------------------------"
-          ln -s opencga opencga-enterprise/opencga-home
           cd opencga-enterprise
+          pwd
+          ls -lrtha 
+          echo "------------------------------------"
+          ln -s ../opencga opencga-home
+          echo "------------------------------------"
+          ls -lrtha 
           ./build.sh -t -l runShortTests,runMediumTests,runLongTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
