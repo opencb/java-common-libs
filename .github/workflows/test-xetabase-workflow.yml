@@ -80,6 +80,11 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
         run: |
+          pwd
+          ls -lrtha 
+          echo "------------------------------------"
+          ls -lrtha /home/runner/work/java-common-libs/java-common-libs
+          echo "------------------------------------"
           ln -s opencga opencga-enterprise/opencga-home
           cd opencga-enterprise
           ./build.sh -t -l runShortTests,runMediumTests,runLongTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
