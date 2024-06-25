@@ -9,6 +9,16 @@ on:
       branch:
         type: string
         required: true
+  workflow_dispatch:
+    inputs:
+      task:
+        type: string
+        description: 'Task ID to be tested.'
+        required: true
+      branch:
+        type: string
+        description: 'Branch of opencga-enterprise to be tested and built.'
+        required: true
 
 jobs:
   test:
