@@ -23,7 +23,7 @@ jobs:
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
       - name: "Run all tests before merging"
-        uses: ./.github/workflows/test-xetabase-workflow.yml@TASK-6399
+        uses: opencb/java-common-libs/.github/workflows/test-xetabase-workflow.yml@TASK-6399
         with:
           branch: ${{ steps.get_xetabase_branch.outputs.xetabase_branch }}
           task: ${{ github.event.pull_request.head.ref }}
