@@ -38,7 +38,6 @@ jobs:
             AZCOPY_SPA_CLIENT_SECRET/field/Secret Value > env:AZCOPY_SPA_CLIENT_SECRET
             AZCOPY_SPA_APPLICATION_ID/field/Secret Value > env:AZCOPY_SPA_APPLICATION_ID
             AZCOPY_TENANT_ID/field/Secret Value > env:AZCOPY_TENANT_ID
-            #ZETTA_REPO_ACCESS_TOKEN/field/Secret Value > env:ZETTA_REPO_ACCESS_TOKEN
             AZURE_KUBE_CONFIG/field/Secret Value > env:AZURE_KUBE_CONFIG
             DOCKER_HUB_USER/field/Secret Value > env:DOCKER_HUB_USER
             DOCKER_HUB_PASSWORD/field/Secret Value > env:DOCKER_HUB_PASSWORD
