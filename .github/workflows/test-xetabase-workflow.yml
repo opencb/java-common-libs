@@ -103,12 +103,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: report-test
-          path: /home/runner/work/testing-environment/testing-environment/opencga-enterprise/reports/test
+          path: /home/runner/work/java-common-libs/java-common-libs/opencga-enterprise/reports/test
       - name: Upload log
         uses: actions/upload-artifact@v4
         with:
           name: build-log
-          path: /home/runner/work/testing-environment/testing-environment/opencga-enterprise/build.log
+          path: /home/runner/work/java-common-libs/java-common-libs/opencga-enterprise/build.log
       - name: Upload junit reports to a remote scp server
         uses: garygrossgarten/github-action-scp@release
         with:
