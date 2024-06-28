@@ -21,10 +21,7 @@ on:
         required: true
 
 env:
-  AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
   AZCOPY_AUTO_LOGIN_TYPE: "SPN"
-  AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
-  AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
 
 
 jobs:
@@ -32,6 +29,23 @@ jobs:
     name: Execute JUnit and Jacoco tests
     runs-on: ubuntu-22.04
     steps:
+      - name: Retrieve secrets from Keeper
+        id: ksecrets
+        uses: Keeper-Security/ksm-action@master
+        with:
+          keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
+          secrets: |
+            AZCOPY_SPA_CLIENT_SECRET/field/Secret Value > env:AZCOPY_SPA_CLIENT_SECRET
+            AZCOPY_SPA_APPLICATION_ID/field/Secret Value > env:AZCOPY_SPA_APPLICATION_ID
+            AZCOPY_TENANT_ID/field/Secret Value > env:AZCOPY_TENANT_ID
+            #ZETTA_REPO_ACCESS_TOKEN/field/Secret Value > env:ZETTA_REPO_ACCESS_TOKEN
+            AZURE_KUBE_CONFIG/field/Secret Value > env:AZURE_KUBE_CONFIG
+            DOCKER_HUB_USER/field/Secret Value > env:DOCKER_HUB_USER
+            DOCKER_HUB_PASSWORD/field/Secret Value > env:DOCKER_HUB_PASSWORD
+            SSH_TESTING_SERVER_HOST/field/Secret Value > env:SSH_TESTING_SERVER_HOST
+            SSH_TESTING_SERVER_PORT/field/Secret Value > env:SSH_TESTING_SERVER_PORT
+            SSH_TESTING_SERVER_USER/field/Secret Value > env:SSH_TESTING_SERVER_USER
+            SSH_TESTING_SERVER_PASSWORD/field/Secret Value > env:SSH_TESTING_SERVER_PASSWORD
       - name: Log inputs
         run: |
           echo "__OpenCGA-enterprise branch:__ \"${{ inputs.branch }}\"" | tee -a $GITHUB_STEP_SUMMARY
@@ -74,7 +88,7 @@ jobs:
         run: |
           wget https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl
           chmod +x ./kubectl
-          echo "${{ secrets.AZURE_KUBE_CONFIG }}" > admin.conf
+          echo "${{ env.AZURE_KUBE_CONFIG }}" > admin.conf
           ./kubectl -n cellbase-db port-forward services/cellbase-rs0-svc 27018:27017 --kubeconfig ./admin.conf &
       - name: Install Azure AZCOPY
         uses: kheiakiyama/install-azcopy-action@v1
@@ -83,8 +97,8 @@ jobs:
       - name: DockerHub login
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          username: ${{ env.DOCKER_HUB_USER }}
+          password: ${{ env.DOCKER_HUB_PASSWORD }}
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
         run: |
           pwd
@@ -114,10 +128,10 @@ jobs:
         with:
           local: opencga-enterprise/reports/test
           remote: /var/www/html/reports/xetabase/${{ inputs.task }}/
-          host: ${{ secrets.SSH_TESTING_SERVER_HOST}}
-          port: ${{ secrets.SSH_TESTING_SERVER_PORT}}
-          username: ${{ secrets.SSH_TESTING_SERVER_USER }}
-          password: ${{ secrets.SSH_TESTING_SERVER_PASSWORD }}
+          host: ${{ env.SSH_TESTING_SERVER_HOST}}
+          port: ${{ env.SSH_TESTING_SERVER_PORT}}
+          username: ${{ env.SSH_TESTING_SERVER_USER }}
+          password: ${{ env.SSH_TESTING_SERVER_PASSWORD }}
           concurrency: 2
 
 
