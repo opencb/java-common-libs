@@ -61,8 +61,8 @@ jobs:
         name: Get OpenCGA branch from 'pom.xml' property
         run: |
           pwd
-          chmod +x ./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh
-          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/get-opencga-branch.sh ${{ inputs.task }})
+          chmod +x ./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh
+          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh false)
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
       - name: Clone OpenCGA branch '${{ steps.get_opencga_branch.outputs.opencga_branch }}'
         uses: actions/checkout@v4
