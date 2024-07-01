@@ -63,8 +63,8 @@ jobs:
           pwd
           ls -lrtha
           ls -lrtha ./opencga-enterprise
-          chmod +x ./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh
-          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh)
+          chmod +x ./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh
+          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/xetabase-branch.sh)
           echo "opencga_branch=${opencga_branch}"
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
       - name: Clone OpenCGA branch '${{ steps.get_opencga_branch.outputs.opencga_branch }}'
