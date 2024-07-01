@@ -133,5 +133,10 @@ jobs:
           username: ${{ env.SSH_TESTING_SERVER_USER }}
           password: ${{ env.SSH_TESTING_SERVER_PASSWORD }}
           concurrency: 2
+      - name: Log summary
+        run: |
+          cat ./opencga-enterprise/build.log | tee -a $GITHUB_STEP_SUMMARY
+          
+          
 
 
