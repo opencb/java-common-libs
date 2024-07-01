@@ -61,6 +61,8 @@ jobs:
         name: Get OpenCGA branch from 'pom.xml' property
         run: |
           pwd
+          ls -lrtha
+          ls -lrtha ./opencga-enterprise
           chmod +x ./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh
           opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/opencga_branch.sh false)
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
