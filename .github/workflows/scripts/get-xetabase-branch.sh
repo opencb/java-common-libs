@@ -5,6 +5,14 @@ get_xetabase_branch() {
   # Input parameter (branch name)
   input_branch="$1"
 
+  # If the branch begins with 'TASK' and exists in the opencga-enterprise repository, I return it
+  if [[ $input_branch == TASK* ]]; then
+    if [ "$(git ls-remote https://github.com/zetta-genomics/opencga-enterprise.git "$input_branch" )" ] ; then
+      echo "$GIT_BRANCH";
+      exit 0;
+    fi
+  fi
+
   # Check if the branch name is "develop" in that case return the same branch name
   if [[ "$input_branch" == "develop" ]]; then
     echo "develop"
