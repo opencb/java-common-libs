@@ -1,0 +1,32 @@
+name: Merge/Push in java-common-libs develop branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch, tag or SHA of the source code to build docker."
+        type: string
+        required: true
+jobs:
+  checkout:
+    name: Build Java app
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '10'
+          ref: "${{ inputs.branch }}"
+
+  build:
+    uses: ./.github/workflows/build-java-app-workflow.yml
+    needs: checkout
+
+  test:
+    uses: ./.github/workflows/test-analysis.yml
+    needs: build
+    secrets: inherit
+
+  deploy-maven:
+    uses: ./.github/workflows/deploy-maven-repository-workflow.yml
+    needs: test
+    secrets: inherit
