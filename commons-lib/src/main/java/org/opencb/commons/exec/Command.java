@@ -76,8 +76,6 @@ public class Command extends RunnableProcess {
     @Override
     public void run() {
         try {
-            setStatus(Status.RUNNING);
-
             startTime();
             logger.debug(Commandline.describeCommand(cmdArray));
             if (environment != null && environment.size() > 0) {
@@ -92,6 +90,7 @@ public class Command extends RunnableProcess {
             } else {
                 proc = Runtime.getRuntime().exec(cmdArray);
             }
+            setStatus(Status.RUNNING);
 
             InputStream is = proc.getInputStream();
             // Thread out = readOutputStream(is);
@@ -134,7 +133,10 @@ public class Command extends RunnableProcess {
 
     @Override
     public void destroy() {
-        proc.destroy();
+        if (proc != null) {
+            proc.destroy();
+            setStatus(Status.KILLED);
+        }
     }
 
     private Thread readOutputStream(InputStream ins) throws IOException {
@@ -182,7 +184,7 @@ public class Command extends RunnableProcess {
                     }
                     logger.debug("Read {} - Exit while", outputName);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    logger.error("Error reading " + outputName, ex);
                     exception = ex.toString();
                 }
         }, outputName + "_reader");
