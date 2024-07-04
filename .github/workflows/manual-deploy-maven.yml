@@ -1,4 +1,4 @@
-name: Merge/Push in java-common-libs develop branch
+name: Manual deploy maven repository
 
 on:
   workflow_dispatch:
