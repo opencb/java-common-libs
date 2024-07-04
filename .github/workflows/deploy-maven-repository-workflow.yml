@@ -48,6 +48,6 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
       - name: Deploy to GitHub Packages repository
-        run: mvn clean deploy -DskipTests -P deploy-github ${{ inputs.maven_opts }}
+        run: mvn clean deploy -DskipTests -P deploy-github ${{ inputs.maven_opts }} --no-transfer-progress
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
