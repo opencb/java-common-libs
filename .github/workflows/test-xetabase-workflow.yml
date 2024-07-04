@@ -9,6 +9,21 @@ on:
       branch:
         type: string
         required: true
+  workflow_dispatch:
+    inputs:
+      task:
+        type: string
+        description: 'Task ID to be tested.'
+        required: true
+      branch:
+        type: string
+        description: 'Branch of opencga-enterprise to be tested and built.'
+        required: true
+env:
+  AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
+  AZCOPY_AUTO_LOGIN_TYPE: "SPN"
+  AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
+  AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
 
 jobs:
   test:
