@@ -1,4 +1,4 @@
-name: Manual deploy maven repository
+name: Manual maven deploy workflow
 
 on:
   workflow_dispatch:
