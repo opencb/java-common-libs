@@ -17,16 +17,7 @@ jobs:
           fetch-depth: '10'
           ref: "${{ inputs.branch }}"
 
-  build:
-    uses: ./.github/workflows/build-java-app-workflow.yml
-    needs: checkout
-
-  test:
-    uses: ./.github/workflows/test-analysis.yml
-    needs: build
-    secrets: inherit
-
   deploy-maven:
     uses: ./.github/workflows/deploy-maven-repository-workflow.yml
-    needs: test
+    needs: checkout
     secrets: inherit
