@@ -1,0 +1,16 @@
+name: Pull request approve workflow
+run-name: 'Pull request approve workflow ${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }} by @${{ github.actor }}'
+
+on:
+  pull_request_review:
+    types: [ submitted ]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-java-app-workflow.yml
+
+  test:
+    name: "Run all tests before merging"
+    uses: ./.github/workflows/test-analysis.yml
+    needs: build
+    secrets: inherit
