@@ -24,6 +24,8 @@ find . -type f -path './*/target/site/surefire-report.html' | while read -r repo
     cp -r "$(dirname "$report_file")"/* "report/$module/"
 done
 
+cd "$(dirname "$0")" || exit
+
 # Read the template and prepare to replace the placeholder with actual menu entries
 template=$(<index.template)
 menu_entries=""
