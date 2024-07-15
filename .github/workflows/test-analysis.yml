@@ -42,14 +42,15 @@ jobs:
           fail_on_test_failures: true
       - name: Create report folder
         run: |
-          mkdir -p $GITHUB_WORKSPACE/surefire-reports
-          cp -r ./**/surefire-reports/TEST-*.xml $GITHUB_WORKSPACE/surefire-reports
-      - uses: actions/upload-artifact@v4
+          mkdir -p report
+          find . -type f -path '*/surefire-reports/TEST-*.xml' -exec cp {} report/ \;
+      - name: Upload Test Report Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: $GITHUB_WORKSPACE/surefire-reports
+          name: report
       - name: Publish Test Report
         uses: ./.github/workflows/publish-test-report-workflow.yml
         with:
           target_path: /var/www/html/reports/xetabase/java-common-libs/${{ github.ref_name }}/surefire-reports/
-          content: $GITHUB_WORKSPACE/surefire-reports
+          content: report
 
