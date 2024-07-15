@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Change to the directory where the script is located
-cd "$(dirname "$0")"
-
 # Create the 'report' folder if it doesn't exist
 mkdir -p report
 
