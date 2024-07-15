@@ -43,7 +43,7 @@ jobs:
       - name: Generate HTML test report folder
         run: |
           pwd
-          ls -la
+          ls -la ./.github/workflows/          
           chmod +x ./.github/workflows/scripts/generate_report.sh
           ./.github/workflows/scripts/generate_report.sh
       - name: Upload Test Report Artifact

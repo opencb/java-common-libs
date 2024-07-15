@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Change to the directory where the script is located
+cd "$(dirname "$0")"
+
 # Create the 'report' folder if it doesn't exist
 mkdir -p report
 
@@ -17,17 +20,15 @@ if [ -f "./target/site/surefire-report.html" ]; then
 fi
 
 # Find all other 'target/site' folders and copy their contents to 'report', renaming them with the module name
-find . -type f -path './*/target/site/surefire-report.html' | while read -r report_file; do
-    module=$(basename $(dirname $(dirname $(dirname "$report_file"))))
+while IFS= read -r report_file; do
+    module=$(basename "$(dirname "$(dirname "$(dirname "$report_file")")")")
     modules+=("$module")
     mkdir -p "report/$module"
     cp -r "$(dirname "$report_file")"/* "report/$module/"
-done
-
-cd "$(dirname "$0")" || exit
+done < <(find . -type f -path './*/target/site/surefire-report.html')
 
 # Read the template and prepare to replace the placeholder with actual menu entries
-template=$(<index.template)
+template=$(<"$PWD"/index.template)
 menu_entries=""
 
 # Create menu entries
