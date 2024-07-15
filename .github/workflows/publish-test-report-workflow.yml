@@ -3,19 +3,12 @@ name: Reusable workflow to push in DockerHub
 on:
   workflow_call:
     inputs:
-      cli:
+      target_path:
         type: string
         required: true
-      repository:
+      content:
         type: string
         required: false
-      branch:
-        type: string
-        required: false
-      build_folder:
-        type: string
-        required: false
-        default: "build-folder"
     secrets:
       SSH_TESTING_SERVER_HOST:
         required: true
