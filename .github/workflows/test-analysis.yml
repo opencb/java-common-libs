@@ -42,9 +42,6 @@ jobs:
           fail_on_test_failures: true
       - name: Generate HTML test report folder
         run: |
-          pwd
-          ls -la ./.github/workflows/          
-          cat ./.github/workflows/publish-test-report-workflow.yml
           chmod +x ./.github/workflows/scripts/generate_report.sh
           ./.github/workflows/scripts/generate_report.sh
       - name: Upload Test Report Artifact

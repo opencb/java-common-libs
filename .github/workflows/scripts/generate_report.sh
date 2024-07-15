@@ -6,40 +6,20 @@ cd "$(dirname "$0")"
 # Create the 'report' folder if it doesn't exist
 mkdir -p report
 
-# Create a list of modules
-modules=()
-
 # Get the current directory name
 current_dir=$(basename "$PWD")
 
-# Add the current directory's report
-if [ -f "./target/site/surefire-report.html" ]; then
-    modules+=("$current_dir")
+# Add the current directory's site folder
+if [ -d "./target/site" ]; then
     mkdir -p "report/$current_dir"
     cp -r "./target/site"/* "report/$current_dir/"
 fi
 
 # Find all other 'target/site' folders and copy their contents to 'report', renaming them with the module name
-while IFS= read -r report_file; do
-    module=$(basename "$(dirname "$(dirname "$(dirname "$report_file")")")")
-    modules+=("$module")
+find . -type d -path './*/target/site' | while read -r site_dir; do
+    module=$(basename "$(dirname "$(dirname "$site_dir")")")
     mkdir -p "report/$module"
-    cp -r "$(dirname "$report_file")"/* "report/$module/"
-done < <(find . -type f -path './*/target/site/surefire-report.html')
-
-# Read the template and prepare to replace the placeholder with actual menu entries
-template=$(<"$PWD"/index.template)
-menu_entries=""
-
-# Create menu entries
-for module in "${modules[@]}"; do
-    menu_entries+="<li><a href=\"#\" onclick=\"loadReport('$module')\">$module</a></li>\n"
+    cp -r "$site_dir"/* "report/$module/"
 done
 
-# Replace the placeholder in the template with actual menu entries
-output="${template//<!-- MENU_ENTRIES -->/$menu_entries}"
-
-# Write the output to index.html in the report folder
-echo -e "$output" > report/index.html
-
-echo "All files have been copied and the index.html file has been created in the 'report' folder."
+echo "All site folders have been copied to the 'report' folder with module names."
