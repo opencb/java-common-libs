@@ -52,9 +52,12 @@ jobs:
         with:
           name: report
           path: report
-      - name: Publish Test Report
-        uses: ./.github/workflows/publish-test-report-workflow.yml
-        with:
-          target_path: /var/www/html/reports/xetabase/java-common-libs/${{ github.ref_name }}/surefire-reports/
-          content: report
 
+  upload-test:
+    name: Upload test results
+    uses: ./.github/workflows/publish-test-report-workflow.yml
+    with:
+      target_path: /var/www/html/reports/xetabase/java-common-libs/${{ github.ref_name }}/surefire-reports/
+      content: report
+    needs: test
+    secrets: inherit
