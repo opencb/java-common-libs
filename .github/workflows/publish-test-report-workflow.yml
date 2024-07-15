@@ -1,0 +1,46 @@
+name: Reusable workflow to push in DockerHub
+
+on:
+  workflow_call:
+    inputs:
+      cli:
+        type: string
+        required: true
+      repository:
+        type: string
+        required: false
+      branch:
+        type: string
+        required: false
+      build_folder:
+        type: string
+        required: false
+        default: "build-folder"
+    secrets:
+      SSH_TESTING_SERVER_HOST:
+        required: true
+      SSH_TESTING_SERVER_PASSWORD:
+        required: true
+      SSH_TESTING_SERVER_PORT:
+        required: true
+      SSH_TESTING_SERVER_USER:
+        required: true
+
+jobs:
+  publish-test-report:
+    name: Publish test report
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.content }}
+          path: report
+      - name: Deploy tests web recursively to remote
+        run: |
+          set -e
+          set -x
+          export SSHPASS=${{ secrets.SSH_TESTING_SERVER_PASSWORD }}
+          SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=60"
+          sshpass -e ssh ${SSH_OPTS} ${{ secrets.SSH_TESTING_SERVER_USER }}@${{ secrets.SSH_TESTING_SERVER_HOST }} -p ${{ secrets.SSH_TESTING_SERVER_PORT }} "mkdir -p ${{ inputs.target_path }}"
+          echo "Copying report tests to remote path ${{ inputs.target_path }}"
+          sshpass -e scp ${SSH_OPTS} -r -P ${{ secrets.SSH_TESTING_SERVER_PORT }} report ${{ secrets.SSH_TESTING_SERVER_USER }}@${{ secrets.SSH_TESTING_SERVER_HOST }}:${{ inputs.target_path }}
