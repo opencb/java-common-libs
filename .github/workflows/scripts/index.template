@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surefire Reports</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #menu {
+            float: left;
+            width: 20%;
+            background: #f4f4f4;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #content {
+            margin-left: 22%;
+            padding: 15px;
+        }
+        a {
+            text-decoration: none;
+            display: block;
+            padding: 8px 16px;
+            color: #333;
+        }
+        a:hover {
+            background: #ddd;
+        }
+    </style>
+    <script>
+        function loadReport(module) {
+            fetch(module + '/surefire-report.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('content').innerHTML = html;
+                });
+        }
+    </script>
+</head>
+<body>
+    <div id="menu">
+        <h2>Surefire Reports</h2>
+        <ul>
+            <!-- MENU_ENTRIES -->
+        </ul>
+    </div>
+    <div id="content">
+        <h2>Select a module from the menu to view the report.</h2>
+    </div>
+</body>
+</html>
