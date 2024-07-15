@@ -44,77 +44,84 @@ jobs:
         run: |
           set -e
           set -x
+          # Crear la carpeta 'report' si no existe
           mkdir -p report
+          
           # Crear una lista de módulos
           modules=()
-          # Buscar todas las carpetas 'site' y copiar su contenido a 'report', renombrándolas con el nombre del módulo
-          find . -type d -name 'site' | while read -r site_dir; do
-              module=$(basename $(dirname "$site_dir"))
-              modules+=("$module")
-              cp -r "$site_dir" "report/$module"
+          
+          # Buscar todas las carpetas 'target/site' y copiar su contenido a 'report', renombrándolas con el nombre del módulo
+          find . -type f -path '*/target/site/surefire-report.html' | while read -r report_file; do
+          module=$(basename $(dirname $(dirname $(dirname "$report_file"))))
+          modules+=("$module")
+          mkdir -p "report/$module"
+          cp -r "$(dirname "$report_file")"/* "report/$module/"
           done
+          
           # Crear el archivo index.html en 'report'
           cat <<EOL > report/index.html
           <!DOCTYPE html>
           <html lang="en">
           <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Surefire Reports</title>
-              <style>
-                  body {
-                      font-family: Arial, sans-serif;
-                  }
-                  #menu {
-                      float: left;
-                      width: 20%;
-                      background: #f4f4f4;
-                      padding: 15px;
-                      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                  }
-                  #content {
-                      margin-left: 22%;
-                      padding: 15px;
-                  }
-                  a {
-                      text-decoration: none;
-                      display: block;
-                      padding: 8px 16px;
-                      color: #333;
-                  }
-                  a:hover {
-                      background: #ddd;
-                  }
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Surefire Reports</title>
+          <style>
+              body {
+              font-family: Arial, sans-serif;
+              }
+              #menu {
+              float: left;
+              width: 20%;
+              background: #f4f4f4;
+              padding: 15px;
+              box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+              #content {
+              margin-left: 22%;
+              padding: 15px;
+            }
+              a {
+              text-decoration: none;
+              display: block;
+              padding: 8px 16px;
+              color: #333;
+            }
+              a:hover {
+              background: #ddd;
+            }
               </style>
               <script>
-                  function loadReport(module) {
-                      fetch(module + '/surefire-report.html')
-                          .then(response => response.text())
-                          .then(html => {
-                              document.getElementById('content').innerHTML = html;
-                          });
-                  }
-              </script>
+              function loadReport(module) {
+              fetch(module + '/surefire-report.html')
+              .then(response => response.text())
+              .then(html => {
+              document.getElementById('content').innerHTML = html;
+            });
+            }
+          </script>
           </head>
           <body>
-              <div id="menu">
-                  <h2>Surefire Reports</h2>
-                  <ul>
+          <div id="menu">
+          <h2>Surefire Reports</h2>
+          <ul>
           EOL
+          
           # Añadir las entradas del menú al archivo index.html
           for module in "${modules[@]}"; do
-              echo "            <li><a href=\"#\" onclick=\"loadReport('$module')\">$module</a></li>" >> report/index.html
+          echo "            <li><a href=\"#\" onclick=\"loadReport('$module')\">$module</a></li>" >> report/index.html
           done
+          
           # Finalizar el archivo index.html
           cat <<EOL >> report/index.html
-                  </ul>
-              </div>
-              <div id="content">
-                  <h2>Seleccione un módulo del menú para ver el informe.</h2>
-              </div>
+          </ul>
+          </div>
+          <div id="content">
+          <h2>Seleccione un módulo del menú para ver el informe.</h2>
+          </div>
           </body>
           </html>
-          EOL
+          EOL          
           echo "Todos los archivos han sido copiados y el archivo index.html ha sido creado en la carpeta 'report'."
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
