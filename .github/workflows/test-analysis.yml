@@ -42,8 +42,10 @@ jobs:
           fail_on_test_failures: true
       - name: Create report folder
         run: |
-          chmod +x scripts/generate_report.sh
-          ./scripts/generate_report.sh
+          pwd
+          ls -la
+          chmod +x ./.github/workflows/scripts/generate_report.sh
+          ./.github/workflows/scripts/generate_report.sh
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
         with:
