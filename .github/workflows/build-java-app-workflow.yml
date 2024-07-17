@@ -6,6 +6,10 @@ on:
       maven_opts:
         type: string
         required: false
+      build_folder:
+        type: string
+        required: false
+        default: "build-folder"
     outputs:
       version:
         description: "Project version"
@@ -34,10 +38,10 @@ jobs:
             ./.github/workflows/scripts/get_same_branch.sh ${{ github.ref_name }}
           fi
       - name: Maven Build (skip tests)
-        run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }}
+        run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }} --no-transfer-progress
       - uses: actions/upload-artifact@v4
         with:
-          name: build-folder
+          name: ${{ inputs.build_folder }}
           path: build
       - id: get_project_version
         name: Get project version
