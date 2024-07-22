@@ -18,6 +18,7 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.exec.Command;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -187,6 +188,27 @@ public class FileUtils {
 
         return new String[]{split[2], split[3]};
     }
+
+
+    public static void copyFile(File src, File dest) throws IOException {
+        try {
+            org.apache.commons.io.FileUtils.copyFile(src, dest);
+        } catch (IOException e) {
+            try {
+                if (src.length() == dest.length()) {
+                    LoggerFactory.getLogger(FileUtils.class).warn(e.getMessage());
+                    return;
+                }
+                throw e;
+            } catch (Exception e1) {
+                throw e;
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    // P R I V A T E     M E T H O D S
+    //-------------------------------------------------------------------------
 
     private static String getLsOutput(Path path, boolean numericId) throws IOException {
         FileUtils.checkPath(path);
