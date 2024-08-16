@@ -35,9 +35,9 @@ jobs:
           mongodb-replica-set: rs-test
       - name: Test and Analyze
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-        run: mvn -B verify surefire-report:report --fail-never org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify surefire-report:report --fail-never org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs --no-transfer-progress
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
         ## Skip cancelled()
