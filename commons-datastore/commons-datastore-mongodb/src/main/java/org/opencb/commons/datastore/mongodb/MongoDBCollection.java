@@ -321,19 +321,6 @@ public class MongoDBCollection {
         return queryResultList;
     }
 
-    public <T> DataResult<T> copyDocuments(Bson query, String targetCollection) {
-        return copyDocuments(query, targetCollection, null);
-    }
-
-    public <T> DataResult<T> copyDocuments(Bson query, String targetCollection,
-                                           ComplexTypeConverter<T, Document> converter) {
-        List<Bson> aggregation = Arrays.asList(
-                Aggregates.match(query),
-                Aggregates.out(targetCollection) // $out step does not support transactions
-        );
-        return aggregate(null, aggregation, converter, QueryOptions.empty());
-    }
-
     public DataResult<Document> aggregate(ClientSession clientSession, List<? extends Bson> operations,
                                           QueryOptions options) {
         return aggregate(clientSession, operations, null, options);
