@@ -25,6 +25,7 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -36,10 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ignacio Medina &lt;imedina@ebi.ac.uk&gt;
@@ -323,17 +321,39 @@ public class MongoDBCollection {
         return queryResultList;
     }
 
+    public <T> DataResult<T> copyDocuments(Bson query, String targetCollection) {
+        return copyDocuments(query, targetCollection, null);
+    }
+
+    public <T> DataResult<T> copyDocuments(Bson query, String targetCollection,
+                                           ComplexTypeConverter<T, Document> converter) {
+        List<Bson> aggregation = Arrays.asList(
+                Aggregates.match(query),
+                Aggregates.out(targetCollection) // $out step does not support transactions
+        );
+        return aggregate(null, aggregation, converter, QueryOptions.empty());
+    }
+
+    public DataResult<Document> aggregate(ClientSession clientSession, List<? extends Bson> operations,
+                                          QueryOptions options) {
+        return aggregate(clientSession, operations, null, options);
+    }
+
     public DataResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         return aggregate(operations, null, options);
     }
 
     public <T> DataResult<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
                                        QueryOptions options) {
+        return aggregate(null, operations, converter, options);
+    }
 
+    public <T> DataResult<T> aggregate(ClientSession clientSession, List<? extends Bson> operations,
+                                       ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         long start = startQuery();
 
         DataResult<T> queryResult;
-        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
+        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(clientSession, operations, converter, options);
 //        MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
         if (queryResultWriter != null) {
