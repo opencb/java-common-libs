@@ -21,6 +21,10 @@ jobs:
       - id: get_xetabase_branch
         name: "Get current branch for Xetabase from target branch"
         run: |
+          if [ "$( git ls-remote https://github.com/opencb/opencga.git "TASK-6807" )" ] ; then
+           echo "OPENCGA TASK-6807 branch";
+          fi
+          
           if [ "$(git ls-remote "https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git" "$input_branch" )" ] ; then
             echo "Here it is TASK-6807 branch";
           fi
