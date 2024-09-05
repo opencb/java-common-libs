@@ -2,11 +2,12 @@ name: Pull request approve workflow
 run-name: 'Pull request approve workflow ${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }} by @${{ github.actor }}'
 
 on:
-
   push:
     branches:
       - TASK-*
-
+env:
+  ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
+  
 jobs:
   calculate-xetabase-branch:
     name: Calculate Xetabase branch
