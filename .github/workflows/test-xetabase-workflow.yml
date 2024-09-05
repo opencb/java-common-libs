@@ -20,10 +20,6 @@ on:
         description: 'Branch of opencga-enterprise to be tested and built.'
         required: true
 
-env:
-  AZCOPY_AUTO_LOGIN_TYPE: "SPN"
-
-
 jobs:
   test:
     name: Execute JUnit and Jacoco tests
@@ -35,9 +31,6 @@ jobs:
         with:
           keeper-secret-config: ${{ secrets.KEEPER_SM_GH_OPENCB }}
           secrets: |
-            AZCOPY_SPA_CLIENT_SECRET/field/Secret Value > env:AZCOPY_SPA_CLIENT_SECRET
-            AZCOPY_SPA_APPLICATION_ID/field/Secret Value > env:AZCOPY_SPA_APPLICATION_ID
-            AZCOPY_TENANT_ID/field/Secret Value > env:AZCOPY_TENANT_ID
             AZURE_KUBE_CONFIG/field/Secret Value > env:AZURE_KUBE_CONFIG
             DOCKER_HUB_USER/field/Secret Value > env:DOCKER_HUB_USER
             DOCKER_HUB_PASSWORD/field/Secret Value > env:DOCKER_HUB_PASSWORD
@@ -93,10 +86,6 @@ jobs:
           chmod +x ./kubectl
           echo "${{ secrets.AZURE_KUBE_CONFIG }}" > admin.conf
           ./kubectl -n cellbase-db port-forward services/cellbase-rs0-svc 27018:27017 --kubeconfig ./admin.conf &
-      - name: Install Azure AZCOPY
-        uses: kheiakiyama/install-azcopy-action@v1
-        with:
-          version: 'v10'
       - name: DockerHub login
         uses: docker/login-action@v3
         with:
@@ -105,11 +94,6 @@ jobs:
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
         run: |
           ./build.sh -t -l runShortTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
-        env:
-          SSH_HOST: ${{ env.SSH_HOST }}
-          SSH_PORT: ${{ env.SSH_PORT }}
-          SSH_USER: ${{ env.SSH_USER }}
-          SSH_PASS: ${{ env.SSH_PASS }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
