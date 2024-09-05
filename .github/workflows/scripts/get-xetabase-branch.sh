@@ -41,11 +41,6 @@ get_xetabase_branch() {
   return 1
 }
 
-# Check if the script receives exactly one argument
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <branch-name>"
-  exit 1
-fi
 
 # Call the function with the input branch name
 get_xetabase_branch "$1" "$2"
