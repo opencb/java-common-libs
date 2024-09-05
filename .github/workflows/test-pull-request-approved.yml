@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - TASK-*
-env:
-  ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
+
 
 jobs:
   calculate-xetabase-branch:
@@ -30,7 +29,8 @@ jobs:
           xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "TASK-6807" )
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
-
+        env:
+          ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
   test:
     name: "Run all tests before merging"
     needs: calculate-xetabase-branch
