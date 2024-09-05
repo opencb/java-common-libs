@@ -22,7 +22,7 @@ jobs:
         name: "Get current branch for Xetabase from target branch"
         run: |
           chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
-          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
+          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}" | tee -a ${GITHUB_STEP_SUMMARY}
           xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "TASK-6807" "${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}" )
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
