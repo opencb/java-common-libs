@@ -41,10 +41,10 @@ jobs:
             AZURE_KUBE_CONFIG/field/Secret Value > env:AZURE_KUBE_CONFIG
             DOCKER_HUB_USER/field/Secret Value > env:DOCKER_HUB_USER
             DOCKER_HUB_PASSWORD/field/Secret Value > env:DOCKER_HUB_PASSWORD
-            SSH_TESTING_SERVER_HOST/field/Secret Value > env:SSH_TESTING_SERVER_HOST
-            SSH_TESTING_SERVER_PORT/field/Secret Value > env:SSH_TESTING_SERVER_PORT
-            SSH_TESTING_SERVER_USER/field/Secret Value > env:SSH_TESTING_SERVER_USER
-            SSH_TESTING_SERVER_PASSWORD/field/Secret Value > env:SSH_TESTING_SERVER_PASSWORD
+            SSH_TESTING_SERVER_HOST/field/Secret Value > env:SSH_HOST
+            SSH_TESTING_SERVER_PORT/field/Secret Value > env:SSH_PORT
+            SSH_TESTING_SERVER_USER/field/Secret Value > env:SSH_USER
+            SSH_TESTING_SERVER_PASSWORD/field/Secret Value > env:SSH_PASS
       - name: Log inputs
         run: |
           echo "__OpenCGA-enterprise branch:__ \"${{ inputs.branch }}\"" | tee -a $GITHUB_STEP_SUMMARY
@@ -104,18 +104,12 @@ jobs:
           password: ${{ env.DOCKER_HUB_PASSWORD }}
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
         run: |
-          pwd
-          ls -lrtha 
-          echo "------------------------------------"
-          cd opencga-enterprise
-          pwd
-          ls -lrtha 
-          echo "------------------------------------"
-          ln -s ../opencga opencga-home
-          echo "------------------------------------"
-          ls -lrtha 
-          #./build.sh -t -l runShortTests,runMediumTests,runLongTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
           ./build.sh -t -l runShortTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
+        env:
+          SSH_HOST: ${{ env.SSH_HOST }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          SSH_USER: ${{ env.SSH_USER }}
+          SSH_PASS: ${{ env.SSH_PASS }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
@@ -126,16 +120,6 @@ jobs:
         with:
           name: build-log
           path: ./opencga-enterprise/build.log
-      - name: Upload junit reports to a remote scp server
-        uses: garygrossgarten/github-action-scp@release
-        with:
-          local: opencga-enterprise/reports/test
-          remote: /var/www/html/reports/xetabase/${{ inputs.task }}/
-          host: ${{ env.SSH_TESTING_SERVER_HOST}}
-          port: ${{ env.SSH_TESTING_SERVER_PORT}}
-          username: ${{ env.SSH_TESTING_SERVER_USER }}
-          password: ${{ env.SSH_TESTING_SERVER_PASSWORD }}
-          concurrency: 2
       - name: Log summary
         run: |
           cat ./opencga-enterprise/build.log | tee -a $GITHUB_STEP_SUMMARY
