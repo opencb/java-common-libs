@@ -1,5 +1,6 @@
 #!/bin/bash
-
+set -e
+set -x
 # Function to calculate the corresponding branch of Xetabase project
 get_xetabase_branch() {
   # Input parameter (branch name)
