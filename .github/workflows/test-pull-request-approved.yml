@@ -25,7 +25,7 @@ jobs:
            echo "OPENCGA TASK-6807 branch";
           fi
           
-          if [ "$(git ls-remote "https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git" "$input_branch" )" ] ; then
+          if [ "$(git ls-remote https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git "$input_branch" )" ] ; then
             echo "Here it is TASK-6807 branch";
           fi
           chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
