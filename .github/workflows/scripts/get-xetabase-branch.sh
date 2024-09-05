@@ -5,7 +5,7 @@ set -x
 get_xetabase_branch() {
   # Input parameter (branch name)
   input_branch="$1"
-  ZETTA_REPO_ACCESS_TOKEN="$2"
+
   # If the branch begins with 'TASK' and exists in the opencga-enterprise repository, I return it
   if [[ $input_branch == TASK* ]]; then
     if [ "$(git ls-remote "https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git" "$input_branch" )" ] ; then
@@ -43,4 +43,4 @@ get_xetabase_branch() {
 
 
 # Call the function with the input branch name
-get_xetabase_branch "$1" "$2"
+get_xetabase_branch "$1"
