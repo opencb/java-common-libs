@@ -91,6 +91,15 @@ jobs:
         with:
           username: ${{ env.DOCKER_HUB_USER }}
           password: ${{ env.DOCKER_HUB_PASSWORD }}
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
+      - name: Add SSH Host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ env.SSH_PORT }} ${{ env.SSH_HOST }} >> ~/.ssh/known_hosts
+        env:
+          SSH_HOST: ${{ env.SSH_HOST }}
+          SSH_PORT: ${{ env.SSH_PORT }}
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
         run: |
           cd opencga-enterprise
