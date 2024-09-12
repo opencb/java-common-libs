@@ -104,7 +104,7 @@ jobs:
         run: |
           cd opencga-enterprise
           ln -s ../opencga opencga-home
-          ./build.sh -t -l runShortTests -b -s -f -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
+          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
