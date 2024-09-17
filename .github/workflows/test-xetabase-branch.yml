@@ -32,7 +32,7 @@ jobs:
           fi
           chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
           echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}" | tee -a ${GITHUB_STEP_SUMMARY}
-          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "TASK-6807" )
+          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "release-5.x.x" )
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
         env:
@@ -44,5 +44,5 @@ jobs:
     uses: opencb/java-common-libs/.github/workflows/test-xetabase-workflow.yml@develop
     with:
       branch: ${{ needs.calculate-xetabase-branch.outputs.xetabase_branch }}
-      task: TASK-6807
+      task: TASK-6879
     secrets: inherit
