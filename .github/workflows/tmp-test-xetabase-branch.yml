@@ -23,8 +23,8 @@ jobs:
       - id: get_xetabase_branch
         name: "Get current branch for Xetabase from target branch"
         run: |
-          if [ "$( git ls-remote https://$ZETTA_REPO_ACCESS_TOKEN@github.com/opencb/opencga.git "TASK-6807" )" ] ; then
-           echo "OPENCGA TASK-6807 branch";
+          if [ "$( git ls-remote https://$ZETTA_REPO_ACCESS_TOKEN@github.com/opencb/opencga.git "TASK-6879" )" ] ; then
+           echo "OPENCGA TASK-6879 branch";
           fi
           
           if [ "$( git ls-remote https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git "$input_branch" )" ] ; then
@@ -32,7 +32,7 @@ jobs:
           fi
           chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
           echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}" | tee -a ${GITHUB_STEP_SUMMARY}
-          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "release-5.x.x" )
+          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "TASK-6879" )
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
         env:
