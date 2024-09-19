@@ -48,7 +48,13 @@ public class DockerUtils {
                 setUser = false;
             }
             for (String key : dockerParams.keySet()) {
-                commandLine.append("--").append(key).append(" ").append(dockerParams.get(key)).append(" ");
+                if (!key.startsWith("-")) {
+                    commandLine.append("--");
+                }
+                commandLine.append(key).append(" ");
+                if (StringUtils.isNotEmpty(dockerParams.get(key))) {
+                    commandLine.append(dockerParams.get(key)).append(" ");
+                }
             }
         }
 
@@ -62,7 +68,7 @@ public class DockerUtils {
             // Mount management (bindings)
             for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
                 commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
-                        .append("\" ");
+                        .append("\",readonly ");
             }
         }
         commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
