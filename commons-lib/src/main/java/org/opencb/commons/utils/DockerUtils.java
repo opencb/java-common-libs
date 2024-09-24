@@ -48,6 +48,10 @@ public class DockerUtils {
                 setUser = false;
             }
             for (String key : dockerParams.keySet()) {
+                if (key.equals("user") && StringUtils.isEmpty(dockerParams.get("user"))) {
+                    // User wants to disable user setting
+                    continue;
+                }
                 if (!key.startsWith("-")) {
                     commandLine.append("--");
                 }
