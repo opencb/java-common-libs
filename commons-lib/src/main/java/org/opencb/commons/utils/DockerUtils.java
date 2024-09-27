@@ -70,9 +70,13 @@ public class DockerUtils {
 
         if (inputBindings != null) {
             // Mount management (bindings)
+            Set<String> inputBindingSet = new HashSet<>();
             for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
-                commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
-                        .append("\",readonly ");
+                if (!inputBindingSet.contains(binding.getKey())) {
+                    commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"")
+                            .append(binding.getValue()).append("\",readonly ");
+                    inputBindingSet.add(binding.getKey());
+                }
             }
         }
         commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
