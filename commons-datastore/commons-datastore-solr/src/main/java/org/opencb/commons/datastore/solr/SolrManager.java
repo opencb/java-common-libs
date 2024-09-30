@@ -42,7 +42,7 @@ public class SolrManager {
 
     private List<String> hosts;
     private String mode;
-    private SolrClient solrClient;
+    private final SolrClient solrClient;
 
     private final Logger logger = LoggerFactory.getLogger(SolrManager.class);
 
@@ -79,13 +79,6 @@ public class SolrManager {
         this.hosts = Collections.singletonList(host);
         this.mode = mode;
     }
-
-//    @Deprecated
-//    public SolrManager(SolrClient solrClient, String host, String mode, int timeout) {
-//        this.solrClient = solrClient;
-//        this.hosts = Collectionshost;
-//        this.mode = mode;
-//    }
 
     public SolrCollection getCollection(String collection) throws SolrException {
         checkIsAlive();
@@ -358,10 +351,6 @@ public class SolrManager {
             }
         }
 
-        // Sanity check
-        if (solrClient == null) {
-            throw new IllegalArgumentException("Can not build a Solr client, please, check Solr configuration");
-        }
         return  solrClient;
     }
 
@@ -415,10 +404,5 @@ public class SolrManager {
 
     public SolrClient getSolrClient() {
         return solrClient;
-    }
-
-    public SolrManager setSolrClient(SolrClient solrClient) {
-        this.solrClient = solrClient;
-        return this;
     }
 }
