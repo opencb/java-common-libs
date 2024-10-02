@@ -51,13 +51,18 @@ jobs:
           path: opencga-enterprise
           fetch-depth: "10"
       - id: get_opencga_branch
-        name: Get OpenCGA branch from 'pom.xml' property
+        name: Get OpenCGA branch
         run: |
-          pwd
-          ls -lrtha
-          ls -lrtha ./opencga-enterprise
-          chmod +x ./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh
-          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh)
+          # If the task exists in the opencga repository, this is the branch to be tested
+          if [[ "${{ inputs.task }}" == TASK* ]]; then
+            if [ "$(git ls-remote "https://github.com/opencb/opencga.git" "${{ inputs.task }}" ] ; then
+              opencga_branch="${{ inputs.task }}";
+              return 0;
+            fi
+          else
+            chmod +x ./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh
+            opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh)
+          fi      
           echo "opencga_branch=${opencga_branch}"
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
       - name: Clone OpenCGA branch '${{ steps.get_opencga_branch.outputs.opencga_branch }}'
