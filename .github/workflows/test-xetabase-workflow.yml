@@ -55,7 +55,7 @@ jobs:
         run: |
           # If the task exists in the opencga repository, this is the branch to be tested
           if [[ "${{ inputs.task }}" == TASK* ]]; then
-            if [ "$(git ls-remote "https://github.com/opencb/opencga.git" "${{ inputs.task }}") ] ; then
+            if [ "$(git ls-remote "https://github.com/opencb/opencga.git" "${{ inputs.task }}")" ]; then
               opencga_branch="${{ inputs.task }}";
               return 0;
             fi
