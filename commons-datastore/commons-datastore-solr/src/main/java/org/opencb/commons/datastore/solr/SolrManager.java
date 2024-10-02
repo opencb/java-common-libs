@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 
 public class SolrManager {
 
-    private List<String> hosts;
-    private String mode;
+    private final List<String> hosts;
+    private final String mode;
     private final SolrClient solrClient;
 
     private final Logger logger = LoggerFactory.getLogger(SolrManager.class);
@@ -323,7 +323,7 @@ public class SolrManager {
     }
 
     public SolrClient newSolrClient(int timeout) {
-        SolrClient solrClient;
+        final SolrClient solrClient;
         if (hosts.get(0).startsWith("http")) {
             if (hosts.size() == 1) {
                 // Single HTTP endpoint.
@@ -355,10 +355,6 @@ public class SolrManager {
     }
 
     private boolean isCloud() {
-        if (StringUtils.isEmpty(mode)) {
-            logger.warn("Solr 'mode' is empty, setting default 'cloud'");
-            mode = "cloud";
-        }
         switch (mode.toLowerCase()) {
             case "collection":
             case "cloud": {
@@ -388,18 +384,8 @@ public class SolrManager {
         return hosts;
     }
 
-    public SolrManager setHosts(List<String> hosts) {
-        this.hosts = hosts;
-        return this;
-    }
-
     public String getMode() {
         return mode;
-    }
-
-    public SolrManager setMode(String mode) {
-        this.mode = mode;
-        return this;
     }
 
     public SolrClient getSolrClient() {
