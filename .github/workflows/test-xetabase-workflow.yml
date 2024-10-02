@@ -57,7 +57,6 @@ jobs:
           if [[ "${{ inputs.task }}" == TASK* ]]; then
             if [ "$(git ls-remote "https://github.com/opencb/opencga.git" "${{ inputs.task }}")" ]; then
               opencga_branch="${{ inputs.task }}";
-              return 0;
             fi
           else
             chmod +x ./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh
