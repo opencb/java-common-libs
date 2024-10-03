@@ -22,6 +22,7 @@ get_xetabase_branch() {
 
   # Check if the branch name starts with "release-" and follows the patterns "release-a.x.x" or "release-a.b.x"
   if [[ "$input_branch" =~ ^release-([0-9]+)\.x\.x$ ]] || [[ "$input_branch" =~ ^release-([0-9]+)\.([0-9]+)\.x$ ]]; then
+
     # Extract the MAJOR part of the branch name
     MAJOR=${BASH_REMATCH[1]}
     # Calculate the XETABASE_MAJOR by subtracting 3 from MAJOR
