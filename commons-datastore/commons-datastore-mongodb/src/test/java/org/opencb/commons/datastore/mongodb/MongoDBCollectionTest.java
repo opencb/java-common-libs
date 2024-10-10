@@ -441,15 +441,13 @@ public class MongoDBCollectionTest {
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 0));
         assertEquals("There must be 1 results", 1, queryResult.getResults().size());
-        assertTrue(queryResult.getResults().contains(result.get(0)));
+        // As the order of result list change between executions, we must ensure the assertTrue doesn't depend on the order
+        assertTrue(result.contains(queryResult.getResults().get(0)));
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 1));
         assertEquals("There must be 1 results", 1, queryResult.getResults().size());
-
-        System.out.println("result = " + result);
-        System.out.println("queryResult.getResults() = " + queryResult.getResults());
-
-        assertTrue(queryResult.getResults().contains(result.get(1)));
+        // As the order of result list change between executions, we must ensure the assertTrue doesn't depend on the order
+        assertTrue(result.contains(queryResult.getResults().get(0)));
     }
 
     @Test
