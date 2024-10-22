@@ -323,17 +323,26 @@ public class MongoDBCollection {
         return queryResultList;
     }
 
+    public DataResult<Document> aggregate(ClientSession clientSession, List<? extends Bson> operations,
+                                          QueryOptions options) {
+        return aggregate(clientSession, operations, null, options);
+    }
+
     public DataResult<Document> aggregate(List<? extends Bson> operations, QueryOptions options) {
         return aggregate(operations, null, options);
     }
 
     public <T> DataResult<T> aggregate(List<? extends Bson> operations, ComplexTypeConverter<T, Document> converter,
                                        QueryOptions options) {
+        return aggregate(null, operations, converter, options);
+    }
 
+    public <T> DataResult<T> aggregate(ClientSession clientSession, List<? extends Bson> operations,
+                                       ComplexTypeConverter<T, Document> converter, QueryOptions options) {
         long start = startQuery();
 
         DataResult<T> queryResult;
-        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
+        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(clientSession, operations, converter, options);
 //        MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
         if (queryResultWriter != null) {
