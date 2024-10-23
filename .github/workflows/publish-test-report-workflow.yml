@@ -1,4 +1,4 @@
-name: Reusable workflow to push in DockerHub
+name: Publish test report workflow
 
 on:
   workflow_call:
