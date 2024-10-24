@@ -18,6 +18,8 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.client.model.*;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonDocument;
+import org.bson.BsonInt32;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
@@ -27,12 +29,11 @@ import org.opencb.commons.datastore.core.QueryParam;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
  * Created by imedina on 17/01/16.
@@ -41,11 +42,15 @@ public class MongoDBQueryUtils {
 
     @Deprecated
     private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-//    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
+    //    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~/?|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
+
+    private static final Pattern FUNC_ACCUMULATOR_PATTERN = Pattern.compile("([a-zA-Z]+)\\(([.a-zA-Z0-9]+)\\)");
+    private static final Pattern RANGE_PATTERN = Pattern.compile("([.a-zA-Z0-9]+)\\[([.0-9]+):([.0-9]+)\\]:([.0-9]+)");
+    public static final String TO_REPLACE_DOTS = "&#46;";
 
     // TODO: Added on 10/08/2021 to deprecate STARTS_WITH and ENDS_WITH regex. They need to be done within '/'.
     @Deprecated
@@ -80,6 +85,15 @@ public class MongoDBQueryUtils {
         BETWEEN
     }
 
+    public enum Accumulator {
+        count,
+        avg,
+        min,
+        max,
+        stdDevPop,
+        stdDevSamp,
+        bucket
+    }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
         return createFilter(mongoDbField, queryParam, query, QueryParam.Type.TEXT, ComparisonOperator.EQUALS, LogicalOperator.OR);
@@ -497,7 +511,7 @@ public class MongoDBQueryUtils {
      * @return the Bson query.
      */
     protected static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
-                                         QueryParam.Type type) {
+                                           QueryParam.Type type) {
         Bson filter = null;
 
         Object date = null;
@@ -639,6 +653,107 @@ public class MongoDBQueryUtils {
             }
             return Arrays.asList(match, project, group);
         }
+    }
+
+    public static List<Bson> createFacet(Bson query, String facetField) {
+        if (facetField == null || StringUtils.isEmpty(facetField.trim())) {
+            return new ArrayList<>();
+        }
+        String cleanFacetField = facetField.replace(" ", "");
+        ArrayList<String> facetFields = new ArrayList<>(Arrays.asList(cleanFacetField.split(";")));
+        return createFacet(query, facetFields);
+    }
+
+    private static List<Bson> createFacet(Bson query, List<String> facetFields) {
+        Set<String> includeFields = new HashSet<>();
+
+        List<Double> boundaries = new ArrayList<>();
+        List<Facet> facets = new ArrayList<>();
+        for (String facetField : facetFields) {
+            Facet facet = null;
+            if (facetField.contains(",")) {
+                Document id = new Document();
+                for (String field : facetField.split(",")) {
+                    String cleanField = field.replace(".", TO_REPLACE_DOTS);
+                    id.append(cleanField, "$" + field);
+                    includeFields.add(field);
+                }
+                facet = new Facet(facetField.replace(".", TO_REPLACE_DOTS).replace(",", "_"), Arrays.asList(Aggregates.group(id,
+                        Accumulators.sum("count", 1))));
+            } else {
+                Accumulator accumulator;
+                String field;
+                Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
+                if (matcher.matches()) {
+                    accumulator = Accumulator.valueOf(matcher.group(1));
+                    field = matcher.group(2);
+                } else {
+                    matcher = RANGE_PATTERN.matcher(facetField);
+                    if (matcher.matches()) {
+                        accumulator = bucket;
+                        field = matcher.group(1);
+                        double start = Double.parseDouble(matcher.group(2));
+                        double end = Double.parseDouble(matcher.group(3));
+                        double step = Double.parseDouble(matcher.group(4));
+                        for (double i = start; i <= end; i += step) {
+                            boundaries.add(i);
+                        }
+                    } else {
+                        accumulator = count;
+                        field = facetField;
+                    }
+                }
+                includeFields.add(field);
+
+                String cleanField = field.replace(".", TO_REPLACE_DOTS);
+                String id = "$" + field;
+                switch (accumulator) {
+                    case count: {
+                        facet = new Facet(cleanField + "Counts", Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+                        break;
+                    }
+                    case avg: {
+                        facet = new Facet(cleanField + "Avg", Arrays.asList(Aggregates.group(field, Accumulators.avg(avg.name(), id))));
+                        break;
+                    }
+                    case min: {
+                        facet = new Facet(cleanField + "Min", Arrays.asList(Aggregates.group(field, Accumulators.min(min.name(), id))));
+                        break;
+                    }
+                    case max: {
+                        facet = new Facet(cleanField + "Max", Arrays.asList(Aggregates.group(field, Accumulators.max(max.name(), id))));
+                        break;
+                    }
+                    case stdDevPop: {
+                        facet = new Facet(cleanField + "StdDevPop", Arrays.asList(Aggregates.group(field,
+                                Accumulators.stdDevPop(stdDevPop.name(), id))));
+                        break;
+                    }
+                    case stdDevSamp: {
+                        facet = new Facet(cleanField + "stdDevSamp", Arrays.asList(Aggregates.group(field,
+                                Accumulators.stdDevSamp("stdDevSamp", id))));
+                        break;
+                    }
+                    case bucket: {
+                        facet = new Facet(cleanField + "Ranges", Aggregates.bucket(id, boundaries,
+                                new BucketOptions()
+                                        .defaultBucket("Other")
+                                        .output(new BsonField("count", new BsonDocument("$sum", new BsonInt32(1))))));
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+            if (facet != null) {
+                facets.add(facet);
+            }
+        }
+
+        Bson match = Aggregates.match(query);
+        Bson project = Aggregates.project(Projections.include(new ArrayList<>(includeFields)));
+        return Arrays.asList(match, project, Aggregates.facet(facets));
     }
 
     public static void parseQueryOptions(List<Bson> operations, QueryOptions options) {

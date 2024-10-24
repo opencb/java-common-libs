@@ -331,31 +331,25 @@ public class MongoDBCollection {
                                        QueryOptions options) {
 
         long start = startQuery();
-
         DataResult<T> queryResult;
-        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
-//        MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
-        if (queryResultWriter != null) {
-            try {
-                queryResultWriter.open();
-                while (iterator.hasNext()) {
-                    queryResultWriter.write(iterator.next());
+        if (operations != null && operations.size() > 0) {
+            MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
+            if (queryResultWriter != null) {
+                try {
+                    queryResultWriter.open();
+                    while (iterator.hasNext()) {
+                        queryResultWriter.write(iterator.next());
+                    }
+                    queryResultWriter.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e.getMessage(), e);
                 }
-                queryResultWriter.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
+            } else {
+                while (iterator.hasNext()) {
+                    list.add((T) iterator.next());
+                }
             }
-        } else {
-//            if (converter != null) {
-//                while (iterator.hasNext()) {
-//                    list.add(converter.convertToDataModelType(iterator.next()));
-//                }
-//            } else {
-            while (iterator.hasNext()) {
-                list.add((T) iterator.next());
-            }
-//            }
         }
         queryResult = endQuery(list, start);
         return queryResult;

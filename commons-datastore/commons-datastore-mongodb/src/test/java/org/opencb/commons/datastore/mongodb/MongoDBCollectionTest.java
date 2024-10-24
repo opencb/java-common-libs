@@ -55,6 +55,7 @@ public class MongoDBCollectionTest {
     public ExpectedException thrown = ExpectedException.none();
     public static final List<String> NAMES = Arrays.asList("John", "Jack", "Javi");
     public static final List<String> SURNAMES = Arrays.asList("Doe", "Davis", null);
+    public static final List<String> COLORS = Arrays.asList("red", "green", "yellow", "blue");
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -88,16 +89,35 @@ public class MongoDBCollectionTest {
         public String surname;
         public int age;
         public int number;
+        public House house;
+
+        public static class House {
+            public String color;
+            public int numRooms;
+            public int m2;
+
+            @Override
+            public String toString() {
+                final StringBuilder sb = new StringBuilder("House{");
+                sb.append("color='").append(color).append('\'');
+                sb.append(", numRooms=").append(numRooms);
+                sb.append(", m2=").append(m2);
+                sb.append('}');
+                return sb.toString();
+            }
+        }
 
         @Override
         public String toString() {
-            return "User{"
-                    + "id:" + id
-                    + ", name:\"" + name + '"'
-                    + ", surname:\"" + surname + '"'
-                    + ", age:" + age
-                    + ", number:" + number
-                    + '}';
+            final StringBuilder sb = new StringBuilder("User{");
+            sb.append("id=").append(id);
+            sb.append(", name='").append(name).append('\'');
+            sb.append(", surname='").append(surname).append('\'');
+            sb.append(", age=").append(age);
+            sb.append(", number=").append(number);
+            sb.append(", house=").append(house);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -111,6 +131,11 @@ public class MongoDBCollectionTest {
             document.put("surname", SURNAMES.get(random.nextInt(SURNAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
+            Document house = new Document();
+            house.put("color", COLORS.get(random.nextInt(COLORS.size())));
+            house.put("numRooms", (int) (i % 7) + 1);
+            house.put("m2", (int) i * 23);
+            document.put("house", house);
             mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
@@ -449,6 +474,43 @@ public class MongoDBCollectionTest {
         // As the order of result list change between executions, we must ensure the assertTrue doesn't depend on the order
         assertTrue(result.contains(queryResult.getResults().get(0)));
     }
+
+    @Test
+    public void testFacet() {
+        DataResult<Document> allResults = mongoDBCollection.find(new Document(), null);
+        System.out.println("allResults.getNumResults() = " + allResults.getNumResults());
+
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,surname");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2)");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,house.color");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:1000000]:100000");
+        System.out.println("facets = " + facets);
+        DataResult<Document> aggregate = mongoDBCollection.aggregate(facets, null);
+        System.out.println("aggregate.getNumResults() = " + aggregate.getNumResults());
+        System.out.println(">>>>>>>>> facet results");
+        for (Document result : aggregate.getResults()) {
+            System.out.println("result = " + result);
+        }
+
+        int counter = 0;
+        for (Document result : allResults.getResults()) {
+            if (result.getInteger("age") > 2) {
+                counter++;
+            }
+        }
+        System.out.println(">>>>>>>>> all results age > 2: " + counter + " of " + allResults.getNumResults());
+        for (Document result : allResults.getResults()) {
+            if (result.getInteger("age") > 2) {
+                System.out.println("result = " + result);
+            }
+        }
+    }
+
 
     @Test
     public void testInsert() throws Exception {
