@@ -25,10 +25,7 @@ import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
-import org.opencb.commons.datastore.core.DataResult;
-import org.opencb.commons.datastore.core.ObjectMap;
-import org.opencb.commons.datastore.core.QueryOptions;
-import org.opencb.commons.datastore.core.QueryResultWriter;
+import org.opencb.commons.datastore.core.*;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -481,32 +478,72 @@ public class MongoDBCollectionTest {
         System.out.println("allResults.getNumResults() = " + allResults.getNumResults());
 
         Document match = new Document("age", new BasicDBObject("$gt", 2));
+//        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
-        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,surname");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2)");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,house.color");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0:1000000]:100000");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:1000000]:100000");
-        System.out.println("facets = " + facets);
+        List<Bson> facetsWithDots = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0:20000]:1000");
+        //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:20000]:1000");
+
+        System.out.println("facetsWithDots = " + facetsWithDots);
+
+        List<Bson> facetsWithoutDots = new ArrayList<>();
+        for (Bson facet : facetsWithDots) {
+            Document facetDocument = GenericDocumentComplexConverter.replaceDots(Document.parse(facet.toBsonDocument().toJson()));
+            facetsWithoutDots.add(facetDocument);
+        }
+        System.out.println("facetsWithoutDots = " + facetsWithoutDots);
+
+        List<Bson> facets = facetsWithoutDots;
+
         DataResult<Document> aggregate = mongoDBCollection.aggregate(facets, null);
         System.out.println("aggregate.getNumResults() = " + aggregate.getNumResults());
-        System.out.println(">>>>>>>>> facet results");
+        System.out.println(">>>>>>>>> facet results (raw)");
         for (Document result : aggregate.getResults()) {
             System.out.println("result = " + result);
+        }
+        System.out.println(">>>>>>>>> facet results (restore dots)");
+        for (Document result : aggregate.getResults()) {
+            System.out.println("result = " + GenericDocumentComplexConverter.restoreDots(result));
         }
 
         int counter = 0;
         for (Document result : allResults.getResults()) {
+//            if (result.getInteger("house.m2") > 10000) {
             if (result.getInteger("age") > 2) {
                 counter++;
             }
         }
         System.out.println(">>>>>>>>> all results age > 2: " + counter + " of " + allResults.getNumResults());
+//        System.out.println(">>>>>>>>> all results house.m2 > 10000: " + counter + " of " + allResults.getNumResults());
         for (Document result : allResults.getResults()) {
+//            if (result.getInteger("house.m2") > 10000) {
             if (result.getInteger("age") > 2) {
                 System.out.println("result = " + result);
+            }
+        }
+    }
+
+    @Test
+    public void testFacetUsingConverter() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+//        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name;name,surname");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:20000]:1000");
+
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.getNumResults() = " + aggregate.getNumResults());
+        for (List<FacetField> result : aggregate.getResults()) {
+            for (FacetField facetField : result) {
+                System.out.println("facetField:\n" + facetField);
             }
         }
     }
