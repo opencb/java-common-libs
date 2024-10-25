@@ -694,9 +694,9 @@ public class MongoDBQueryUtils {
                     includeFields.add(field);
                 }
                 facet = new Facet(facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
-                        Arrays.asList(Aggregates.group(id, Accumulators.sum("count", 1))));
+                        Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
             } else {
-                // Facet with accumulators (count, avg, min...) or range
+                // Facet with accumulators (count, avg, min, max,...) or range (bucket)
                 Accumulator accumulator;
                 String field;
                 Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
@@ -742,7 +742,7 @@ public class MongoDBQueryUtils {
     private static Facet getMongoDBFacet(String field, Accumulator accumulator, List<Double> boundaries) {
         String id = "$" + field;
 
-        Facet facet = null;
+        Facet facet;
         switch (accumulator) {
             case count: {
                 facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
@@ -767,7 +767,7 @@ public class MongoDBQueryUtils {
             }
             case stdDevSamp: {
                 facet = new Facet(field + STD_DEV_SAMP_SUFFIX, Arrays.asList(Aggregates.group(field,
-                        Accumulators.stdDevSamp("stdDevSamp", id))));
+                        Accumulators.stdDevSamp(stdDevSamp.name(), id))));
                 break;
             }
             case bucket: {
@@ -778,6 +778,7 @@ public class MongoDBQueryUtils {
                 break;
             }
             default: {
+                facet = null;
                 break;
             }
         }

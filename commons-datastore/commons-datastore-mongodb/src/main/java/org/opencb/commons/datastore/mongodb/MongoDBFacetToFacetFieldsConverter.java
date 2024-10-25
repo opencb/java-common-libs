@@ -30,14 +30,16 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                 long total = 0;
                 for (Document documentValue : documentValues) {
                     long counter = documentValue.getInteger(count.name());
-                    String bucketValue;
-                    if (documentValue.get(INTERNAL_ID) instanceof String) {
-                        bucketValue = documentValue.getString(INTERNAL_ID);
-                    } else if (documentValue.get(INTERNAL_ID) instanceof Boolean) {
-                        bucketValue = documentValue.getBoolean(INTERNAL_ID).toString();
-                    } else {
-                        Document combined = (Document) documentValue.get(INTERNAL_ID);
-                        bucketValue = StringUtils.join(combined.values(), AND_SEPARATOR);
+                    String bucketValue = "";
+                    Object internalIdValue = documentValue.get(INTERNAL_ID);
+                    if (internalIdValue instanceof String) {
+                        bucketValue = (String) internalIdValue;
+                    } else if (internalIdValue instanceof Boolean
+                            || internalIdValue instanceof Integer
+                            || internalIdValue instanceof Double) {
+                        bucketValue = internalIdValue.toString();
+                    } else if (internalIdValue instanceof Document) {
+                        bucketValue = StringUtils.join(((Document) internalIdValue).values(), AND_SEPARATOR);
                     }
                     buckets.add(new FacetField.Bucket(bucketValue, counter, null));
                     total += counter;
@@ -66,7 +68,6 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                         }
                     }
                 }
-                System.out.println("entry = " + entry);
                 key = key.substring(0, key.length() - RANGES_SUFFIX.length()).replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
                 if (other != null) {
                     key += " (out of range = " + other + ")";
