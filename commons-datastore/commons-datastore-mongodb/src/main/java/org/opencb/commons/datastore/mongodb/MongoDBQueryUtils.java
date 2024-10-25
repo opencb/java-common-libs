@@ -656,22 +656,27 @@ public class MongoDBQueryUtils {
     }
 
     public static List<Bson> createFacet(Bson query, String facetField) {
+        // Sanity check
         if (facetField == null || StringUtils.isEmpty(facetField.trim())) {
             return new ArrayList<>();
         }
         String cleanFacetField = facetField.replace(" ", "");
+
+        // Multiple facets separated by ;
         ArrayList<String> facetFields = new ArrayList<>(Arrays.asList(cleanFacetField.split(";")));
         return createFacet(query, facetFields);
     }
 
     private static List<Bson> createFacet(Bson query, List<String> facetFields) {
         Set<String> includeFields = new HashSet<>();
-
         List<Double> boundaries = new ArrayList<>();
         List<Facet> facets = new ArrayList<>();
+
         for (String facetField : facetFields) {
-            Facet facet = null;
+            Facet facet;
+
             if (facetField.contains(",")) {
+                // Facet combining fields (i.e., AND logical)
                 Document id = new Document();
                 for (String field : facetField.split(",")) {
                     String cleanField = field.replace(".", TO_REPLACE_DOTS);
@@ -681,6 +686,7 @@ public class MongoDBQueryUtils {
                 facet = new Facet(facetField.replace(".", TO_REPLACE_DOTS).replace(",", "_"), Arrays.asList(Aggregates.group(id,
                         Accumulators.sum("count", 1))));
             } else {
+                // Facet with accumulators (count, avg, min...) or range
                 Accumulator accumulator;
                 String field;
                 Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
@@ -705,55 +711,64 @@ public class MongoDBQueryUtils {
                 }
                 includeFields.add(field);
 
-                String cleanField = field.replace(".", TO_REPLACE_DOTS);
-                String id = "$" + field;
-                switch (accumulator) {
-                    case count: {
-                        facet = new Facet(cleanField + "Counts", Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
-                        break;
-                    }
-                    case avg: {
-                        facet = new Facet(cleanField + "Avg", Arrays.asList(Aggregates.group(field, Accumulators.avg(avg.name(), id))));
-                        break;
-                    }
-                    case min: {
-                        facet = new Facet(cleanField + "Min", Arrays.asList(Aggregates.group(field, Accumulators.min(min.name(), id))));
-                        break;
-                    }
-                    case max: {
-                        facet = new Facet(cleanField + "Max", Arrays.asList(Aggregates.group(field, Accumulators.max(max.name(), id))));
-                        break;
-                    }
-                    case stdDevPop: {
-                        facet = new Facet(cleanField + "StdDevPop", Arrays.asList(Aggregates.group(field,
-                                Accumulators.stdDevPop(stdDevPop.name(), id))));
-                        break;
-                    }
-                    case stdDevSamp: {
-                        facet = new Facet(cleanField + "stdDevSamp", Arrays.asList(Aggregates.group(field,
-                                Accumulators.stdDevSamp("stdDevSamp", id))));
-                        break;
-                    }
-                    case bucket: {
-                        facet = new Facet(cleanField + "Ranges", Aggregates.bucket(id, boundaries,
-                                new BucketOptions()
-                                        .defaultBucket("Other")
-                                        .output(new BsonField("count", new BsonDocument("$sum", new BsonInt32(1))))));
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
+                // Get MongoDB facet
+                facet = getMongoDBFacet(field, accumulator, boundaries);
             }
             if (facet != null) {
                 facets.add(facet);
             }
         }
 
+        // Build MongoDB pipeline for facets
         Bson match = Aggregates.match(query);
         Bson project = Aggregates.project(Projections.include(new ArrayList<>(includeFields)));
         return Arrays.asList(match, project, Aggregates.facet(facets));
+    }
+
+    private static Facet getMongoDBFacet(String field, Accumulator accumulator, List<Double> boundaries) {
+        String id = "$" + field;
+        String cleanField = field.replace(".", TO_REPLACE_DOTS);
+
+        Facet facet = null;
+        switch (accumulator) {
+            case count: {
+                facet = new Facet(cleanField + "Counts", Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case avg: {
+                facet = new Facet(cleanField + "Avg", Arrays.asList(Aggregates.group(field, Accumulators.avg(avg.name(), id))));
+                break;
+            }
+            case min: {
+                facet = new Facet(cleanField + "Min", Arrays.asList(Aggregates.group(field, Accumulators.min(min.name(), id))));
+                break;
+            }
+            case max: {
+                facet = new Facet(cleanField + "Max", Arrays.asList(Aggregates.group(field, Accumulators.max(max.name(), id))));
+                break;
+            }
+            case stdDevPop: {
+                facet = new Facet(cleanField + "StdDevPop", Arrays.asList(Aggregates.group(field,
+                        Accumulators.stdDevPop(stdDevPop.name(), id))));
+                break;
+            }
+            case stdDevSamp: {
+                facet = new Facet(cleanField + "stdDevSamp", Arrays.asList(Aggregates.group(field,
+                        Accumulators.stdDevSamp("stdDevSamp", id))));
+                break;
+            }
+            case bucket: {
+                facet = new Facet(cleanField + "Ranges", Aggregates.bucket(id, boundaries,
+                        new BucketOptions()
+                                .defaultBucket("Other")
+                                .output(new BsonField("count", new BsonDocument("$sum", new BsonInt32(1))))));
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        return facet;
     }
 
     public static void parseQueryOptions(List<Bson> operations, QueryOptions options) {
