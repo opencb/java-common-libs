@@ -70,7 +70,7 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                 }
                 key = key.substring(0, key.length() - RANGES_SUFFIX.length()).replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
                 if (other != null) {
-                    key += " (out of range = " + other + ")";
+                    key += " (counts out of range: " + other + ")";
                 }
                 FacetField facetField = new FacetField(key, "range", facetFieldValues)
                         .setStart(start)

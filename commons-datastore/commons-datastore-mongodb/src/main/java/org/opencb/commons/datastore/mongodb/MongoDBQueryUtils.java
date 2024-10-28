@@ -49,7 +49,14 @@ public class MongoDBQueryUtils {
     private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
 
     private static final Pattern FUNC_ACCUMULATOR_PATTERN = Pattern.compile("([a-zA-Z]+)\\(([.a-zA-Z0-9]+)\\)");
-    private static final Pattern RANGE_PATTERN = Pattern.compile("([.a-zA-Z0-9]+)\\[([.0-9]+):([.0-9]+)\\]:([.0-9]+)");
+    private static final String RANGE_MARK = "..";
+    private static final String RANGE_MARK1 = "[";
+    private static final String RANGE_MARK2 = "]";
+    private static final String RANGE_SPLIT_MARK = "\\.\\.";
+    private static final Pattern RANGE_START_PATTERN = Pattern.compile("([.a-zA-Z0-9]+)\\[([.0-9]+)");
+    private static final Pattern RANGE_END_PATTERN = Pattern.compile("([.0-9]+)\\]:([.0-9]+)");
+    public static final String INVALID_FORMAT_MSG = "Invalid format ";
+    public static final String RANGE_FORMAT_MSG = " for range aggregation. Valid format is: field[start..end]:step, e.g: size[0..1000]:200";
 
     public static final String INTERNAL_ID = "_id";
     public static final String AND_SEPARATOR = "_and_";
@@ -704,15 +711,25 @@ public class MongoDBQueryUtils {
                     accumulator = Accumulator.valueOf(matcher.group(1));
                     field = matcher.group(2);
                 } else {
-                    matcher = RANGE_PATTERN.matcher(facetField);
-                    if (matcher.matches()) {
-                        accumulator = bucket;
-                        field = matcher.group(1);
-                        double start = Double.parseDouble(matcher.group(2));
-                        double end = Double.parseDouble(matcher.group(3));
-                        double step = Double.parseDouble(matcher.group(4));
-                        for (double i = start; i <= end; i += step) {
-                            boundaries.add(i);
+                    if (facetField.contains(RANGE_MARK) || facetField.contains(RANGE_MARK1) || facetField.contains(RANGE_MARK2)) {
+                        String[] split = facetField.split(RANGE_SPLIT_MARK);
+                        if (split.length == 2) {
+                            Matcher matcher1 = RANGE_START_PATTERN.matcher(split[0]);
+                            Matcher matcher2 = RANGE_END_PATTERN.matcher(split[1]);
+                            if (matcher1.matches() && matcher2.matches()) {
+                                accumulator = bucket;
+                                field = matcher1.group(1);
+                                double start = Double.parseDouble(matcher1.group(2));
+                                double end = Double.parseDouble(matcher2.group(1));
+                                double step = Double.parseDouble(matcher2.group(2));
+                                for (double i = start; i <= end; i += step) {
+                                    boundaries.add(i);
+                                }
+                            } else {
+                                throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
                         }
                     } else {
                         accumulator = count;

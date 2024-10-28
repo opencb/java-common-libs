@@ -480,13 +480,13 @@ public class MongoDBCollectionTest {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
 //        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0..1000000]100000");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,surname");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2)");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,house.color");
-        List<Bson> facetsWithDots = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0:20000]:1000");
-        //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:20000]:1000");
+        List<Bson> facetsWithDots = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0..20000]:1000");
+        //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0..20000]:1000");
 
         System.out.println("facetsWithDots = " + facetsWithDots);
 
@@ -532,11 +532,11 @@ public class MongoDBCollectionTest {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
 //        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
-        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0:1000000]:100000");
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0..1000000]:100000");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name;name,surname");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
 //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0:20000]:1000");
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0..20000]:1000");
 
         MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
@@ -548,6 +548,23 @@ public class MongoDBCollectionTest {
         }
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testFacetInvalidRangeFormat() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        MongoDBQueryUtils.createFacet(match, "house.m2[toto0..20000]:1000");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFacetInvalidRangeFormat1() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        MongoDBQueryUtils.createFacet(match, "house.m2[0:20000]:1000");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFacetInvalidRangeFormat2() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        MongoDBQueryUtils.createFacet(match, "house.m2[toto0..20000]..1000");
+    }
 
     @Test
     public void testInsert() throws Exception {
