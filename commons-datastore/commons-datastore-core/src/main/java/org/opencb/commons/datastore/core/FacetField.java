@@ -16,18 +16,14 @@
 
 package org.opencb.commons.datastore.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.List;
 
 /**
  * Created by jtarraga on 09/03/17.
  */
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FacetField {
     private String name;
-    private Long count;
+    private long count;
     private List<Bucket> buckets;
     private String aggregationName;
     private List<Double> aggregationValues;
@@ -35,7 +31,7 @@ public class FacetField {
     private Number end;
     private Number step;
 
-    public FacetField(String name, Long count, List<Bucket> buckets) {
+    public FacetField(String name, long count, List<Bucket> buckets) {
         this.name = name;
         this.count = count;
         this.buckets = buckets;
