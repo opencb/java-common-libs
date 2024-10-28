@@ -24,7 +24,7 @@ import java.util.List;
 
 public class FacetField {
     private String name;
-    private long count;
+    private Long count;
     private List<Bucket> buckets;
     private String aggregationName;
     private List<Double> aggregationValues;
@@ -32,7 +32,7 @@ public class FacetField {
     private Number end;
     private Number step;
 
-    public FacetField(String name, long count, List<Bucket> buckets) {
+    public FacetField(String name, Long count, List<Bucket> buckets) {
         this.name = name;
         this.count = count;
         this.buckets = buckets;
