@@ -16,12 +16,15 @@
 
 package org.opencb.commons.datastore.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 
 /**
  * Created by jtarraga on 09/03/17.
  */
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FacetField {
     private String name;
     private Long count;
