@@ -20,6 +20,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.model.Filters;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.hamcrest.CoreMatchers;
@@ -33,12 +34,15 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
  * Created by imedina on 29/03/14.
  */
 public class MongoDBCollectionTest {
 
+    public static final String EMPTY = "***EMPTY***";
     private static MongoDataStoreManager mongoDataStoreManager;
     private static MongoDataStore mongoDataStore;
     private static MongoDBCollection mongoDBCollection;
@@ -86,6 +90,7 @@ public class MongoDBCollectionTest {
         public String surname;
         public int age;
         public int number;
+        public boolean tall;
         public House house;
 
         public static class House {
@@ -112,6 +117,7 @@ public class MongoDBCollectionTest {
             sb.append(", surname='").append(surname).append('\'');
             sb.append(", age=").append(age);
             sb.append(", number=").append(number);
+            sb.append(", tall=").append(tall);
             sb.append(", house=").append(house);
             sb.append('}');
             return sb.toString();
@@ -128,6 +134,7 @@ public class MongoDBCollectionTest {
             document.put("surname", SURNAMES.get(random.nextInt(SURNAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
+            document.put("tall", (i % 6 == 0));
             Document house = new Document();
             house.put("color", COLORS.get(random.nextInt(COLORS.size())));
             house.put("numRooms", (int) (i % 7) + 1);
@@ -473,77 +480,307 @@ public class MongoDBCollectionTest {
     }
 
     @Test
-    public void testFacet() {
-        DataResult<Document> allResults = mongoDBCollection.find(new Document(), null);
-        System.out.println("allResults.getNumResults() = " + allResults.getNumResults());
-
+    public void testFacetBuckets() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
-//        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0..1000000]100000");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,surname");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2)");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "name,house.color");
-        List<Bson> facetsWithDots = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms);count(house.color);name,house.color;avg(house.m2);min(house.m2);max(house.m2);house.m2[0..20000]:1000");
-        //        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0..20000]:1000");
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
 
-        System.out.println("facetsWithDots = " + facetsWithDots);
+        String fieldName = "name";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
-        List<Bson> facetsWithoutDots = new ArrayList<>();
-        for (Bson facet : facetsWithDots) {
-            Document facetDocument = GenericDocumentComplexConverter.replaceDots(Document.parse(facet.toBsonDocument().toJson()));
-            facetsWithoutDots.add(facetDocument);
-        }
-        System.out.println("facetsWithoutDots = " + facetsWithoutDots);
-
-        List<Bson> facets = facetsWithoutDots;
-
-        DataResult<Document> aggregate = mongoDBCollection.aggregate(facets, null);
-        System.out.println("aggregate.getNumResults() = " + aggregate.getNumResults());
-        System.out.println(">>>>>>>>> facet results (raw)");
-        for (Document result : aggregate.getResults()) {
-            System.out.println("result = " + result);
-        }
-        System.out.println(">>>>>>>>> facet results (restore dots)");
-        for (Document result : aggregate.getResults()) {
-            System.out.println("result = " + GenericDocumentComplexConverter.restoreDots(result));
-        }
-
-        int counter = 0;
-        for (Document result : allResults.getResults()) {
-//            if (result.getInteger("house.m2") > 10000) {
-            if (result.getInteger("age") > 2) {
-                counter++;
+        String value;
+        long totalCount = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            value = result.getString(fieldName);
+            if (StringUtils.isEmpty(value)) {
+                value = EMPTY;
+                map.put(value, 0);
+            } else if (!map.containsKey(value)) {
+                map.put(value, 0);
             }
+            map.put(value, 1 + map.get(value));
+            totalCount++;
         }
-        System.out.println(">>>>>>>>> all results age > 2: " + counter + " of " + allResults.getNumResults());
-//        System.out.println(">>>>>>>>> all results house.m2 > 10000: " + counter + " of " + allResults.getNumResults());
-        for (Document result : allResults.getResults()) {
-//            if (result.getInteger("house.m2") > 10000) {
-            if (result.getInteger("age") > 2) {
-                System.out.println("result = " + result);
+        for (List<FacetField> result : aggregate.getResults()) {
+            for (FacetField facetField : result) {
+                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertEquals(map.size(), facetField.getBuckets().size());
+                for (FacetField.Bucket bucket : facetField.getBuckets()) {
+                    value = bucket.getValue();
+                    if (StringUtils.isEmpty(value)) {
+                        value = EMPTY;
+                    }
+                    Assert.assertEquals(map.get(value).longValue(), bucket.getCount());
+                }
             }
         }
     }
 
     @Test
-    public void testFacetUsingConverter() {
+    public void testFacetBucketsBoolean() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
-//        Document match = new Document("house.m2", new BasicDBObject("$gt", 10000));
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "count(name);name,surname;avg(age);min(age);max(age);number[0..1000000]:100000");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name;name,surname");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.numRooms)");
-//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(house.m2);name");
-        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "house.m2[0..20000]:1000");
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
 
+        String fieldName = "tall";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
         MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
-        System.out.println("aggregate.getNumResults() = " + aggregate.getNumResults());
+
+        String value;
+        long totalCount = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            value = "" + result.getBoolean(fieldName);
+            if (StringUtils.isEmpty(value)) {
+                value = EMPTY;
+                map.put(value, 0);
+            } else if (!map.containsKey(value)) {
+                map.put(value, 0);
+            }
+            map.put(value, 1 + map.get(value));
+            totalCount++;
+        }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                System.out.println("facetField:\n" + facetField);
+                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertEquals(map.size(), facetField.getBuckets().size());
+                for (FacetField.Bucket bucket : facetField.getBuckets()) {
+                    value = bucket.getValue();
+                    if (StringUtils.isEmpty(value)) {
+                        value = EMPTY;
+                    }
+                    Assert.assertEquals(map.get(value).longValue(), bucket.getCount());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFacetBucketsDotNotation() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "house.color";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        String value;
+        long totalCount = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            Document house = (Document) result.get("house");
+            value = house.getString("color");
+            if (StringUtils.isEmpty(value)) {
+                value = EMPTY;
+                map.put(value, 0);
+            } else if (!map.containsKey(value)) {
+                map.put(value, 0);
+            }
+            map.put(value, 1 + map.get(value));
+            totalCount++;
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            for (FacetField facetField : result) {
+                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertEquals(map.size(), facetField.getBuckets().size());
+                for (FacetField.Bucket bucket : facetField.getBuckets()) {
+                    value = bucket.getValue();
+                    if (StringUtils.isEmpty(value)) {
+                        value = EMPTY;
+                    }
+                    Assert.assertEquals(map.get(value).longValue(), bucket.getCount());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFacetMax() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "number";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "max(" + fieldName + ")");
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        double maxValue = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            Long value = result.getLong(fieldName);
+            if (value != null) {
+                if (value > maxValue) {
+                    maxValue = value;
+                }
+            }
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertEquals(max.name(), facetField.getAggregationName());
+                Assert.assertEquals(maxValue, facetField.getAggregationValues().get(0), 0.0001);
+            }
+        }
+    }
+
+    @Test
+    public void testFacetMin() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "number";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "min(" + fieldName + ")");
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        double minValue = Double.MAX_VALUE;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            Long value = result.getLong(fieldName);
+            if (value != null) {
+                if (value < minValue) {
+                    minValue = value;
+                }
+            }
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertEquals(min.name(), facetField.getAggregationName());
+                Assert.assertEquals(minValue, facetField.getAggregationValues().get(0), 0.0001);
+            }
+        }
+    }
+
+    @Test
+    public void testFacetAvg() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "number";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(" + fieldName + ")");
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        long totalCount = 0;
+        double totalSum = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            Long value = result.getLong(fieldName);
+            if (value != null) {
+                totalSum += value;
+                totalCount++;
+            }
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertEquals(avg.name(), facetField.getAggregationName());
+                Assert.assertEquals(totalSum / totalCount, facetField.getAggregationValues().get(0), 0.0001);
+            }
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFacetInvalidAccumulator() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "number";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "toto(" + fieldName + ")");
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        mongoDBCollection.aggregate(facets, converter, null);
+    }
+
+    @Test
+    public void testFacetCombine() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "name,surname";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        String name;
+        String surname;
+        long totalCount = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            name = result.getString("name");
+            if (StringUtils.isEmpty(name)) {
+                name = null;
+            }
+            surname = result.getString("surname");
+            if (StringUtils.isEmpty(surname)) {
+                surname = null;
+            }
+            String key = "";
+            if (name != null) {
+                key += name;
+            }
+            key += AND_SEPARATOR;
+            if (surname != null) {
+                key += surname;
+            }
+            if (!map.containsKey(key)) {
+                map.put(key, 0);
+            }
+            map.put(key, 1 + map.get(key));
+            totalCount++;
+        }
+        String value;
+        for (List<FacetField> result : aggregate.getResults()) {
+            for (FacetField facetField : result) {
+                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertEquals(map.size(), facetField.getBuckets().size());
+                for (FacetField.Bucket bucket : facetField.getBuckets()) {
+                    value = bucket.getValue();
+                    Assert.assertEquals(map.get(value).longValue(), bucket.getCount());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFacetRange() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        int start = 1000;
+        int end = 5000;
+        int step = 1000;
+        String fieldName = "number" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        long outOfRange = 0;
+        List<Double> rangeValues = new ArrayList<>(Arrays.asList(0d, 0d, 0d, 0d));
+
+        Map<String, Integer> map = new HashMap<>();
+        for (Document result : matchedResults.getResults()) {
+            int bucketNum;
+            Long value = result.getLong("number");
+            if (value != null) {
+                if (value < start || value > end) {
+                    outOfRange++;
+                } else {
+                     bucketNum = (int) (value - start) / step;
+                     rangeValues.set(bucketNum, 1 + rangeValues.get(bucketNum));
+                }
+            }
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getName().contains("" + (1.0d * outOfRange)));
+                for (int i = 0; i < facetField.getAggregationValues().size(); i++) {
+                    Assert.assertEquals(rangeValues.get(i), facetField.getAggregationValues().get(i));
+                }
             }
         }
     }

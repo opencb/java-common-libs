@@ -5,13 +5,10 @@ import org.bson.Document;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.FacetField;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
-import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.count;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
 
@@ -89,6 +86,8 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                         Double fieldValue;
                         if (documentValue.get(accumulator.name()) instanceof Integer) {
                             fieldValue = 1.0d * documentValue.getInteger(accumulator.name());
+                        } else if (documentValue.get(accumulator.name()) instanceof Long) {
+                            fieldValue = 1.0d * documentValue.getLong(accumulator.name());
                         } else {
                             fieldValue = documentValue.getDouble(accumulator.name());
                         }
@@ -97,8 +96,7 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                         break;
                     }
                     default: {
-                        // Nothing to do
-                        break;
+                        // Do nothing, exception is raised
                     }
                 }
             }
@@ -115,7 +113,8 @@ public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<
                 // Do nothing
             }
         }
-        throw new IllegalArgumentException("No accumulators found in facet document: " + StringUtils.join(document.keySet(), ","));
+        throw new IllegalArgumentException("No accumulators found in facet document: " + StringUtils.join(document.keySet(), ",")
+                + " Valid accumulator functions: " + StringUtils.join(Arrays.asList(count, max, min, avg, stdDevPop, stdDevSamp), ","));
     }
 
     @Override

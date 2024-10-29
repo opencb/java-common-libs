@@ -49,9 +49,9 @@ public class MongoDBQueryUtils {
     private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
 
     private static final Pattern FUNC_ACCUMULATOR_PATTERN = Pattern.compile("([a-zA-Z]+)\\(([.a-zA-Z0-9]+)\\)");
-    private static final String RANGE_MARK = "..";
-    private static final String RANGE_MARK1 = "[";
-    private static final String RANGE_MARK2 = "]";
+    public static final String RANGE_MARK = "..";
+    public static final String RANGE_MARK1 = "[";
+    public static final String RANGE_MARK2 = "]";
     private static final String RANGE_SPLIT_MARK = "\\.\\.";
     private static final Pattern RANGE_START_PATTERN = Pattern.compile("([.a-zA-Z0-9]+)\\[([.0-9]+)");
     private static final Pattern RANGE_END_PATTERN = Pattern.compile("([.0-9]+)\\]:([.0-9]+)");
@@ -708,7 +708,12 @@ public class MongoDBQueryUtils {
                 String field;
                 Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
                 if (matcher.matches()) {
-                    accumulator = Accumulator.valueOf(matcher.group(1));
+                    try {
+                        accumulator = Accumulator.valueOf(matcher.group(1));
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
+                                + " functions: " + StringUtils.join(Arrays.asList(count, max, min, avg, stdDevPop, stdDevSamp), ", "));
+                    }
                     field = matcher.group(2);
                 } else {
                     if (facetField.contains(RANGE_MARK) || facetField.contains(RANGE_MARK1) || facetField.contains(RANGE_MARK2)) {
