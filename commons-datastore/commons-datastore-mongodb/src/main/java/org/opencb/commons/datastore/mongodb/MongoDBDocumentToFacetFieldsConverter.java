@@ -10,7 +10,7 @@ import java.util.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
-public class MongoDBFacetToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
+public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
 
     @Override
     public List<FacetField> convertToDataModelType(Document document) {

@@ -486,7 +486,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "name";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         String value;
@@ -505,7 +505,8 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertFalse(facetField.getCount() == null);
+                Assert.assertEquals(totalCount, facetField.getCount().longValue());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -525,7 +526,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "tall";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         String value;
@@ -544,7 +545,8 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertFalse(facetField.getCount() == null);
+                Assert.assertEquals(totalCount, facetField.getCount().longValue());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -564,7 +566,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "house.color";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         String value;
@@ -584,7 +586,8 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertFalse(facetField.getCount() == null);
+                Assert.assertEquals(totalCount, facetField.getCount().longValue());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -604,7 +607,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "number";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "max(" + fieldName + ")");
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         double maxValue = 0;
@@ -620,6 +623,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
                 Assert.assertEquals(max.name(), facetField.getAggregationName());
                 Assert.assertEquals(maxValue, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -633,7 +637,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "number";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "min(" + fieldName + ")");
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         double minValue = Double.MAX_VALUE;
@@ -649,6 +653,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
                 Assert.assertEquals(min.name(), facetField.getAggregationName());
                 Assert.assertEquals(minValue, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -662,7 +667,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "number";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(" + fieldName + ")");
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         long totalCount = 0;
@@ -678,6 +683,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
                 Assert.assertEquals(avg.name(), facetField.getAggregationName());
                 Assert.assertEquals(totalSum / totalCount, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -691,7 +697,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "number";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "toto(" + fieldName + ")");
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         mongoDBCollection.aggregate(facets, converter, null);
     }
 
@@ -702,7 +708,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "name,surname";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         String name;
@@ -735,7 +741,8 @@ public class MongoDBCollectionTest {
         String value;
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount());
+                Assert.assertFalse(facetField.getCount() == null);
+                Assert.assertEquals(totalCount, facetField.getCount().longValue());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -755,7 +762,7 @@ public class MongoDBCollectionTest {
         int step = 1000;
         String fieldName = "number" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
-        MongoDBFacetToFacetFieldsConverter converter = new MongoDBFacetToFacetFieldsConverter();
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
 
         long outOfRange = 0;
@@ -777,6 +784,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
                 Assert.assertTrue(facetField.getName().contains("" + (1.0d * outOfRange)));
                 for (int i = 0; i < facetField.getAggregationValues().size(); i++) {
                     Assert.assertEquals(rangeValues.get(i), facetField.getAggregationValues().get(i));
