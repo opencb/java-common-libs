@@ -83,16 +83,20 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     case avg:
                     case stdDevPop:
                     case stdDevSamp: {
-                        Double fieldValue;
+                        List<Double> fieldValues = new ArrayList<>();
                         if (documentValue.get(accumulator.name()) instanceof Integer) {
-                            fieldValue = 1.0d * documentValue.getInteger(accumulator.name());
+                            fieldValues.add(1.0d * documentValue.getInteger(accumulator.name()));
                         } else if (documentValue.get(accumulator.name()) instanceof Long) {
-                            fieldValue = 1.0d * documentValue.getLong(accumulator.name());
+                            fieldValues.add(1.0d * documentValue.getLong(accumulator.name()));
+                        } else if (documentValue.get(accumulator.name()) instanceof List) {
+                            List<Number> list = (List<Number>) documentValue.get(accumulator.name());
+                            for (Number number : list) {
+                                fieldValues.add(number.doubleValue());
+                            }
                         } else {
-                            fieldValue = documentValue.getDouble(accumulator.name());
+                            fieldValues.add(documentValue.getDouble(accumulator.name()));
                         }
-                        facets.add(new FacetField(documentValue.getString(INTERNAL_ID), accumulator.name(),
-                                Collections.singletonList(fieldValue)));
+                        facets.add(new FacetField(documentValue.getString(INTERNAL_ID), accumulator.name(), fieldValues));
                         break;
                     }
                     default: {

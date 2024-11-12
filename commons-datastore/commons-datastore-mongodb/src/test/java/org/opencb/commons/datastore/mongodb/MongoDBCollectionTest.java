@@ -92,6 +92,7 @@ public class MongoDBCollectionTest {
         public int number;
         public boolean tall;
         public House house;
+        public List<Dog> dogs;
 
         public static class House {
             public String color;
@@ -109,6 +110,20 @@ public class MongoDBCollectionTest {
             }
         }
 
+        public static class Dog {
+            public int age;
+            public String color;
+
+            @Override
+            public String toString() {
+                final StringBuilder sb = new StringBuilder("Dog{");
+                sb.append("age=").append(age);
+                sb.append("color=").append(color);
+                sb.append('}');
+                return sb.toString();
+            }
+        }
+
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("User{");
@@ -119,6 +134,7 @@ public class MongoDBCollectionTest {
             sb.append(", number=").append(number);
             sb.append(", tall=").append(tall);
             sb.append(", house=").append(house);
+            sb.append(", dogs=").append(dogs);
             sb.append('}');
             return sb.toString();
         }
@@ -140,6 +156,15 @@ public class MongoDBCollectionTest {
             house.put("numRooms", (int) (i % 7) + 1);
             house.put("m2", (int) i * 23);
             document.put("house", house);
+            int numDogs = random.nextInt(3);
+            List<Document> dogs = new ArrayList<>();
+            for (int j = 0 ; j < numDogs; j++) {
+                Document dog = new Document();
+                dog.put("age", random.nextInt(20));
+                dog.put("color", COLORS.get(random.nextInt(COLORS.size())));
+                dogs.add(dog);
+            }
+            document.put("dogs", dogs);
             mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
@@ -686,6 +711,44 @@ public class MongoDBCollectionTest {
                 Assert.assertTrue(facetField.getCount() == null);
                 Assert.assertEquals(avg.name(), facetField.getAggregationName());
                 Assert.assertEquals(totalSum / totalCount, facetField.getAggregationValues().get(0), 0.0001);
+            }
+        }
+    }
+
+    @Test
+    public void testFacetMaxDotNotationAndList() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "dogs.age";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "max(" + fieldName + ")");
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+
+        DataResult<Document> aggregate2 = mongoDBCollection.aggregate(facets, null);
+
+        List<Double> maxValues = new ArrayList<>(Arrays.asList(0D,0D,0D,0D,0D,0D,0D,0D,0D,0D,0D,0D));
+        for (Document result : matchedResults.getResults()) {
+            List<Document> dogs = (List<Document>) result.get("dogs");
+            if (result.getInteger("age") > 2 && dogs.size() > 0) {
+                System.out.println();
+                for (int i = 0; i < dogs.size(); i++) {
+                    Number value = (Number) dogs.get(i).get("age");
+                    System.out.print("age = " + result.getInteger("age") + "; i = " + i + "; value = " + value + "; ");
+                    if (value.doubleValue() > maxValues.get(i)) {
+                        maxValues.set(i, value.doubleValue());
+                    }
+                }
+            }
+        }
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
+                Assert.assertEquals(max.name(), facetField.getAggregationName());
+//                for (int i = 0; i < facetField.getAggregationValues().size() ; i++) {
+//                    Assert.assertEquals(maxValues.get(i), facetField.getAggregationValues().get(i), 0.0001);
+//                }
             }
         }
     }
