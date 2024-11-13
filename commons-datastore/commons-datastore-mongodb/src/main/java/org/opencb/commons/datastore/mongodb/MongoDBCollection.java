@@ -97,8 +97,7 @@ public class MongoDBCollection {
         long end = System.currentTimeMillis();
         int numResults = (result != null) ? result.size() : 0;
 
-        DataResult<T> queryResult = new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
-        return queryResult;
+        return new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
     }
 
     private DataResult endWrite(long start) {
@@ -333,7 +332,7 @@ public class MongoDBCollection {
         long start = startQuery();
         DataResult<T> queryResult;
         List<T> list = new LinkedList<>();
-        if (operations != null && operations.size() > 0) {
+        if (operations != null && !operations.isEmpty()) {
             MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
             if (queryResultWriter != null) {
                 try {
@@ -347,7 +346,7 @@ public class MongoDBCollection {
                 }
             } else {
                 while (iterator.hasNext()) {
-                    list.add((T) iterator.next());
+                    list.add(iterator.next());
                 }
             }
         }
@@ -429,7 +428,7 @@ public class MongoDBCollection {
 
         return endWrite(
                 wr.getMatchedCount(),
-                wr.getInsertedCount() + wr.getUpserts().size(),
+                (long) wr.getInsertedCount() + wr.getUpserts().size(),
                 wr.getModifiedCount(),
                 wr.getDeletedCount(),
                 0,
@@ -547,8 +546,7 @@ public class MongoDBCollection {
         }
 
         mongoDBNativeQuery.createIndex(keys, i);
-        DataResult dataResult = endQuery(Collections.emptyList(), start);
-        return dataResult;
+        return endQuery(Collections.emptyList(), start);
     }
 
     public void dropIndexes() {
@@ -558,15 +556,13 @@ public class MongoDBCollection {
     public DataResult dropIndex(Bson keys) {
         long start = startQuery();
         mongoDBNativeQuery.dropIndex(keys);
-        DataResult dataResult = endQuery(Collections.emptyList(), start);
-        return dataResult;
+        return endQuery(Collections.emptyList(), start);
     }
 
     public DataResult<Document> getIndex() {
         long start = startQuery();
         List<Document> index = mongoDBNativeQuery.getIndex();
-        DataResult<Document> queryResult = endQuery(index, start);
-        return queryResult;
+        return endQuery(index, start);
     }
 
 
