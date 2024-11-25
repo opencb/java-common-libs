@@ -50,4 +50,23 @@ public class FileUtilsTest {
         Assert.assertEquals("0", user[0]);
         Assert.assertEquals("0", user[1]);
     }
+
+    @Test(expected = IOException.class)
+    public void checkPathNull() throws IOException {
+	FileUtils.checkPath(null, false);
+    }
+
+    @Test(expected = IOException.class)
+    public void checkPathNonExist() throws IOException {
+	FileUtils.checkPath(path, true);
+	FileUtils.checkPath(Paths.get("/tmp/nonExistentPath"), true);
+    }
+
+    @Test(expected = IOException.class)
+    public void checkFileIsDir() throws IOException {
+	FileUtils.checkFile(path, true);
+	FileUtils.checkFile(Paths.get("/tmp/test.txt"), true);
+	FileUtils.checkFile(Paths.get("/tmp/test.txt"), false);
+	FileUtils.checkFile(Paths.get("/tmp/test.txt/"), true);
+    }
 }
