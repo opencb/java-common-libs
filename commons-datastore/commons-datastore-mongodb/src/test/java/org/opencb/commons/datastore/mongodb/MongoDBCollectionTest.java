@@ -164,7 +164,7 @@ public class MongoDBCollectionTest {
     public void testSortOrder() throws Exception {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
-                .append(QueryOptions.ORDER, "asc");
+                .append(QueryOptions.ORDER, QueryOptions.ASC);
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
         assertEquals(0L, result.get(0).get("number"));
     }
@@ -173,8 +173,9 @@ public class MongoDBCollectionTest {
     public void testMultipleSortOrder() throws Exception {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 500)
-                .append(QueryOptions.SORT, Arrays.asList("age:ASC", "number:DESC"))
-                .append(QueryOptions.ORDER, "asc");
+                .append(QueryOptions.SORT, Arrays.asList("age:" + QueryOptions.ASC.toUpperCase(Locale.ROOT),
+                        "number:" + QueryOptions.DESC.toUpperCase(Locale.ROOT)))
+                .append(QueryOptions.ORDER, QueryOptions.ASC);
         int age = 0;
         long number = Long.MAX_VALUE;
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
