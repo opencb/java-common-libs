@@ -753,6 +753,46 @@ public class MongoDBCollectionTest {
         }
     }
 
+    @Test
+    public void testFacetSumAccumulator() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+        int total = 0;
+        String fieldName = "number";
+        for (Document result : matchedResults.getResults()) {
+            System.out.println("result = " + result);
+            total += result.getLong(fieldName);
+        }
+        double avg = total / matchedResults.getNumResults();
+
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(" + fieldName + ")");
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
+                Assert.assertEquals(Accumulator.avg.name(), facetField.getAggregationName());
+                Assert.assertEquals(avg, facetField.getAggregationValues().get(0), 0.5);
+//                for (int i = 0; i < facetField.getAggregationValues().size() ; i++) {
+//                    Assert.assertEquals(maxValues.get(i), facetField.getAggregationValues().get(i), 0.0001);
+//                }
+            }
+        }
+
+
+        facets = MongoDBQueryUtils.createFacet(match, "sum(" + fieldName + ")");
+        aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        for (List<FacetField> result : aggregate.getResults()) {
+            Assert.assertEquals(1, result.size());
+            for (FacetField facetField : result) {
+                Assert.assertTrue(facetField.getCount() == null);
+                Assert.assertEquals(Accumulator.sum.name(), facetField.getAggregationName());
+                Assert.assertEquals(total, facetField.getAggregationValues().get(0), 0.0001);
+            }
+        }
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testFacetInvalidAccumulator() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));

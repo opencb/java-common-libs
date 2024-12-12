@@ -773,7 +773,7 @@ public class MongoDBQueryUtils {
                 break;
             }
             case sum: {
-                facet = new Facet(field + SUM_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(sum.name(), id))));
+                facet = new Facet(field + SUM_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.sum(sum.name(), id))));
                 break;
             }
             case avg: {
