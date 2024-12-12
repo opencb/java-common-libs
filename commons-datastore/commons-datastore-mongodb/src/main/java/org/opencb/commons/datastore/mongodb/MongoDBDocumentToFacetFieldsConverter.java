@@ -119,7 +119,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
             }
         }
         throw new IllegalArgumentException("No accumulators found in facet document: " + StringUtils.join(document.keySet(), ",")
-                + " Valid accumulator functions: " + StringUtils.join(Arrays.asList(count, max, min, avg, stdDevPop, stdDevSamp), ","));
+                + " Valid accumulator functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ","));
     }
 
     @Override
