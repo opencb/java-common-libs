@@ -63,6 +63,7 @@ public class MongoDBQueryUtils {
     public static final String OTHER = "Other";
 
     public static final String COUNTS_SUFFIX = "Counts";
+    public static final String SUM_SUFFIX = "Sum";
     public static final String AVG_SUFFIX = "Avg";
     public static final String MIN_SUFFIX = "Min";
     public static final String MAX_SUFFIX = "Max";
@@ -769,6 +770,10 @@ public class MongoDBQueryUtils {
         switch (accumulator) {
             case count: {
                 facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case sum: {
+                facet = new Facet(field + SUM_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(sum.name(), id))));
                 break;
             }
             case avg: {
