@@ -78,9 +78,10 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 Document documentValue = ((List<Document>) entry.getValue()).get(0);
                 MongoDBQueryUtils.Accumulator accumulator = getAccumulator(documentValue);
                 switch (accumulator) {
+                    case avg:
+                    case sum:
                     case max:
                     case min:
-                    case avg:
                     case stdDevPop:
                     case stdDevSamp: {
                         List<Double> fieldValues = new ArrayList<>();
