@@ -105,6 +105,7 @@ public class MongoDBQueryUtils {
 
     public enum Accumulator {
         count,
+        sum,
         avg,
         min,
         max,
@@ -712,7 +713,7 @@ public class MongoDBQueryUtils {
                         accumulator = Accumulator.valueOf(matcher.group(1));
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
-                                + " functions: " + StringUtils.join(Arrays.asList(count, max, min, avg, stdDevPop, stdDevSamp), ", "));
+                                + " functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ", "));
                     }
                     field = matcher.group(2);
                 } else {
