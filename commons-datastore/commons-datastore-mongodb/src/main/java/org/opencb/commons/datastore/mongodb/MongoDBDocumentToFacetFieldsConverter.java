@@ -78,8 +78,8 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 Document documentValue = ((List<Document>) entry.getValue()).get(0);
                 MongoDBQueryUtils.Accumulator accumulator = getAccumulator(documentValue);
                 switch (accumulator) {
-                    case avg:
                     case sum:
+                    case avg:
                     case max:
                     case min:
                     case stdDevPop:
@@ -118,8 +118,8 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 // Do nothing
             }
         }
-        throw new IllegalArgumentException("No accumulators found in facet document: " + StringUtils.join(document.keySet(), ",")
-                + " Valid accumulator functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ","));
+        throw new IllegalArgumentException("No accumulators found in facet document: " + StringUtils.join(document.keySet(), ", ")
+                + "Valid accumulator functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ","));
     }
 
     @Override
