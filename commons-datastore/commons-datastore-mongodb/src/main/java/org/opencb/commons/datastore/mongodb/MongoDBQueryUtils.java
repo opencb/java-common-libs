@@ -704,22 +704,21 @@ public class MongoDBQueryUtils {
                     fields.append(field, "$" + field);
                     includeFields.add(field);
                 }
-                facet = new Facet(
-                        facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
+                facet = new Facet(facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
                         Aggregates.group(fields, Accumulators.sum(count.name(), 1))
                 );
             } else {
-                Accumulator accumulator;
                 String groupField;
-                String accumulatorField = null;
+                Accumulator accumulator;
                 List<Double> boundaries = new ArrayList<>();
 
                 // 2. Facet with accumulators (count, avg, min, max,...) or range (bucket)
                 Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
                 if (matcher.matches()) {
                     try {
-                        accumulator = Accumulator.valueOf(matcher.group(1));
                         groupField = matcher.group(2);
+                        accumulator = Accumulator.valueOf(matcher.group(1));
+                        facet = MongoDBQueryUtils.getMongoDBFacet(groupField, accumulator, boundaries);
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
                                 + " functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ", "));
@@ -740,6 +739,7 @@ public class MongoDBQueryUtils {
                                 for (double i = start; i <= end; i += step) {
                                     boundaries.add(i);
                                 }
+                                facet = MongoDBQueryUtils.getMongoDBFacet(groupField, accumulator, boundaries);
                             } else {
                                 throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
                             }
@@ -750,20 +750,26 @@ public class MongoDBQueryUtils {
                         // 4. Facet with count as default accumulator
                         if (facetField.contains(":")) {
                             String[] split = facetField.split("[:()]");
+                            groupField = split[0];
                             accumulator = Accumulator.valueOf(split[1]);
-                            accumulatorField = split[2];
-                        } else {
-                            accumulator = count;
-                        }
+                            String accumulatorField = split[2];
 
-                        groupField = facetField;
+                            facet = new Facet(groupField + COUNTS_SUFFIX,
+                                    Aggregates.group("$" + groupField, Accumulators.sum(accumulator.name(), "$" + accumulatorField)));
+                        } else {
+                            groupField = facetField;
+                            accumulator = count;
+                            facet = new Facet(groupField + COUNTS_SUFFIX,
+                                    Aggregates.group("$" + groupField, Accumulators.sum(accumulator.name(), 1)));
+                        }
+//                        facet = MongoDBQueryUtils.getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
                     }
                 }
 
                 includeFields.add(groupField);
 
                 // Get MongoDB facet
-                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
+//                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
             }
 
             // Add facet to the list of facets to be executed
@@ -782,24 +788,13 @@ public class MongoDBQueryUtils {
         return Arrays.asList(match, project, aggregates);
     }
 
-    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
-        String accumulatorId;
-        if (accumulator == count) {
-            accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "1";
-        } else {
-            accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
-        }
+    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, List<Double> boundaries) {
+        String accumulatorId = "$" + groupField;
 
         Facet facet;
         switch (accumulator) {
             case count: {
-                facet = new Facet(groupField + COUNTS_SUFFIX,
-                        Aggregates.group("$" + groupField, Accumulators.sum(accumulator.name(), accumulatorId)));
-//                facet = new Facet(field + COUNTS_SUFFIX,
-//                        Arrays.asList(Aggregates.group(
-//                                id,
-//                                Accumulators.sum("size", "$size")
-//                        )));
+                facet = new Facet(groupField + COUNTS_SUFFIX, Aggregates.group("$" + groupField, Accumulators.sum(count.name(), 1)));
                 break;
             }
             case sum: {
