@@ -748,9 +748,8 @@ public class MongoDBQueryUtils {
                         }
                     } else {
                         // 4. Facet with count as default accumulator
-                        // TODO extract the right field
                         if (facetField.contains(":")) {
-                            String[] split = facetField.split("[:\\(\\)]");
+                            String[] split = facetField.split("[:()]");
                             accumulator = Accumulator.valueOf(split[1]);
                             accumulatorField = split[2];
                         } else {
