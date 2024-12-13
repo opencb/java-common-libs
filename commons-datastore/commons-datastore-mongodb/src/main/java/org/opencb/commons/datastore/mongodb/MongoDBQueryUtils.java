@@ -62,6 +62,7 @@ public class MongoDBQueryUtils {
     public static final String AND_SEPARATOR = "_and_";
     public static final String OTHER = "Other";
 
+    public static final String FACET_ACC_SUFFIX = "Acc";
     public static final String COUNTS_SUFFIX = "Counts";
     public static final String SUM_SUFFIX = "Sum";
     public static final String AVG_SUFFIX = "Avg";
@@ -70,6 +71,7 @@ public class MongoDBQueryUtils {
     public static final String STD_DEV_POP_SUFFIX = "StdDevPop";
     public static final String STD_DEV_SAMP_SUFFIX = "stdDevSamp";
     public static final String RANGES_SUFFIX = "Ranges";
+    public static final String SEPARATOR = "___";
 
     // TODO: Added on 10/08/2021 to deprecate STARTS_WITH and ENDS_WITH regex. They need to be done within '/'.
     @Deprecated
@@ -748,20 +750,22 @@ public class MongoDBQueryUtils {
                         }
                     } else {
                         // 4. Facet with count as default accumulator
-                        // TODO extract the right field
                         if (facetField.contains(":")) {
                             String[] split = facetField.split("[:\\(\\)]");
+                            groupField = split[0];
                             accumulator = Accumulator.valueOf(split[1]);
                             accumulatorField = split[2];
                         } else {
+                            groupField = facetField;
                             accumulator = count;
                         }
-
-                        groupField = facetField;
                     }
                 }
 
                 includeFields.add(groupField);
+                if (StringUtils.isNotEmpty(accumulatorField)) {
+                    includeFields.add(accumulatorField);
+                }
 
                 // Get MongoDB facet
                 facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
@@ -784,48 +788,78 @@ public class MongoDBQueryUtils {
     }
 
     private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
-        String accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
+        String groupFieldId = groupField;
+        String accumulatorId = "$" + groupField;
+        String facetName = null;
+        if (StringUtils.isNotEmpty(accumulatorField)) {
+            groupFieldId = "$" + groupField;
+            accumulatorId = "$" + accumulatorField;
+            facetName = groupField + SEPARATOR + accumulator + SEPARATOR + accumulatorField + SEPARATOR + FACET_ACC_SUFFIX;
+        }
+//        String accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
 
         Facet facet;
         switch (accumulator) {
             case count: {
-                facet = new Facet(groupField + COUNTS_SUFFIX,
-                        Aggregates.group("$" + groupField, Accumulators.sum(count.name(), accumulatorId)));
-//                facet = new Facet(field + COUNTS_SUFFIX,
-//                        Arrays.asList(Aggregates.group(
-//                                id,
-//                                Accumulators.sum("size", "$size")
-//                        )));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group("$" + groupFieldId, Accumulators.sum(count.name(), 1)));
                 break;
             }
             case sum: {
-                facet = new Facet(groupField + SUM_SUFFIX, Aggregates.group(groupField, Accumulators.sum(sum.name(), accumulatorId)));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + SUM_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.sum(sum.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case avg: {
-                facet = new Facet(groupField + AVG_SUFFIX, Aggregates.group(groupField, Accumulators.avg(avg.name(), accumulatorId)));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + AVG_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.avg(avg.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case min: {
-                facet = new Facet(groupField + MIN_SUFFIX, Aggregates.group(groupField, Accumulators.min(min.name(), accumulatorId)));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + MIN_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.min(min.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case max: {
-                facet = new Facet(groupField + MAX_SUFFIX, Aggregates.group(groupField, Accumulators.max(max.name(), accumulatorId)));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + MAX_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.max(max.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case stdDevPop: {
-                facet = new Facet(groupField + STD_DEV_POP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
-                        Accumulators.stdDevPop(stdDevPop.name(), accumulatorId))));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + STD_DEV_POP_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.stdDevPop(stdDevPop.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case stdDevSamp: {
-                facet = new Facet(groupField + STD_DEV_SAMP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
-                        Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId))));
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + STD_DEV_SAMP_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                        Arrays.asList(Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
             case bucket: {
-                facet = new Facet(groupField + RANGES_SUFFIX, Aggregates.bucket(accumulatorId, boundaries,
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + RANGES_SUFFIX;
+                }
+                facet = new Facet(facetName, Aggregates.bucket(accumulatorId, boundaries,
                         new BucketOptions()
                                 .defaultBucket(OTHER)
                                 .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
@@ -836,6 +870,7 @@ public class MongoDBQueryUtils {
                 break;
             }
         }
+
         return facet;
     }
 

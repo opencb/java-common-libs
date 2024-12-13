@@ -22,7 +22,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
         for (Map.Entry<String, Object> entry : document.entrySet()) {
             String key = entry.getKey();
             List<Document> documentValues = (List<Document>) entry.getValue();
-            if (key.endsWith(COUNTS_SUFFIX)) {
+            if (key.endsWith(COUNTS_SUFFIX) || key.endsWith(FACET_ACC_SUFFIX)) {
                 List<FacetField.Bucket> buckets = new ArrayList<>(documentValues.size());
                 long total = 0;
                 for (Document documentValue : documentValues) {
@@ -38,10 +38,31 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     } else if (internalIdValue instanceof Document) {
                         bucketValue = StringUtils.join(((Document) internalIdValue).values(), AND_SEPARATOR);
                     }
-                    buckets.add(new FacetField.Bucket(bucketValue, counter, null));
+
+                    List<FacetField> bucketFacetFields = null;
+                    if (key.endsWith(FACET_ACC_SUFFIX)) {
+                        String[] split = key.split(SEPARATOR);
+                        String name = split[2];
+                        String aggregationName = split[1];
+                        Double value;
+                        if (documentValue.get(aggregationName) instanceof Integer) {
+                            value = 1.0d * documentValue.getInteger(aggregationName);
+                        } else if (documentValue.get(aggregationName) instanceof Long) {
+                            value = 1.0d * documentValue.getLong(aggregationName);
+                        } else {
+                            value = documentValue.getDouble(aggregationName);
+                        }
+                        List<Double> aggregationValues = Collections.singletonList(value);
+                        FacetField facetField = new FacetField(name, aggregationName, aggregationValues);
+                        // Perhaps it’s redundant, as it is also set in the bucket
+                        facetField.setCount(counter);
+                        bucketFacetFields = Collections.singletonList(facetField);
+                    }
+
+                    buckets.add(new FacetField.Bucket(bucketValue, counter, bucketFacetFields));
                     total += counter;
                 }
-                key = key.substring(0, key.length() - COUNTS_SUFFIX.length());
+                key = key.split(SEPARATOR)[0];
                 facets.add(new FacetField(key, total, buckets));
             } else if (key.endsWith(RANGES_SUFFIX)) {
                 List<Double> facetFieldValues = new ArrayList<>();
@@ -65,7 +86,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                         }
                     }
                 }
-                key = key.substring(0, key.length() - RANGES_SUFFIX.length()).replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
+                key = key.split(SEPARATOR)[0].replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
                 if (other != null) {
                     key += " (counts out of range: " + other + ")";
                 }
