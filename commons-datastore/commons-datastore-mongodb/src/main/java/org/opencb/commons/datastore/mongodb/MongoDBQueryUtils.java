@@ -796,7 +796,6 @@ public class MongoDBQueryUtils {
             accumulatorId = "$" + accumulatorField;
             facetName = groupField + SEPARATOR + accumulator + SEPARATOR + accumulatorField + SEPARATOR + FACET_ACC_SUFFIX;
         }
-//        String accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
 
         Facet facet;
         switch (accumulator) {

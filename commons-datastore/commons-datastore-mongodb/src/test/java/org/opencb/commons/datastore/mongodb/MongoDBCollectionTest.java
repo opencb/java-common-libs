@@ -837,18 +837,6 @@ public class MongoDBCollectionTest {
             Assert.assertEquals(acc, bucket.getFacetFields().get(0).getAggregationName());
             Assert.assertEquals(numberPerNames.get(bucket.getValue()), bucket.getFacetFields().get(0).getAggregationValues().get(0), 0.001);
         }
-
-//        for (List<FacetField> result : aggregate.getResults()) {
-//            Assert.assertEquals(1, result.size());
-//            for (FacetField facetField : result) {
-//                Assert.assertTrue(facetField.getCount() == null);
-//                Assert.assertEquals(Accumulator.avg.name(), facetField.getAggregationName());
-//                Assert.assertEquals(avg, facetField.getAggregationValues().get(0), 0.5);
-////                for (int i = 0; i < facetField.getAggregationValues().size() ; i++) {
-////                    Assert.assertEquals(maxValues.get(i), facetField.getAggregationValues().get(i), 0.0001);
-////                }
-//            }
-//        }
     }
 
 
