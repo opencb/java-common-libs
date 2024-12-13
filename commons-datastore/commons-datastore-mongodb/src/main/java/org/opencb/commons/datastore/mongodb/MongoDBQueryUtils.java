@@ -789,7 +789,7 @@ public class MongoDBQueryUtils {
         switch (accumulator) {
             case count: {
                 facet = new Facet(groupField + COUNTS_SUFFIX,
-                        Aggregates.group("$" + groupField, Accumulators.sum(count.name(), accumulatorId)));
+                        Aggregates.group("$" + groupField, Accumulators.sum(accumulator.name(), accumulatorId)));
 //                facet = new Facet(field + COUNTS_SUFFIX,
 //                        Arrays.asList(Aggregates.group(
 //                                id,
@@ -814,13 +814,13 @@ public class MongoDBQueryUtils {
                 break;
             }
             case stdDevPop: {
-                facet = new Facet(groupField + STD_DEV_POP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
-                        Accumulators.stdDevPop(stdDevPop.name(), accumulatorId))));
+                facet = new Facet(groupField + STD_DEV_POP_SUFFIX,
+                        Aggregates.group(groupField, Accumulators.stdDevPop(stdDevPop.name(), accumulatorId)));
                 break;
             }
             case stdDevSamp: {
-                facet = new Facet(groupField + STD_DEV_SAMP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
-                        Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId))));
+                facet = new Facet(groupField + STD_DEV_SAMP_SUFFIX,
+                        Aggregates.group(groupField, Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId)));
                 break;
             }
             case bucket: {
