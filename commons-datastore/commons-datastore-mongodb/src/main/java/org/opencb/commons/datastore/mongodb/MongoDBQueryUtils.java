@@ -710,7 +710,8 @@ public class MongoDBQueryUtils {
                 );
             } else {
                 Accumulator accumulator;
-                String field;
+                String groupField;
+                String accumulatorField = null;
                 List<Double> boundaries = new ArrayList<>();
 
                 // 2. Facet with accumulators (count, avg, min, max,...) or range (bucket)
@@ -718,7 +719,7 @@ public class MongoDBQueryUtils {
                 if (matcher.matches()) {
                     try {
                         accumulator = Accumulator.valueOf(matcher.group(1));
-                        field = matcher.group(2);
+                        groupField = matcher.group(2);
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
                                 + " functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ", "));
@@ -732,7 +733,7 @@ public class MongoDBQueryUtils {
                             Matcher matcher2 = RANGE_END_PATTERN.matcher(split[1]);
                             if (matcher1.matches() && matcher2.matches()) {
                                 accumulator = bucket;
-                                field = matcher1.group(1);
+                                groupField = matcher1.group(1);
                                 double start = Double.parseDouble(matcher1.group(2));
                                 double end = Double.parseDouble(matcher2.group(1));
                                 double step = Double.parseDouble(matcher2.group(2));
@@ -747,16 +748,23 @@ public class MongoDBQueryUtils {
                         }
                     } else {
                         // 4. Facet with count as default accumulator
-                        accumulator = count;
-//                        accumulator = Accumulators.sum(count.name(), 1);
-                        field = facetField;
+                        // TODO extract the right field
+                        if (facetField.contains(":")) {
+                            String[] split = facetField.split("[:\\(\\)]");
+                            accumulator = Accumulator.valueOf(split[1]);
+                            accumulatorField = split[2];
+                        } else {
+                            accumulator = count;
+                        }
+
+                        groupField = facetField;
                     }
                 }
 
-                includeFields.add(field);
+                includeFields.add(groupField);
 
                 // Get MongoDB facet
-                facet = getMongoDBFacet(field, accumulator, boundaries);
+                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
             }
 
             // Add facet to the list of facets to be executed
@@ -775,13 +783,14 @@ public class MongoDBQueryUtils {
         return Arrays.asList(match, project, aggregates);
     }
 
-    private static Facet getMongoDBFacet(String field, Accumulator accumulator, List<Double> boundaries) {
-        String id = "$" + field;
+    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
+        String accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
 
         Facet facet;
         switch (accumulator) {
             case count: {
-                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), "$size"))));
+                facet = new Facet(groupField + COUNTS_SUFFIX,
+                        Aggregates.group("$" + groupField, Accumulators.sum(count.name(), accumulatorId)));
 //                facet = new Facet(field + COUNTS_SUFFIX,
 //                        Arrays.asList(Aggregates.group(
 //                                id,
@@ -790,33 +799,33 @@ public class MongoDBQueryUtils {
                 break;
             }
             case sum: {
-                facet = new Facet(field + SUM_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.sum(sum.name(), id))));
+                facet = new Facet(groupField + SUM_SUFFIX, Aggregates.group(groupField, Accumulators.sum(sum.name(), accumulatorId)));
                 break;
             }
             case avg: {
-                facet = new Facet(field + AVG_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.avg(avg.name(), id))));
+                facet = new Facet(groupField + AVG_SUFFIX, Aggregates.group(groupField, Accumulators.avg(avg.name(), accumulatorId)));
                 break;
             }
             case min: {
-                facet = new Facet(field + MIN_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.min(min.name(), id))));
+                facet = new Facet(groupField + MIN_SUFFIX, Aggregates.group(groupField, Accumulators.min(min.name(), accumulatorId)));
                 break;
             }
             case max: {
-                facet = new Facet(field + MAX_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.max(max.name(), id))));
+                facet = new Facet(groupField + MAX_SUFFIX, Aggregates.group(groupField, Accumulators.max(max.name(), accumulatorId)));
                 break;
             }
             case stdDevPop: {
-                facet = new Facet(field + STD_DEV_POP_SUFFIX, Arrays.asList(Aggregates.group(field,
-                        Accumulators.stdDevPop(stdDevPop.name(), id))));
+                facet = new Facet(groupField + STD_DEV_POP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
+                        Accumulators.stdDevPop(stdDevPop.name(), accumulatorId))));
                 break;
             }
             case stdDevSamp: {
-                facet = new Facet(field + STD_DEV_SAMP_SUFFIX, Arrays.asList(Aggregates.group(field,
-                        Accumulators.stdDevSamp(stdDevSamp.name(), id))));
+                facet = new Facet(groupField + STD_DEV_SAMP_SUFFIX, Arrays.asList(Aggregates.group(groupField,
+                        Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId))));
                 break;
             }
             case bucket: {
-                facet = new Facet(field + RANGES_SUFFIX, Aggregates.bucket(id, boundaries,
+                facet = new Facet(groupField + RANGES_SUFFIX, Aggregates.bucket(accumulatorId, boundaries,
                         new BucketOptions()
                                 .defaultBucket(OTHER)
                                 .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
