@@ -755,7 +755,7 @@ public class MongoDBQueryUtils {
                             String accumulatorField = split[2];
 
                             facet = new Facet(groupField + COUNTS_SUFFIX,
-                                    Aggregates.group("$" + groupField, Accumulators.sum(accumulator.name(), "$" + accumulatorField)));
+                                    Aggregates.group("$" + groupField, Accumulators.sum(count.name(), "$" + accumulatorField)));
                         } else {
                             groupField = facetField;
                             accumulator = count;
