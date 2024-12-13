@@ -688,36 +688,43 @@ public class MongoDBQueryUtils {
     }
 
     private static List<Bson> createFacet(Bson query, List<String> facetFields) {
+        List<Facet> facetList = new ArrayList<>();
         Set<String> includeFields = new HashSet<>();
-        List<Double> boundaries = new ArrayList<>();
-        List<Facet> facets = new ArrayList<>();
 
+        // For each facet field passed we will create a MongoDB facet, thre are 4 types of facets:
+        // 1. Facet combining fields with commas. In this case, only 'count' is supported as accumulator.
         for (String facetField : facetFields) {
             Facet facet;
 
+            // 1. Check if it is a facet combining fields with commas. In this case, only 'count' is supported as accumulator.
+            // Example: aggregationFields=format,type
             if (facetField.contains(",")) {
-                // Facet combining fields (i.e., AND logical)
-                Document id = new Document();
+                Document fields = new Document();
                 for (String field : facetField.split(",")) {
-                    id.append(field, "$" + field);
+                    fields.append(field, "$" + field);
                     includeFields.add(field);
                 }
-                facet = new Facet(facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
-                        Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+                facet = new Facet(
+                        facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
+                        Aggregates.group(fields, Accumulators.sum(count.name(), 1))
+                );
             } else {
-                // Facet with accumulators (count, avg, min, max,...) or range (bucket)
                 Accumulator accumulator;
                 String field;
+                List<Double> boundaries = new ArrayList<>();
+
+                // 2. Facet with accumulators (count, avg, min, max,...) or range (bucket)
                 Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
                 if (matcher.matches()) {
                     try {
                         accumulator = Accumulator.valueOf(matcher.group(1));
+                        field = matcher.group(2);
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
                                 + " functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ", "));
                     }
-                    field = matcher.group(2);
                 } else {
+                    // 3. Facet with range aggregation
                     if (facetField.contains(RANGE_MARK) || facetField.contains(RANGE_MARK1) || facetField.contains(RANGE_MARK2)) {
                         String[] split = facetField.split(RANGE_SPLIT_MARK);
                         if (split.length == 2) {
@@ -739,17 +746,22 @@ public class MongoDBQueryUtils {
                             throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
                         }
                     } else {
+                        // 4. Facet with count as default accumulator
                         accumulator = count;
+//                        accumulator = Accumulators.sum(count.name(), 1);
                         field = facetField;
                     }
                 }
+
                 includeFields.add(field);
 
                 // Get MongoDB facet
                 facet = getMongoDBFacet(field, accumulator, boundaries);
             }
+
+            // Add facet to the list of facets to be executed
             if (facet != null) {
-                facets.add(facet);
+                facetList.add(facet);
             }
         }
 
@@ -757,8 +769,8 @@ public class MongoDBQueryUtils {
         Bson match = Aggregates.match(query);
         Bson project = Aggregates.project(Projections.include(new ArrayList<>(includeFields)));
         // Dot notation management for facets
-        Document aggregates = GenericDocumentComplexConverter.replaceDots(Document.parse(Aggregates.facet(facets).toBsonDocument()
-                .toJson()));
+        Document aggregates = GenericDocumentComplexConverter
+                .replaceDots(Document.parse(Aggregates.facet(facetList).toBsonDocument().toJson()));
 
         return Arrays.asList(match, project, aggregates);
     }
@@ -769,7 +781,8 @@ public class MongoDBQueryUtils {
         Facet facet;
         switch (accumulator) {
             case count: {
-                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+//                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
+                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), "$size"))));
                 break;
             }
             case sum: {
