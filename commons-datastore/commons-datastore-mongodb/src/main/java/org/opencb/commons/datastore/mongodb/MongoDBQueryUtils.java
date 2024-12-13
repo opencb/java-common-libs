@@ -782,7 +782,13 @@ public class MongoDBQueryUtils {
         switch (accumulator) {
             case count: {
 //                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), 1))));
-                facet = new Facet(field + COUNTS_SUFFIX, Arrays.asList(Aggregates.group(id, Accumulators.sum(count.name(), "$size"))));
+                facet = new Facet(field + COUNTS_SUFFIX,
+                        Arrays.asList(Aggregates.group(
+                                id,
+                                Accumulators.sum(count.name(), 1),
+                                Accumulators.sum("size", "$size"),
+                                Accumulators.avg("avg", "$size")
+                        )));
                 break;
             }
             case sum: {
