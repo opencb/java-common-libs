@@ -787,7 +787,7 @@ public class MongoDBQueryUtils {
 //                                id,
 //                                Accumulators.sum("size", "$size")
 //                        )));
-//                break;
+                break;
             }
             case sum: {
                 facet = new Facet(field + SUM_SUFFIX, Arrays.asList(Aggregates.group(field, Accumulators.sum(sum.name(), id))));
