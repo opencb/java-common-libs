@@ -783,7 +783,12 @@ public class MongoDBQueryUtils {
     }
 
     private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
-        String accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
+        String accumulatorId;
+        if (accumulator == count) {
+            accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "1";
+        } else {
+            accumulatorId = StringUtils.isNotEmpty(accumulatorField) ? "$" + accumulatorField : "$" + groupField;
+        }
 
         Facet facet;
         switch (accumulator) {
