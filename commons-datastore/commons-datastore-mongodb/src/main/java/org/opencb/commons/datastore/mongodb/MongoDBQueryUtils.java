@@ -800,10 +800,8 @@ public class MongoDBQueryUtils {
         Facet facet;
         switch (accumulator) {
             case count: {
-                if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
-                }
-                facet = new Facet(facetName, Aggregates.group("$" + groupFieldId, Accumulators.sum(count.name(), 1)));
+                facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
+                facet = new Facet(facetName, Aggregates.group("$" + groupField, Accumulators.sum(count.name(), 1)));
                 break;
             }
             case sum: {
