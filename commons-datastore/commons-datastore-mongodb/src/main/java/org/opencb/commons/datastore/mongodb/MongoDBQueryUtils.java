@@ -27,10 +27,7 @@ import org.opencb.commons.datastore.core.QueryParam;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -668,8 +665,8 @@ public class MongoDBQueryUtils {
             if (sortObject instanceof Bson) {
                 return Aggregates.sort((Bson) sortObject);
             } else if (sortObject instanceof String) {
-                String order = options.getString(QueryOptions.ORDER, "DESC");
-                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                String order = options.getString(QueryOptions.ORDER, QueryOptions.DESC.toUpperCase(Locale.ROOT));
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase(QueryOptions.ASC) || order.equals("1")) {
                     return Aggregates.sort(Sorts.ascending((String) sortObject));
                 } else {
                     return Aggregates.sort(Sorts.descending((String) sortObject));

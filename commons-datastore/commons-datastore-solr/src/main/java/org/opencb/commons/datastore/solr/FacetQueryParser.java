@@ -25,6 +25,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.opencb.commons.datastore.core.QueryOptions.*;
+
 public class FacetQueryParser {
 
     public static final String FACET_SEPARATOR = ";";
@@ -252,6 +254,7 @@ public class FacetQueryParser {
                     auxMap.put("type", "terms");
                     setTermLimit(matcher.group(3), options, auxMap);
                     setTermSkip(options, auxMap);
+                    setTermOrder(options, auxMap);
 
                     Map<String, Object> tmpMap = new HashMap<>();
                     tmpMap.put(matcher.group(1), auxMap);
@@ -261,6 +264,7 @@ public class FacetQueryParser {
                     outputMap.put("type", "terms");
                     setTermLimit(matcher.group(3), options, outputMap);
                     setTermSkip(options, outputMap);
+                    setTermOrder(options, outputMap);
                 }
             } else {
                 throw new Exception("Invalid categorical facet: " + facet);
@@ -287,6 +291,30 @@ public class FacetQueryParser {
     private void setTermSkip(QueryOptions options, Map<String, Object> map) {
         if (options.containsKey(QueryOptions.SKIP) && options.getInt(QueryOptions.SKIP) > 0) {
             map.put("offset", options.getInt(QueryOptions.SKIP));
+        }
+    }
+
+    private void setTermOrder(QueryOptions options, Map<String, Object> map) throws Exception {
+        if (options.containsKey(QueryOptions.ORDER)) {
+            String order = options.getString(QueryOptions.ORDER);
+            switch (order.toLowerCase(Locale.ROOT)) {
+                case ASC:
+                case ASCENDING: {
+                    map.put("sort", "count asc");
+                    break;
+                }
+                case DESC:
+                case DESCENDING: {
+                    map.put("sort", "count desc");
+                    break;
+                }
+                default: {
+                    throw new Exception("Invalid order value: '" + order + "'. Valid values are: "
+                            + StringUtils.join(Arrays.asList(ASC, ASCENDING, DESC, DESCENDING)));
+                }
+            }
+        } else {
+            map.put("sort", "count desc");
         }
     }
 
