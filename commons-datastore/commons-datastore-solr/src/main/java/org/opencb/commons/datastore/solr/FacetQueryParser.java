@@ -297,7 +297,7 @@ public class FacetQueryParser {
     private void setTermOrder(QueryOptions options, Map<String, Object> map) throws Exception {
         if (options.containsKey(QueryOptions.ORDER)) {
             String order = options.getString(QueryOptions.ORDER);
-            switch (order.toUpperCase(Locale.ROOT)) {
+            switch (order.toLowerCase(Locale.ROOT)) {
                 case ASC:
                 case ASCENDING: {
                     map.put("sort", "count asc");
