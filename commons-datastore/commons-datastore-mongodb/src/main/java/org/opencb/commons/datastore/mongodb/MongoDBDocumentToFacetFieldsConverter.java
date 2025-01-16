@@ -152,7 +152,11 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             } else {
                                 fieldValues.add(documentValue.getDouble(accumulator.name()));
                             }
-                            facets.add(new FacetField(documentValue.getString(INTERNAL_ID), accumulator.name(), fieldValues));
+                            long count = 0;
+                            if (documentValue.containsKey("count")) {
+                                count = Long.valueOf(documentValue.getInteger("count"));
+                            }
+                            facets.add(new FacetField(documentValue.getString(INTERNAL_ID), count, accumulator.name(), fieldValues));
                             break;
                         }
                         default: {

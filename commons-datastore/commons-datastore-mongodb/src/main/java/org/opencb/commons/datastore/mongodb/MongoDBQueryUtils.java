@@ -692,6 +692,7 @@ public class MongoDBQueryUtils {
     private static List<Bson> createFacet(Bson query, List<String> facetFields) {
         List<Facet> facetList = new ArrayList<>();
         Set<String> includeFields = new HashSet<>();
+        List<Bson> unwindList = new ArrayList<>();
 
         // For each facet field passed we will create a MongoDB facet, thre are 4 types of facets:
         // 1. Facet combining fields with commas. In this case, only 'count' is supported as accumulator.
@@ -739,8 +740,11 @@ public class MongoDBQueryUtils {
                                 double start = Double.parseDouble(matcher1.group(2));
                                 double end = Double.parseDouble(matcher2.group(1));
                                 double step = Double.parseDouble(matcher2.group(2));
-                                for (double i = start; i <= end; i += step) {
-                                    boundaries.add(i);
+                                int numSections = (int) Math.ceil((end - start + 1) / step);
+                                double boundary = start;
+                                for (int i = 0; i < numSections + 1; i++) {
+                                    boundaries.add(boundary);
+                                    boundary += step;
                                 }
                             } else {
                                 throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
@@ -769,6 +773,17 @@ public class MongoDBQueryUtils {
 
                 // Get MongoDB facet
                 facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
+
+                // Unwind in any case
+                String[] split = groupField.split("\\.");
+                String acc = "";
+                for (String s : split) {
+                    if (!StringUtils.isEmpty(acc)) {
+                        acc += ".";
+                    }
+                    acc += s;
+                    unwindList.add(Aggregates.unwind("$" + acc));
+                }
             }
 
             // Add facet to the list of facets to be executed
@@ -777,14 +792,19 @@ public class MongoDBQueryUtils {
             }
         }
 
-        // Build MongoDB pipeline for facets
-        Bson match = Aggregates.match(query);
-        Bson project = Aggregates.project(Projections.include(new ArrayList<>(includeFields)));
-        // Dot notation management for facets
-        Document aggregates = GenericDocumentComplexConverter
-                .replaceDots(Document.parse(Aggregates.facet(facetList).toBsonDocument().toJson()));
-
-        return Arrays.asList(match, project, aggregates);
+        // Build and return the MongoDB pipeline for facets: match, project, [unwind,] aggregates
+        List<Bson> result = new ArrayList<>();
+        // 1 - Match
+        result.add(Aggregates.match(query));
+        // 2 - Project
+        result.add(Aggregates.project(Projections.include(new ArrayList<>(includeFields))));
+        // 3 - Unwind
+        if (!unwindList.isEmpty()) {
+            result.addAll(unwindList);
+        }
+        // 4 - Aggregates (dot notation management for facets)
+        result.add(GenericDocumentComplexConverter.replaceDots(Document.parse(Aggregates.facet(facetList).toBsonDocument().toJson())));
+        return result;
     }
 
     private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {

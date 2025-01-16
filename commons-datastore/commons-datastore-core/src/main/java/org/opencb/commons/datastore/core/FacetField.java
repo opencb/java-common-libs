@@ -37,6 +37,13 @@ public class FacetField {
         this.buckets = buckets;
     }
 
+    public FacetField(String name, long count, String aggregationName, List<Double> aggregationValues) {
+        this.name = name;
+        this.count = count;
+        this.aggregationName = aggregationName;
+        this.aggregationValues = aggregationValues;
+    }
+
     public FacetField(String name, String aggregationName, List<Double> aggregationValues) {
         this.name = name;
         this.aggregationName = aggregationName;
