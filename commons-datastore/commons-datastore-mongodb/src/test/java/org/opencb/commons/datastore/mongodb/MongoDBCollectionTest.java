@@ -112,12 +112,14 @@ public class MongoDBCollectionTest {
 
         public static class Dog {
             public int age;
+            public List<Integer> years;
             public String color;
 
             @Override
             public String toString() {
                 final StringBuilder sb = new StringBuilder("Dog{");
                 sb.append("age=").append(age);
+                sb.append("years=").append(years);
                 sb.append("color=").append(color);
                 sb.append('}');
                 return sb.toString();
@@ -161,6 +163,14 @@ public class MongoDBCollectionTest {
             for (int j = 0 ; j < numDogs; j++) {
                 Document dog = new Document();
                 dog.put("age", random.nextInt(20));
+                int numYears = random.nextInt(3);
+                List<Integer> years = new ArrayList<>();
+                for (int k = 0 ; k < numYears; k++) {
+                    years.add(random.nextInt(100) + 1900);
+                }
+                if (years.size() > 1) {
+                    dog.put("years", years);
+                }
                 dog.put("color", COLORS.get(random.nextInt(COLORS.size())));
                 dogs.add(dog);
             }
@@ -701,6 +711,34 @@ public class MongoDBCollectionTest {
         Assert.assertEquals(aggregate.getResults().get(0).get(0).getAggregationValues().get(0), 1.0d * acc / counter, 0.0001);
     }
 
+//    @Test
+//    public void testFacetAccumulatorMaxBucketsArray() {
+//        Document match = new Document("age", new BasicDBObject("$gt", 2));
+//        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+//
+//        String fieldName = "dogs.color:max(dogs.years)";
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+//        System.out.println("facets = " + facets);
+//        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+//        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+//        for (List<FacetField> facetFieldList : aggregate.getResults()) {
+//            System.out.println("facetFieldList = " + facetFieldList);
+//        }
+//
+//        int counter = 0;
+//        int acc = 0;
+//        for (Document doc : matchedResults.getResults()) {
+//            List<Document> dogs = (List<Document>) doc.get("dogs");
+//            for (Document dog : dogs) {
+//                counter++;
+//                acc += (int) dog.get("age");
+//            }
+//        }
+//        System.out.println("counter = " + counter);
+//        System.out.println("(acc/counter) = " + (1.0d * acc / counter));
+//        Assert.assertEquals(aggregate.getResults().get(0).get(0).getAggregationValues().get(0), 1.0d * acc / counter, 0.0001);
+//    }
+//
     @Test
     public void testFacetFilterAccumulatorBucketsArray() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));

@@ -775,14 +775,18 @@ public class MongoDBQueryUtils {
                 facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
 
                 // Unwind in any case
-                String[] split = groupField.split("\\.");
-                String acc = "";
-                for (String s : split) {
-                    if (!StringUtils.isEmpty(acc)) {
-                        acc += ".";
-                    }
-                    acc += s;
-                    unwindList.add(Aggregates.unwind("$" + acc));
+                Set<String> unwindFields = new HashSet<>();
+                if (StringUtils.isNotEmpty(groupField)) {
+                    unwindFields.addAll(getUnwindFields(groupField));
+                }
+                if (StringUtils.isNotEmpty(accumulatorField)) {
+                    unwindFields.addAll(getUnwindFields(accumulatorField));
+                }
+                // We must order the "unwind" fields
+                List<String> unwindFieldList = new ArrayList<>(unwindFields);
+                unwindFieldList.sort(Comparator.comparingInt(s -> s.length() - s.replace(".", "").length()));
+                for (String unwindField : unwindFieldList) {
+                    unwindList.add(Aggregates.unwind("$" + unwindField));
                 }
             }
 
@@ -805,6 +809,20 @@ public class MongoDBQueryUtils {
         // 4 - Aggregates (dot notation management for facets)
         result.add(GenericDocumentComplexConverter.replaceDots(Document.parse(Aggregates.facet(facetList).toBsonDocument().toJson())));
         return result;
+    }
+
+    private static Collection<String> getUnwindFields(String field) {
+        List<String> unwindFields = new ArrayList<>();
+        String[] split = field.split("\\.");
+        String acc = "";
+        for (String s : split) {
+            if (!StringUtils.isEmpty(acc)) {
+                acc += ".";
+            }
+            acc += s;
+            unwindFields.add(acc);
+        }
+        return unwindFields;
     }
 
     private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
