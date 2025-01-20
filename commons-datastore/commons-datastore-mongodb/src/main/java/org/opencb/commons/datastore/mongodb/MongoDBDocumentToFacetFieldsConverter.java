@@ -7,6 +7,7 @@ import org.opencb.commons.datastore.core.FacetField;
 
 import java.util.*;
 
+import static org.opencb.commons.datastore.mongodb.GenericDocumentComplexConverter.TO_REPLACE_DOTS;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
@@ -18,6 +19,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
             return Collections.emptyList();
         }
 
+        String facetFieldName;
         List<FacetField> facets = new ArrayList<>();
         for (Map.Entry<String, Object> entry : document.entrySet()) {
             String key = entry.getKey();
@@ -54,7 +56,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             value = documentValue.getDouble(aggregationName);
                         }
                         List<Double> aggregationValues = Collections.singletonList(value);
-                        FacetField facetField = new FacetField(name, aggregationName, aggregationValues);
+                        FacetField facetField = new FacetField(name.replace(TO_REPLACE_DOTS, "."), aggregationName, aggregationValues);
                         // Perhaps it’s redundant, as it is also set in the bucket
                         facetField.setCount(counter);
                         bucketFacetFields = Collections.singletonList(facetField);
@@ -63,8 +65,8 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     buckets.add(new FacetField.Bucket(bucketValue, counter, bucketFacetFields));
                     total += counter;
                 }
-                key = key.split(SEPARATOR)[0];
-                facets.add(new FacetField(key, total, buckets));
+                facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
+                facets.add(new FacetField(facetFieldName, total, buckets));
             } else if (key.endsWith(RANGES_SUFFIX)) {
                 List<Double> facetFieldValues = new ArrayList<>();
                 Number start = null;
@@ -87,11 +89,11 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                         }
                     }
                 }
-                key = key.split(SEPARATOR)[0].replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
+                facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
                 if (other != null) {
-                    key += " (counts out of range: " + other + ")";
+                    facetFieldName += " (counts out of range: " + other + ")";
                 }
-                FacetField facetField = new FacetField(key, "range", facetFieldValues)
+                FacetField facetField = new FacetField(facetFieldName, "range", facetFieldValues)
                         .setStart(start)
                         .setEnd(end)
                         .setStep(step);
@@ -119,12 +121,11 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             }
                         }
                     }
-                    key = key.substring(0,
-                            key.length() - RANGES_SUFFIX.length()).replace(GenericDocumentComplexConverter.TO_REPLACE_DOTS, ".");
+                    facetFieldName = key.substring(0, key.length() - RANGES_SUFFIX.length()).replace(TO_REPLACE_DOTS, ".");
                     if (other != null) {
-                        key += " (counts out of range: " + other + ")";
+                        facetFieldName += " (counts out of range: " + other + ")";
                     }
-                    FacetField facetField = new FacetField(key, "range", facetFieldValues)
+                    FacetField facetField = new FacetField(facetFieldName, "range", facetFieldValues)
                             .setStart(start)
                             .setEnd(end)
                             .setStep(step);
@@ -156,7 +157,8 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             if (documentValue.containsKey("count")) {
                                 count = Long.valueOf(documentValue.getInteger("count"));
                             }
-                            facets.add(new FacetField(documentValue.getString(INTERNAL_ID), count, accumulator.name(), fieldValues));
+                            facetFieldName = documentValue.getString(INTERNAL_ID).replace(TO_REPLACE_DOTS, ".");
+                            facets.add(new FacetField(facetFieldName, count, accumulator.name(), fieldValues));
                             break;
                         }
                         default: {
