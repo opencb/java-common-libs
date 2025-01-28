@@ -174,9 +174,26 @@ public class DockerUtils {
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
                              Map<String, String> dockerParams) throws IOException {
+        return run(image, inputBindings, outputBinding != null ? Collections.singletonList(outputBinding) : null, cmdParams, dockerParams);
+    }
+
+    /**
+     * Create and run the command line to execute the docker image.
+     *
+     * @param image         Docker image name
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBindings Array of bind mount for docker output volume (source-target)
+     * @param cmdParams     Image command parameters
+     * @param dockerParams  Docker parameters
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
+                             Map<String, String> dockerParams) throws IOException {
         checkDockerDaemonAlive();
 
-        String commandLine = buildCommandLine(image, inputBindings, outputBinding, cmdParams, dockerParams);
+        String commandLine = buildCommandLine(image, inputBindings, outputBindings, cmdParams, dockerParams);
 
         LOGGER.info("Run docker command line");
         LOGGER.info("============================");
@@ -189,6 +206,7 @@ public class DockerUtils {
 
         return commandLine;
     }
+
 
     public static void checkDockerDaemonAlive() throws IOException {
         int maxAttempts = 12;
