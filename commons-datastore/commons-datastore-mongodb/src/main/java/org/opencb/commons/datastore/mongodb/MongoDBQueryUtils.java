@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Projections.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
@@ -68,6 +70,9 @@ public class MongoDBQueryUtils {
     public static final String AVG_SUFFIX = "Avg";
     public static final String MIN_SUFFIX = "Min";
     public static final String MAX_SUFFIX = "Max";
+    public static final String YEAR_SUFFIX = "Year";
+    public static final String MONTH_SUFFIX = "Month";
+    public static final String DAY_SUFFIX = "Day";
     public static final String STD_DEV_POP_SUFFIX = "StdDevPop";
     public static final String STD_DEV_SAMP_SUFFIX = "stdDevSamp";
     public static final String RANGES_SUFFIX = "Ranges";
@@ -114,7 +119,10 @@ public class MongoDBQueryUtils {
         max,
         stdDevPop,
         stdDevSamp,
-        bucket
+        bucket,
+        year,
+        month,
+        day
     }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
@@ -635,12 +643,12 @@ public class MongoDBQueryUtils {
             return createGroupBy(query, Arrays.asList(groupByField.split(",")), idField, count);
         } else {
             Bson match = Aggregates.match(query);
-            Bson project = Aggregates.project(Projections.include(groupByField, idField));
+            Bson project = project(Projections.include(groupByField, idField));
             Bson group;
             if (count) {
-                group = Aggregates.group("$" + groupByField, Accumulators.sum("count", 1));
+                group = group("$" + groupByField, Accumulators.sum("count", 1));
             } else {
-                group = Aggregates.group("$" + groupByField, Accumulators.addToSet("features", "$" + idField));
+                group = group("$" + groupByField, Accumulators.addToSet("features", "$" + idField));
             }
             return Arrays.asList(match, project, group);
         }
@@ -660,7 +668,7 @@ public class MongoDBQueryUtils {
             // add all group-by fields to the projection together with the aggregation field name
             List<String> groupByFields = new ArrayList<>(groupByField);
             groupByFields.add(idField);
-            Bson project = Aggregates.project(Projections.include(groupByFields));
+            Bson project = project(Projections.include(groupByFields));
 
             // _id document creation to have the multiple id
             Document id = new Document();
@@ -669,9 +677,9 @@ public class MongoDBQueryUtils {
             }
             Bson group;
             if (count) {
-                group = Aggregates.group(id, Accumulators.sum("count", 1));
+                group = group(id, Accumulators.sum("count", 1));
             } else {
-                group = Aggregates.group(id, Accumulators.addToSet("features", "$" + idField));
+                group = group(id, Accumulators.addToSet("features", "$" + idField));
             }
             return Arrays.asList(match, project, group);
         }
@@ -693,6 +701,7 @@ public class MongoDBQueryUtils {
         List<Facet> facetList = new ArrayList<>();
         Set<String> includeFields = new HashSet<>();
         List<Bson> unwindList = new ArrayList<>();
+        List<Bson> dateProjections = new ArrayList<>();
 
         // For each facet field passed we will create a MongoDB facet, thre are 4 types of facets:
         // 1. Facet combining fields with commas. In this case, only 'count' is supported as accumulator.
@@ -709,7 +718,7 @@ public class MongoDBQueryUtils {
                 }
                 facet = new Facet(
                         facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
-                        Aggregates.group(fields, Accumulators.sum(count.name(), 1))
+                        group(fields, Accumulators.sum(count.name(), 1))
                 );
             } else {
                 Accumulator accumulator;
@@ -771,6 +780,27 @@ public class MongoDBQueryUtils {
                     includeFields.add(accumulatorField);
                 }
 
+                // Date management in format YYYYMMDDhhmmss: year, month, day
+                switch (accumulator) {
+                    case year: {
+                        dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$toInt", new Document("$substrCP",
+                                Arrays.asList("$" + groupField, 0, 4)))));
+                        break;
+                    }
+                    case month: {
+                        dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$toInt", new Document("$substrCP",
+                                Arrays.asList("$" + groupField, 4, 2)))));
+                        break;
+                    }
+                    case day: {
+                        dateProjections.add(computed(groupField + SEPARATOR + day.name(), new Document("$toInt", new Document("$substrCP",
+                                Arrays.asList("$" + groupField, 6, 2)))));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
                 // Get MongoDB facet
                 facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
 
@@ -801,13 +831,26 @@ public class MongoDBQueryUtils {
         // 1 - Match
         result.add(Aggregates.match(query));
         // 2 - Project
-        result.add(Aggregates.project(Projections.include(new ArrayList<>(includeFields))));
+
+        List<Bson> projections = new ArrayList<>();
+
+        // 2.1 - Include fields
+        for (String field : includeFields) {
+            projections.add(include(field));
+        }
+
+        // 2.2 - Compute data fields
+        projections.addAll(dateProjections);
+
+        result.add(project(fields(projections)));
+
         // 3 - Unwind
         if (!unwindList.isEmpty()) {
-            result.addAll(unwindList);
+          result.addAll(unwindList);
         }
+
         // 4 - Aggregates (dot notation management for facets)
-        result.add(GenericDocumentComplexConverter.replaceDots(Document.parse(Aggregates.facet(facetList).toBsonDocument().toJson())));
+        result.add(GenericDocumentComplexConverter.replaceDots(Document.parse(facet(facetList).toBsonDocument().toJson())));
         return result;
     }
 
@@ -839,14 +882,35 @@ public class MongoDBQueryUtils {
         switch (accumulator) {
             case count: {
                 facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
-                facet = new Facet(facetName, Aggregates.group("$" + groupField, Accumulators.sum(count.name(), 1)));
+                facet = new Facet(facetName, group("$" + groupField, Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case year: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + YEAR_SUFFIX;
+                }
+                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + year.name(), Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case month: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + MONTH_SUFFIX;
+                }
+                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + month.name(), Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case day: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + DAY_SUFFIX;
+                }
+                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + day.name(), Accumulators.sum(count.name(), 1)));
                 break;
             }
             case sum: {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + SUM_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.sum(sum.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -854,7 +918,7 @@ public class MongoDBQueryUtils {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + AVG_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.avg(avg.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -862,7 +926,7 @@ public class MongoDBQueryUtils {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + MIN_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.min(min.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -870,7 +934,7 @@ public class MongoDBQueryUtils {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + MAX_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.max(max.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -878,7 +942,7 @@ public class MongoDBQueryUtils {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + STD_DEV_POP_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.stdDevPop(stdDevPop.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -886,7 +950,7 @@ public class MongoDBQueryUtils {
                 if (StringUtils.isEmpty(facetName)) {
                     facetName = groupField + SEPARATOR + STD_DEV_SAMP_SUFFIX;
                 }
-                facet = new Facet(facetName, Aggregates.group(groupFieldId,
+                facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
@@ -963,7 +1027,7 @@ public class MongoDBQueryUtils {
 
     public static Bson getProjection(QueryOptions options) {
         Bson projection = getProjection(null, options);
-        return projection != null ? Aggregates.project(projection) : null;
+        return projection != null ? project(projection) : null;
     }
 
     protected static Bson getProjection(Bson projection, QueryOptions options) {
@@ -1017,7 +1081,7 @@ public class MongoDBQueryUtils {
                 projections.add(include);
                 // MongoDB allows to exclude _id when include is present
                 if (excludeId) {
-                    projections.add(Projections.excludeId());
+                    projections.add(excludeId());
                 }
             } else {
                 if (exclude != null) {
@@ -1051,7 +1115,7 @@ public class MongoDBQueryUtils {
         }
 
         if (projections.size() > 0) {
-            projectionResult = Projections.fields(projections);
+            projectionResult = fields(projections);
         }
 
         return projectionResult;

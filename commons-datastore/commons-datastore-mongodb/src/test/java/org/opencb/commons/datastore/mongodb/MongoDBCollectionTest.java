@@ -31,6 +31,9 @@ import org.opencb.commons.datastore.core.*;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -90,6 +93,7 @@ public class MongoDBCollectionTest {
         public String surname;
         public int age;
         public int number;
+        public String date;
         public boolean tall;
         public House house;
         public List<Dog> dogs;
@@ -134,6 +138,7 @@ public class MongoDBCollectionTest {
             sb.append(", surname='").append(surname).append('\'');
             sb.append(", age=").append(age);
             sb.append(", number=").append(number);
+            sb.append(", date='").append(date).append('\'');
             sb.append(", tall=").append(tall);
             sb.append(", house=").append(house);
             sb.append(", dogs=").append(dogs);
@@ -146,12 +151,19 @@ public class MongoDBCollectionTest {
         MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(test);
         Document document;
         Random random = new Random();
+
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime now = LocalDateTime.now();
+
         for (long i = 0; i < size; i++) {
             document = new Document("id", i);
             document.put("name", NAMES.get(random.nextInt(NAMES.size())));
             document.put("surname", SURNAMES.get(random.nextInt(SURNAMES.size())));
             document.put("age", (int) i % 5);
             document.put("number", (int) i * i);
+            LocalDateTime futureDate = now.plusDays(random.nextInt(1000));
+            document.put("date", futureDate.format(formatter));
             document.put("tall", (i % 6 == 0));
             Document house = new Document();
             house.put("color", COLORS.get(random.nextInt(COLORS.size())));
@@ -1186,6 +1198,45 @@ public class MongoDBCollectionTest {
     public void testFacetInvalidRangeFormat2() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
         MongoDBQueryUtils.createFacet(match, "house.m2[toto0..20000]..1000");
+    }
+
+    @Test
+    public void testFacetYear() {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        System.out.println("sdf.format(date) = " + sdf.format(date));
+
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        //MongoDBQueryUtils.createFacet(match, "year(date)");
+        List<Bson> facets = createFacet(match, "name");
+        System.out.println("counts for 'name'; facets = " + facets);
+
+        String facetField = "year(date)";
+        System.out.println("\nfacetField = " + facetField);
+        facets = createFacet(match, facetField);
+        System.out.println("year counts for 'date'; facets = " + facets);
+
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.first() = " + aggregate.first());
+
+        facetField = "month(date)";
+        System.out.println("\nfacetField = " + facetField);
+        facets = createFacet(match, facetField);
+        System.out.println("year counts for 'date'; facets = " + facets);
+
+        converter = new MongoDBDocumentToFacetFieldsConverter();
+        aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.first() = " + aggregate.first());
+
+        facetField = "day(date)";
+        System.out.println("\nfacetField = " + facetField);
+        facets = createFacet(match, facetField);
+        System.out.println("year counts for 'date'; facets = " + facets);
+
+        converter = new MongoDBDocumentToFacetFieldsConverter();
+        aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.first() = " + aggregate.first());
     }
 
     @Test

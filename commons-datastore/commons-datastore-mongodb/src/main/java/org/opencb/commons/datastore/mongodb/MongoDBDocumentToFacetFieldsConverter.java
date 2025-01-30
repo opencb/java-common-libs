@@ -24,7 +24,8 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
         for (Map.Entry<String, Object> entry : document.entrySet()) {
             String key = entry.getKey();
             List<Document> documentValues = (List<Document>) entry.getValue();
-            if (key.endsWith(COUNTS_SUFFIX) || key.endsWith(FACET_ACC_SUFFIX)) {
+            if (key.endsWith(COUNTS_SUFFIX) || key.endsWith(FACET_ACC_SUFFIX) || key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX)
+                    || key.endsWith(DAY_SUFFIX)) {
                 List<FacetField.Bucket> buckets = new ArrayList<>(documentValues.size());
                 long total = 0;
                 for (Document documentValue : documentValues) {
@@ -66,7 +67,11 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     total += counter;
                 }
                 facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
-                facets.add(new FacetField(facetFieldName, total, buckets));
+                FacetField facetField = new FacetField(facetFieldName, total, buckets);
+                if (key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX) || key.endsWith(DAY_SUFFIX)) {
+                    facetField.setAggregationName(key.split(SEPARATOR)[1].toLowerCase(Locale.ROOT));
+                }
+                facets.add(facetField);
             } else if (key.endsWith(RANGES_SUFFIX)) {
                 List<Double> facetFieldValues = new ArrayList<>();
                 Number start = null;
