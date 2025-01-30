@@ -63,6 +63,10 @@ public class MongoDBQueryUtils {
     public static final String INVALID_FORMAT_MSG = "Invalid format ";
     public static final String RANGE_FORMAT_MSG = " for range aggregation. Valid format is: field[start..end]:step, e.g: size[0..1000]:200";
 
+    public static final String YEAR_FACET_MARK = "[YEAR]";
+    public static final String MONTH_FACET_MARK = "[MONTH]";
+    public static final String DAY_FACET_MARK = "[DAY]";
+
     public static final String INTERNAL_ID = "_id";
     public static final String AND_SEPARATOR = "_and_";
     public static final String OTHER = "Other";
@@ -737,12 +741,42 @@ public class MongoDBQueryUtils {
                         groupField = matcher.group(2);
                     } catch (IllegalArgumentException e) {
                         List<Accumulator> validAccumulators = Arrays.stream(Accumulator.values())
-                                .filter(acc -> !acc.name().equalsIgnoreCase(bucket.name()))
+                                .filter(acc -> !acc.name().equalsIgnoreCase(bucket.name())
+                                        && !acc.name().equalsIgnoreCase(year.name())
+                                        && !acc.name().equalsIgnoreCase(month.name())
+                                        && !acc.name().equalsIgnoreCase(day.name()))
                                 .collect(Collectors.toList());
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
                                 + " functions: " + StringUtils.join(validAccumulators, ", "));
 
                     }
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(YEAR_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - YEAR_FACET_MARK.length());
+                    accumulator = year;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(MONTH_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - MONTH_FACET_MARK.length());
+                    accumulator = month;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                    dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 4, 2))));
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(DAY_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - DAY_FACET_MARK.length());
+                    accumulator = day;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                    dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 4, 2))));
+                    dateProjections.add(computed(groupField + SEPARATOR + day.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 6, 2))));
                 } else {
                     // 3. Facet with range aggregation
                     if (facetField.contains(RANGE_MARK) || facetField.contains(RANGE_MARK1) || facetField.contains(RANGE_MARK2)) {
@@ -785,27 +819,6 @@ public class MongoDBQueryUtils {
                 includeFields.add(groupField);
                 if (StringUtils.isNotEmpty(accumulatorField)) {
                     includeFields.add(accumulatorField);
-                }
-
-                // Date management in format YYYYMMDDhhmmss: year, month, day
-                switch (accumulator) {
-                    case year: {
-                        dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$toInt", new Document("$substrCP",
-                                Arrays.asList("$" + groupField, 0, 4)))));
-                        break;
-                    }
-                    case month: {
-                        dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$toInt", new Document("$substrCP",
-                                Arrays.asList("$" + groupField, 4, 2)))));
-                        break;
-                    }
-                    case day: {
-                        dateProjections.add(computed(groupField + SEPARATOR + day.name(), new Document("$toInt", new Document("$substrCP",
-                                Arrays.asList("$" + groupField, 6, 2)))));
-                        break;
-                    }
-                    default:
-                        break;
                 }
 
                 // Get MongoDB facet
@@ -853,7 +866,7 @@ public class MongoDBQueryUtils {
 
         // 3 - Unwind
         if (!unwindList.isEmpty()) {
-          result.addAll(unwindList);
+            result.addAll(unwindList);
         }
 
         // 4 - Aggregates (dot notation management for facets)
@@ -901,16 +914,27 @@ public class MongoDBQueryUtils {
             }
             case month: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField + SEPARATOR + MONTH_SUFFIX;
+                    facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX;
                 }
-                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + month.name(), Accumulators.sum(count.name(), 1)));
+
+                Document fields = new Document();
+                fields.append(groupField + SEPARATOR + year.name(), "$" + groupField + SEPARATOR + year.name());
+                fields.append(groupField + SEPARATOR + month.name(), "$" + groupField + SEPARATOR + month.name());
+
+                facet = new Facet(facetName, group(fields, Accumulators.sum(count.name(), 1)));
                 break;
             }
             case day: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField + SEPARATOR + DAY_SUFFIX;
+                    facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX + SEPARATOR + DAY_SUFFIX;
                 }
-                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + day.name(), Accumulators.sum(count.name(), 1)));
+
+                Document fields = new Document();
+                fields.append(groupField + SEPARATOR + year.name(), "$" + groupField + SEPARATOR + year.name());
+                fields.append(groupField + SEPARATOR + month.name(), "$" + groupField + SEPARATOR + month.name());
+                fields.append(groupField + SEPARATOR + day.name(), "$" + groupField + SEPARATOR + day.name());
+
+                facet = new Facet(facetName, group(fields, Accumulators.sum(count.name(), 1)));
                 break;
             }
             case sum: {

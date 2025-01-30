@@ -1086,7 +1086,7 @@ public class MongoDBCollectionTest {
         mongoDBCollection.aggregate(facets, converter, null);
     }
 
-    @Test
+        @Test
     public void testFacetCombine() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
         DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
@@ -1207,36 +1207,49 @@ public class MongoDBCollectionTest {
         System.out.println("sdf.format(date) = " + sdf.format(date));
 
         Document match = new Document("age", new BasicDBObject("$gt", 2));
-        //MongoDBQueryUtils.createFacet(match, "year(date)");
-        List<Bson> facets = createFacet(match, "name");
-        System.out.println("counts for 'name'; facets = " + facets);
 
-        String facetField = "year(date)";
+        String facetField = "date[YEAR]";
         System.out.println("\nfacetField = " + facetField);
-        facets = createFacet(match, facetField);
-        System.out.println("year counts for 'date'; facets = " + facets);
+        List<Bson> facets = createFacet(match, facetField);
+        System.out.println("\nyear counts for 'date'; facets = " + facets);
 
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        facetField = "month(date)";
-        System.out.println("\nfacetField = " + facetField);
-        facets = createFacet(match, facetField);
-        System.out.println("year counts for 'date'; facets = " + facets);
+        Assert.assertEquals(year.name(), aggregate.first().get(0).getAggregationName());
+    }
 
-        converter = new MongoDBDocumentToFacetFieldsConverter();
-        aggregate = mongoDBCollection.aggregate(facets, converter, null);
+    @Test
+    public void testFacetMonth() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+
+        String facetField = "date[MONTH]";
+        System.out.println("\nfacetField = " + facetField);
+        List<Bson> facets = createFacet(match, facetField);
+        System.out.println("\nmonth counts for 'date'; facets = " + facets);
+
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        facetField = "day(date)";
-        System.out.println("\nfacetField = " + facetField);
-        facets = createFacet(match, facetField);
-        System.out.println("year counts for 'date'; facets = " + facets);
+        Assert.assertEquals(year.name() + AND_SEPARATOR + month.name(), aggregate.first().get(0).getAggregationName());
+    }
 
-        converter = new MongoDBDocumentToFacetFieldsConverter();
-        aggregate = mongoDBCollection.aggregate(facets, converter, null);
+    @Test
+    public void testFacetDay() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+
+        String facetField = "date[DAY]";
+        System.out.println("\nfacetField = " + facetField);
+        List<Bson> facets = createFacet(match, facetField);
+        System.out.println("\nmonth counts for 'date'; facets = " + facets);
+
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
+
+        Assert.assertEquals(year.name() + AND_SEPARATOR + month.name() + AND_SEPARATOR + day.name(), aggregate.first().get(0).getAggregationName());
     }
 
     @Test

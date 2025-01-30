@@ -69,7 +69,10 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
                 FacetField facetField = new FacetField(facetFieldName, total, buckets);
                 if (key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX) || key.endsWith(DAY_SUFFIX)) {
-                    facetField.setAggregationName(key.split(SEPARATOR)[1].toLowerCase(Locale.ROOT));
+                    // Remove the data field and keep year, month and day
+                    List<String> labels = new ArrayList<>(Arrays.asList(key.split(SEPARATOR)));
+                    labels.remove(0);
+                    facetField.setAggregationName(StringUtils.join(labels, AND_SEPARATOR).toLowerCase(Locale.ROOT));
                 }
                 facets.add(facetField);
             } else if (key.endsWith(RANGES_SUFFIX)) {
