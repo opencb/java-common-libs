@@ -26,12 +26,14 @@ import org.opencb.commons.datastore.core.Query;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryParam;
 
+import javax.swing.plaf.ActionMapUIResource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Projections.*;
@@ -733,8 +735,12 @@ public class MongoDBQueryUtils {
                         accumulator = Accumulator.valueOf(matcher.group(1));
                         groupField = matcher.group(2);
                     } catch (IllegalArgumentException e) {
+                        List<Accumulator> validAccumulators = Arrays.stream(Accumulator.values())
+                                .filter(acc -> !acc.name().equalsIgnoreCase(bucket.name()))
+                                .collect(Collectors.toList());
                         throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
-                                + " functions: " + StringUtils.join(Arrays.asList(count, sum, max, min, avg, stdDevPop, stdDevSamp), ", "));
+                                + " functions: " + StringUtils.join(validAccumulators, ", "));
+
                     }
                 } else {
                     // 3. Facet with range aggregation
