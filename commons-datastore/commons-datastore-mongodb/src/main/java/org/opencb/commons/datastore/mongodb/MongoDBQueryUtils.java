@@ -26,7 +26,6 @@ import org.opencb.commons.datastore.core.Query;
 import org.opencb.commons.datastore.core.QueryOptions;
 import org.opencb.commons.datastore.core.QueryParam;
 
-import javax.swing.plaf.ActionMapUIResource;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -37,6 +36,8 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Projections.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.bucket;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.count;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
