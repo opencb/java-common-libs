@@ -658,6 +658,8 @@ public class MongoDBCollectionTest {
         System.out.println("facets = " + facets);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.toString() = " + aggregate);
+
         for (List<FacetField> facetFieldList : aggregate.getResults()) {
             System.out.println("facetFieldList = " + facetFieldList);
         }
@@ -819,9 +821,10 @@ public class MongoDBCollectionTest {
         System.out.println("facets = " + facets);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
-        for (List<FacetField> facetFieldList : aggregate.getResults()) {
-            System.out.println("facetFieldList = " + facetFieldList);
-        }
+        System.out.println("aggregate = " + aggregate);
+//        for (List<FacetField> facetFieldList : aggregate.getResults()) {
+//            System.out.println("facetFieldList = " + facetFieldList);
+//        }
 
         long outOfRange = 0;
         List<Double> rangeValues = new ArrayList<>(Arrays.asList(0d, 0d, 0d, 0d));
@@ -925,6 +928,7 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(" + fieldName + ")");
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.toString() = " + aggregate);
 
         long totalCount = 0;
         double totalSum = 0;
@@ -955,8 +959,10 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "max(" + fieldName + ")");
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.toString() = " + aggregate);
 
         DataResult<Document> aggregate2 = mongoDBCollection.aggregate(facets, null);
+        System.out.println("aggregate2.toString() = " + aggregate2);
 
         int count = 0;
         List<Double> maxValues = new ArrayList<>(Arrays.asList(0D,0D,0D,0D,0D,0D,0D,0D,0D,0D,0D,0D));
@@ -1003,6 +1009,7 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, "avg(" + fieldName + ")");
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.toString() = " + aggregate);
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
@@ -1114,7 +1121,7 @@ public class MongoDBCollectionTest {
             if (name != null) {
                 key += name;
             }
-            key += COMBINE_SEPARATOR;
+            key += SEPARATOR;
             if (surname != null) {
                 key += surname;
             }
@@ -1234,7 +1241,7 @@ public class MongoDBCollectionTest {
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        Assert.assertEquals(year.name() + COMBINE_SEPARATOR + month.name(), aggregate.first().get(0).getAggregationName());
+        Assert.assertEquals(year.name() + SEPARATOR + month.name(), aggregate.first().get(0).getAggregationName());
     }
 
     @Test
@@ -1250,7 +1257,7 @@ public class MongoDBCollectionTest {
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        Assert.assertEquals(year.name() + COMBINE_SEPARATOR + month.name() + COMBINE_SEPARATOR + day.name(), aggregate.first().get(0).getAggregationName());
+        Assert.assertEquals(year.name() + SEPARATOR + month.name() + SEPARATOR + day.name(), aggregate.first().get(0).getAggregationName());
     }
 
     @Test

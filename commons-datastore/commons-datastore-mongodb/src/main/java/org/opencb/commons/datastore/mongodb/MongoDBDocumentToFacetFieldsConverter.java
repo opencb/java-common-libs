@@ -8,8 +8,8 @@ import org.opencb.commons.datastore.core.FacetField;
 import java.util.*;
 
 import static org.opencb.commons.datastore.mongodb.GenericDocumentComplexConverter.TO_REPLACE_DOTS;
-import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 
 public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
 
@@ -40,7 +40,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             || internalIdValue instanceof Double) {
                         bucketValue = internalIdValue.toString();
                     } else if (internalIdValue instanceof Document) {
-                        bucketValue = StringUtils.join(((Document) internalIdValue).values(), COMBINE_SEPARATOR);
+                        bucketValue = StringUtils.join(((Document) internalIdValue).values(), SEPARATOR);
                     }
 
                     List<FacetField> bucketFacetFields = null;
@@ -68,11 +68,12 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 }
                 facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
                 FacetField facetField = new FacetField(facetFieldName, total, buckets);
+                facetField.setAggregationName(count.name());
                 if (key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX) || key.endsWith(DAY_SUFFIX)) {
                     // Remove the data field and keep year, month and day
                     List<String> labels = new ArrayList<>(Arrays.asList(key.split(SEPARATOR)));
                     labels.remove(0);
-                    facetField.setAggregationName(StringUtils.join(labels, COMBINE_SEPARATOR).toLowerCase(Locale.ROOT));
+                    facetField.setAggregationName(StringUtils.join(labels, SEPARATOR).toLowerCase(Locale.ROOT));
                 }
                 facets.add(facetField);
             } else if (key.endsWith(RANGES_SUFFIX)) {
