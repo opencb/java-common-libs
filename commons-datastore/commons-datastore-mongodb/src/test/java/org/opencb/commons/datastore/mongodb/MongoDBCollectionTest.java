@@ -725,7 +725,7 @@ public class MongoDBCollectionTest {
         Assert.assertEquals(aggregate.getResults().get(0).get(0).getAggregationValues().get(0), 1.0d * acc / counter, 0.0001);
     }
 
-//    @Test
+    //    @Test
 //    public void testFacetAccumulatorMaxBucketsArray() {
 //        Document match = new Document("age", new BasicDBObject("$gt", 2));
 //        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
@@ -1100,6 +1100,7 @@ public class MongoDBCollectionTest {
 
         String fieldName = "name;surname";
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        System.out.println("facets = " + facets);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate = " + aggregate);
@@ -1107,7 +1108,47 @@ public class MongoDBCollectionTest {
         Assert.assertEquals(2, aggregate.first().size());
     }
 
-        @Test
+    @Test
+    public void testFacetMultipleAccumulators() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        for (Document result : matchedResults.getResults()) {
+            double value = 1.0d * result.getLong("number");
+            if (value > max) {
+                max = value;
+            }
+            if (value < min) {
+                min = value;
+            }
+        }
+
+        String fieldName = "min(number);max(number)";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        System.out.println("facets = " + facets);
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate = " + aggregate);
+
+        Assert.assertEquals(2, aggregate.first().size());
+        for (FacetField result : aggregate.first()) {
+            Assert.assertEquals("number", result.getName());
+            Assert.assertEquals(Long.valueOf(matchedResults.getNumResults()), result.getCount());
+            double value = 0d;
+            if ("min".equals(result.getAggregationName())) {
+                value = min;
+            } else if ("max".equals(result.getAggregationName())) {
+                value = max;
+            } else {
+                fail();
+            }
+            Assert.assertEquals(value, result.getAggregationValues().get(0), 0.001d);
+        }
+    }
+
+    @Test
     public void testFacetCombine() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));
         DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
@@ -1118,7 +1159,7 @@ public class MongoDBCollectionTest {
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.toString() = " + aggregate.toString());
 
-            String name;
+        String name;
         String surname;
         long totalCount = 0;
         Map<String, Integer> map = new HashMap<>();
