@@ -45,9 +45,6 @@ import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator
  */
 public class MongoDBQueryUtils {
 
-    @Deprecated
-    private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-    //    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~/?|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
@@ -68,20 +65,13 @@ public class MongoDBQueryUtils {
     public static final String DAY_FACET_MARK = "[DAY]";
 
     public static final String INTERNAL_ID = "_id";
-//    public static final String COMBINE_SEPARATOR = "_";
     public static final String OTHER = "Other";
 
     public static final String FACET_ACC_SUFFIX = "Acc";
     public static final String COUNTS_SUFFIX = "Counts";
-//    public static final String SUM_SUFFIX = "Sum";
-//    public static final String AVG_SUFFIX = "Avg";
-//    public static final String MIN_SUFFIX = "Min";
-//    public static final String MAX_SUFFIX = "Max";
     public static final String YEAR_SUFFIX = "Year";
     public static final String MONTH_SUFFIX = "Month";
     public static final String DAY_SUFFIX = "Day";
-//    public static final String STD_DEV_POP_SUFFIX = "StdDevPop";
-//    public static final String STD_DEV_SAMP_SUFFIX = "stdDevSamp";
     public static final String RANGES_SUFFIX = "Ranges";
     public static final String SEPARATOR = "__";
 
@@ -933,7 +923,7 @@ public class MongoDBQueryUtils {
             }
             case sum: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + SUM_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.sum(sum.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
@@ -941,7 +931,7 @@ public class MongoDBQueryUtils {
             }
             case avg: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + AVG_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.avg(avg.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
@@ -949,7 +939,7 @@ public class MongoDBQueryUtils {
             }
             case min: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + MIN_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.min(min.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
@@ -957,7 +947,7 @@ public class MongoDBQueryUtils {
             }
             case max: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + MAX_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.max(max.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
@@ -965,7 +955,7 @@ public class MongoDBQueryUtils {
             }
             case stdDevPop: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + STD_DEV_POP_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.stdDevPop(stdDevPop.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
@@ -973,7 +963,7 @@ public class MongoDBQueryUtils {
             }
             case stdDevSamp: {
                 if (StringUtils.isEmpty(facetName)) {
-                    facetName = groupField; // + SEPARATOR + STD_DEV_SAMP_SUFFIX;
+                    facetName = groupField;
                 }
                 facet = new Facet(facetName, group(groupFieldId,
                         Arrays.asList(Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
