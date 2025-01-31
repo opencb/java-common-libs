@@ -26,9 +26,12 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
             List<Document> documentValues = (List<Document>) entry.getValue();
             if (key.endsWith(COUNTS_SUFFIX) || key.endsWith(FACET_ACC_SUFFIX) || key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX)
                     || key.endsWith(DAY_SUFFIX)) {
+                facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
+
                 List<FacetField.Bucket> buckets = new ArrayList<>(documentValues.size());
                 long total = 0;
                 for (Document documentValue : documentValues) {
+
                     long counter = documentValue.getInteger(count.name());
                     String bucketValue = "";
                     Object internalIdValue = documentValue.get(INTERNAL_ID);
@@ -41,6 +44,9 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                         bucketValue = internalIdValue.toString();
                     } else if (internalIdValue instanceof Document) {
                         bucketValue = StringUtils.join(((Document) internalIdValue).values(), SEPARATOR);
+                        if (key.endsWith(COUNTS_SUFFIX)) {
+                            facetFieldName = key.substring(0, key.indexOf(COUNTS_SUFFIX));
+                        }
                     }
 
                     List<FacetField> bucketFacetFields = null;
@@ -66,7 +72,6 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     buckets.add(new FacetField.Bucket(bucketValue, counter, bucketFacetFields));
                     total += counter;
                 }
-                facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
                 FacetField facetField = new FacetField(facetFieldName, total, buckets);
                 facetField.setAggregationName(count.name());
                 if (key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX) || key.endsWith(DAY_SUFFIX)) {

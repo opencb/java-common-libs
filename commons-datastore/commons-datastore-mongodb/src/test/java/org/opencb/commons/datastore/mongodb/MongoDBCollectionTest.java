@@ -1093,6 +1093,20 @@ public class MongoDBCollectionTest {
         mongoDBCollection.aggregate(facets, converter, null);
     }
 
+    @Test
+    public void testFacetMultiple() {
+        Document match = new Document("age", new BasicDBObject("$gt", 2));
+        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+
+        String fieldName = "name;surname";
+        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate = " + aggregate);
+
+        Assert.assertEquals(2, aggregate.first().size());
+    }
+
         @Test
     public void testFacetCombine() {
         Document match = new Document("age", new BasicDBObject("$gt", 2));

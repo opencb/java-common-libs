@@ -714,7 +714,7 @@ public class MongoDBQueryUtils {
                     includeFields.add(field);
                 }
                 facet = new Facet(
-                        facetField.replace(",", SEPARATOR), // + COUNTS_SUFFIX,
+                        facetField.replace(",", SEPARATOR) + COUNTS_SUFFIX,
                         group(fields, Accumulators.sum(count.name(), 1))
                 );
             } else {
