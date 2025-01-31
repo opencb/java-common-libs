@@ -1095,8 +1095,9 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate.toString() = " + aggregate.toString());
 
-        String name;
+            String name;
         String surname;
         long totalCount = 0;
         Map<String, Integer> map = new HashMap<>();
@@ -1113,7 +1114,7 @@ public class MongoDBCollectionTest {
             if (name != null) {
                 key += name;
             }
-            key += AND_SEPARATOR;
+            key += COMBINE_SEPARATOR;
             if (surname != null) {
                 key += surname;
             }
@@ -1233,7 +1234,7 @@ public class MongoDBCollectionTest {
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        Assert.assertEquals(year.name() + AND_SEPARATOR + month.name(), aggregate.first().get(0).getAggregationName());
+        Assert.assertEquals(year.name() + COMBINE_SEPARATOR + month.name(), aggregate.first().get(0).getAggregationName());
     }
 
     @Test
@@ -1249,7 +1250,7 @@ public class MongoDBCollectionTest {
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
 
-        Assert.assertEquals(year.name() + AND_SEPARATOR + month.name() + AND_SEPARATOR + day.name(), aggregate.first().get(0).getAggregationName());
+        Assert.assertEquals(year.name() + COMBINE_SEPARATOR + month.name() + COMBINE_SEPARATOR + day.name(), aggregate.first().get(0).getAggregationName());
     }
 
     @Test

@@ -68,7 +68,7 @@ public class MongoDBQueryUtils {
     public static final String DAY_FACET_MARK = "[DAY]";
 
     public static final String INTERNAL_ID = "_id";
-    public static final String AND_SEPARATOR = "_and_";
+    public static final String COMBINE_SEPARATOR = "_";
     public static final String OTHER = "Other";
 
     public static final String FACET_ACC_SUFFIX = "Acc";
@@ -724,7 +724,7 @@ public class MongoDBQueryUtils {
                     includeFields.add(field);
                 }
                 facet = new Facet(
-                        facetField.replace(",", AND_SEPARATOR) + COUNTS_SUFFIX,
+                        facetField.replace(",", COMBINE_SEPARATOR) + COUNTS_SUFFIX,
                         group(fields, Accumulators.sum(count.name(), 1))
                 );
             } else {

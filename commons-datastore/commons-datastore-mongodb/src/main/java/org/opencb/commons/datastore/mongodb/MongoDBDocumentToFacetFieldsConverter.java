@@ -40,7 +40,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                             || internalIdValue instanceof Double) {
                         bucketValue = internalIdValue.toString();
                     } else if (internalIdValue instanceof Document) {
-                        bucketValue = StringUtils.join(((Document) internalIdValue).values(), AND_SEPARATOR);
+                        bucketValue = StringUtils.join(((Document) internalIdValue).values(), COMBINE_SEPARATOR);
                     }
 
                     List<FacetField> bucketFacetFields = null;
@@ -72,7 +72,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     // Remove the data field and keep year, month and day
                     List<String> labels = new ArrayList<>(Arrays.asList(key.split(SEPARATOR)));
                     labels.remove(0);
-                    facetField.setAggregationName(StringUtils.join(labels, AND_SEPARATOR).toLowerCase(Locale.ROOT));
+                    facetField.setAggregationName(StringUtils.join(labels, COMBINE_SEPARATOR).toLowerCase(Locale.ROOT));
                 }
                 facets.add(facetField);
             } else if (key.endsWith(RANGES_SUFFIX)) {
