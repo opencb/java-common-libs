@@ -13,6 +13,23 @@ import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 
 public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
 
+    private static final Map<String, String> monthMap = new HashMap<>();
+
+    static {
+        monthMap.put("01", "Jan");
+        monthMap.put("02", "Feb");
+        monthMap.put("03", "Mar");
+        monthMap.put("04", "Apr");
+        monthMap.put("05", "May");
+        monthMap.put("06", "Jun");
+        monthMap.put("07", "Jul");
+        monthMap.put("08", "Aug");
+        monthMap.put("09", "Sep");
+        monthMap.put("10", "Oct");
+        monthMap.put("11", "Nov");
+        monthMap.put("12", "Dec");
+    }
+
     @Override
     public List<FacetField> convertToDataModelType(Document document) {
         if (document == null || document.entrySet().size() == 0) {
@@ -75,6 +92,18 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 FacetField facetField = new FacetField(facetFieldName, total, buckets);
                 facetField.setAggregationName(count.name());
                 if (key.endsWith(YEAR_SUFFIX) || key.endsWith(MONTH_SUFFIX) || key.endsWith(DAY_SUFFIX)) {
+                    Collections.sort(buckets, Comparator.comparing(FacetField.Bucket::getValue));
+                    if (key.endsWith(MONTH_SUFFIX)) {
+                        for (FacetField.Bucket b : buckets) {
+                            String[] split = b.getValue().split(SEPARATOR);
+                            b.setValue(monthMap.get(split[1]) + ", " + split[0]);
+                        }
+                    } else if (key.endsWith(DAY_SUFFIX)) {
+                        for (FacetField.Bucket b : buckets) {
+                            String[] split = b.getValue().split(SEPARATOR);
+                            b.setValue(split[2] + " " + monthMap.get(split[1]) + ", " + split[0]);
+                        }
+                    }
                     // Remove the data field and keep year, month and day
                     List<String> labels = new ArrayList<>(Arrays.asList(key.split(SEPARATOR)));
                     labels.remove(0);
