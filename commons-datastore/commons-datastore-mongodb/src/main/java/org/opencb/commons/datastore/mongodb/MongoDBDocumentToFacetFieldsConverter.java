@@ -96,12 +96,12 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     if (key.endsWith(MONTH_SUFFIX)) {
                         for (FacetField.Bucket b : buckets) {
                             String[] split = b.getValue().split(SEPARATOR);
-                            b.setValue(MONTH_MAP.get(split[1]) + ", " + split[0]);
+                            b.setValue(MONTH_MAP.get(split[1]) + " " + split[0]);
                         }
                     } else if (key.endsWith(DAY_SUFFIX)) {
                         for (FacetField.Bucket b : buckets) {
                             String[] split = b.getValue().split(SEPARATOR);
-                            b.setValue(split[2] + " " + MONTH_MAP.get(split[1]) + ", " + split[0]);
+                            b.setValue(split[2] + " " + MONTH_MAP.get(split[1]) + " " + split[0]);
                         }
                     }
                     // Remove the data field and keep year, month and day
