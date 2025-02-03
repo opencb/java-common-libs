@@ -689,6 +689,10 @@ public class MongoDBQueryUtils {
     }
 
     public static List<Bson> createFacet(Bson query, String facetField) {
+        return createFacet(query, facetField, QueryOptions.DESCENDING);
+    }
+
+    public static List<Bson> createFacet(Bson query, String facetField, String order) {
         // Sanity check
         if (facetField == null || StringUtils.isEmpty(facetField.trim())) {
             return new ArrayList<>();
@@ -697,10 +701,10 @@ public class MongoDBQueryUtils {
 
         // Multiple facets separated by ;
         ArrayList<String> facetFields = new ArrayList<>(Arrays.asList(cleanFacetField.split(";")));
-        return createFacet(query, facetFields);
+        return createFacet(query, facetFields, order);
     }
 
-    private static List<Bson> createFacet(Bson query, List<String> facetFields) {
+    private static List<Bson> createFacet(Bson query, List<String> facetFields, String order) {
         List<Facet> facetList = new ArrayList<>();
         Set<String> includeFields = new HashSet<>();
         List<Bson> unwindList = new ArrayList<>();
@@ -719,10 +723,15 @@ public class MongoDBQueryUtils {
                     fields.append(field, "$" + field);
                     includeFields.add(field);
                 }
+                Bson bsonSort;
+                if (QueryOptions.ASCENDING.equals(order)) {
+                    bsonSort = sort(Sorts.ascending(count.name()));
+                } else {
+                    bsonSort = sort(Sorts.descending(count.name()));
+                }
                 facet = new Facet(
                         facetField.replace(",", SEPARATOR) + COUNTS_SUFFIX,
-                        group(fields, Accumulators.sum(count.name(), 1))
-                );
+                        Arrays.asList(group(fields, Accumulators.sum(Accumulator.count.name(), 1)), bsonSort));
             } else {
                 Accumulator accumulator;
                 String groupField;
@@ -818,7 +827,7 @@ public class MongoDBQueryUtils {
                 }
 
                 // Get MongoDB facet
-                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries);
+                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries, order);
 
                 // Unwind in any case
                 Set<String> unwindFields = new HashSet<>();
@@ -884,7 +893,8 @@ public class MongoDBQueryUtils {
         return unwindFields;
     }
 
-    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries) {
+    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries,
+                                         String order) {
         String groupFieldId = groupField;
         String accumulatorId = "$" + groupField;
         String facetName = null;
@@ -898,7 +908,18 @@ public class MongoDBQueryUtils {
         switch (accumulator) {
             case count: {
                 facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
-                facet = new Facet(facetName, group("$" + groupField, Accumulators.sum(count.name(), 1)));
+
+                Bson bsonSort;
+                if (QueryOptions.ASCENDING.equals(order)) {
+                    bsonSort = sort(Sorts.ascending(count.name()));
+                } else {
+                    bsonSort = sort(Sorts.descending(count.name()));
+                }
+//                facet = new Facet(
+//                        facetField.replace(",", SEPARATOR) + COUNTS_SUFFIX,
+//                        Arrays.asList(group(fields, Accumulators.sum(Accumulator.count.name(), 1)), bsonSort));
+
+                facet = new Facet(facetName, Arrays.asList(group("$" + groupField, Accumulators.sum(count.name(), 1)), bsonSort));
                 break;
             }
             case year: {

@@ -37,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.opencb.commons.datastore.core.QueryOptions.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
@@ -240,7 +241,7 @@ public class MongoDBCollectionTest {
     @Test
     public void testSortOrder() throws Exception {
         Document query = new Document();
-        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(SORT, "number")
                 .append(QueryOptions.ORDER, "asc");
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
         assertEquals(0L, result.get(0).get("number"));
@@ -250,7 +251,7 @@ public class MongoDBCollectionTest {
     public void testMultipleSortOrder() throws Exception {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 500)
-                .append(QueryOptions.SORT, Arrays.asList("age:ASC", "number:DESC"))
+                .append(SORT, Arrays.asList("age:ASC", "number:DESC"))
                 .append(QueryOptions.ORDER, "asc");
         int age = 0;
         long number = Long.MAX_VALUE;
@@ -536,6 +537,7 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate = " + aggregate);
 
         String value;
         long totalCount = 0;
@@ -576,6 +578,7 @@ public class MongoDBCollectionTest {
         List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
         DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        System.out.println("aggregate = " + aggregate);
 
         String value;
         long totalCount = 0;
