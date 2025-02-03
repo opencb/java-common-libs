@@ -13,21 +13,21 @@ import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 
 public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConverter<List<FacetField>, Document> {
 
-    private static final Map<String, String> monthMap = new HashMap<>();
+    private static final Map<String, String> MONTH_MAP = new HashMap<>();
 
     static {
-        monthMap.put("01", "Jan");
-        monthMap.put("02", "Feb");
-        monthMap.put("03", "Mar");
-        monthMap.put("04", "Apr");
-        monthMap.put("05", "May");
-        monthMap.put("06", "Jun");
-        monthMap.put("07", "Jul");
-        monthMap.put("08", "Aug");
-        monthMap.put("09", "Sep");
-        monthMap.put("10", "Oct");
-        monthMap.put("11", "Nov");
-        monthMap.put("12", "Dec");
+        MONTH_MAP.put("01", "Jan");
+        MONTH_MAP.put("02", "Feb");
+        MONTH_MAP.put("03", "Mar");
+        MONTH_MAP.put("04", "Apr");
+        MONTH_MAP.put("05", "May");
+        MONTH_MAP.put("06", "Jun");
+        MONTH_MAP.put("07", "Jul");
+        MONTH_MAP.put("08", "Aug");
+        MONTH_MAP.put("09", "Sep");
+        MONTH_MAP.put("10", "Oct");
+        MONTH_MAP.put("11", "Nov");
+        MONTH_MAP.put("12", "Dec");
     }
 
     @Override
@@ -96,12 +96,12 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                     if (key.endsWith(MONTH_SUFFIX)) {
                         for (FacetField.Bucket b : buckets) {
                             String[] split = b.getValue().split(SEPARATOR);
-                            b.setValue(monthMap.get(split[1]) + ", " + split[0]);
+                            b.setValue(MONTH_MAP.get(split[1]) + ", " + split[0]);
                         }
                     } else if (key.endsWith(DAY_SUFFIX)) {
                         for (FacetField.Bucket b : buckets) {
                             String[] split = b.getValue().split(SEPARATOR);
-                            b.setValue(split[2] + " " + monthMap.get(split[1]) + ", " + split[0]);
+                            b.setValue(split[2] + " " + MONTH_MAP.get(split[1]) + ", " + split[0]);
                         }
                     }
                     // Remove the data field and keep year, month and day
