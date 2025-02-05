@@ -830,7 +830,7 @@ public class MongoDBCollectionTest {
 //        }
 
         long outOfRange = 0;
-        List<Double> rangeValues = new ArrayList<>(Arrays.asList(0d, 0d, 0d, 0d));
+        List<Long> rangeValues = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L));
 
         Map<String, Integer> map = new HashMap<>();
         for (Document result : matchedResults.getResults()) {
@@ -846,13 +846,22 @@ public class MongoDBCollectionTest {
                 }
             }
         }
+
+        System.out.println("rangeValues = " + rangeValues);
+        System.out.println("outOfRange = " + outOfRange);
+
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertTrue(facetField.getCount() == null);
-                Assert.assertTrue(facetField.getName().contains("" + (1.0d * outOfRange)));
-                for (int i = 0; i < facetField.getAggregationValues().size(); i++) {
-                    Assert.assertEquals(rangeValues.get(i), facetField.getAggregationValues().get(i));
+                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount().longValue());
+                Assert.assertEquals(rangeValues.size() + 1, facetField.getBuckets().size());
+                for (int i = 0; i < facetField.getBuckets().size(); i++) {
+                    FacetField.Bucket bucket = facetField.getBuckets().get(i);
+                    if (bucket.getValue().equals("Other")) {
+                        Assert.assertEquals(outOfRange, bucket.getCount());
+                    } else {
+                        Assert.assertEquals(rangeValues.get(i).longValue(), bucket.getCount());
+                    }
                 }
             }
         }
@@ -1219,7 +1228,7 @@ public class MongoDBCollectionTest {
         System.out.println("aggregate.first() = " + aggregate.first());
 
         long outOfRange = 0;
-        List<Double> rangeValues = new ArrayList<>(Arrays.asList(0d, 0d, 0d, 0d, 0d));
+        List<Long> rangeValues = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
 
         Map<String, Integer> map = new HashMap<>();
         for (Document result : matchedResults.getResults()) {
@@ -1235,14 +1244,21 @@ public class MongoDBCollectionTest {
                 }
             }
         }
-        System.out.println("rangeValues.toString() = " + rangeValues.toString());
+        System.out.println("rangeValues = " + rangeValues);
+        System.out.println("outOfRange = " + outOfRange);
+
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertTrue(facetField.getCount() == null);
-                Assert.assertTrue(facetField.getName().contains("" + (1.0d * outOfRange)));
-                for (int i = 0; i < facetField.getAggregationValues().size(); i++) {
-                    Assert.assertEquals(rangeValues.get(i), facetField.getAggregationValues().get(i));
+                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount().longValue());
+                Assert.assertEquals(rangeValues.size() + 1, facetField.getBuckets().size());
+                for (int i = 0; i < facetField.getBuckets().size(); i++) {
+                    FacetField.Bucket bucket = facetField.getBuckets().get(i);
+                    if (bucket.getValue().equals("Other")) {
+                        Assert.assertEquals(outOfRange, bucket.getCount());
+                    } else {
+                        Assert.assertEquals(rangeValues.get(i).longValue(), bucket.getCount());
+                    }
                 }
             }
         }

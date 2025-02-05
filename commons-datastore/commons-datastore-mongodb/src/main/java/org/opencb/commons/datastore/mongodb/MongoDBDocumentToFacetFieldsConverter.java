@@ -111,102 +111,85 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 }
                 facets.add(facetField);
             } else if (key.endsWith(RANGES_SUFFIX)) {
-                List<Double> facetFieldValues = new ArrayList<>();
-                Number start = null;
-                Number end = null;
-                Number step = null;
-                Double other = null;
+                List<FacetField.Bucket> buckets = new ArrayList<>(documentValues.size());
+                int total = 0;
+                Double start = null;
+                Double end = null;
+                Double step = null;
+                int other = 0;
                 for (Document value : documentValues) {
                     if (value.get(INTERNAL_ID) instanceof String && OTHER.equals(value.getString(INTERNAL_ID))) {
-                        other = 1.0d * value.getInteger(count.name());
+                        other = value.getInteger(count.name());
                     } else {
-                        Double range = value.getDouble(INTERNAL_ID);
-                        Integer counter = value.getInteger(count.name());
-                        facetFieldValues.add(1.0d * counter);
+                        FacetField.Bucket bucket = new FacetField.Bucket(String.valueOf(value.getDouble(INTERNAL_ID)),
+                                value.getInteger(count.name()), null);
+                        buckets.add(bucket);
+                        total += bucket.getCount();
+                        if (step == null && start != null) {
+                            step = Double.parseDouble(bucket.getValue()) - (Double) start;
+                        }
                         if (start == null) {
-                            start = range;
+                            start = Double.parseDouble(bucket.getValue());
                         }
-                        end = range;
-                        if (step == null && start != end) {
-                            step = end.doubleValue() - start.doubleValue();
-                        }
+                        end = Double.parseDouble(bucket.getValue());
+//
+//                        Double range = value.getDouble(INTERNAL_ID);
+//                        Integer counter = value.getInteger(count.name());
+////                        buckets.add(new FacetField.Bucket());
+//                        //facetFieldValues.add(1.0d * counter);
+//                        if (start == null) {
+//                            start = range;
+//                        }
+//                        end = range;
+//                        if (step == null && start != end) {
+//                            step = end.doubleValue() - start.doubleValue();
+//                        }
                     }
                 }
                 facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
-                if (other != null) {
-                    facetFieldName += " (counts out of range: " + other + ")";
+                if (other > 0) {
+                    FacetField.Bucket bucket = new FacetField.Bucket("Other", other, null);
+                    buckets.add(bucket);
+                    total += bucket.getCount();
                 }
-                FacetField facetField = new FacetField(facetFieldName, "range", facetFieldValues)
+                FacetField facetField = new FacetField(facetFieldName, total, buckets)
                         .setStart(start)
-                        .setEnd(end)
+                        .setEnd(end + step)
                         .setStep(step);
                 facets.add(facetField);
             } else {
-                if (key.endsWith(RANGES_SUFFIX)) {
-                    List<Double> facetFieldValues = new ArrayList<>();
-                    Number start = null;
-                    Number end = null;
-                    Number step = null;
-                    Double other = null;
-                    for (Document value : documentValues) {
-                        if (value.get(INTERNAL_ID) instanceof String && OTHER.equals(value.getString(INTERNAL_ID))) {
-                            other = 1.0d * value.getInteger(count.name());
+                Document documentValue = ((List<Document>) entry.getValue()).get(0);
+                MongoDBQueryUtils.Accumulator accumulator = getAccumulator(documentValue);
+                switch (accumulator) {
+                    case sum:
+                    case avg:
+                    case max:
+                    case min:
+                    case stdDevPop:
+                    case stdDevSamp: {
+                        List<Double> fieldValues = new ArrayList<>();
+                        if (documentValue.get(accumulator.name()) instanceof Integer) {
+                            fieldValues.add(1.0d * documentValue.getInteger(accumulator.name()));
+                        } else if (documentValue.get(accumulator.name()) instanceof Long) {
+                            fieldValues.add(1.0d * documentValue.getLong(accumulator.name()));
+                        } else if (documentValue.get(accumulator.name()) instanceof List) {
+                            List<Number> list = (List<Number>) documentValue.get(accumulator.name());
+                            for (Number number : list) {
+                                fieldValues.add(number.doubleValue());
+                            }
                         } else {
-                            Double range = value.getDouble(INTERNAL_ID);
-                            Integer counter = value.getInteger(count.name());
-                            facetFieldValues.add(1.0d * counter);
-                            if (start == null) {
-                                start = range;
-                            }
-                            end = range;
-                            if (step == null && start != end) {
-                                step = end.doubleValue() - start.doubleValue();
-                            }
+                            fieldValues.add(documentValue.getDouble(accumulator.name()));
                         }
+                        long count = 0;
+                        if (documentValue.containsKey("count")) {
+                            count = Long.valueOf(documentValue.getInteger("count"));
+                        }
+                        facetFieldName = documentValue.getString(INTERNAL_ID).replace(TO_REPLACE_DOTS, ".");
+                        facets.add(new FacetField(facetFieldName, count, accumulator.name(), fieldValues));
+                        break;
                     }
-                    facetFieldName = key.substring(0, key.length() - RANGES_SUFFIX.length()).replace(TO_REPLACE_DOTS, ".");
-                    if (other != null) {
-                        facetFieldName += " (counts out of range: " + other + ")";
-                    }
-                    FacetField facetField = new FacetField(facetFieldName, "range", facetFieldValues)
-                            .setStart(start)
-                            .setEnd(end)
-                            .setStep(step);
-                    facets.add(facetField);
-                } else {
-                    Document documentValue = ((List<Document>) entry.getValue()).get(0);
-                    MongoDBQueryUtils.Accumulator accumulator = getAccumulator(documentValue);
-                    switch (accumulator) {
-                        case sum:
-                        case avg:
-                        case max:
-                        case min:
-                        case stdDevPop:
-                        case stdDevSamp: {
-                            List<Double> fieldValues = new ArrayList<>();
-                            if (documentValue.get(accumulator.name()) instanceof Integer) {
-                                fieldValues.add(1.0d * documentValue.getInteger(accumulator.name()));
-                            } else if (documentValue.get(accumulator.name()) instanceof Long) {
-                                fieldValues.add(1.0d * documentValue.getLong(accumulator.name()));
-                            } else if (documentValue.get(accumulator.name()) instanceof List) {
-                                List<Number> list = (List<Number>) documentValue.get(accumulator.name());
-                                for (Number number : list) {
-                                    fieldValues.add(number.doubleValue());
-                                }
-                            } else {
-                                fieldValues.add(documentValue.getDouble(accumulator.name()));
-                            }
-                            long count = 0;
-                            if (documentValue.containsKey("count")) {
-                                count = Long.valueOf(documentValue.getInteger("count"));
-                            }
-                            facetFieldName = documentValue.getString(INTERNAL_ID).replace(TO_REPLACE_DOTS, ".");
-                            facets.add(new FacetField(facetFieldName, count, accumulator.name(), fieldValues));
-                            break;
-                        }
-                        default: {
-                            // Do nothing, exception is raised
-                        }
+                    default: {
+                        // Do nothing, exception is raised
                     }
                 }
             }
