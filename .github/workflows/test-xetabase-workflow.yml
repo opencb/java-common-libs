@@ -51,13 +51,10 @@ jobs:
           path: opencga-enterprise
           fetch-depth: "10"
       - id: get_opencga_branch
-        name: Get OpenCGA branch from 'pom.xml' property
+        name: Get OpenCGA branch
         run: |
-          pwd
-          ls -lrtha
-          ls -lrtha ./opencga-enterprise
           chmod +x ./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh
-          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh)
+          opencga_branch=$(./opencga-enterprise/.github/workflows/scripts/get-opencga-xetabase-branch.sh "${{ inputs.task }}")
           echo "opencga_branch=${opencga_branch}"
           echo "opencga_branch=${opencga_branch}" >> $GITHUB_OUTPUT
       - name: Clone OpenCGA branch '${{ steps.get_opencga_branch.outputs.opencga_branch }}'
