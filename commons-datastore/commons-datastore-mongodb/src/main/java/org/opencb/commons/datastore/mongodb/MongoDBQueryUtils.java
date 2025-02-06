@@ -713,7 +713,7 @@ public class MongoDBQueryUtils {
         // For each facet field passed we will create a MongoDB facet, thre are 4 types of facets:
         // 1. Facet combining fields with commas. In this case, only 'count' is supported as accumulator.
         for (String facetField : facetFields) {
-            Facet facet;
+            Facet facet = null;
 
             // 1. Check if it is a facet combining fields with commas. In this case, only 'count' is supported as accumulator.
             // Example: aggregationFields=format,type
@@ -795,12 +795,20 @@ public class MongoDBQueryUtils {
                                 double start = Double.parseDouble(matcher1.group(2));
                                 double end = Double.parseDouble(matcher2.group(1));
                                 double step = Double.parseDouble(matcher2.group(2));
-                                int numSections = (int) Math.ceil((end - start + 1) / step);
-                                double boundary = start;
-                                for (int i = 0; i < numSections + 1; i++) {
-                                    boundaries.add(boundary);
-                                    boundary += step;
+                                double i;
+                                for (i = start; i <= end; i += step) {
+                                    boundaries.add(i);
                                 }
+                                if (boundaries.get(boundaries.size() - 1) < end) {
+                                    boundaries.add(i);
+                                }
+
+                                String facetName = groupField + SEPARATOR + start + SEPARATOR + end + SEPARATOR + step + SEPARATOR
+                                        + RANGES_SUFFIX;
+                                facet = new Facet(facetName, Aggregates.bucket("$" + groupField, boundaries,
+                                        new BucketOptions()
+                                                .defaultBucket(OTHER)
+                                                .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
                             } else {
                                 throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
                             }
@@ -827,7 +835,9 @@ public class MongoDBQueryUtils {
                 }
 
                 // Get MongoDB facet
-                facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries, order);
+                if (facet == null) {
+                    facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries, order);
+                }
 
                 // Unwind in any case
                 Set<String> unwindFields = new HashSet<>();
@@ -938,7 +948,7 @@ public class MongoDBQueryUtils {
                 break;
             }
             case day: {
-                 facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX + SEPARATOR + DAY_SUFFIX;
+                facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX + SEPARATOR + DAY_SUFFIX;
 
                 Document fields = new Document();
                 fields.append(groupField + SEPARATOR + year.name(), "$" + groupField + SEPARATOR + year.name());
@@ -996,14 +1006,16 @@ public class MongoDBQueryUtils {
                         Arrays.asList(Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
                 break;
             }
-            case bucket: {
-                facetName = groupField + SEPARATOR + RANGES_SUFFIX;
-                facet = new Facet(facetName, Aggregates.bucket(accumulatorId, boundaries,
-                        new BucketOptions()
-                                .defaultBucket(OTHER)
-                                .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
-                break;
-            }
+            case bucket:
+//            {
+//                // Nothing to do
+//                facetName = groupField + SEPARATOR + RANGES_SUFFIX;
+//                facet = new Facet(facetName, Aggregates.bucket(accumulatorId, boundaries,
+//                        new BucketOptions()
+//                                .defaultBucket(OTHER)
+//                                .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
+//                break;
+//            }
             default: {
                 facet = null;
                 break;

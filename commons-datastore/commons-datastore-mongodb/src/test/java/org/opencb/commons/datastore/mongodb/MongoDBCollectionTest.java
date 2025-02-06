@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.opencb.commons.datastore.core.QueryOptions.*;
+import static org.opencb.commons.datastore.core.QueryOptions.SORT;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
@@ -53,6 +53,7 @@ public class MongoDBCollectionTest {
     private static MongoDBCollection mongoDBCollectionInsertTest;
     private static MongoDBCollection mongoDBCollectionUpdateTest;
     private static MongoDBCollection mongoDBCollectionRemoveTest;
+    private static MongoDBCollection mongoDBCollectionFacetRange;
 
     private static int N = 1000;
 
@@ -74,6 +75,7 @@ public class MongoDBCollectionTest {
         mongoDBCollectionInsertTest = createTestCollection("insert_test", 50);
         mongoDBCollectionUpdateTest = createTestCollection("update_test", 50);
         mongoDBCollectionRemoveTest = createTestCollection("remove_test", 50);
+        mongoDBCollectionFacetRange = createTestCollection2("facet-range-test");
     }
 
     @Before
@@ -190,6 +192,19 @@ public class MongoDBCollectionTest {
             document.put("dogs", dogs);
             mongoDBCollection.nativeQuery().insert(document, null);
             System.out.println("document.toJson() = " + document.toJson());
+        }
+        return mongoDBCollection;
+    }
+
+    private static MongoDBCollection createTestCollection2(String name) {
+        MongoDBCollection mongoDBCollection = mongoDataStore.getCollection(name);
+        Document document;
+        Random random = new Random();
+
+        List<Integer> ages = Arrays.asList(1, 3, 3, 9, 10, 11, 12);
+        for (Integer age : ages) {
+            document = new Document("age", age);
+            mongoDBCollection.nativeQuery().insert(document, null);
         }
         return mongoDBCollection;
     }
@@ -1212,56 +1227,112 @@ public class MongoDBCollectionTest {
         }
     }
 
+//    @Test
+//    public void testFacetRange() {
+//        Document match = new Document("age", new BasicDBObject("$gt", 2));
+//        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+//
+//        int start = 1000;
+//        int end = 5000;
+//        int step = 100;
+//        String fieldName = "number" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
+//        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+//        System.out.println("facets = " + facets);
+//        MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
+//        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+//        System.out.println("aggregate.first() = " + aggregate.first());
+//
+//        long outOfRange = 0;
+//        List<Long> rangeValues = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
+//
+//        Map<String, Integer> map = new HashMap<>();
+//        for (Document result : matchedResults.getResults()) {
+//            int bucketNum;
+//            Long value = result.getLong("number");
+//            if (value != null) {
+//                bucketNum = (int) (value - start) / step;
+//                int numSections = (int) Math.ceil((end - start + 1) / step);
+//                if (value < start || bucketNum > numSections) {
+//                    outOfRange++;
+//                } else {
+//                    rangeValues.set(bucketNum, 1 + rangeValues.get(bucketNum));
+//                }
+//            }
+//        }
+//        System.out.println("rangeValues = " + rangeValues);
+//        System.out.println("outOfRange = " + outOfRange);
+//
+//        for (List<FacetField> result : aggregate.getResults()) {
+//            Assert.assertEquals(1, result.size());
+//            for (FacetField facetField : result) {
+//                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount().longValue());
+//                Assert.assertEquals(rangeValues.size() + 1, facetField.getBuckets().size());
+//                for (int i = 0; i < facetField.getBuckets().size(); i++) {
+//                    FacetField.Bucket bucket = facetField.getBuckets().get(i);
+//                    if (bucket.getValue().equals("Other")) {
+//                        Assert.assertEquals(outOfRange, bucket.getCount());
+//                    } else {
+//                        Assert.assertEquals(rangeValues.get(i).longValue(), bucket.getCount());
+//                    }
+//                }
+//            }
+//        }
+//    }
+
     @Test
     public void testFacetRange() {
-        Document match = new Document("age", new BasicDBObject("$gt", 2));
-        DataResult<Document> matchedResults = mongoDBCollection.find(match, null);
+        DataResult<Document> matchedResults = mongoDBCollectionFacetRange.find(new Document(), null);
+        for (Document result : matchedResults.getResults()) {
+            System.out.println("age = " + result.get("age"));
+        }
 
-        int start = 1000;
-        int end = 5000;
-        int step = 1000;
-        String fieldName = "number" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
-        List<Bson> facets = MongoDBQueryUtils.createFacet(match, fieldName);
+        double start = 3;
+        double end = 10;
+        double step = 2;
+        String fieldName = "age" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
+        System.out.println("fieldName = " + fieldName);
+        List<Bson> facets = MongoDBQueryUtils.createFacet(new Document(), fieldName);
         System.out.println("facets = " + facets);
         MongoDBDocumentToFacetFieldsConverter converter = new MongoDBDocumentToFacetFieldsConverter();
-        DataResult<List<FacetField>> aggregate = mongoDBCollection.aggregate(facets, converter, null);
+        DataResult<List<FacetField>> aggregate = mongoDBCollectionFacetRange.aggregate(facets, converter, null);
         System.out.println("aggregate.first() = " + aggregate.first());
-
-        long outOfRange = 0;
-        List<Long> rangeValues = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L, 0L));
-
         Map<String, Integer> map = new HashMap<>();
-        for (Document result : matchedResults.getResults()) {
-            int bucketNum;
-            Long value = result.getLong("number");
-            if (value != null) {
-                bucketNum = (int) (value - start) / step;
-                int numSections = (int) Math.ceil((end - start + 1) / step);
-                if (value < start || bucketNum > numSections) {
-                    outOfRange++;
-                } else {
-                    rangeValues.set(bucketNum, 1 + rangeValues.get(bucketNum));
-                }
-            }
+        map.put("3.0", 2);
+        map.put("5.0", 0);
+        map.put("7.0", 0);
+        map.put("9.0", 2);
+        map.put("Other", 3);
+        Assert.assertTrue(aggregate.first().get(0).getBuckets().size() > 0);
+        for (FacetField.Bucket bucket : aggregate.first().get(0).getBuckets()) {
+            Assert.assertTrue(map.containsKey(bucket.getValue()));
+            Assert.assertEquals(map.get(bucket.getValue()), bucket.getCount(), 0.0001);
         }
-        System.out.println("rangeValues = " + rangeValues);
-        System.out.println("outOfRange = " + outOfRange);
+        Assert.assertEquals(start, aggregate.first().get(0).getStart());
+        Assert.assertEquals(end, aggregate.first().get(0).getEnd());
+        Assert.assertEquals(step, aggregate.first().get(0).getStep());
 
-        for (List<FacetField> result : aggregate.getResults()) {
-            Assert.assertEquals(1, result.size());
-            for (FacetField facetField : result) {
-                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount().longValue());
-                Assert.assertEquals(rangeValues.size() + 1, facetField.getBuckets().size());
-                for (int i = 0; i < facetField.getBuckets().size(); i++) {
-                    FacetField.Bucket bucket = facetField.getBuckets().get(i);
-                    if (bucket.getValue().equals("Other")) {
-                        Assert.assertEquals(outOfRange, bucket.getCount());
-                    } else {
-                        Assert.assertEquals(rangeValues.get(i).longValue(), bucket.getCount());
-                    }
-                }
-            }
+        step = 3;
+        System.out.println();
+        fieldName = "age" + RANGE_MARK1 + start + RANGE_MARK + end + RANGE_MARK2 + ":" + step;
+        System.out.println("fieldName = " + fieldName);
+        facets = MongoDBQueryUtils.createFacet(new Document(), fieldName);
+        System.out.println("facets = " + facets);
+        converter = new MongoDBDocumentToFacetFieldsConverter();
+        aggregate = mongoDBCollectionFacetRange.aggregate(facets, converter, null);
+        System.out.println("aggregate.first() = " + aggregate.first());
+        map.clear();
+        map.put("3.0", 2);
+        map.put("6.0", 0);
+        map.put("9.0", 3);
+        map.put("Other", 2);
+        Assert.assertTrue(aggregate.first().get(0).getBuckets().size() > 0);
+        for (FacetField.Bucket bucket : aggregate.first().get(0).getBuckets()) {
+            Assert.assertTrue(map.containsKey(bucket.getValue()));
+            Assert.assertEquals(map.get(bucket.getValue()), bucket.getCount(), 0.0001);
         }
+        Assert.assertEquals(start, aggregate.first().get(0).getStart());
+        Assert.assertEquals(end, aggregate.first().get(0).getEnd());
+        Assert.assertEquals(step, aggregate.first().get(0).getStep());
     }
 
     @Test(expected = IllegalArgumentException.class)

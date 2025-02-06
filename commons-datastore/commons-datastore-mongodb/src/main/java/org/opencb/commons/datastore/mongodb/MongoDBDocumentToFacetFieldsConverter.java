@@ -5,6 +5,8 @@ import org.bson.Document;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.FacetField;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import static org.opencb.commons.datastore.mongodb.GenericDocumentComplexConverter.TO_REPLACE_DOTS;
@@ -113,37 +115,23 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
             } else if (key.endsWith(RANGES_SUFFIX)) {
                 List<FacetField.Bucket> buckets = new ArrayList<>(documentValues.size());
                 int total = 0;
-                Double start = null;
-                Double end = null;
-                Double step = null;
+
+                String[] split = key.split(SEPARATOR);
+                double start = Double.parseDouble(split[1].replace(TO_REPLACE_DOTS, "."));
+                double end = Double.parseDouble(split[2].replace(TO_REPLACE_DOTS, "."));
+                double step = Double.parseDouble(split[3].replace(TO_REPLACE_DOTS, "."));
+
                 int other = 0;
+                for (double i = start; i <= end; i += step) {
+                    int bucketCount = getBucketCountFromRanges(i, documentValues);
+                    FacetField.Bucket bucket = new FacetField.Bucket(String.valueOf(roundToTwoSignificantDecimals(i)), bucketCount, null);
+                    buckets.add(bucket);
+                    total += bucketCount;
+                }
+
                 for (Document value : documentValues) {
                     if (value.get(INTERNAL_ID) instanceof String && OTHER.equals(value.getString(INTERNAL_ID))) {
                         other = value.getInteger(count.name());
-                    } else {
-                        FacetField.Bucket bucket = new FacetField.Bucket(String.valueOf(value.getDouble(INTERNAL_ID)),
-                                value.getInteger(count.name()), null);
-                        buckets.add(bucket);
-                        total += bucket.getCount();
-                        if (step == null && start != null) {
-                            step = Double.parseDouble(bucket.getValue()) - (Double) start;
-                        }
-                        if (start == null) {
-                            start = Double.parseDouble(bucket.getValue());
-                        }
-                        end = Double.parseDouble(bucket.getValue());
-//
-//                        Double range = value.getDouble(INTERNAL_ID);
-//                        Integer counter = value.getInteger(count.name());
-////                        buckets.add(new FacetField.Bucket());
-//                        //facetFieldValues.add(1.0d * counter);
-//                        if (start == null) {
-//                            start = range;
-//                        }
-//                        end = range;
-//                        if (step == null && start != end) {
-//                            step = end.doubleValue() - start.doubleValue();
-//                        }
                     }
                 }
                 facetFieldName = key.split(SEPARATOR)[0].replace(TO_REPLACE_DOTS, ".");
@@ -154,7 +142,7 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
                 }
                 FacetField facetField = new FacetField(facetFieldName, total, buckets)
                         .setStart(start)
-                        .setEnd(end + step)
+                        .setEnd(end)
                         .setStep(step);
                 facets.add(facetField);
             } else {
@@ -213,5 +201,28 @@ public class MongoDBDocumentToFacetFieldsConverter implements ComplexTypeConvert
     @Override
     public Document convertToStorageType(List<FacetField> facetFields) {
         throw new RuntimeException("Not yet implemented");
+    }
+
+    private static double roundToTwoSignificantDecimals(double value) {
+        if (value == 0) {
+            return 0;
+        }
+
+        BigDecimal bd = new BigDecimal(value);
+        int integerDigits = bd.precision() - bd.scale();
+        int scale = Math.max(0, 2 + integerDigits);
+        return bd.setScale(scale, RoundingMode.HALF_UP).doubleValue();
+    }
+
+
+    private int getBucketCountFromRanges(double inputRange, List<Document> documentValues) {
+        for (Document document : documentValues) {
+            if (!OTHER.equals(document.get(INTERNAL_ID))) {
+                if (inputRange == document.getDouble(INTERNAL_ID)) {
+                    return document.getInteger(count.name());
+                }
+            }
+        }
+        return 0;
     }
 }
