@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class FacetField {
     private String name;
-    private Long count;
+    private long count;
     private List<Bucket> buckets;
     private String aggregationName;
     private List<Double> aggregationValues;
@@ -74,20 +74,17 @@ public class FacetField {
         return this;
     }
 
-    public Long getCount() {
+    public long getCount() {
         return count;
     }
 
-    public FacetField setCount(Long count) {
+    public FacetField setCount(long count) {
         this.count = count;
         return this;
     }
 
     public FacetField addCount(long delta) {
-        if (this.count == null) {
-            this.count = 0L;
-        }
-        this.count = this.count.longValue() + delta;
+        this.count = this.count + delta;
         return this;
     }
 

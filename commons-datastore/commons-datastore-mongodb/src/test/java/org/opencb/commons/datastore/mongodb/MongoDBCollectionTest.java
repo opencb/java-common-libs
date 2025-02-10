@@ -570,8 +570,7 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertFalse(facetField.getCount() == null);
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -611,8 +610,7 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertFalse(facetField.getCount() == null);
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -652,8 +650,7 @@ public class MongoDBCollectionTest {
         }
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertFalse(facetField.getCount() == null);
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -702,7 +699,7 @@ public class MongoDBCollectionTest {
 
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -810,7 +807,7 @@ public class MongoDBCollectionTest {
 
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(counterMap.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
@@ -818,7 +815,7 @@ public class MongoDBCollectionTest {
                         value = EMPTY;
                     }
                     Assert.assertEquals(counterMap.get(value).longValue(), bucket.getCount());
-                    Assert.assertEquals(counterMap.get(value).longValue(), bucket.getFacetFields().get(0).getCount().longValue());
+                    Assert.assertEquals(counterMap.get(value).longValue(), bucket.getFacetFields().get(0).getCount());
                     Assert.assertEquals("avg", bucket.getFacetFields().get(0).getAggregationName());
                     Assert.assertEquals(1.0 * accMap.get(value) / counterMap.get(value), bucket.getFacetFields().get(0).getAggregationValues().get(0), 0.0001);
                 }
@@ -868,7 +865,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount().longValue());
+                Assert.assertEquals(outOfRange + rangeValues.stream().mapToLong(Long::longValue).sum(), facetField.getCount());
                 Assert.assertEquals(rangeValues.size() + 1, facetField.getBuckets().size());
                 for (int i = 0; i < facetField.getBuckets().size(); i++) {
                     FacetField.Bucket bucket = facetField.getBuckets().get(i);
@@ -907,7 +904,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(max.name(), facetField.getAggregationName());
                 Assert.assertEquals(maxValue, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -939,7 +936,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(count, facetField.getCount().longValue());
+                Assert.assertEquals(count, facetField.getCount());
                 Assert.assertEquals(min.name(), facetField.getAggregationName());
                 Assert.assertEquals(minValue, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -970,7 +967,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(avg.name(), facetField.getAggregationName());
                 Assert.assertEquals(totalSum / totalCount, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -1010,7 +1007,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(count, facetField.getCount().longValue());
+                Assert.assertEquals(count, facetField.getCount());
                 Assert.assertEquals(max.name(), facetField.getAggregationName());
 //                for (int i = 0; i < facetField.getAggregationValues().size() ; i++) {
 //                    Assert.assertEquals(maxValues.get(i), facetField.getAggregationValues().get(i), 0.0001);
@@ -1040,7 +1037,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(count, facetField.getCount().longValue());
+                Assert.assertEquals(count, facetField.getCount());
                 Assert.assertEquals(Accumulator.avg.name(), facetField.getAggregationName());
                 Assert.assertEquals(avg, facetField.getAggregationValues().get(0), 0.5);
 //                for (int i = 0; i < facetField.getAggregationValues().size() ; i++) {
@@ -1055,7 +1052,7 @@ public class MongoDBCollectionTest {
         for (List<FacetField> result : aggregate.getResults()) {
             Assert.assertEquals(1, result.size());
             for (FacetField facetField : result) {
-                Assert.assertEquals(count, facetField.getCount().longValue());
+                Assert.assertEquals(count, facetField.getCount());
                 Assert.assertEquals(Accumulator.sum.name(), facetField.getAggregationName());
                 Assert.assertEquals(total, facetField.getAggregationValues().get(0), 0.0001);
             }
@@ -1162,7 +1159,7 @@ public class MongoDBCollectionTest {
         Assert.assertEquals(2, aggregate.first().size());
         for (FacetField result : aggregate.first()) {
             Assert.assertEquals("number", result.getName());
-            Assert.assertEquals(Long.valueOf(matchedResults.getNumResults()), result.getCount());
+            Assert.assertEquals(matchedResults.getNumResults(), result.getCount());
             double value = 0d;
             if ("min".equals(result.getAggregationName())) {
                 value = min;
@@ -1216,8 +1213,7 @@ public class MongoDBCollectionTest {
         String value;
         for (List<FacetField> result : aggregate.getResults()) {
             for (FacetField facetField : result) {
-                Assert.assertFalse(facetField.getCount() == null);
-                Assert.assertEquals(totalCount, facetField.getCount().longValue());
+                Assert.assertEquals(totalCount, facetField.getCount());
                 Assert.assertEquals(map.size(), facetField.getBuckets().size());
                 for (FacetField.Bucket bucket : facetField.getBuckets()) {
                     value = bucket.getValue();
