@@ -18,6 +18,8 @@ package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.client.model.*;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonDocument;
+import org.bson.BsonInt32;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.Query;
@@ -27,25 +29,57 @@ import org.opencb.commons.datastore.core.QueryParam;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Projections.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.bucket;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.count;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
  * Created by imedina on 17/01/16.
  */
 public class MongoDBQueryUtils {
 
-    @Deprecated
-    private static final String REGEX_SEPARATOR = "(\\w+|\\^)";
-//    private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~|==?|=?\\^|=?\\$)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_STRING_PATTERN = Pattern.compile("^(!=?|!?=?~/?|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_NUMERIC_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_BOOLEAN_PATTERN = Pattern.compile("^(!=|!?=?~|==?)([^=<>~!]+.*)$");
     private static final Pattern OPERATION_DATE_PATTERN = Pattern.compile("^(<=?|>=?|!=|!?=?~|=?=?)([0-9]+)(-?)([0-9]*)");
+
+    private static final Pattern FUNC_ACCUMULATOR_PATTERN = Pattern.compile("([a-zA-Z]+)\\(([.a-zA-Z0-9]+)\\)");
+    public static final String RANGE_MARK = "..";
+    public static final String RANGE_MARK1 = "[";
+    public static final String RANGE_MARK2 = "]";
+    private static final String RANGE_SPLIT_MARK = "\\.\\.";
+    private static final Pattern RANGE_START_PATTERN = Pattern.compile("([.a-zA-Z0-9]+)\\[([.0-9]+)");
+    private static final Pattern RANGE_END_PATTERN = Pattern.compile("([.0-9]+)\\]:([.0-9]+)");
+    public static final String INVALID_FORMAT_MSG = "Invalid format ";
+    public static final String RANGE_FORMAT_MSG = " for range aggregation. Valid format is: field[start..end]:step, e.g: size[0..1000]:200";
+
+    public static final String YEAR_FACET_MARK = "[YEAR]";
+    public static final String MONTH_FACET_MARK = "[MONTH]";
+    public static final String DAY_FACET_MARK = "[DAY]";
+
+    public static final String INTERNAL_ID = "_id";
+    public static final String OTHER = "Other";
+
+    public static final String FACET_ACC_SUFFIX = "Acc";
+    public static final String COUNTS_SUFFIX = "Counts";
+    public static final String SUM_SUFFIX = "Sum";
+    public static final String MIN_SUFFIX = "Min";
+    public static final String MAX_SUFFIX = "Max";
+    public static final String AVG_SUFFIX = "Avg";
+    public static final String STDDEVPOP_SUFFIX = "StdDevPop";
+    public static final String STDDEVSAMP_SUFFIX = "StdDevSamp";
+    public static final String YEAR_SUFFIX = "Year";
+    public static final String MONTH_SUFFIX = "Month";
+    public static final String DAY_SUFFIX = "Day";
+    public static final String RANGES_SUFFIX = "Ranges";
+    public static final String SEPARATOR = "__";
 
     // TODO: Added on 10/08/2021 to deprecate STARTS_WITH and ENDS_WITH regex. They need to be done within '/'.
     @Deprecated
@@ -80,6 +114,19 @@ public class MongoDBQueryUtils {
         BETWEEN
     }
 
+    public enum Accumulator {
+        count,
+        sum,
+        avg,
+        min,
+        max,
+        stdDevPop,
+        stdDevSamp,
+        bucket,
+        year,
+        month,
+        day
+    }
 
     public static Bson createFilter(String mongoDbField, String queryParam, Query query) {
         return createFilter(mongoDbField, queryParam, query, QueryParam.Type.TEXT, ComparisonOperator.EQUALS, LogicalOperator.OR);
@@ -497,7 +544,7 @@ public class MongoDBQueryUtils {
      * @return the Bson query.
      */
     protected static Bson createDateFilter(String mongoDbField, List<String> dateValues, ComparisonOperator comparator,
-                                         QueryParam.Type type) {
+                                           QueryParam.Type type) {
         Bson filter = null;
 
         Object date = null;
@@ -599,12 +646,12 @@ public class MongoDBQueryUtils {
             return createGroupBy(query, Arrays.asList(groupByField.split(",")), idField, count);
         } else {
             Bson match = Aggregates.match(query);
-            Bson project = Aggregates.project(Projections.include(groupByField, idField));
+            Bson project = project(Projections.include(groupByField, idField));
             Bson group;
             if (count) {
-                group = Aggregates.group("$" + groupByField, Accumulators.sum("count", 1));
+                group = group("$" + groupByField, Accumulators.sum("count", 1));
             } else {
-                group = Aggregates.group("$" + groupByField, Accumulators.addToSet("features", "$" + idField));
+                group = group("$" + groupByField, Accumulators.addToSet("features", "$" + idField));
             }
             return Arrays.asList(match, project, group);
         }
@@ -624,7 +671,7 @@ public class MongoDBQueryUtils {
             // add all group-by fields to the projection together with the aggregation field name
             List<String> groupByFields = new ArrayList<>(groupByField);
             groupByFields.add(idField);
-            Bson project = Aggregates.project(Projections.include(groupByFields));
+            Bson project = project(Projections.include(groupByFields));
 
             // _id document creation to have the multiple id
             Document id = new Document();
@@ -633,12 +680,349 @@ public class MongoDBQueryUtils {
             }
             Bson group;
             if (count) {
-                group = Aggregates.group(id, Accumulators.sum("count", 1));
+                group = group(id, Accumulators.sum("count", 1));
             } else {
-                group = Aggregates.group(id, Accumulators.addToSet("features", "$" + idField));
+                group = group(id, Accumulators.addToSet("features", "$" + idField));
             }
             return Arrays.asList(match, project, group);
         }
+    }
+
+    public static List<Bson> createFacet(Bson query, String facetField) {
+        return createFacet(query, facetField, QueryOptions.DESCENDING);
+    }
+
+    public static List<Bson> createFacet(Bson query, String facetField, String order) {
+        // Sanity check
+        if (facetField == null || StringUtils.isEmpty(facetField.trim())) {
+            return new ArrayList<>();
+        }
+        String cleanFacetField = facetField.replace(" ", "");
+
+        // Multiple facets separated by ;
+        ArrayList<String> facetFields = new ArrayList<>(Arrays.asList(cleanFacetField.split(";")));
+        return createFacet(query, facetFields, order);
+    }
+
+    private static List<Bson> createFacet(Bson query, List<String> facetFields, String order) {
+        List<Facet> facetList = new ArrayList<>();
+        Set<String> includeFields = new HashSet<>();
+        List<Bson> unwindList = new ArrayList<>();
+        List<Bson> dateProjections = new ArrayList<>();
+
+        // For each facet field passed we will create a MongoDB facet, thre are 4 types of facets:
+        // 1. Facet combining fields with commas. In this case, only 'count' is supported as accumulator.
+        for (String facetField : facetFields) {
+            Facet facet = null;
+
+            // 1. Check if it is a facet combining fields with commas. In this case, only 'count' is supported as accumulator.
+            // Example: aggregationFields=format,type
+            if (facetField.contains(",")) {
+                Document fields = new Document();
+                for (String field : facetField.split(",")) {
+                    fields.append(field, "$" + field);
+                    includeFields.add(field);
+                }
+                Bson bsonSort;
+                if (QueryOptions.ASCENDING.equals(order)) {
+                    bsonSort = sort(Sorts.ascending(count.name()));
+                } else {
+                    bsonSort = sort(Sorts.descending(count.name()));
+                }
+                facet = new Facet(
+                        facetField.replace(",", SEPARATOR) + COUNTS_SUFFIX,
+                        Arrays.asList(group(fields, Accumulators.sum(Accumulator.count.name(), 1)), bsonSort));
+            } else {
+                Accumulator accumulator;
+                String groupField;
+                String accumulatorField = null;
+                List<Double> boundaries = new ArrayList<>();
+
+                // 2. Facet with accumulators (count, avg, min, max,...) or range (bucket)
+                Matcher matcher = FUNC_ACCUMULATOR_PATTERN.matcher(facetField);
+                if (matcher.matches()) {
+                    try {
+                        accumulator = Accumulator.valueOf(matcher.group(1));
+                        groupField = matcher.group(2);
+                    } catch (IllegalArgumentException e) {
+                        List<Accumulator> validAccumulators = Arrays.stream(Accumulator.values())
+                                .filter(acc -> !acc.name().equalsIgnoreCase(bucket.name())
+                                        && !acc.name().equalsIgnoreCase(year.name())
+                                        && !acc.name().equalsIgnoreCase(month.name())
+                                        && !acc.name().equalsIgnoreCase(day.name()))
+                                .collect(Collectors.toList());
+                        throw new IllegalArgumentException("Invalid accumulator function '" + matcher.group(1) + "'. Valid accumulator"
+                                + " functions: " + StringUtils.join(validAccumulators, ", "));
+
+                    }
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(YEAR_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - YEAR_FACET_MARK.length());
+                    accumulator = year;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(MONTH_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - MONTH_FACET_MARK.length());
+                    accumulator = month;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                    dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 4, 2))));
+                } else if (facetField.toUpperCase(Locale.ROOT).endsWith(DAY_FACET_MARK)) {
+                    groupField = facetField.substring(0, facetField.length() - DAY_FACET_MARK.length());
+                    accumulator = day;
+
+                    // Add projections
+                    dateProjections.add(computed(groupField + SEPARATOR + year.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 0, 4))));
+                    dateProjections.add(computed(groupField + SEPARATOR + month.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 4, 2))));
+                    dateProjections.add(computed(groupField + SEPARATOR + day.name(), new Document("$substrCP",
+                            Arrays.asList("$" + groupField, 6, 2))));
+                } else {
+                    // 3. Facet with range aggregation
+                    if (facetField.contains(RANGE_MARK) || facetField.contains(RANGE_MARK1) || facetField.contains(RANGE_MARK2)) {
+                        String[] split = facetField.split(RANGE_SPLIT_MARK);
+                        if (split.length == 2) {
+                            Matcher matcher1 = RANGE_START_PATTERN.matcher(split[0]);
+                            Matcher matcher2 = RANGE_END_PATTERN.matcher(split[1]);
+                            if (matcher1.matches() && matcher2.matches()) {
+                                accumulator = bucket;
+                                groupField = matcher1.group(1);
+                                double start = Double.parseDouble(matcher1.group(2));
+                                double end = Double.parseDouble(matcher2.group(1));
+                                double step = Double.parseDouble(matcher2.group(2));
+                                double i;
+                                for (i = start; i <= end; i += step) {
+                                    boundaries.add(i);
+                                }
+                                if (boundaries.get(boundaries.size() - 1) < end) {
+                                    boundaries.add(i);
+                                }
+
+                                String facetName = groupField + SEPARATOR + start + SEPARATOR + end + SEPARATOR + step + SEPARATOR
+                                        + RANGES_SUFFIX;
+                                facet = new Facet(facetName, Aggregates.bucket("$" + groupField, boundaries,
+                                        new BucketOptions()
+                                                .defaultBucket(OTHER)
+                                                .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
+                            } else {
+                                throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(INVALID_FORMAT_MSG + facetField + RANGE_FORMAT_MSG);
+                        }
+                    } else {
+                        // 4. Facet with count as default accumulator
+                        if (facetField.contains(":")) {
+                            String[] split = facetField.split("[:\\(\\)]");
+                            groupField = split[0];
+                            accumulator = Accumulator.valueOf(split[1]);
+                            accumulatorField = split[2];
+                        } else {
+                            groupField = facetField;
+                            accumulator = count;
+                        }
+                    }
+                }
+
+                includeFields.add(groupField);
+                if (StringUtils.isNotEmpty(accumulatorField)) {
+                    includeFields.add(accumulatorField);
+                }
+
+                // Get MongoDB facet
+                if (facet == null) {
+                    facet = getMongoDBFacet(groupField, accumulator, accumulatorField, boundaries, order);
+                }
+
+                // Unwind in any case
+                Set<String> unwindFields = new HashSet<>();
+                if (StringUtils.isNotEmpty(groupField)) {
+                    unwindFields.addAll(getUnwindFields(groupField));
+                }
+                if (StringUtils.isNotEmpty(accumulatorField)) {
+                    unwindFields.addAll(getUnwindFields(accumulatorField));
+                }
+                // We must order the "unwind" fields
+                List<String> unwindFieldList = new ArrayList<>(unwindFields);
+                unwindFieldList.sort(Comparator.comparingInt(s -> s.length() - s.replace(".", "").length()));
+                for (String unwindField : unwindFieldList) {
+                    unwindList.add(Aggregates.unwind("$" + unwindField));
+                }
+            }
+
+            // Add facet to the list of facets to be executed
+            if (facet != null) {
+                facetList.add(facet);
+            }
+        }
+
+        // Build and return the MongoDB pipeline for facets: match, project, [unwind,] aggregates
+        List<Bson> result = new ArrayList<>();
+        // 1 - Match
+        result.add(Aggregates.match(query));
+        // 2 - Project
+
+        List<Bson> projections = new ArrayList<>();
+
+        // 2.1 - Include fields
+        for (String field : includeFields) {
+            projections.add(include(field));
+        }
+
+        // 2.2 - Compute data fields
+        projections.addAll(dateProjections);
+
+        result.add(project(fields(projections)));
+
+        // 3 - Unwind
+        if (!unwindList.isEmpty()) {
+            result.addAll(unwindList);
+        }
+
+        // 4 - Aggregates (dot notation management for facets)
+        result.add(GenericDocumentComplexConverter.replaceDots(Document.parse(facet(facetList).toBsonDocument().toJson())));
+        return result;
+    }
+
+    private static Collection<String> getUnwindFields(String field) {
+        List<String> unwindFields = new ArrayList<>();
+        String[] split = field.split("\\.");
+        String acc = "";
+        for (String s : split) {
+            if (!StringUtils.isEmpty(acc)) {
+                acc += ".";
+            }
+            acc += s;
+            unwindFields.add(acc);
+        }
+        return unwindFields;
+    }
+
+    private static Facet getMongoDBFacet(String groupField, Accumulator accumulator, String accumulatorField, List<Double> boundaries,
+                                         String order) {
+        String groupFieldId = groupField;
+        String accumulatorId = "$" + groupField;
+        String facetName = null;
+        if (StringUtils.isNotEmpty(accumulatorField)) {
+            groupFieldId = "$" + groupField;
+            accumulatorId = "$" + accumulatorField;
+            facetName = groupField + SEPARATOR + accumulator + SEPARATOR + accumulatorField + SEPARATOR + FACET_ACC_SUFFIX;
+        }
+
+        Facet facet;
+        switch (accumulator) {
+            case count: {
+                facetName = groupField + SEPARATOR + COUNTS_SUFFIX;
+
+                Bson bsonSort;
+                if (QueryOptions.ASCENDING.equals(order)) {
+                    bsonSort = sort(Sorts.ascending(count.name()));
+                } else {
+                    bsonSort = sort(Sorts.descending(count.name()));
+                }
+//                facet = new Facet(
+//                        facetField.replace(",", SEPARATOR) + COUNTS_SUFFIX,
+//                        Arrays.asList(group(fields, Accumulators.sum(Accumulator.count.name(), 1)), bsonSort));
+
+                facet = new Facet(facetName, Arrays.asList(group("$" + groupField, Accumulators.sum(count.name(), 1)), bsonSort));
+                break;
+            }
+            case year: {
+                facetName = groupField + SEPARATOR + YEAR_SUFFIX;
+                facet = new Facet(facetName, group("$" + groupField + SEPARATOR + year.name(), Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case month: {
+                facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX;
+
+                Document fields = new Document();
+                fields.append(groupField + SEPARATOR + year.name(), "$" + groupField + SEPARATOR + year.name());
+                fields.append(groupField + SEPARATOR + month.name(), "$" + groupField + SEPARATOR + month.name());
+
+                facet = new Facet(facetName, group(fields, Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case day: {
+                facetName = groupField + SEPARATOR + YEAR_SUFFIX + SEPARATOR + MONTH_SUFFIX + SEPARATOR + DAY_SUFFIX;
+
+                Document fields = new Document();
+                fields.append(groupField + SEPARATOR + year.name(), "$" + groupField + SEPARATOR + year.name());
+                fields.append(groupField + SEPARATOR + month.name(), "$" + groupField + SEPARATOR + month.name());
+                fields.append(groupField + SEPARATOR + day.name(), "$" + groupField + SEPARATOR + day.name());
+
+                facet = new Facet(facetName, group(fields, Accumulators.sum(count.name(), 1)));
+                break;
+            }
+            case sum: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + SUM_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.sum(sum.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case avg: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + AVG_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.avg(avg.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case min: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + MIN_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.min(min.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case max: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + MAX_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.max(max.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case stdDevPop: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + STDDEVPOP_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.stdDevPop(stdDevPop.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case stdDevSamp: {
+                if (StringUtils.isEmpty(facetName)) {
+                    facetName = groupField + SEPARATOR + STDDEVSAMP_SUFFIX;
+                }
+                facet = new Facet(facetName, group(groupFieldId,
+                        Arrays.asList(Accumulators.stdDevSamp(stdDevSamp.name(), accumulatorId), Accumulators.sum(count.name(), 1))));
+                break;
+            }
+            case bucket:
+//            {
+//                // Nothing to do
+//                facetName = groupField + SEPARATOR + RANGES_SUFFIX;
+//                facet = new Facet(facetName, Aggregates.bucket(accumulatorId, boundaries,
+//                        new BucketOptions()
+//                                .defaultBucket(OTHER)
+//                                .output(new BsonField(count.name(), new BsonDocument("$sum", new BsonInt32(1))))));
+//                break;
+//            }
+            default: {
+                facet = null;
+                break;
+            }
+        }
+
+        return facet;
     }
 
     public static void parseQueryOptions(List<Bson> operations, QueryOptions options) {
@@ -695,7 +1079,7 @@ public class MongoDBQueryUtils {
 
     public static Bson getProjection(QueryOptions options) {
         Bson projection = getProjection(null, options);
-        return projection != null ? Aggregates.project(projection) : null;
+        return projection != null ? project(projection) : null;
     }
 
     protected static Bson getProjection(Bson projection, QueryOptions options) {
@@ -749,7 +1133,7 @@ public class MongoDBQueryUtils {
                 projections.add(include);
                 // MongoDB allows to exclude _id when include is present
                 if (excludeId) {
-                    projections.add(Projections.excludeId());
+                    projections.add(excludeId());
                 }
             } else {
                 if (exclude != null) {
@@ -783,7 +1167,7 @@ public class MongoDBQueryUtils {
         }
 
         if (projections.size() > 0) {
-            projectionResult = Projections.fields(projections);
+            projectionResult = fields(projections);
         }
 
         return projectionResult;
