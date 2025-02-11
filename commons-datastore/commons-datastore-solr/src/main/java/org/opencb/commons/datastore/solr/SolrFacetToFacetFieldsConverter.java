@@ -67,12 +67,12 @@ public class SolrFacetToFacetFieldsConverter {
      * @param defaultCount  Default count
      * @return  Actual count
      */
-    private static int getBucketCount(SimpleOrderedMap<Object> solrFacets, int defaultCount) {
+    private static long getBucketCount(SimpleOrderedMap<Object> solrFacets, long defaultCount) {
         List<SimpleOrderedMap<Object>> solrBuckets = (List<SimpleOrderedMap<Object>>) solrFacets.get("buckets");
         if (solrBuckets == null) {
             for (int i = 0; i < solrFacets.size(); i++) {
                 if (solrFacets.getName(i).equals("count")) {
-                    return (int) solrFacets.getVal(i);
+                    return (long) solrFacets.getVal(i);
                 }
             }
         }

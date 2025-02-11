@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Created by jtarraga on 09/03/17.
  */
-
 public class FacetField {
     private String name;
     private long count;
@@ -36,6 +35,13 @@ public class FacetField {
         this.name = name;
         this.count = count;
         this.buckets = buckets;
+    }
+
+    public FacetField(String name, long count, String aggregationName, List<Double> aggregationValues) {
+        this.name = name;
+        this.count = count;
+        this.aggregationName = aggregationName;
+        this.aggregationValues = aggregationValues;
     }
 
     public FacetField(String name, String aggregationName, List<Double> aggregationValues) {
@@ -78,7 +84,7 @@ public class FacetField {
     }
 
     public FacetField addCount(long delta) {
-        this.count += delta;
+        this.count = this.count + delta;
         return this;
     }
 
