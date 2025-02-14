@@ -97,8 +97,7 @@ public class MongoDBCollection {
         long end = System.currentTimeMillis();
         int numResults = (result != null) ? result.size() : 0;
 
-        DataResult<T> queryResult = new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
-        return queryResult;
+        return new DataResult((int) (end - start), Collections.emptyList(), numResults, result, numMatches, null);
     }
 
     private DataResult endWrite(long start) {
@@ -331,31 +330,25 @@ public class MongoDBCollection {
                                        QueryOptions options) {
 
         long start = startQuery();
-
         DataResult<T> queryResult;
-        MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
-//        MongoCursor<Document> iterator = output.iterator();
         List<T> list = new LinkedList<>();
-        if (queryResultWriter != null) {
-            try {
-                queryResultWriter.open();
-                while (iterator.hasNext()) {
-                    queryResultWriter.write(iterator.next());
+        if (operations != null && !operations.isEmpty()) {
+            MongoDBIterator<T> iterator = mongoDBNativeQuery.aggregate(operations, converter, options);
+            if (queryResultWriter != null) {
+                try {
+                    queryResultWriter.open();
+                    while (iterator.hasNext()) {
+                        queryResultWriter.write(iterator.next());
+                    }
+                    queryResultWriter.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e.getMessage(), e);
                 }
-                queryResultWriter.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
+            } else {
+                while (iterator.hasNext()) {
+                    list.add(iterator.next());
+                }
             }
-        } else {
-//            if (converter != null) {
-//                while (iterator.hasNext()) {
-//                    list.add(converter.convertToDataModelType(iterator.next()));
-//                }
-//            } else {
-            while (iterator.hasNext()) {
-                list.add((T) iterator.next());
-            }
-//            }
         }
         queryResult = endQuery(list, start);
         return queryResult;
@@ -435,7 +428,7 @@ public class MongoDBCollection {
 
         return endWrite(
                 wr.getMatchedCount(),
-                wr.getInsertedCount() + wr.getUpserts().size(),
+                (long) wr.getInsertedCount() + wr.getUpserts().size(),
                 wr.getModifiedCount(),
                 wr.getDeletedCount(),
                 0,
@@ -553,8 +546,7 @@ public class MongoDBCollection {
         }
 
         mongoDBNativeQuery.createIndex(keys, i);
-        DataResult dataResult = endQuery(Collections.emptyList(), start);
-        return dataResult;
+        return endQuery(Collections.emptyList(), start);
     }
 
     public void dropIndexes() {
@@ -564,15 +556,13 @@ public class MongoDBCollection {
     public DataResult dropIndex(Bson keys) {
         long start = startQuery();
         mongoDBNativeQuery.dropIndex(keys);
-        DataResult dataResult = endQuery(Collections.emptyList(), start);
-        return dataResult;
+        return endQuery(Collections.emptyList(), start);
     }
 
     public DataResult<Document> getIndex() {
         long start = startQuery();
         List<Document> index = mongoDBNativeQuery.getIndex();
-        DataResult<Document> queryResult = endQuery(index, start);
-        return queryResult;
+        return endQuery(index, start);
     }
 
 

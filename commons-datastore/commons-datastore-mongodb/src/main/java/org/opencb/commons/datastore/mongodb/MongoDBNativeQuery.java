@@ -121,6 +121,7 @@ public class MongoDBNativeQuery {
         // we need to be sure that the List is mutable
         List<Bson> bsonOperations = new ArrayList<>(operations);
         parseQueryOptions(bsonOperations, options);
+        System.out.println("bsonOperations = " + bsonOperations);
         MongoDBIterator<T> iterator = null;
         if (bsonOperations.size() > 0) {
             long numMatches = -1;
