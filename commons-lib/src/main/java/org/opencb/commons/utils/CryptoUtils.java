@@ -19,17 +19,13 @@ package org.opencb.commons.utils;
 //import org.apache.commons.codec.binary.Base64;
 //import org.apache.commons.codec.digest.DigestUtils;
 
-import java.security.InvalidKeyException;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author Cristina Yenyxe Gonzalez Garcia <cyenyxe@ebi.ac.uk>
@@ -39,30 +35,37 @@ public final class CryptoUtils {
     private CryptoUtils() {
     }
 
-    public static byte[] encryptAES(String strToEncrypt, byte[] key)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return Base64.getEncoder().encode(cipher.doFinal(strToEncrypt.getBytes()));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(CryptoUtils.class.getName()).log(Level.SEVERE, "This should not happen", ex);
-            throw ex;
-        }
+    // Method to generate a new AES key
+    public static SecretKey generateKey(int n) throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(n);
+        SecretKey key = keyGenerator.generateKey();
+        return key;
     }
 
-    public static String decryptAES(String strToDecrypt, byte[] key)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return new String(Base64.getDecoder().decode(strToDecrypt));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(CryptoUtils.class.getName()).log(Level.SEVERE, null, ex);
-            throw ex;
-        }
+    // Method to encrypt a string using a given key
+    public static String encrypt(String strToEncrypt, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        byte[] encryptedBytes = cipher.doFinal(strToEncrypt.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    // Method to decrypt a string using a given key
+    public static String decrypt(String strToDecrypt, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(strToDecrypt));
+        return new String(decryptedBytes);
+    }
+
+    public static String secretKeyToString(SecretKey secretKey) {
+        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+    }
+
+    public static SecretKey stringToSecretKey(String keyString) {
+        byte[] decodedKey = Base64.getDecoder().decode(keyString);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     }
 
     public static byte[] sha1(byte[] input) throws NoSuchAlgorithmException {
