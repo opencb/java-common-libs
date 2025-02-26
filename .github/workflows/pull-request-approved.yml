@@ -7,6 +7,7 @@ on:
 
 jobs:
   calculate-xetabase-branch:
+    if: github.event.review.state == 'approved'
     name: Calculate Xetabase branch
     runs-on: ubuntu-22.04
     outputs:
