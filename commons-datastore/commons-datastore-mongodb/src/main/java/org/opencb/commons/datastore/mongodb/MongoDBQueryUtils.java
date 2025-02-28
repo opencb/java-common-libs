@@ -1052,8 +1052,8 @@ public class MongoDBQueryUtils {
             if (sortObject instanceof Bson) {
                 return Aggregates.sort((Bson) sortObject);
             } else if (sortObject instanceof String) {
-                String order = options.getString(QueryOptions.ORDER, "DESC");
-                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC") || order.equals("1")) {
+                String order = options.getString(QueryOptions.ORDER, QueryOptions.DESC.toUpperCase(Locale.ROOT));
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase(QueryOptions.ASC) || order.equals("1")) {
                     return Aggregates.sort(Sorts.ascending((String) sortObject));
                 } else {
                     return Aggregates.sort(Sorts.descending((String) sortObject));
