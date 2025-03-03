@@ -37,7 +37,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.opencb.commons.datastore.core.QueryOptions.SORT;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
@@ -256,8 +255,8 @@ public class MongoDBCollectionTest {
     @Test
     public void testSortOrder() throws Exception {
         Document query = new Document();
-        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(SORT, "number")
-                .append(QueryOptions.ORDER, "asc");
+        QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 10).append(QueryOptions.SORT, "number")
+                .append(QueryOptions.ORDER, QueryOptions.ASC);
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();
         assertEquals(0L, result.get(0).get("number"));
     }
@@ -266,8 +265,9 @@ public class MongoDBCollectionTest {
     public void testMultipleSortOrder() throws Exception {
         Document query = new Document();
         QueryOptions queryOptions = new QueryOptions(QueryOptions.LIMIT, 500)
-                .append(SORT, Arrays.asList("age:ASC", "number:DESC"))
-                .append(QueryOptions.ORDER, "asc");
+                .append(QueryOptions.SORT, Arrays.asList("age:" + QueryOptions.ASC.toUpperCase(Locale.ROOT),
+                        "number:" + QueryOptions.DESC.toUpperCase(Locale.ROOT)))
+                .append(QueryOptions.ORDER, QueryOptions.ASC);
         int age = 0;
         long number = Long.MAX_VALUE;
         List<Document> result = mongoDBCollection.find(query, queryOptions).getResults();

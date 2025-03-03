@@ -28,10 +28,7 @@ import org.bson.conversions.Bson;
 import org.opencb.commons.datastore.core.ComplexTypeConverter;
 import org.opencb.commons.datastore.core.QueryOptions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.getProjection;
@@ -181,8 +178,8 @@ public class MongoDBNativeQuery {
             if (sortObject instanceof Bson) {
                 findIterable.sort(((Bson) sortObject));
             } else if (sortObject instanceof String) {
-                String order = options.getString(QueryOptions.ORDER, "DESC");
-                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase("ASC")
+                String order = options.getString(QueryOptions.ORDER, QueryOptions.DESC.toUpperCase(Locale.ROOT));
+                if (order.equalsIgnoreCase(QueryOptions.ASCENDING) || order.equalsIgnoreCase(QueryOptions.ASC)
                         || order.equals("1")) {
                     findIterable.sort(Sorts.ascending(((String) sortObject)));
                 } else {
@@ -200,9 +197,9 @@ public class MongoDBNativeQuery {
                         order = fieldArray[1];
                     } else if (fieldArray.length == 1) {
                         sortField = field;
-                        order = options.getString(QueryOptions.ORDER, "DESC");
+                        order = options.getString(QueryOptions.ORDER, QueryOptions.DESC.toUpperCase(Locale.ROOT));
                     }
-                    if (QueryOptions.ASCENDING.equalsIgnoreCase(order) || "ASC".equalsIgnoreCase(order)
+                    if (QueryOptions.ASCENDING.equalsIgnoreCase(order) || QueryOptions.ASC.equalsIgnoreCase(order)
                             || "1".equals(order)) {
                         sortedList.add(Sorts.ascending(sortField));
                     } else {
