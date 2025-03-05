@@ -33,9 +33,26 @@ public class DockerUtils {
     public static String buildCommandLine(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                                           AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
                                           Map<String, String> dockerParams) throws IOException {
+        return buildCommandLine(image, inputBindings, Collections.singletonList(outputBinding), cmdParams, dockerParams);
+    }
+
+    /**
+     * Create the command line to execute the docker image.
+     *
+     * @param image         Docker image name
+     * @param inputBindings  Array of bind mounts for docker input volumes (source-target)
+     * @param outputBindings Array of bind mount for docker output volume (source-target)
+     * @param cmdParams     Image command parameters
+     * @param dockerParams  Docker parameters
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String buildCommandLine(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                                          List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
+                                          Map<String, String> dockerParams) throws IOException {
         // Sanity check
-        if (outputBinding == null) {
-            throw new IllegalArgumentException("Missing output binding");
+        if (outputBindings == null || outputBindings.isEmpty()) {
+            throw new IllegalArgumentException("Missing output binding(s)");
         }
 
         // Docker run
@@ -48,25 +65,41 @@ public class DockerUtils {
                 setUser = false;
             }
             for (String key : dockerParams.keySet()) {
-                commandLine.append("--").append(key).append(" ").append(dockerParams.get(key)).append(" ");
+                if (key.equals("user") && StringUtils.isEmpty(dockerParams.get("user"))) {
+                    // User wants to disable user setting
+                    continue;
+                }
+                if (!key.startsWith("-")) {
+                    commandLine.append("--");
+                }
+                commandLine.append(key).append(" ");
+                if (StringUtils.isNotEmpty(dockerParams.get(key))) {
+                    commandLine.append(dockerParams.get(key)).append(" ");
+                }
             }
         }
 
         if (setUser) {
             // User: array of two strings, the first string, the user; the second, the group
-            String[] user = FileUtils.getUserAndGroup(Paths.get(outputBinding.getKey()), true);
+            String[] user = FileUtils.getUserAndGroup(Paths.get(outputBindings.get(0).getKey()), true);
             commandLine.append("--user ").append(user[0]).append(":").append(user[1]).append(" ");
         }
 
         if (inputBindings != null) {
             // Mount management (bindings)
+            Set<String> inputBindingSet = new HashSet<>();
             for (AbstractMap.SimpleEntry<String, String> binding : inputBindings) {
-                commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"").append(binding.getValue())
-                        .append("\" ");
+                if (!inputBindingSet.contains(binding.getKey())) {
+                    commandLine.append("--mount type=bind,source=\"").append(binding.getKey()).append("\",target=\"")
+                            .append(binding.getValue()).append("\",readonly ");
+                    inputBindingSet.add(binding.getKey());
+                }
             }
         }
-        commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
-                .append(outputBinding.getValue()).append("\" ");
+        for (AbstractMap.SimpleEntry<String, String> outputBinding : outputBindings) {
+            commandLine.append("--mount type=bind,source=\"").append(outputBinding.getKey()).append("\",target=\"")
+                    .append(outputBinding.getValue()).append("\" ");
+        }
 
         // Docker image and version
         commandLine.append(image).append(" ");
@@ -141,9 +174,26 @@ public class DockerUtils {
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
                              Map<String, String> dockerParams) throws IOException {
+        return run(image, inputBindings, outputBinding != null ? Collections.singletonList(outputBinding) : null, cmdParams, dockerParams);
+    }
+
+    /**
+     * Create and run the command line to execute the docker image.
+     *
+     * @param image         Docker image name
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBindings Array of bind mount for docker output volume (source-target)
+     * @param cmdParams     Image command parameters
+     * @param dockerParams  Docker parameters
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
+                             Map<String, String> dockerParams) throws IOException {
         checkDockerDaemonAlive();
 
-        String commandLine = buildCommandLine(image, inputBindings, outputBinding, cmdParams, dockerParams);
+        String commandLine = buildCommandLine(image, inputBindings, outputBindings, cmdParams, dockerParams);
 
         LOGGER.info("Run docker command line");
         LOGGER.info("============================");
@@ -156,6 +206,7 @@ public class DockerUtils {
 
         return commandLine;
     }
+
 
     public static void checkDockerDaemonAlive() throws IOException {
         int maxAttempts = 12;
