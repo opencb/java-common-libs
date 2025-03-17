@@ -203,6 +203,21 @@ public class DockerUtils {
         // Execute command
         Command cmd = new Command(commandLine);
         cmd.run();
+        if (cmd.getExitValue() != 0) {
+            String stderr = cmd.getError();
+            int maxOutputContext = 1024;
+            if (stderr.length() > maxOutputContext) {
+                int length = stderr.length();
+                stderr = " ... (length: " + length + ") " + stderr.substring(length - maxOutputContext);
+            }
+            String stdout = cmd.getOutput();
+            if (stdout.length() > maxOutputContext) {
+                int length = stdout.length();
+                stdout = " ... (length: " + length + ") " + stdout.substring(length - maxOutputContext);
+            }
+            throw new IOException("Docker command failed with exit value " + cmd.getExitValue()
+                    + ": stdout:" + stdout + " stderr:" + stderr);
+        }
 
         return commandLine;
     }
