@@ -7,8 +7,6 @@ on:
         type: string
         required: false
     secrets:
-      MAVEN_NEXUS_USER:
-        required: true
       MAVEN_NEXUS_PASSWORD:
         required: true
       MAVEN_GPG_PASSPHRASE:
