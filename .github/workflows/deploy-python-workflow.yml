@@ -26,10 +26,10 @@ jobs:
           name: ${{ inputs.artifact }}
       - name: Chmod
         run: chmod +x ./clients/python/*sh
-#      - name: Upgrade pip tools to compatible versions
-#        run: |
-#          python -m pip install --upgrade pip
-#          pip install --upgrade setuptools packaging
+      - name: Upgrade pip tools to compatible versions
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools packaging
       - name: Build Python package for PyPI
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_TWINE_USER }}
