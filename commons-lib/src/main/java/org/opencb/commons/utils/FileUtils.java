@@ -18,6 +18,7 @@ package org.opencb.commons.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opencb.commons.exec.Command;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
@@ -25,6 +26,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -35,8 +38,13 @@ import java.util.zip.GZIPOutputStream;
  * Time: 1:06 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FileUtils {
+public final class FileUtils {
 
+    private static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
+    private FileUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void checkPath(Path path) throws IOException {
         checkPath(path, false);
@@ -189,6 +197,9 @@ public class FileUtils {
         return new String[]{split[2], split[3]};
     }
 
+    public static void copyFile(Path src, Path dest) throws IOException {
+        copyFile(src.toFile(), dest.toFile());
+    }
 
     public static void copyFile(File src, File dest) throws IOException {
         try {
@@ -203,6 +214,42 @@ public class FileUtils {
             } catch (Exception e1) {
                 throw e;
             }
+        }
+    }
+
+    public static void copyDirectory(Path sourceDir, Path targetDir) throws IOException {
+        if (!Files.exists(sourceDir) || !Files.isDirectory(sourceDir)) {
+            throw new IllegalArgumentException("Source directory does not exist or is not a directory: " + sourceDir);
+        }
+
+        if (!Files.exists(targetDir)) {
+            Files.createDirectories(targetDir);
+            logger.debug("Created target directory: {}", targetDir);
+        } else if (!Files.isDirectory(targetDir)) {
+            String msg = "Target path exists but is not a directory: " + targetDir;
+            logger.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        try (Stream<Path> stream = Files.walk(sourceDir)) {
+            stream.forEach(source -> {
+                Path target = targetDir.resolve(sourceDir.relativize(source));
+                try {
+                    if (!Files.exists(target)) {
+                        if (Files.isDirectory(source)) {
+                            Files.createDirectories(target);
+                            logger.debug("Created directory: {}", target);
+                        } else {
+                            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                            logger.debug("Copied file: {} to {}", source, target);
+                        }
+                    }
+                } catch (IOException e) {
+                    String msg = "Error copying: " + source + " to " + target + " - " + e.getMessage();
+                    logger.error(msg);
+                    throw new RuntimeException(msg, e);
+                }
+            });
         }
     }
 
