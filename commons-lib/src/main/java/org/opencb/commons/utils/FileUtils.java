@@ -253,6 +253,31 @@ public final class FileUtils {
         }
     }
 
+    public static void deleteDirectory(Path directory) throws IOException {
+        deleteDirectory(directory.toFile());
+    }
+
+    public static void deleteDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+
+        // If it's a directory, delete contents recursively
+        if (directory.isDirectory()) {
+            java.io.File[] files = directory.listFiles();
+            // Not null if directory is not empty
+            if (files != null) {
+                for (java.io.File file : files) {
+                    // Recursively delete subdirectories and files
+                    deleteDirectory(file);
+                }
+            }
+        }
+
+        // Finally, delete the directory or file itself
+        Files.delete(directory.toPath());
+    }
+
     //-------------------------------------------------------------------------
     // P R I V A T E     M E T H O D S
     //-------------------------------------------------------------------------
