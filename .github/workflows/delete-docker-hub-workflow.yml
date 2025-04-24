@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          username: ${{ secrets.ZETTA_DOCKER_HUB_USER }}
+          password: ${{ secrets.ZETTA_DOCKER_HUB_PASSWORD }}
       - name: Delete in Docker Hub
-        run: ${{ inputs.cli }}
+        run: ${{ inputs.cli }} --org zettagenomics
