@@ -1,0 +1,37 @@
+name: Reusable workflow to release in PyPI
+
+on:
+  workflow_call:
+    inputs:
+      cli:
+        type: string
+        required: true
+      artifact:
+        type: string
+        required: false
+    secrets:
+      PYPI_TWINE_USER:
+        required: true
+      PYPI_TWINE_PASSWORD:
+        required: true
+
+jobs:
+  pypi:
+    name: Deploy Python package in PyPI
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.artifact }}
+        with:
+          name: ${{ inputs.artifact }}
+      - name: Chmod
+        run: chmod +x ./clients/python/*sh
+      - name: Upgrade pip tools to compatible versions
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools packaging
+      - name: Build Python package for PyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_TWINE_USER }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TWINE_PASSWORD }}
+        run: ${{ inputs.cli }}
