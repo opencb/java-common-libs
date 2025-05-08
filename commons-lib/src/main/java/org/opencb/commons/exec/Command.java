@@ -50,6 +50,29 @@ public class Command extends RunnableProcess {
     private final String[] cmdArray;
     private boolean printOutput = true;
 
+    private String stdinInput;
+
+    // Add a constructor that takes stdin input
+    public Command(String commandLine, String stdinInput) {
+        this(commandLine);
+        this.stdinInput = stdinInput;
+    }
+
+    public Command(String commandLine, List<String> environment, String stdinInput) {
+        this(commandLine, environment);
+        this.stdinInput = stdinInput;
+    }
+
+    public Command(String[] cmdArray, List<String> environment, String stdinInput) {
+        this(cmdArray, environment);
+        this.stdinInput = stdinInput;
+    }
+
+    public Command(String[] cmdArray, Map<String, String> environment, String stdinInput) {
+        this(cmdArray, environment);
+        this.stdinInput = stdinInput;
+    }
+
     public Command(String commandLine) {
         this.commandLine = commandLine;
         cmdArray = Commandline.translateCommandline(getCommandLine());
@@ -91,6 +114,14 @@ public class Command extends RunnableProcess {
                 proc = Runtime.getRuntime().exec(cmdArray);
             }
             setStatus(Status.RUNNING);
+
+            // Write to stdin if input is provided
+            if (stdinInput != null) {
+                try (OutputStream stdin = proc.getOutputStream()) {
+                    stdin.write(stdinInput.getBytes());
+                    stdin.flush();
+                }
+            }
 
             InputStream is = proc.getInputStream();
             // Thread out = readOutputStream(is);
@@ -273,6 +304,15 @@ public class Command extends RunnableProcess {
 
     public Command setPrintOutput(boolean printOutput) {
         this.printOutput = printOutput;
+        return this;
+    }
+
+    public String getStdinInput() {
+        return stdinInput;
+    }
+
+    public Command setStdinInput(String stdinInput) {
+        this.stdinInput = stdinInput;
         return this;
     }
 }
