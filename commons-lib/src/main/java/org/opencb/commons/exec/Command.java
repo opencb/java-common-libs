@@ -40,7 +40,6 @@ public class Command extends RunnableProcess {
     // protected String pathScript;
     // protected String outDir;
     // protected Arguments arguments;
-    private static final int STDIN_BUFFER_SIZE = 128 * 1024;
 
     private String commandLine;
     private Map<String, String> environment;
