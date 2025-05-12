@@ -1,4 +1,4 @@
-name: Reusable workflow to push in DockerHub
+name: Reusable workflow to push in opencb DockerHub
 
 on:
   workflow_call:
@@ -45,4 +45,4 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           logout: true
       - name: Deploy in Docker Hub
-        run: ${{ inputs.cli }}
+        run: ${{ inputs.cli }} --org opencb
