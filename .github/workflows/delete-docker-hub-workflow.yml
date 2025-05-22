@@ -15,7 +15,7 @@ on:
 jobs:
   delete-docker-hub:
     name: Delete Docker Hub image
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.UBUNTU_VERSION }}
     steps:
       - uses: docker/login-action@v2
         with:
