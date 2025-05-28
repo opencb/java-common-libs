@@ -23,7 +23,7 @@ on:
 jobs:
   test:
     name: Execute JUnit and Jacoco tests
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.UBUNTU_VERSION }}
     steps:
       - name: Retrieve secrets from Keeper
         id: ksecrets

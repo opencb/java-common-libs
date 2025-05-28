@@ -18,7 +18,7 @@ on:
 jobs:
   pypi:
     name: Deploy Python package in PyPI
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.UBUNTU_VERSION }}
     steps:
       - uses: actions/download-artifact@v4
         if: ${{ inputs.artifact }}
