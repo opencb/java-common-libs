@@ -25,7 +25,9 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Variable;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.BsonValue;
@@ -235,6 +237,25 @@ public class MongoDBCollection {
     public <T> List<DataResult<T>> find(List<? extends Bson> queries, Bson projection, ComplexTypeConverter<T, Document> converter,
                                         QueryOptions options) {
         return privateFind(queries, projection, null, converter, options);
+    }
+
+    public <T> MongoDBIterator<T> leftJoinFind(ClientSession clientSession, Bson query, Bson projection, String collection,
+                                          List<Variable<String>> let, List<? extends Bson> pipeline, String as, boolean unwind,
+                                          ComplexTypeConverter<T, Document> converter, QueryOptions options) {
+        List<Bson> operations = new ArrayList<>();
+        if (query != null) {
+            operations.add(Aggregates.match(query));
+        }
+        if (projection != null) {
+            operations.add(Aggregates.project(projection));
+        }
+        operations.add(Aggregates.lookup(collection, let, pipeline, as));
+        operations.add(Aggregates.match(new Document(as + ".0", new Document("$exists", true))));
+        if (unwind) {
+            operations.add(Aggregates.unwind("$" + as));
+        }
+
+        return iterator(clientSession, operations, converter, options);
     }
 
     public MongoDBIterator<Document> iterator(Bson query, QueryOptions options) {

@@ -19,7 +19,9 @@ package org.opencb.commons.datastore.mongodb;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoWriteException;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Variable;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -99,6 +101,8 @@ public class MongoDBCollectionTest {
         public boolean tall;
         public House house;
         public List<Dog> dogs;
+        private List<String> dogNames = new ArrayList<>();
+        private List<String> dogBreeds = new ArrayList<>();
 
         public static class House {
             public String color;
@@ -146,6 +150,37 @@ public class MongoDBCollectionTest {
             sb.append(", dogs=").append(dogs);
             sb.append('}');
             return sb.toString();
+        }
+
+        public User(long id, String name, int age) {
+            this.id = id;
+            this.name = name;
+            this.age = age;
+        }
+
+        public void addDogInfo(String name, String breed) {
+            this.dogNames.add(name);
+            this.dogBreeds.add(breed);
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public List<String> getDogNames() {
+            return dogNames;
+        }
+
+        public List<String> getDogBreeds() {
+            return dogBreeds;
         }
     }
 
@@ -1605,6 +1640,138 @@ public class MongoDBCollectionTest {
     public void testExplain() throws Exception {
         Document explain = mongoDBCollection.nativeQuery().explain(new Document(), new Document(), new QueryOptions());
         assertNotNull(explain.get("queryPlanner"));
+    }
+
+    @Test
+    public void testLeftJoinFind() {
+        // Create second collection for join
+        MongoDBCollection dogCollection = createTestCollection("dog_collection", 0);
+
+        // Insert some dog data
+        List<Document> dogs = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Document dog = new Document()
+                    .append("_id", i)
+                    .append("ownerId", i % 5L) // This will match with 'id' field in main collection
+                    .append("name", "Dog" + i)
+                    .append("breed", "Breed" + (i % 3));
+            dogs.add(dog);
+        }
+        dogCollection.insert(dogs, null);
+
+        // Create pipeline for the lookup
+        List<Variable<String>> letVariables = Collections.singletonList(
+                new Variable<>("userId", "$id")
+        );
+
+        List<Bson> pipeline = Collections.singletonList(
+                Aggregates.match(new Document("$expr",
+                        new Document("$eq", Arrays.asList("$ownerId", "$$userId"))))
+        );
+
+        // Test with unwind = false (keep array structure)
+        Document query = new Document("id", new Document("$lt", 5));
+        try (MongoDBIterator<Document> result = mongoDBCollection.leftJoinFind(
+                null, query, null, "dog_collection", letVariables, pipeline, "dogs", false, null, null)) {
+
+            // Verify results
+            assertNotNull("Result should not be null", result);
+            assertTrue("Should have results", result.hasNext());
+            while (result.hasNext()) {
+                // Each document should have a dogs array with at least one element
+                Document doc = result.next();
+                List<Document> dogsList = (List<Document>) doc.get("dogs");
+                assertNotNull("Dogs array should exist", dogsList);
+                assertTrue("Dogs array should not be empty", dogsList.size() > 0);
+                assertEquals("Owner ID should match document ID",
+                        doc.getLong("id"), dogsList.get(0).getLong("ownerId"));
+            }
+        }
+
+        // Test with unwind = true (flatten array)
+        try (MongoDBIterator<Document> unwoundResult = mongoDBCollection.leftJoinFind(
+                null, query, null, "dog_collection", letVariables, pipeline, "dogs", true, null, null)) {
+
+            // Verify unwound results
+            assertNotNull("Unwound result should not be null", unwoundResult);
+            assertTrue("Should have results", unwoundResult.hasNext());
+            // Each document should have a dog object, not an array
+            while (unwoundResult.hasNext()) {
+                Document doc = unwoundResult.next();
+                Document dog = (Document) doc.get("dogs");
+                assertNotNull("Dog document should exist", dog);
+                assertEquals("Owner ID should match document ID", doc.getLong("id"), dog.getLong("ownerId"));
+            }
+        }
+
+        // Test with projection
+        Document projection = new Document("id", 1).append("name", 1);
+        try (MongoDBIterator<Document> projectedResult = mongoDBCollection.leftJoinFind(
+                null, query, projection, "dog_collection", letVariables, pipeline, "dogs", false, null, null)) {
+
+            // Verify projection
+            while (projectedResult.hasNext()) {
+                Document doc = projectedResult.next();
+                assertNotNull("ID should be present", doc.get("id"));
+                assertNotNull("Name should be present", doc.get("name"));
+                assertNull("Age should not be present", doc.get("age"));
+            }
+        }
+
+        // Test with custom converter
+        ComplexTypeConverter<User, Document> converter = new ComplexTypeConverter<User, Document>() {
+            @Override
+            public User convertToDataModelType(Document object) {
+                User user = new User(object.getLong("id"), object.getString("name"), object.getInteger("age"));
+                if (object.containsKey("dogs")) {
+                    List<Document> dogsList = (List<Document>) object.get("dogs");
+                    for (Document dogDoc : dogsList) {
+                        user.addDogInfo(dogDoc.getString("name"), dogDoc.getString("breed"));
+                    }
+                }
+                return user;
+            }
+
+            @Override
+            public Document convertToStorageType(User object) {
+                return null; // Not needed for this test
+            }
+        };
+
+        try (MongoDBIterator<User> userResult = mongoDBCollection.leftJoinFind(
+                null, query, null, "dog_collection", letVariables, pipeline, "dogs", false, converter, null)) {
+
+            // Verify conversion
+            assertNotNull("User result should not be null", userResult);
+            assertTrue("Should have User results", userResult.hasNext());
+            while (userResult.hasNext()) {
+                User user = userResult.next();
+                assertNotNull("User dogs info should be populated", user.getDogNames());
+                assertFalse("User should have dog data", user.getDogNames().isEmpty());
+            }
+        }
+    }
+
+    @Test
+    public void testLeftJoinFindNoMatchingDocuments() {
+        // Create second collection for join
+        MongoDBCollection dogCollection = createTestCollection("empty_dog_collection", 0);
+
+        List<Variable<String>> letVariables = Collections.singletonList(
+                new Variable<>("userId", "$id")
+        );
+
+        List<Bson> pipeline = Collections.singletonList(
+                Aggregates.match(new Document("$expr",
+                        new Document("$eq", Arrays.asList("$ownerId", "$$userId"))))
+        );
+
+        Document query = new Document("id", 1);
+        try (MongoDBIterator<Document> result = mongoDBCollection.leftJoinFind(
+                null, query, null, "empty_dog_collection", letVariables, pipeline, "dogs", false, null, null)) {
+            // Since we're filtering for documents where dogs.0 exists, there should be no results
+            assertFalse("Should have no results", result.hasNext());
+        }
     }
 
     class BasicQueryResultWriter implements QueryResultWriter<Object> {
