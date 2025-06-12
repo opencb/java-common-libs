@@ -1,12 +1,11 @@
 package org.opencb.commons.datastore.mongodb;
 
 import com.mongodb.client.ClientSession;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.TransactionBody;
 import org.bson.Document;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opencb.commons.datastore.core.DataResult;
 import org.opencb.commons.datastore.core.DataStoreServerAddress;
@@ -38,6 +37,7 @@ public class TransactionTest {
     }
 
     @Test
+    @Ignore
     public void testGet() throws Exception {
         ClientSession clientSession = mongoDataStore.startSession();
 

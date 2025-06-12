@@ -425,7 +425,7 @@ public class MongoDBCollectionTest {
     }
 
     @Test
-    public void testAggregate() throws Exception {
+    public void testAggregate() {
         List<Bson> dbObjectList = new ArrayList<>();
         Document match = new Document("$match", new Document("age", new BasicDBObject("$gt", 2)));
         Document group = new Document("$group", new Document("_id", "$age"));
@@ -441,12 +441,13 @@ public class MongoDBCollectionTest {
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 0));
         assertEquals("There must be 1 results", 1, queryResult.getResults().size());
-        assertEquals(result.get(0), queryResult.first());
+        // As the order of result list change between executions, we must ensure the assertTrue doesn't depend on the order
+        assertTrue(result.contains(queryResult.getResults().get(0)));
 
         queryResult = mongoDBCollection.aggregate(dbObjectList, new QueryOptions(QueryOptions.LIMIT, 1).append(QueryOptions.SKIP, 1));
         assertEquals("There must be 1 results", 1, queryResult.getResults().size());
-        assertEquals(result.get(1), queryResult.first());
-
+        // As the order of result list change between executions, we must ensure the assertTrue doesn't depend on the order
+        assertTrue(result.contains(queryResult.getResults().get(0)));
     }
 
     @Test

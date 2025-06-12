@@ -16,10 +16,15 @@
 
 package org.opencb.commons.datastore.mongodb;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoDriverInformation;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.internal.MongoClientImpl;
 import org.junit.Test;
+
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,7 +44,10 @@ public class MongoDBConfigurationTest {
                 .build();
         System.out.println(mongoDBConfiguration.toJson());
 
-        MongoClient client = new MongoClient("localhost");
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(new ServerAddress("localhost"))))
+                .build();
+        MongoClient client = new MongoClientImpl(settings, MongoDriverInformation.builder().build());
         MongoDatabase db = client.getDatabase("test");
 
         MongoDataStore mongoDataStore = new MongoDataStore(client, db, mongoDBConfiguration);

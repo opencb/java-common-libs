@@ -149,6 +149,23 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
+    public static Bson createStringFilter(String mongoDbField, String queryParam, Query query) {
+        return createAutoFilter(mongoDbField, queryParam, query, QueryParam.Type.STRING);
+    }
+
+    public static Bson createStringFilter(String mongoDbField, String queryParam, Query query, Pattern pattern) {
+        Bson filter = null;
+        if (query != null && query.containsKey(queryParam)) {
+            List<String> values = query.getAsStringList(queryParam, pattern);
+            LogicalOperator operator = LogicalOperator.OR;
+            if (values.size() == 1) {
+                operator = checkOperator(values.get(0));
+            }
+            filter = createAutoFilter(mongoDbField, queryParam, QueryParam.Type.STRING, operator, values);
+        }
+        return filter;
+    }
+
     private static List<String> replaceDeprecatedPatterns(List<String> queryParamList) {
         List<String> replacedQueryParamList = new ArrayList<>(queryParamList.size());
         for (String queryItem : queryParamList) {
@@ -196,19 +213,25 @@ public class MongoDBQueryUtils {
             throws NumberFormatException {
 
         List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
-        queryParamList = replaceDeprecatedPatterns(queryParamList);
+        return createAutoFilter(mongoDbField, queryParam, type, operator, queryParamList);
+    }
+
+    public static Bson createAutoFilter(String mongoDbField, String queryParam, QueryParam.Type type,
+                                        LogicalOperator operator, List<String> values)
+            throws NumberFormatException {
+        values = replaceDeprecatedPatterns(values);
 
         if (LogicalOperator.OR.equals(operator)
-                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.EQUALS)) {
+                && queryParamsOperatorAlwaysMatchesOperator(type, values, ComparisonOperator.EQUALS)) {
             // It is better to perform a $in operation
-            return Filters.in(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+            return Filters.in(mongoDbField, removeOperatorsFromQueryParamList(type, values));
         } else if (LogicalOperator.AND.equals(operator)
-                && queryParamsOperatorAlwaysMatchesOperator(type, queryParamList, ComparisonOperator.NOT_EQUALS)) {
+                && queryParamsOperatorAlwaysMatchesOperator(type, values, ComparisonOperator.NOT_EQUALS)) {
             // It is better to perform a $nin operation
-            return Filters.nin(mongoDbField, removeOperatorsFromQueryParamList(type, queryParamList));
+            return Filters.nin(mongoDbField, removeOperatorsFromQueryParamList(type, values));
         } else {
-            List<Bson> bsonList = new ArrayList<>(queryParamList.size());
-            for (String queryItem : queryParamList) {
+            List<Bson> bsonList = new ArrayList<>(values.size());
+            for (String queryItem : values) {
                 Matcher matcher = getPattern(type).matcher(queryItem);
                 String op = "";
                 String op2 = "";
