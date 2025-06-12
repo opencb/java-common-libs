@@ -5,7 +5,7 @@ on:
 
 jobs:
   buildexecutable:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.UBUNTU_VERSION }}
     name: Build with Keeper secrets
     steps:
       - name: Retrieve secrets from Keeper
