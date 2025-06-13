@@ -22,7 +22,7 @@ on:
 jobs:
   publish-test-report:
     name: Publish test report
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.UBUNTU_VERSION }}
     steps:
       - uses: actions/download-artifact@v4
         with:
