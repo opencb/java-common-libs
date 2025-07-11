@@ -98,4 +98,61 @@ public interface DataWriter<T> {
         };
     }
 
+    default DataWriter<T> then(DataWriter<T> nextWriter) {
+        return then(nextWriter.asTask());
+    }
+
+    default DataWriter<T> then(Task<T, ?> nextTask) {
+        return new DataWriter<T>() {
+            @Override
+            public boolean open() {
+                return DataWriter.this.open();
+            }
+
+            @Override
+            public boolean pre() {
+                boolean res = DataWriter.this.pre();
+                try {
+                    nextTask.pre();
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return res;
+            }
+
+            @Override
+            public boolean close() {
+                return DataWriter.this.close();
+            }
+
+            @Override
+            public boolean post() {
+                boolean res = DataWriter.this.post();
+                try {
+                    nextTask.post();
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                return res;
+            }
+
+            @Override
+            public boolean write(List<T> batch) {
+                boolean res = DataWriter.this.write(batch);
+                try {
+                    nextTask.apply(batch);
+                    return res;
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+    }
+
 }
