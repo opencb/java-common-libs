@@ -16,11 +16,13 @@
 
 package org.opencb.commons;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.opencb.commons.run.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,33 +45,43 @@ public class ProgressLogger {
 
     private final String message;
     private final int numLinesLog;
+    private final long logFrequencyMillis;
+    private boolean progressRateEnabled = true;
+    private long progressRateWindowSizeSeconds;
+    private boolean progressRateMillionHours = false; // If true, progress rate is in millions of elements per hour
     private long totalCount;
     private boolean isApproximated; // Total count is an approximated value
     private final AtomicReference<Future<Long>> futureTotalCount = new AtomicReference<>();
     private final AtomicLong count;
+    private final long startTime;
+    private final LinkedList<Pair<Long, Long>> times = new LinkedList<>();
 
     private double batchSize;
 
     private Logger logger = LoggerFactory.getLogger(ProgressLogger.class);
 
     public ProgressLogger(String message) {
-        this(message, 0, null, 200);
+        this(message, 0, null, 200, 0);
+    }
+
+    public ProgressLogger(String message, long logFrequency, TimeUnit timeUnit) {
+        this(message, 0, null, 0, timeUnit.toMillis(logFrequency));
     }
 
     public ProgressLogger(String message, long totalCount) {
-        this(message, totalCount, null, 200);
+        this(message, totalCount, null, 200, 0);
     }
 
     public ProgressLogger(String message, long totalCount, int numLinesLog) {
-        this(message, totalCount, null, numLinesLog);
+        this(message, totalCount, null, numLinesLog, 0);
     }
 
     public ProgressLogger(String message, Future<Long> futureTotalCount) {
-        this(message, 0, futureTotalCount, 200);
+        this(message, 0, futureTotalCount, 200, 0);
     }
 
     public ProgressLogger(String message, Future<Long> futureTotalCount, int numLinesLog) {
-        this(message, 0, futureTotalCount, numLinesLog);
+        this(message, 0, futureTotalCount, numLinesLog, 0);
     }
 
     /**
@@ -79,10 +91,10 @@ public class ProgressLogger {
      * @param numLinesLog           Number of lines to print
      */
     public ProgressLogger(String message, Callable<Long> totalCountCallable, int numLinesLog) {
-        this(message, 0, getFuture(totalCountCallable), numLinesLog);
+        this(message, 0, getFuture(totalCountCallable), numLinesLog, 0);
     }
 
-    private ProgressLogger(String message, long totalCount, Future<Long> futureTotalCount, int numLinesLog) {
+    private ProgressLogger(String message, long totalCount, Future<Long> futureTotalCount, int numLinesLog, long logFrequencyMillis) {
         if (message.endsWith(" ")) {
             this.message = message;
         } else {
@@ -92,12 +104,21 @@ public class ProgressLogger {
         this.totalCount = totalCount;
         this.futureTotalCount.set(futureTotalCount);
         this.count = new AtomicLong();
-        if (totalCount == 0) {
-            batchSize = DEFAULT_BATCH_SIZE;
+        if (logFrequencyMillis > 0) {
+            this.logFrequencyMillis = logFrequencyMillis;
+            batchSize = 0;
         } else {
-            updateBatchSize();
+            // Avoid not logging for too long. Log at least once a minute by default
+            this.logFrequencyMillis = TimeUnit.MINUTES.toMillis(1);
+            if (totalCount == 0) {
+                batchSize = DEFAULT_BATCH_SIZE;
+            } else {
+                updateBatchSize();
+            }
         }
         isApproximated = false;
+        startTime = System.currentTimeMillis();
+        progressRateWindowSizeSeconds = 60;
     }
 
 
@@ -118,6 +139,25 @@ public class ProgressLogger {
         return this;
     }
 
+    public ProgressLogger setProgressRateWindowSize(int progressRateWindowSize, TimeUnit timeUnit) {
+        this.progressRateWindowSizeSeconds = timeUnit.toSeconds(progressRateWindowSize);
+        return this;
+    }
+
+    public ProgressLogger setProgressRateAtMillionsPerHours() {
+        return setProgressRateAtMillionsPerHours(true);
+    }
+
+    public ProgressLogger setProgressRateAtMillionsPerHours(boolean progressRateMillionHours) {
+        this.progressRateMillionHours = progressRateMillionHours;
+        return this;
+    }
+
+    public ProgressLogger disableProgressRate() {
+        this.progressRateEnabled = false;
+        return this;
+    }
+
     public void increment(long delta) {
         increment(delta, "", null);
     }
@@ -135,12 +175,36 @@ public class ProgressLogger {
         long count = previousCount + delta;
 
         updateFutureTotalCount();
-        if ((int) (previousCount / batchSize) != (int) (count / batchSize) || count == totalCount && delta > 0) {
-            log(count, supplier == null ? message : supplier.get());
+        long currentTimeMillis = System.currentTimeMillis();
+        if (shouldLog(delta, previousCount, count, currentTimeMillis)) {
+            log(count, supplier == null ? message : supplier.get(), currentTimeMillis);
         }
     }
 
-    protected synchronized void log(long count, String extraMessage) {
+    private boolean shouldLog(long delta, long previousCount, long count, long currentTimeMillis) {
+        if (batchSize > 0) {
+            if ((int) (previousCount / batchSize) != (int) (count / batchSize)) {
+                return true;
+            }
+        }
+        if (logFrequencyMillis > 0) {
+            long lastLogTime = times.isEmpty() ? startTime : times.getLast().getRight();
+            if (currentTimeMillis - lastLogTime > logFrequencyMillis) {
+                return true;
+            }
+        }
+        if (count == totalCount && delta > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    protected synchronized void log(long count, String extraMessage, long currentTimeMillis) {
+        times.add(Pair.of(count, currentTimeMillis));
+        if (times.size() > 5 && times.get(0).getRight() < currentTimeMillis - progressRateWindowSizeSeconds * 1000) {
+            // Remove old points that are outside the progress rate window
+            times.removeFirst();
+        }
         long totalCount = getTotalCount();
 
         StringBuilder sb = new StringBuilder(message).append(count);
@@ -151,6 +215,45 @@ public class ProgressLogger {
                 sb.append('/');
             }
             sb.append(totalCount).append(' ').append(DECIMAL_FORMAT.format(((float) (count)) / totalCount));
+        }
+        if (progressRateEnabled) {
+            float elapsedTime = (float) (currentTimeMillis - startTime) / 1000;
+            float progressRate = count / elapsedTime; // elements per second
+            boolean addRelativeTime = times.size() > 5 && elapsedTime > progressRateWindowSizeSeconds;
+            float relativeTime;
+            float relativeProgressRate; // elements per second
+            if (addRelativeTime) {
+                int idx = 5;
+                do {
+                    Pair<Long, Long> relativePoint = times.get(times.size() - idx);
+                    relativeTime = (float) (currentTimeMillis - relativePoint.getRight()) / 1000;
+                    relativeProgressRate = (count - relativePoint.getLeft()) / relativeTime;
+                } while (relativeTime < progressRateWindowSizeSeconds && idx++ < times.size());
+
+            } else {
+                relativeTime = 0;
+                relativeProgressRate = 0;
+            }
+            String progressRateUnits;
+            String rateFormat;
+            if (progressRateMillionHours) {
+                progressRateUnits = "M/h";
+                rateFormat = "%.2f";
+                progressRate = (progressRate / 1_000_000) * 3600; // Convert to millions per hour
+                relativeProgressRate = (relativeProgressRate / 1_000_000) * 3600; // Convert to millions per hour
+            } else {
+                progressRateUnits = "elements/s";
+                rateFormat = "%.0f";
+            }
+            sb.append(" in ")
+                    .append(String.format("%.2f", elapsedTime)).append("s (")
+                    .append(String.format(rateFormat, progressRate)).append(" " + progressRateUnits + ")");
+            if (addRelativeTime) {
+                sb.append(", (")
+                        .append(String.format(rateFormat, relativeProgressRate)).append(" " + progressRateUnits + " in last ")
+                        .append(String.format("%.2f", relativeTime)).append("s")
+                        .append(')');
+            }
         }
         if (!extraMessage.isEmpty() && (!extraMessage.startsWith(" ") && !extraMessage.startsWith(",") && !extraMessage.startsWith("."))) {
             sb.append(' ');
