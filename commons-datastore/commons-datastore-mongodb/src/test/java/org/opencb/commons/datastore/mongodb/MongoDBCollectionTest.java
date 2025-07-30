@@ -37,6 +37,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBCollection.MULTI;
+import static org.opencb.commons.datastore.mongodb.MongoDBCollection.UPSERT;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
@@ -1541,7 +1543,7 @@ public class MongoDBCollectionTest {
         }
 
         DataResult writeResult = mongoDBCollectionUpdateTest.update(queries, updates, new QueryOptions("multi", false)
-                .append(MongoDBCollection.UPSERT, true));
+                .append(UPSERT, true));
         assertEquals(modifiedDocuments, writeResult.getNumUpdated());
         assertEquals(numUpserts, writeResult.getNumInserted());
     }
@@ -1629,6 +1631,228 @@ public class MongoDBCollectionTest {
         public void close() throws IOException {
             System.out.println("Closing!");
             fileOutputStream.close();
+        }
+    }
+
+    @Test
+    public void testUpdateWithPipeline() throws Exception {
+        // Create a test document
+        Document testDoc = new Document("id", 999)
+                .append("name", "TestUser")
+                .append("age", 25)
+                .append("score", 100);
+        mongoDBCollectionUpdateTest.insert(testDoc, null);
+
+        // Create aggregation pipeline to increment age and double the score
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("age", new Document("$add", Arrays.asList("$age", 1)))
+                        .append("score", new Document("$multiply", Arrays.asList("$score", 2)))
+                        .append("lastModified", new Date())
+                )
+        );
+
+        // Test single document update with pipeline
+        Bson query = new Document("id", 999);
+        DataResult updateResult = mongoDBCollectionUpdateTest.updateWithPipeline(query, pipeline, null);
+
+        assertEquals("One document should be matched", 1, updateResult.getNumMatches());
+        assertEquals("One document should be updated", 1, updateResult.getNumUpdated());
+
+        // Verify the update
+        DataResult<Document> findResult = mongoDBCollectionUpdateTest.find(query, null);
+        Document updatedDoc = findResult.first();
+        assertEquals("Age should be incremented", 26, updatedDoc.getInteger("age").intValue());
+        assertEquals("Score should be doubled", 200, updatedDoc.getInteger("score").intValue());
+        assertNotNull("lastModified should be set", updatedDoc.get("lastModified"));
+    }
+
+    @Test
+    public void testUpdateWithPipelineUpsert() throws Exception {
+        // Test upsert with aggregation pipeline
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("name", "NewUser")
+                        .append("age", 30)
+                        .append("created", new Date())
+                        .append("isNew", true)
+                )
+        );
+
+        Bson query = new Document("id", 888);
+        QueryOptions options = new QueryOptions(UPSERT, true);
+
+        DataResult updateResult = mongoDBCollectionUpdateTest.updateWithPipeline(query, pipeline, options);
+
+        assertEquals("No documents should be matched for new document", 0, updateResult.getNumMatches());
+        assertEquals("One document should be inserted", 1, updateResult.getNumInserted());
+
+        // Verify the upserted document
+        DataResult<Document> findResult = mongoDBCollectionUpdateTest.find(query, null);
+        Document upsertedDoc = findResult.first();
+        assertEquals("Name should be set", "NewUser", upsertedDoc.getString("name"));
+        assertEquals("Age should be set", 30, upsertedDoc.getInteger("age").intValue());
+        assertTrue("isNew flag should be true", upsertedDoc.getBoolean("isNew"));
+    }
+
+    @Test
+    public void testUpdateWithPipelineMulti() throws Exception {
+        // Insert multiple test documents
+        List<Document> testDocs = Arrays.asList(
+                new Document("category", "test").append("value", 10),
+                new Document("category", "test").append("value", 20),
+                new Document("category", "test").append("value", 30),
+                new Document("category", "other").append("value", 40)
+        );
+        mongoDBCollectionUpdateTest.insert(testDocs, null);
+
+        // Pipeline to add bonus field based on value
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("bonus", new Document("$cond", Arrays.asList(
+                                new Document("$gte", Arrays.asList("$value", 20)),
+                                new Document("$multiply", Arrays.asList("$value", 0.1)),
+                                0
+                        )))
+                )
+        );
+
+        // Update all documents in "test" category
+        Bson query = new Document("category", "test");
+        QueryOptions options = new QueryOptions(MULTI, true);
+
+        DataResult updateResult = mongoDBCollectionUpdateTest.updateWithPipeline(query, pipeline, options);
+
+        assertEquals("Three documents should be matched", 3, updateResult.getNumMatches());
+        assertEquals("Three documents should be updated", 3, updateResult.getNumUpdated());
+
+        // Verify updates
+        DataResult<Document> findResult = mongoDBCollectionUpdateTest.find(query, null);
+        for (Document doc : findResult.getResults()) {
+            int value = doc.getInteger("value");
+            double expectedBonus = value >= 20 ? value * 0.1 : 0;
+            assertEquals("Bonus should be calculated correctly", expectedBonus, doc.get("bonus", Number.class).doubleValue(), 0.01);
+        }
+    }
+
+    @Test
+    public void testFindAndUpdateWithPipeline() throws Exception {
+        // Insert test document
+        Document testDoc = new Document("id", 777)
+                .append("counter", 5)
+                .append("name", "Counter");
+        mongoDBCollectionUpdateTest.insert(testDoc, null);
+
+        // Pipeline to increment counter and add timestamp
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("counter", new Document("$add", Arrays.asList("$counter", 1)))
+                        .append("lastIncrement", new Date())
+                )
+        );
+
+        Bson query = new Document("id", 777);
+        QueryOptions options = new QueryOptions("returnNew", true);
+
+        DataResult<Document> result = mongoDBCollectionUpdateTest.findAndUpdateWithPipeline(
+                query, null, null, pipeline, options);
+
+        assertNotNull("Result should not be null", result);
+        assertEquals("Should return one document", 1, result.getNumResults());
+
+        Document updatedDoc = result.first();
+        assertEquals("Counter should be incremented", 6, updatedDoc.getInteger("counter").intValue());
+        assertNotNull("lastIncrement should be set", updatedDoc.get("lastIncrement"));
+    }
+
+    @Test
+    public void testFindAndUpdateWithPipelineReturnOriginal() throws Exception {
+        // Insert test document
+        Document testDoc = new Document("id", 666)
+                .append("version", 1)
+                .append("data", "original");
+        mongoDBCollectionUpdateTest.insert(testDoc, null);
+
+        // Pipeline to increment version and update data
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("version", new Document("$add", Arrays.asList("$version", 1)))
+                        .append("data", "updated")
+                )
+        );
+
+        Bson query = new Document("id", 666);
+        QueryOptions options = new QueryOptions("returnNew", false); // Return original document
+
+        DataResult<Document> result = mongoDBCollectionUpdateTest.findAndUpdateWithPipeline(
+                query, null, null, pipeline, options);
+
+        Document returnedDoc = result.first();
+        assertEquals("Should return original version", 1, returnedDoc.getInteger("version").intValue());
+        assertEquals("Should return original data", "original", returnedDoc.getString("data"));
+
+        // Verify the document was actually updated
+        Document currentDoc = mongoDBCollectionUpdateTest.find(query, null).first();
+        assertEquals("Current version should be updated", 2, currentDoc.getInteger("version").intValue());
+        assertEquals("Current data should be updated", "updated", currentDoc.getString("data"));
+    }
+
+    @Test
+    public void testUpdateWithPipelineConditionalLogic() throws Exception {
+        // Insert test documents with different categories
+        List<Document> testDocs = Arrays.asList(
+                new Document("test", "conditionalLogic").append("id", 1).append("type", "premium").append("balance", 1000),
+                new Document("test", "conditionalLogic").append("id", 2).append("type", "standard").append("balance", 500),
+                new Document("test", "conditionalLogic").append("id", 3).append("type", "basic").append("balance", 100)
+        );
+        mongoDBCollectionUpdateTest.insert(testDocs, null);
+
+        // Pipeline with conditional logic for different account types
+        List<Bson> pipeline = Arrays.asList(
+                new Document("$set", new Document()
+                        .append("interestRate", new Document("$switch", new Document()
+                                .append("branches", Arrays.asList(
+                                        new Document("case", new Document("$eq", Arrays.asList("$type", "premium")))
+                                                .append("then", 0.05),
+                                        new Document("case", new Document("$eq", Arrays.asList("$type", "standard")))
+                                                .append("then", 0.03)
+                                ))
+                                .append("default", 0.01)
+                        ))
+                        .append("interest", new Document("$multiply", Arrays.asList(
+                                "$balance",
+                                new Document("$switch", new Document()
+                                        .append("branches", Arrays.asList(
+                                                new Document("case", new Document("$eq", Arrays.asList("$type", "premium")))
+                                                        .append("then", 0.05),
+                                                new Document("case", new Document("$eq", Arrays.asList("$type", "standard")))
+                                                        .append("then", 0.03)
+                                        ))
+                                        .append("default", 0.01)
+                                )
+                        )))
+                )
+        );
+
+        // Update all documents
+        QueryOptions options = new QueryOptions(MULTI, true);
+        DataResult updateResult = mongoDBCollectionUpdateTest.updateWithPipeline(Filters.eq("test", "conditionalLogic"), pipeline, options);
+
+        assertEquals("Three documents should be updated", 3, updateResult.getNumUpdated());
+
+        // Verify interest calculations
+        DataResult<Document> allDocs = mongoDBCollectionUpdateTest.find(Filters.eq("test", "conditionalLogic"), null);
+        for (Document doc : allDocs.getResults()) {
+            String type = doc.getString("type");
+            int balance = doc.getInteger("balance");
+            double expectedRate;
+            switch (type) {
+                case "premium": expectedRate = 0.05; break;
+                case "standard": expectedRate = 0.03; break;
+                default: expectedRate = 0.01;
+            }
+            assertEquals("Interest rate should match type", expectedRate, doc.getDouble("interestRate"), 0.001);
+            assertEquals("Interest should be calculated correctly", balance * expectedRate, doc.getDouble("interest"), 0.001);
         }
     }
 
