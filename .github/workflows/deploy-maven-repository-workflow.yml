@@ -63,7 +63,7 @@ jobs:
           <settings>
             <servers>
               <server>
-                <id>central</id>
+                <id>ossrh</id>
                 <username>${{ secrets.MAVEN_NEXUS_USER }}</username>
                 <password>${{ secrets.MAVEN_NEXUS_PASSWORD }}</password>
               </server>
