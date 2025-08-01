@@ -57,7 +57,6 @@ jobs:
           rm private.key
 
       - name: Generate Maven settings.xml
-        # Create settings.xml with Sonatype Central credentials & GPG profile
         run: |
           cat > settings.xml <<EOF
           <settings>
@@ -76,6 +75,9 @@ jobs:
                 </properties>
               </profile>
             </profiles>
+            <activeProfiles>
+              <activeProfile>gpg</activeProfile>
+            </activeProfiles>
           </settings>
           EOF
 
