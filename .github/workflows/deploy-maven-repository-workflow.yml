@@ -41,16 +41,14 @@ jobs:
           cache: 'maven'                 # Cache dependencies
 
       - name: Import GPG private key
-        # Decode and import your Base64-encoded private key,
-        # and ensure GPG can find a TTY for passphrase prompts if needed
+        # Write your secret directly to a file (no base64 decode),
+        # set GPG_TTY so gpg can prompt if ever needed.
         env:
           GPG_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
-          # Set GPG_TTY at runtime instead of using runner.tool_cache
           export GPG_TTY=$(tty || echo /dev/console)
-          echo "$GPG_KEY" | base64 -d > private.key
-          gpg --batch --passphrase "$GPG_PASSPHRASE" --import private.key
+          echo "$GPG_KEY" > private.key
+          gpg --batch --import private.key
           rm private.key
 
       - name: Generate Maven settings.xml
