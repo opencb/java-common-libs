@@ -370,6 +370,8 @@
                         <configuration>
                             <!-- Must match the <server><id>ossrh</id> in your settings.xml -->
                             <publishingServerId>ossrh</publishingServerId>
+                            <!-- Force the snapshot endpoint and authenticate there -->
+                            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
                             <!-- Automatically close and release staging repositories -->
                             <autoPublish>true</autoPublish>
                             <!-- Wait until artifacts are actually published -->
