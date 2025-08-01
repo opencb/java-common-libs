@@ -305,6 +305,16 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <!-- Only for SNAPSHOTs: the plugin will use this when your version ends with -SNAPSHOT -->
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </snapshotRepository>
+    </distributionManagement>
     <profiles>
         <profile>
             <id>deploy-maven</id>
@@ -367,18 +377,17 @@
                         <version>0.8.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <!-- Must match the <server><id>ossrh</id> in settings.xml -->
+                            <!-- Must match the <server><id>ossrh</id> in your settings.xml -->
                             <publishingServerId>ossrh</publishingServerId>
-                            <!-- OSSRH compatibility endpoint for SNAPSHOT uploads -->
-                            <centralSnapshotsUrl>https://s01.oss.sonatype.org/content/repositories/snapshots/</centralSnapshotsUrl>
-                            <!-- Automatically close and release staging repositories for releases -->
+                            <!-- Automatically close and release staging repositories -->
                             <autoPublish>true</autoPublish>
-                            <!-- Wait until artifacts are published -->
+                            <!-- Wait until artifacts are actually published -->
                             <waitUntil>published</waitUntil>
-                            <!-- Skip already published modules in multimodule builds -->
+                            <!-- Skip already published components in multimodule builds -->
                             <ignorePublishedComponents>true</ignorePublishedComponents>
                         </configuration>
                     </plugin>
+
                 </plugins>
             </build>
         </profile>
