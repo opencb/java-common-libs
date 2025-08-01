@@ -79,8 +79,4 @@ jobs:
 
       - name: Deploy to Central
         # A single Maven deploy picks SNAPSHOT vs Release by your POM’s version
-        run: mvn clean deploy -DskipTests -P deploy-maven -s settings.xml ${{ inputs.maven_opts }} --no-transfer-progress
-      - name: Deploy to GitHub Packages repository
-        run: mvn clean deploy -DskipTests -P deploy-github ${{ inputs.maven_opts }} --no-transfer-progress
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn clean deploy -DskipTests -s settings.xml ${{ inputs.maven_opts }} --no-transfer-progress
