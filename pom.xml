@@ -305,7 +305,16 @@
             </plugin>
         </plugins>
     </build>
-
+    <distributionManagement>
+        <!-- Only for SNAPSHOTs: the plugin will use this when your version ends with -SNAPSHOT -->
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </snapshotRepository>
+    </distributionManagement>
     <profiles>
         <profile>
             <id>deploy-maven</id>
