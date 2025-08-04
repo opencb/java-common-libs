@@ -52,14 +52,14 @@
     </licenses>
 
     <repositories>
-<!--        <repository>-->
-<!--            <id>ossrh</id>-->
-<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-<!--            <snapshots>-->
-<!--                <enabled>true</enabled>-->
-<!--                <updatePolicy>daily</updatePolicy>-->
-<!--            </snapshots>-->
-<!--        </repository>-->
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
         <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/opencb</url>
@@ -305,16 +305,16 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <!-- Only for SNAPSHOTs: the plugin will use this when your version ends with -SNAPSHOT -->
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </snapshotRepository>
-    </distributionManagement>
+<!--    <distributionManagement>-->
+<!--        &lt;!&ndash; Only for SNAPSHOTs: the plugin will use this when your version ends with -SNAPSHOT &ndash;&gt;-->
+<!--        <snapshotRepository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--            </snapshots>-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
     <profiles>
         <profile>
             <id>deploy-maven</id>
