@@ -386,7 +386,7 @@
                             <!-- Skip already published components in multimodule builds -->
                             <ignorePublishedComponents>true</ignorePublishedComponents>
                         </configuration>
-                    </plugin>:w
+                    </plugin>
 
                 </plugins>
             </build>
