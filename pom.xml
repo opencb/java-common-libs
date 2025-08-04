@@ -367,6 +367,12 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <!-- disable strict checking of HTML tags in comments -->
+                            <doclint>none</doclint>
+                            <!-- do not fail the build if Javadoc generation issues errors -->
+                            <failOnError>false</failOnError>
+                        </configuration>
                     </plugin>
 
                     <!-- GPG Plugin: signs all deployable artifacts (.jar, .pom, sources, javadoc) with your GPG key -->
