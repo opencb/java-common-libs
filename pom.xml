@@ -52,14 +52,14 @@
     </licenses>
 
     <repositories>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </repository>
+<!--        <repository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--            <snapshots>-->
+<!--                <enabled>true</enabled>-->
+<!--                <updatePolicy>daily</updatePolicy>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
         <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/opencb</url>
@@ -386,7 +386,7 @@
                             <!-- Skip already published components in multimodule builds -->
                             <ignorePublishedComponents>true</ignorePublishedComponents>
                         </configuration>
-                    </plugin>
+                    </plugin>:w
 
                 </plugins>
             </build>
