@@ -39,7 +39,6 @@
             <groupId>org.opencb.commons</groupId>
             <artifactId>commons-datastore-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
@@ -57,5 +56,4 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
-
 </project>

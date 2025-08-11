@@ -35,7 +35,10 @@ public class SolrFacetToFacetFieldsConverter {
 
         SimpleOrderedMap<Object> solrFacets = (SimpleOrderedMap<Object>) solrResponse.getResponse().get("facets");
         List<FacetField> fields = new ArrayList<>();
-        int count = (int) solrFacets.get("count");
+        long count = 0;
+        if (solrFacets.get("count") != null) {
+            count = ((Number) solrFacets.get("count")).longValue();
+        }
         for (int i = 0; i < solrFacets.size(); i++) {
             String name = solrFacets.getName(i);
             if (!"count".equals(name)) {
@@ -67,12 +70,12 @@ public class SolrFacetToFacetFieldsConverter {
      * @param defaultCount  Default count
      * @return  Actual count
      */
-    private static int getBucketCount(SimpleOrderedMap<Object> solrFacets, int defaultCount) {
+    private static long getBucketCount(SimpleOrderedMap<Object> solrFacets, long defaultCount) {
         List<SimpleOrderedMap<Object>> solrBuckets = (List<SimpleOrderedMap<Object>>) solrFacets.get("buckets");
         if (solrBuckets == null) {
             for (int i = 0; i < solrFacets.size(); i++) {
-                if (solrFacets.getName(i).equals("count")) {
-                    return (int) solrFacets.getVal(i);
+                if (solrFacets.getName(i).equals("count") && solrFacets.getVal(i) != null) {
+                    return ((Number) solrFacets.getVal(i)).longValue();
                 }
             }
         }
