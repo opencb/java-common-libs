@@ -13,6 +13,11 @@
     <artifactId>commons-datastore</artifactId>
     <packaging>pom</packaging>
 
+    <name>OpenCB commons-datastore project</name>
+    <description>OpenCB commons project contains several Java libs for Bioinformatics</description>
+    <url>http://www.opencb.org</url>
+
+
     <modules>
         <module>commons-datastore-core</module>
         <module>commons-datastore-mongodb</module>
