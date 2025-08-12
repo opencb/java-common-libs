@@ -13,6 +13,10 @@
     <artifactId>commons-datastore-mongodb</artifactId>
     <packaging>jar</packaging>
 
+    <name>OpenCB commons-datastore-mongodb project</name>
+    <description>OpenCB commons project contains several Java libs for Bioinformatics</description>
+    <url>http://www.opencb.org</url>
+
     <dependencies>
         <dependency>
             <groupId>org.opencb.commons</groupId>
