@@ -70,24 +70,11 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
           cache: 'maven'
-      - name: Install Samtools
-        run: sudo apt-get install samtools python3-deeptools
       - name: Start MongoDB v6.0
         uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: 6.0
           mongodb-replica-set: rs-test
-      - name: K8s Tunnel MongoDB
-        run: |
-          wget https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl
-          chmod +x ./kubectl
-          echo "${{ secrets.AZURE_KUBE_CONFIG }}" > admin.conf
-          ./kubectl -n cellbase-db port-forward services/cellbase-rs0-svc 27018:27017 --kubeconfig ./admin.conf &
-      - name: DockerHub login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKER_HUB_USER }}
-          password: ${{ env.DOCKER_HUB_PASSWORD }}
       - name: Install sshpass
         run: sudo apt-get install sshpass
       - name: Add SSH Host to known_hosts
@@ -97,11 +84,11 @@ jobs:
         env:
           SSH_HOST: ${{ env.SSH_HOST }}
           SSH_PORT: ${{ env.SSH_PORT }}
-      - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, cellbase, opencga and opencga-enterprise
+      - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, opencga and opencga-enterprise
         run: |
           cd opencga-enterprise
           ln -s ../opencga opencga-home
-          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }} -c localhost:27018 -H hdp3.1
+          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
