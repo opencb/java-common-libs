@@ -62,4 +62,10 @@ public class QueryTest {
         thrown.expect(EnumConstantNotPresentException.class);
         query.validate(TestQueryParam.class);
     }
+
+    @Test(expected = EnumConstantNotPresentException.class)
+    public void testValidateWrongParam() throws Exception {
+	Query query = new Query(TestQueryParam.TEST_PARAM_BOOLEAN.key(), true).append("wrongParam", "1");
+	query.validate(TestQueryParam.class);
+    }
 }
