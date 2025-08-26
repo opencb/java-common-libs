@@ -23,7 +23,10 @@ import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.LBHttpSolrClient;
-import org.apache.solr.client.solrj.request.*;
+import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.client.solrj.request.CoreStatus;
+import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrException;
 import org.slf4j.Logger;
@@ -31,14 +34,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SolrManager {
 
-    private String host;
-    private String mode;
-    private SolrClient solrClient;
+    private final List<String> hosts;
+    private final String mode;
+    private final SolrClient solrClient;
 
     private final Logger logger = LoggerFactory.getLogger(SolrManager.class);
 
@@ -65,49 +69,14 @@ public class SolrManager {
      * @param timeout Read timeout
      */
     public SolrManager(List<String> hosts, String mode, int timeout) {
-        hosts = hosts.stream().flatMap(s -> Arrays.stream(s.split(","))).collect(Collectors.toList());
-
-        this.host = String.join(",", hosts);
+        this.hosts = hosts.stream().flatMap(s -> Arrays.stream(s.split(","))).collect(Collectors.toList());
         this.mode = mode;
-
-        if (hosts.get(0).startsWith("http")) {
-            if (hosts.size() == 1) {
-                // Single HTTP endpoint.
-                this.solrClient = new HttpSolrClient.Builder(host).build();
-                ((HttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
-                ((HttpSolrClient) this.solrClient).setSoTimeout(timeout);
-            } else {
-                // Use a LoadBalancer if there are multiple http hosts
-                this.solrClient = new LBHttpSolrClient.Builder().withBaseSolrUrls(hosts.toArray(new String[0])).build();
-
-                ((LBHttpSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
-                ((LBHttpSolrClient) this.solrClient).setSoTimeout(timeout);
-            }
-        } else {
-            // If the provided hosts are not http, assume zookeeper hosts like HOST:PORT
-            // This client will use Zookeeper to discover Solr endpoints for SolrCloud collections, and then use the
-            // LBHttpSolrClient to issue requests.
-            if (isCloud()) {
-                this.solrClient = new CloudSolrClient.Builder().withZkHost(hosts).build();
-
-                ((CloudSolrClient) this.solrClient).setRequestWriter(new BinaryRequestWriter());
-                ((CloudSolrClient) this.solrClient).setSoTimeout(timeout);
-            } else {
-                throw new IllegalArgumentException("Can not initialize SolrManager from Zookeeper host not in Cloud mode");
-            }
-        }
+        this.solrClient = newSolrClient(timeout);
     }
 
     public SolrManager(SolrClient solrClient, String host, String mode) {
         this.solrClient = solrClient;
-        this.host = host;
-        this.mode = mode;
-    }
-
-    @Deprecated
-    public SolrManager(SolrClient solrClient, String host, String mode, int timeout) {
-        this.solrClient = solrClient;
-        this.host = host;
+        this.hosts = Collections.singletonList(host);
         this.mode = mode;
     }
 
@@ -188,7 +157,7 @@ public class SolrManager {
      */
     public void createCore(String coreName, String configSet) throws SolrException {
         try {
-            logger.debug("Creating core: host={}, core={}, configSet={}", host, coreName, configSet);
+            logger.debug("Creating core: host={}, core={}, configSet={}", StringUtils.join(",", hosts), coreName, configSet);
             CoreAdminRequest.Create request = new CoreAdminRequest.Create();
             request.setCoreName(coreName);
             request.setConfigSet(configSet);
@@ -210,7 +179,7 @@ public class SolrManager {
      */
     public void createCollection(String collectionName, String configSet) throws SolrException {
         logger.debug("Creating collection: host={}, collection={}, config={}, numShards={}, numReplicas={}",
-                host, collectionName, configSet, 1, 1);
+                StringUtils.join(",", hosts), collectionName, configSet, 1, 1);
         try {
             CollectionAdminRequest request = CollectionAdminRequest.createCollection(collectionName, configSet, 1, 1);
             request.process(solrClient);
@@ -353,11 +322,39 @@ public class SolrManager {
         }
     }
 
-    private boolean isCloud() {
-        if (StringUtils.isEmpty(mode)) {
-            logger.warn("Solr 'mode' is empty, setting default 'cloud'");
-            mode = "cloud";
+    public SolrClient newSolrClient(int timeout) {
+        final SolrClient solrClient;
+        if (hosts.get(0).startsWith("http")) {
+            if (hosts.size() == 1) {
+                // Single HTTP endpoint.
+                solrClient = new HttpSolrClient.Builder(hosts.get(0)).build();
+                ((HttpSolrClient) solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((HttpSolrClient) solrClient).setSoTimeout(timeout);
+            } else {
+                // Use a LoadBalancer if there are multiple http hosts
+                solrClient = new LBHttpSolrClient.Builder().withBaseSolrUrls(hosts.toArray(new String[0])).build();
+
+                ((LBHttpSolrClient) solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((LBHttpSolrClient) solrClient).setSoTimeout(timeout);
+            }
+        } else {
+            // If the provided hosts are not http, assume zookeeper hosts like HOST:PORT
+            // This client will use Zookeeper to discover Solr endpoints for SolrCloud collections, and then use the
+            // LBHttpSolrClient to issue requests.
+            if (isCloud()) {
+                solrClient = new CloudSolrClient.Builder().withZkHost(hosts).build();
+
+                ((CloudSolrClient) solrClient).setRequestWriter(new BinaryRequestWriter());
+                ((CloudSolrClient) solrClient).setSoTimeout(timeout);
+            } else {
+                throw new IllegalArgumentException("Can not initialize SolrManager from Zookeeper host not in Cloud mode");
+            }
         }
+
+        return  solrClient;
+    }
+
+    private boolean isCloud() {
         switch (mode.toLowerCase()) {
             case "collection":
             case "cloud": {
@@ -376,37 +373,22 @@ public class SolrManager {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SolrManager{");
-        sb.append("host='").append(host).append('\'');
+        sb.append("hosts='").append(hosts).append('\'');
         sb.append(", mode='").append(mode).append('\'');
         sb.append(", solrClient=").append(solrClient);
         sb.append('}');
         return sb.toString();
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public SolrManager setHost(String host) {
-        this.host = host;
-        return this;
+    public List<String> getHosts() {
+        return hosts;
     }
 
     public String getMode() {
         return mode;
     }
 
-    public SolrManager setMode(String mode) {
-        this.mode = mode;
-        return this;
-    }
-
     public SolrClient getSolrClient() {
         return solrClient;
-    }
-
-    public SolrManager setSolrClient(SolrClient solrClient) {
-        this.solrClient = solrClient;
-        return this;
     }
 }
