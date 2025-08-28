@@ -205,7 +205,7 @@ public class ProgressLogger {
             // Remove old points that are outside the progress rate window
             times.removeFirst();
         }
-        long totalCount = getTotalCount();
+        long totalCount = this.totalCount;
 
         StringBuilder sb = new StringBuilder(message).append(count);
         if (totalCount > 0) {
@@ -284,10 +284,6 @@ public class ProgressLogger {
         }
     }
 
-    private long getTotalCount() {
-        return this.totalCount;
-    }
-
     private void updateBatchSize() {
         batchSize = Math.max((double) totalCount / numLinesLog, MIN_BATCH_SIZE);
     }
@@ -297,6 +293,10 @@ public class ProgressLogger {
         Future<Long> future = executor.submit(totalCountCallable);
         executor.shutdown();
         return future;
+    }
+
+    public long getCount() {
+        return count.get();
     }
 
     public <T> Task<T, T> asTask() {

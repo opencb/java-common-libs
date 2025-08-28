@@ -18,10 +18,8 @@ package org.opencb.commons.io;
 
 import org.opencb.commons.run.Task;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -163,4 +161,16 @@ public interface DataReader<T> extends Iterable<T> {
         };
     }
 
+    @Override
+    default void forEach(Consumer<? super T> action) {
+        forEach(action, 1);
+    }
+
+    default void forEach(Consumer<? super T> action, int batchSize) {
+        Objects.requireNonNull(action);
+        for (Iterator<T> iterator = this.iterator(batchSize); iterator.hasNext();) {
+            T t = iterator.next();
+            action.accept(t);
+        }
+    }
 }
