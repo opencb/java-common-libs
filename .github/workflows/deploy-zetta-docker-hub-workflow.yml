@@ -43,5 +43,6 @@ jobs:
         with:
           username: ${{ secrets.ZETTA_DOCKER_HUB_USER }}
           password: ${{ secrets.ZETTA_DOCKER_HUB_PASSWORD }}
+          logout: true
       - name: Deploy in Docker Hub
         run: ${{ inputs.cli }} --org zettagenomics
