@@ -38,7 +38,6 @@ public class ObjectMap implements Map<String, Object>, Serializable {
 
     private static final Pattern KEY_SPLIT_PATTERN = Pattern.compile("(^[^\\[\\].]+(?:\\[[^\\]]+\\])?)(?:\\.(.*))*");
     private static final Pattern LIST_FILTER_PATTERN = Pattern.compile("([^\\[\\]]+)\\[([^=]*?)(?:[=]?)([^=]+)\\]$");
-    public static final Pattern COMMA_SEPARATED_LIST_SPLIT_PATTERN = Pattern.compile("((?:(?!,\\S).)+)+");
 
     public ObjectMap() {
         objectMap = new LinkedHashMap<>();
