@@ -133,27 +133,42 @@ jobs:
                     (($id + "|" + $pv + "|" + (($m.vulnerability.severity // "") | ascii_upcase)))
                   ] | .[]' "$B_GRYPE" | sort -u > /tmp/b_entries.txt || true
 
-          # unimos y normalizamos
+          # union de entradas (unique)
           cat /tmp/a_entries.txt /tmp/b_entries.txt | sort -u > /tmp/all_entries.txt || true
+
+          # --- crear archivo ordenado por severidad desc (rank) y luego por ID ---
+          awk -F'|' '
+            BEGIN {
+              map["CRITICAL"]=5; map["HIGH"]=4; map["MEDIUM"]=3; map["LOW"]=2; map["UNKNOWN"]=1;
+            }
+            {
+              id=$1; pv=$2; sev=toupper($3);
+              rank = (sev in map ? map[sev] : 0);
+              # output: rank|sev|id|pv
+              printf("%d|%s|%s|%s\n", rank, sev, id, pv);
+            }
+          ' /tmp/all_entries.txt | sort -t'|' -k1,1nr -k3,3 | cut -d'|' -f2- > /tmp/all_sorted.txt || true
 
           # --- START MD FILE ---
           echo "# Vulnerability comparison: ${A_BRANCH}  **vs**  ${B_BRANCH}" > "${OUT}"
           echo "" >> "${OUT}"
 
-          # --- TABLE requested: VulnerabilityID | package:version | Severity | branches ---
-          echo "| VulnerabilityID | package:version | Severity | branches |" >> "${OUT}"
+          # --- TABLE requested: Severity | VulnerabilityID | package:version | branches ---
+          echo "| Severity | VulnerabilityID | package:version | branches |" >> "${OUT}"
           echo "|---|---|---|---|" >> "${OUT}"
 
-          if [ -s /tmp/all_entries.txt ]; then
+          if [ -s /tmp/all_sorted.txt ]; then
             while IFS= read -r line; do
-              # line format: ID|pkg:version|SEVERITY
-              id=$(echo "$line" | awk -F'|' '{print $1}')
-              pv=$(echo "$line" | awk -F'|' '{print $2}')
-              sev=$(echo "$line" | awk -F'|' '{print $3}')
+              # line format: SEV|ID|PKG:VER
+              sev=$(echo "$line" | awk -F'|' '{print $1}')
+              id=$(echo "$line" | awk -F'|' '{print $2}')
+              pv=$(echo "$line" | awk -F'|' '{print $3}')
 
               inA=0; inB=0
-              if grep -Fxq "$line" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
-              if grep -Fxq "$line" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+              # membership checks use original a_entries/b_entries (ID|pkg|sev)
+              entry="${id}|${pv}|${sev}"
+              if grep -Fxq "$entry" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+              if grep -Fxq "$entry" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
 
               if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
                 branches="**BOTH**"
@@ -163,10 +178,8 @@ jobs:
                 branches="${B_BRANCH}"
               fi
 
-              # salida segura (escapa pipes en campos si hay)
-              # aquí asumimos que id/pv/sev no contienen pipes adicionales
-              echo "| ${id} | ${pv} | ${sev} | ${branches} |" >> "${OUT}"
-            done < /tmp/all_entries.txt
+              echo "| ${sev} | ${id} | ${pv} | ${branches} |" >> "${OUT}"
+            done < /tmp/all_sorted.txt
           else
             echo "| - | - | - | - |" >> "${OUT}"
             echo "" >> "${OUT}"
@@ -189,7 +202,6 @@ jobs:
           done
 
           echo "" >> "${OUT}"
-          # añadimos secciones de detalle (opcionales) - mantenidas o puedes comentarlas si no quieres
           echo "----" >> "${OUT}"
           echo "Artifacts included:" >> "${OUT}"
           echo "- ${REPORT_DIR}/branchA-sbom.cdx.json" >> "${OUT}"
@@ -198,13 +210,14 @@ jobs:
           echo "- ${REPORT_DIR}/branchB-grype.json" >> "${OUT}"
           echo "- ${REPORT_DIR}/comparison-report.md (this file)" >> "${OUT}"
 
+
       - name: Create ZIP of reports
         run: |
           set -euo pipefail
           cd "${REPORT_DIR}"
           zip -r comparison-artifacts.zip . || true
 
-      - name: "Publish table to GitHub Actions summary (only the table)"
+      - name: "Publish table to GitHub Actions summary (only the table, sorted)"
         if: always()
         run: |
           set -euo pipefail
@@ -212,46 +225,46 @@ jobs:
           A_BRANCH="${{ github.event.inputs.branch_a }}"
           B_BRANCH="${{ github.event.inputs.branch_b }}"
 
-          # Comprueba que exista la tabla (en /tmp/all_entries o en reports MD)
-          if [ ! -f /tmp/all_entries.txt ] || [ ! -s /tmp/all_entries.txt ]; then
-            # Si all_entries no tiene datos, intentamos extraer del MD
-            if [ -f "${REPORT_DIR}/comparison-report.md" ]; then
-              # extraemos la tabla completa entre el header y la línea en blanco que sigue
-              awk '
-                BEGIN {found=0}
-                /^\\| VulnerabilityID \\| package:version \\| Severity \\| branches \\|/ {found=1; print; next}
-                found==1 { if (/^$/) exit; print }
-              ' "${REPORT_DIR}/comparison-report.md" >> "$SUMMARY" || true
-            else
-              echo "No table available to show in summary." >> "$SUMMARY"
-            fi
-            exit 0
+          # Si no hay sorted file, intenta generarlo a partir de /tmp/all_entries.txt
+          if [ ! -s /tmp/all_sorted.txt ] && [ -s /tmp/all_entries.txt ]; then
+            awk -F'|' '
+              BEGIN { map["CRITICAL"]=5; map["HIGH"]=4; map["MEDIUM"]=3; map["LOW"]=2; map["UNKNOWN"]=1; }
+              {
+                id=$1; pv=$2; sev=toupper($3);
+                rank = (sev in map ? map[sev] : 0);
+                printf("%d|%s|%s|%s\n", rank, sev, id, pv);
+              }
+            ' /tmp/all_entries.txt | sort -t'|' -k1,1nr -k3,3 | cut -d'|' -f2- > /tmp/all_sorted.txt || true
           fi
 
-          # Build the table header in the summary
-          echo "| VulnerabilityID | package:version | Severity | branches |" >> "$SUMMARY"
+          # Header table for summary
+          echo "| Severity | VulnerabilityID | package:version | branches |" >> "$SUMMARY"
           echo "|---|---|---|---|" >> "$SUMMARY"
 
-          # For each entry in /tmp/all_entries.txt, build row with branches decision (same logic as in MD)
-          while IFS= read -r line; do
-            id=$(echo "$line" | awk -F'|' '{print $1}')
-            pv=$(echo "$line" | awk -F'|' '{print $2}')
-            sev=$(echo "$line" | awk -F'|' '{print $3}')
+          if [ -s /tmp/all_sorted.txt ]; then
+            while IFS= read -r line; do
+              sev=$(echo "$line" | awk -F'|' '{print $1}')
+              id=$(echo "$line" | awk -F'|' '{print $2}')
+              pv=$(echo "$line" | awk -F'|' '{print $3}')
 
-            inA=0; inB=0
-            if grep -Fxq "$line" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
-            if grep -Fxq "$line" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+              inA=0; inB=0
+              entry="${id}|${pv}|${sev}"
+              if grep -Fxq "$entry" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+              if grep -Fxq "$entry" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
 
-            if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
-              branches="**BOTH**"
-            elif [ "$inA" -eq 1 ]; then
-              branches="${A_BRANCH}"
-            else
-              branches="${B_BRANCH}"
-            fi
+              if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
+                branches="**BOTH**"
+              elif [ "$inA" -eq 1 ]; then
+                branches="${A_BRANCH}"
+              else
+                branches="${B_BRANCH}"
+              fi
 
-            echo "| ${id} | ${pv} | ${sev} | ${branches} |" >> "$SUMMARY"
-          done < /tmp/all_entries.txt
+              echo "| ${sev} | ${id} | ${pv} | ${branches} |" >> "$SUMMARY"
+            done < /tmp/all_sorted.txt
+          else
+            echo "| - | - | - | - |" >> "$SUMMARY"
+          fi
 
       - name: Upload artifacts (reports)
         uses: actions/upload-artifact@v4
