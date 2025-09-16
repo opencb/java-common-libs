@@ -6,7 +6,7 @@ on:
       branch_a:
         description: 'First branch to compare (e.g. main)'
         required: true
-        default: 'main'
+        default: 'develop'
       branch_b:
         description: 'Second branch to compare (e.g. feature/fix-branch)'
         required: true
@@ -93,7 +93,8 @@ jobs:
             echo "branchB-grype.json missing"
           fi
 
-      - name: Generate robust comparison report (by VulnerabilityID and by package:version)
+      - name: Generate comparison report (table + full MD)
+        id: gen_report
         run: |
           set -euo pipefail
           A_BRANCH="${{ github.event.inputs.branch_a }}"
@@ -103,7 +104,7 @@ jobs:
           OUT="${REPORT_DIR}/comparison-report.md"
           mkdir -p "$(dirname "$OUT")"
 
-          # --- basic presence checks ---
+          # comprueba que los JSON existen
           if [ ! -s "$A_GRYPE" ]; then
             echo "ERROR: ${A_GRYPE} not found or empty" >&2
             exit 1
@@ -113,38 +114,72 @@ jobs:
             exit 1
           fi
 
+          # --- extraer entradas formateadas: ID|pkg:version|SEVERITY ---
+          jq -r '[ .matches[]? as $m |
+                    ($m.vulnerability.id // "-") as $id |
+                    ( if ($m.artifact | type) == "object"
+                        then (($m.artifact.name // $m.artifact.id // "-") + ":" + ($m.artifact.version // "-"))
+                        else (($m.artifact // "-") + ":" + "-")
+                      end) as $pv |
+                    (($id + "|" + $pv + "|" + (($m.vulnerability.severity // "") | ascii_upcase)))
+                  ] | .[]' "$A_GRYPE" | sort -u > /tmp/a_entries.txt || true
+
+          jq -r '[ .matches[]? as $m |
+                    ($m.vulnerability.id // "-") as $id |
+                    ( if ($m.artifact | type) == "object"
+                        then (($m.artifact.name // $m.artifact.id // "-") + ":" + ($m.artifact.version // "-"))
+                        else (($m.artifact // "-") + ":" + "-")
+                      end) as $pv |
+                    (($id + "|" + $pv + "|" + (($m.vulnerability.severity // "") | ascii_upcase)))
+                  ] | .[]' "$B_GRYPE" | sort -u > /tmp/b_entries.txt || true
+
+          # unimos y normalizamos
+          cat /tmp/a_entries.txt /tmp/b_entries.txt | sort -u > /tmp/all_entries.txt || true
+
+          # --- START MD FILE ---
           echo "# Vulnerability comparison: ${A_BRANCH}  **vs**  ${B_BRANCH}" > "${OUT}"
           echo "" >> "${OUT}"
 
-          # Totals (unique vulnerability IDs)
+          # --- TABLE requested: VulnerabilityID | package:version | Severity | branches ---
+          echo "| VulnerabilityID | package:version | Severity | branches |" >> "${OUT}"
+          echo "|---|---|---|---|" >> "${OUT}"
+
+          if [ -s /tmp/all_entries.txt ]; then
+            while IFS= read -r line; do
+              # line format: ID|pkg:version|SEVERITY
+              id=$(echo "$line" | awk -F'|' '{print $1}')
+              pv=$(echo "$line" | awk -F'|' '{print $2}')
+              sev=$(echo "$line" | awk -F'|' '{print $3}')
+
+              inA=0; inB=0
+              if grep -Fxq "$line" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+              if grep -Fxq "$line" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+
+              if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
+                branches="**BOTH**"
+              elif [ "$inA" -eq 1 ]; then
+                branches="${A_BRANCH}"
+              else
+                branches="${B_BRANCH}"
+              fi
+
+              # salida segura (escapa pipes en campos si hay)
+              # aquí asumimos que id/pv/sev no contienen pipes adicionales
+              echo "| ${id} | ${pv} | ${sev} | ${branches} |" >> "${OUT}"
+            done < /tmp/all_entries.txt
+          else
+            echo "| - | - | - | - |" >> "${OUT}"
+            echo "" >> "${OUT}"
+          fi
+
+          echo "" >> "${OUT}"
+          # --- Totals y resto del MD (se mantienen para contexto) ---
           totalA=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
           totalB=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
           echo "- **Total unique vulnerability IDs**: ${totalA} (${A_BRANCH})  |  ${totalB} (${B_BRANCH})" >> "${OUT}"
           echo "" >> "${OUT}"
 
-          # Totals by package:version (unique vulnerable packages)
-          # Use a robust expression: handle .artifact being object or string
-          jq -r '[ .matches[]? |
-            ( if (.artifact | type) == "object"
-              then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-"))
-              else ((.artifact // "-") + ":" + ("-"))
-              end)
-            ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_pkgs.txt || true
-          jq -r '[ .matches[]? |
-            ( if (.artifact | type) == "object"
-              then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-"))
-              else ((.artifact // "-") + ":" + ("-"))
-              end)
-            ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_pkgs.txt || true
-
-          pkgsA=$(wc -l < /tmp/a_pkgs.txt 2>/dev/null || echo 0)
-          pkgsB=$(wc -l < /tmp/b_pkgs.txt 2>/dev/null || echo 0)
-          echo "- **Total unique vulnerable package:version**: ${pkgsA} (${A_BRANCH})  |  ${pkgsB} (${B_BRANCH})" >> "${OUT}"
-          echo "" >> "${OUT}"
-
-          # Severity table (counts by unique vulnerability ID) — normalize severity uppercase
-          echo "## Vulnerabilities by severity (counted by unique VulnerabilityID)" >> "${OUT}"
-          echo "" >> "${OUT}"
+          # tabla de severidad (como antes)
           echo "| Severity | ${A_BRANCH} | ${B_BRANCH} |" >> "${OUT}"
           echo "|---:|---:|---:|" >> "${OUT}"
           for sev in CRITICAL HIGH MEDIUM LOW UNKNOWN; do
@@ -152,108 +187,9 @@ jobs:
             cb=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select((.severity // "") | ascii_upcase == $s) | .id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
             echo "| $sev | $ca | $cb |" >> "${OUT}"
           done
-          echo "" >> "${OUT}"
 
-          # Prepare lists of unique vulnerability IDs
-          jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_ids.txt || true
-          jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_ids.txt || true
-
-          # New vulnerabilities in A not in B (by ID)
-          echo "## VulnerabilityIDs present in ${A_BRANCH} but NOT in ${B_BRANCH}" >> "${OUT}"
           echo "" >> "${OUT}"
-          if [ -s /tmp/a_ids.txt ]; then
-            comm -23 /tmp/a_ids.txt /tmp/b_ids.txt > /tmp/new_in_a_ids.txt || true
-            if [ -s /tmp/new_in_a_ids.txt ]; then
-              while read -r id; do
-                jq --arg id "$id" -r '
-                  .matches[]? | select(.vulnerability?.id==$id) |
-                  ("- " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
-                   ( if (.artifact | type) == "object" then (.artifact.name // .artifact.id // "-") else (.artifact // "-") end ) + " | " +
-                   ( if (.artifact | type) == "object" then (.artifact.version // "-") else "-" end ) + " | " +
-                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250] )
-                  )
-                ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
-              done < /tmp/new_in_a_ids.txt
-            else
-              echo "No unique VulnerabilityIDs in ${A_BRANCH} vs ${B_BRANCH}." >> "${OUT}"
-            fi
-          else
-            echo "No vulnerabilities found in ${A_BRANCH}." >> "${OUT}"
-          fi
-          echo "" >> "${OUT}"
-
-          # New vulnerabilities in B not in A (by ID)
-          echo "## VulnerabilityIDs present in ${B_BRANCH} but NOT in ${A_BRANCH}" >> "${OUT}"
-          echo "" >> "${OUT}"
-          if [ -s /tmp/b_ids.txt ]; then
-            comm -13 /tmp/a_ids.txt /tmp/b_ids.txt > /tmp/new_in_b_ids.txt || true
-            if [ -s /tmp/new_in_b_ids.txt ]; then
-              while read -r id; do
-                jq --arg id "$id" -r '
-                  .matches[]? | select(.vulnerability?.id==$id) |
-                  ("- " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
-                   ( if (.artifact | type) == "object" then (.artifact.name // .artifact.id // "-") else (.artifact // "-") end ) + " | " +
-                   ( if (.artifact | type) == "object" then (.artifact.version // "-") else "-" end ) + " | " +
-                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250] )
-                  )
-                ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
-              done < /tmp/new_in_b_ids.txt
-            else
-              echo "No unique VulnerabilityIDs in ${B_BRANCH} vs ${A_BRANCH}." >> "${OUT}"
-            fi
-          else
-            echo "No vulnerabilities found in ${B_BRANCH}." >> "${OUT}"
-          fi
-          echo "" >> "${OUT}"
-
-          # New vulnerable package:version in A not in B
-          echo "## package:version present in ${A_BRANCH} but NOT in ${B_BRANCH}" >> "${OUT}"
-          echo "" >> "${OUT}"
-          if [ -s /tmp/a_pkgs.txt ]; then
-            comm -23 /tmp/a_pkgs.txt /tmp/b_pkgs.txt > /tmp/new_in_a_pkgs.txt || true
-            if [ -s /tmp/new_in_a_pkgs.txt ]; then
-              while read -r pv; do
-                jq -r --arg pv "$pv" '
-                  .matches[]? | select(
-                    ( if (.artifact|type) == "object" then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-")) else ((.artifact // "-") + ":" + "-") end) == $pv
-                  ) |
-                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
-                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200])
-                  )
-                ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
-              done < /tmp/new_in_a_pkgs.txt
-            else
-              echo "No unique package:version in ${A_BRANCH} vs ${B_BRANCH}." >> "${OUT}"
-            fi
-          else
-            echo "No vulnerable packages found in ${A_BRANCH}." >> "${OUT}"
-          fi
-          echo "" >> "${OUT}"
-
-          # New vulnerable package:version in B not in A
-          echo "## package:version present in ${B_BRANCH} but NOT in ${A_BRANCH}" >> "${OUT}"
-          echo "" >> "${OUT}"
-          if [ -s /tmp/b_pkgs.txt ]; then
-            comm -13 /tmp/a_pkgs.txt /tmp/b_pkgs.txt > /tmp/new_in_b_pkgs.txt || true
-            if [ -s /tmp/new_in_b_pkgs.txt ]; then
-              while read -r pv; do
-                jq -r --arg pv "$pv" '
-                  .matches[]? | select(
-                    ( if (.artifact|type) == "object" then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-")) else ((.artifact // "-") + ":" + "-") end) == $pv
-                  ) |
-                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
-                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200])
-                  )
-                ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
-              done < /tmp/new_in_b_pkgs.txt
-            else
-              echo "No unique package:version in ${B_BRANCH} vs ${A_BRANCH}." >> "${OUT}"
-            fi
-          else
-            echo "No vulnerable packages found in ${B_BRANCH}." >> "${OUT}"
-          fi
-          echo "" >> "${OUT}"
-
+          # añadimos secciones de detalle (opcionales) - mantenidas o puedes comentarlas si no quieres
           echo "----" >> "${OUT}"
           echo "Artifacts included:" >> "${OUT}"
           echo "- ${REPORT_DIR}/branchA-sbom.cdx.json" >> "${OUT}"
@@ -267,6 +203,55 @@ jobs:
           set -euo pipefail
           cd "${REPORT_DIR}"
           zip -r comparison-artifacts.zip . || true
+
+      - name: "Publish table to GitHub Actions summary (only the table)"
+        if: always()
+        run: |
+          set -euo pipefail
+          SUMMARY="$GITHUB_STEP_SUMMARY"
+          A_BRANCH="${{ github.event.inputs.branch_a }}"
+          B_BRANCH="${{ github.event.inputs.branch_b }}"
+
+          # Comprueba que exista la tabla (en /tmp/all_entries o en reports MD)
+          if [ ! -f /tmp/all_entries.txt ] || [ ! -s /tmp/all_entries.txt ]; then
+            # Si all_entries no tiene datos, intentamos extraer del MD
+            if [ -f "${REPORT_DIR}/comparison-report.md" ]; then
+              # extraemos la tabla completa entre el header y la línea en blanco que sigue
+              awk '
+                BEGIN {found=0}
+                /^\\| VulnerabilityID \\| package:version \\| Severity \\| branches \\|/ {found=1; print; next}
+                found==1 { if (/^$/) exit; print }
+              ' "${REPORT_DIR}/comparison-report.md" >> "$SUMMARY" || true
+            else
+              echo "No table available to show in summary." >> "$SUMMARY"
+            fi
+            exit 0
+          fi
+
+          # Build the table header in the summary
+          echo "| VulnerabilityID | package:version | Severity | branches |" >> "$SUMMARY"
+          echo "|---|---|---|---|" >> "$SUMMARY"
+
+          # For each entry in /tmp/all_entries.txt, build row with branches decision (same logic as in MD)
+          while IFS= read -r line; do
+            id=$(echo "$line" | awk -F'|' '{print $1}')
+            pv=$(echo "$line" | awk -F'|' '{print $2}')
+            sev=$(echo "$line" | awk -F'|' '{print $3}')
+
+            inA=0; inB=0
+            if grep -Fxq "$line" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+            if grep -Fxq "$line" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+
+            if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
+              branches="**BOTH**"
+            elif [ "$inA" -eq 1 ]; then
+              branches="${A_BRANCH}"
+            else
+              branches="${B_BRANCH}"
+            fi
+
+            echo "| ${id} | ${pv} | ${sev} | ${branches} |" >> "$SUMMARY"
+          done < /tmp/all_entries.txt
 
       - name: Upload artifacts (reports)
         uses: actions/upload-artifact@v4
