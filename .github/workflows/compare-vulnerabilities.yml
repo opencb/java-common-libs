@@ -74,8 +74,8 @@ jobs:
           set -euo pipefail
           grype sbom:"${REPORT_DIR}/branchB-sbom.cdx.json" -o json > "${REPORT_DIR}/branchB-grype.json"
 
-      - name:
-          Debug: show match counts and sample (for troubleshooting)
+      - name: "debug - show match counts and sample (for troubleshooting)"
+        id: debug
         run: |
           set -euo pipefail
           echo "---- branchA summary ----"
