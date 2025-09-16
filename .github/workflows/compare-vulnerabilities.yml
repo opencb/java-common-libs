@@ -1,0 +1,212 @@
+name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_a:
+        description: 'First branch to compare (e.g. main)'
+        required: true
+        default: 'main'
+      branch_b:
+        description: 'Second branch to compare (e.g. feature/fix-branch)'
+        required: true
+        default: ''
+
+jobs:
+  compare-sbom-grype:
+    runs-on: ubuntu-latest
+    env:
+      REPORT_DIR: reports
+    steps:
+      - name: Prepare workspace
+        run: |
+          mkdir -p "${REPORT_DIR}"
+
+      - name: Checkout branch A
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_a }}
+          path: branchA
+          fetch-depth: 0
+
+      - name: Checkout branch B
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_b }}
+          path: branchB
+          fetch-depth: 0
+
+      - name: Install dependencies (jq, unzip)
+        run: sudo apt-get update && sudo apt-get install -y jq unzip
+
+      - name: Install Syft (generate SBOMs)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Install Grype (scan SBOMs)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM for branch A (CycloneDX JSON)
+        run: |
+          set -euo pipefail
+          syft dir:./branchA -o cyclonedx-json="${REPORT_DIR}/branchA-sbom.cdx.json"
+
+      - name: Generate SBOM for branch B (CycloneDX JSON)
+        run: |
+          set -euo pipefail
+          syft dir:./branchB -o cyclonedx-json="${REPORT_DIR}/branchB-sbom.cdx.json"
+
+      - name: Scan SBOM with Grype (branch A)
+        run: |
+          set -euo pipefail
+          grype sbom:"${REPORT_DIR}/branchA-sbom.cdx.json" -o json > "${REPORT_DIR}/branchA-grype.json" || true
+
+      - name: Scan SBOM with Grype (branch B)
+        run: |
+          set -euo pipefail
+          grype sbom:"${REPORT_DIR}/branchB-sbom.cdx.json" -o json > "${REPORT_DIR}/branchB-grype.json" || true
+
+      - name: Generate comparison report (by VulnerabilityID and by package:version)
+        run: |
+          set -euo pipefail
+          A_BRANCH="${{ github.event.inputs.branch_a }}"
+          B_BRANCH="${{ github.event.inputs.branch_b }}"
+          A_GRYPE="${REPORT_DIR}/branchA-grype.json"
+          B_GRYPE="${REPORT_DIR}/branchB-grype.json"
+          OUT="${REPORT_DIR}/comparison-report.md"
+          mkdir -p "$(dirname "$OUT")"
+
+          echo "# Vulnerability comparison: ${A_BRANCH}  **vs**  ${B_BRANCH}" > "${OUT}"
+          echo "" >> "${OUT}"
+          # Totals (unique vulnerability IDs)
+          totalA=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+          totalB=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+          echo "- **Total unique vulnerability IDs**: ${totalA} (${A_BRANCH})  |  ${totalB} (${B_BRANCH})" >> "${OUT}"
+          echo "" >> "${OUT}"
+
+          # Totals by package:version (unique vulnerable packages)
+          pkgsA=$(jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+          pkgsB=$(jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+          echo "- **Total unique vulnerable package:version**: ${pkgsA} (${A_BRANCH})  |  ${pkgsB} (${B_BRANCH})" >> "${OUT}"
+          echo "" >> "${OUT}"
+
+          # Severity table (counts by vulnerability ID)
+          echo "## Vulnerabilities by severity (counted by unique VulnerabilityID)" >> "${OUT}"
+          echo "" >> "${OUT}"
+          echo "| Severity | ${A_BRANCH} | ${B_BRANCH} |" >> "${OUT}"
+          echo "|---:|---:|---:|" >> "${OUT}"
+          for sev in CRITICAL HIGH MEDIUM LOW UNKNOWN; do
+            ca=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select(.severity==$s) | .id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+            cb=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select(.severity==$s) | .id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+            echo "| $sev | $ca | $cb |" >> "${OUT}"
+          done
+          echo "" >> "${OUT}"
+
+          # Create lists of unique vulnerability IDs
+          jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_ids.txt || true
+          jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_ids.txt || true
+
+          # Create lists of unique package:version pairs
+          jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_pkgs.txt || true
+          jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_pkgs.txt || true
+
+          # New vulnerabilities in A not in B (by ID)
+          echo "## VulnerabilityIDs present in ${A_BRANCH} but NOT in ${B_BRANCH}" >> "${OUT}"
+          echo "" >> "${OUT}"
+          if [ -s /tmp/a_ids.txt ]; then
+            comm -23 /tmp/a_ids.txt /tmp/b_ids.txt > /tmp/new_in_a_ids.txt || true
+            if [ -s /tmp/new_in_a_ids.txt ]; then
+              while read -r id; do
+                jq --arg id "$id" -r '
+                  .matches[]? | select(.vulnerability?.id==$id) |
+                  ("- " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + (.artifact.name // "-") + " | " + (.artifact.version // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250]))
+                ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
+              done < /tmp/new_in_a_ids.txt
+            else
+              echo "No unique VulnerabilityIDs in ${A_BRANCH} vs ${B_BRANCH}." >> "${OUT}"
+            fi
+          else
+            echo "No vulnerabilities found in ${A_BRANCH}." >> "${OUT}"
+          fi
+          echo "" >> "${OUT}"
+
+          # New vulnerabilities in B not in A (by ID)
+          echo "## VulnerabilityIDs present in ${B_BRANCH} but NOT in ${A_BRANCH}" >> "${OUT}"
+          echo "" >> "${OUT}"
+          if [ -s /tmp/b_ids.txt ]; then
+            comm -13 /tmp/a_ids.txt /tmp/b_ids.txt > /tmp/new_in_b_ids.txt || true
+            if [ -s /tmp/new_in_b_ids.txt ]; then
+              while read -r id; do
+                jq --arg id "$id" -r '
+                  .matches[]? | select(.vulnerability?.id==$id) |
+                  ("- " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + (.artifact.name // "-") + " | " + (.artifact.version // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250]))
+                ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
+              done < /tmp/new_in_b_ids.txt
+            else
+              echo "No unique VulnerabilityIDs in ${B_BRANCH} vs ${A_BRANCH}." >> "${OUT}"
+            fi
+          else
+            echo "No vulnerabilities found in ${B_BRANCH}." >> "${OUT}"
+          fi
+          echo "" >> "${OUT}"
+
+          # New vulnerable package:version in A not in B
+          echo "## package:version present in ${A_BRANCH} but NOT in ${B_BRANCH}" >> "${OUT}"
+          echo "" >> "${OUT}"
+          if [ -s /tmp/a_pkgs.txt ]; then
+            comm -23 /tmp/a_pkgs.txt /tmp/b_pkgs.txt > /tmp/new_in_a_pkgs.txt || true
+            if [ -s /tmp/new_in_a_pkgs.txt ]; then
+              while read -r pv; do
+                # show a sample vulnerability that affects this pkg:version
+                jq -r --arg pv "$pv" '
+                  .matches[]? | select((.artifact.name // "-") + ":" + (.artifact.version // "-") == $pv) |
+                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200]))
+                ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
+              done < /tmp/new_in_a_pkgs.txt
+            else
+              echo "No unique package:version in ${A_BRANCH} vs ${B_BRANCH}." >> "${OUT}"
+            fi
+          else
+            echo "No vulnerable packages found in ${A_BRANCH}." >> "${OUT}"
+          fi
+          echo "" >> "${OUT}"
+
+          # New vulnerable package:version in B not in A
+          echo "## package:version present in ${B_BRANCH} but NOT in ${A_BRANCH}" >> "${OUT}"
+          echo "" >> "${OUT}"
+          if [ -s /tmp/b_pkgs.txt ]; then
+            comm -13 /tmp/a_pkgs.txt /tmp/b_pkgs.txt > /tmp/new_in_b_pkgs.txt || true
+            if [ -s /tmp/new_in_b_pkgs.txt ]; then
+              while read -r pv; do
+                jq -r --arg pv "$pv" '
+                  .matches[]? | select((.artifact.name // "-") + ":" + (.artifact.version // "-") == $pv) |
+                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200]))
+                ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
+              done < /tmp/new_in_b_pkgs.txt
+            else
+              echo "No unique package:version in ${B_BRANCH} vs ${A_BRANCH}." >> "${OUT}"
+            fi
+          else
+            echo "No vulnerable packages found in ${B_BRANCH}." >> "${OUT}"
+          fi
+          echo "" >> "${OUT}"
+
+          echo "----" >> "${OUT}"
+          echo "Artifacts included:" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchA-sbom.cdx.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchB-sbom.cdx.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchA-grype.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchB-grype.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/comparison-report.md (this file)" >> "${OUT}"
+
+      - name: Create ZIP of reports
+        run: |
+          cd "${REPORT_DIR}"
+          zip -r comparison-artifacts.zip . || true
+
+      - name: Upload artifacts (reports)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln-comparison-${{ github.run_id }}
+          path: ${{ env.REPORT_DIR }}
