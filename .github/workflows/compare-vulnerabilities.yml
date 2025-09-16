@@ -1,4 +1,4 @@
-name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches
+name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches (robust)
 
 on:
   workflow_dispatch:
@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Prepare workspace
         run: |
+          set -euo pipefail
           mkdir -p "${REPORT_DIR}"
 
       - name: Checkout branch A
@@ -37,15 +38,21 @@ jobs:
           fetch-depth: 0
 
       - name: Install dependencies (jq, unzip)
-        run: sudo apt-get update && sudo apt-get install -y jq unzip
-
-      - name: Install Syft (generate SBOMs)
         run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+
+      - name: Install Syft
+        run: |
+          set -euo pipefail
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          syft version
 
-      - name: Install Grype (scan SBOMs)
+      - name: Install Grype
         run: |
+          set -euo pipefail
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          grype version
 
       - name: Generate SBOM for branch A (CycloneDX JSON)
         run: |
@@ -60,14 +67,33 @@ jobs:
       - name: Scan SBOM with Grype (branch A)
         run: |
           set -euo pipefail
-          grype sbom:"${REPORT_DIR}/branchA-sbom.cdx.json" -o json > "${REPORT_DIR}/branchA-grype.json" || true
+          grype sbom:"${REPORT_DIR}/branchA-sbom.cdx.json" -o json > "${REPORT_DIR}/branchA-grype.json"
 
       - name: Scan SBOM with Grype (branch B)
         run: |
           set -euo pipefail
-          grype sbom:"${REPORT_DIR}/branchB-sbom.cdx.json" -o json > "${REPORT_DIR}/branchB-grype.json" || true
+          grype sbom:"${REPORT_DIR}/branchB-sbom.cdx.json" -o json > "${REPORT_DIR}/branchB-grype.json"
 
-      - name: Generate comparison report (by VulnerabilityID and by package:version)
+      - name:
+          Debug: show match counts and sample (for troubleshooting)
+        run: |
+          set -euo pipefail
+          echo "---- branchA summary ----"
+          if [ -f "${REPORT_DIR}/branchA-grype.json" ]; then
+            jq '.matches | length' "${REPORT_DIR}/branchA-grype.json" || true
+            jq '.matches[0:5]' "${REPORT_DIR}/branchA-grype.json" || true
+          else
+            echo "branchA-grype.json missing"
+          fi
+          echo "---- branchB summary ----"
+          if [ -f "${REPORT_DIR}/branchB-grype.json" ]; then
+            jq '.matches | length' "${REPORT_DIR}/branchB-grype.json" || true
+            jq '.matches[0:5]' "${REPORT_DIR}/branchB-grype.json" || true
+          else
+            echo "branchB-grype.json missing"
+          fi
+
+      - name: Generate robust comparison report (by VulnerabilityID and by package:version)
         run: |
           set -euo pipefail
           A_BRANCH="${{ github.event.inputs.branch_a }}"
@@ -77,8 +103,19 @@ jobs:
           OUT="${REPORT_DIR}/comparison-report.md"
           mkdir -p "$(dirname "$OUT")"
 
+          # --- basic presence checks ---
+          if [ ! -s "$A_GRYPE" ]; then
+            echo "ERROR: ${A_GRYPE} not found or empty" >&2
+            exit 1
+          fi
+          if [ ! -s "$B_GRYPE" ]; then
+            echo "ERROR: ${B_GRYPE} not found or empty" >&2
+            exit 1
+          fi
+
           echo "# Vulnerability comparison: ${A_BRANCH}  **vs**  ${B_BRANCH}" > "${OUT}"
           echo "" >> "${OUT}"
+
           # Totals (unique vulnerability IDs)
           totalA=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
           totalB=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
@@ -86,30 +123,40 @@ jobs:
           echo "" >> "${OUT}"
 
           # Totals by package:version (unique vulnerable packages)
-          pkgsA=$(jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
-          pkgsB=$(jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+          # Use a robust expression: handle .artifact being object or string
+          jq -r '[ .matches[]? |
+            ( if (.artifact | type) == "object"
+              then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-"))
+              else ((.artifact // "-") + ":" + ("-"))
+              end)
+            ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_pkgs.txt || true
+          jq -r '[ .matches[]? |
+            ( if (.artifact | type) == "object"
+              then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-"))
+              else ((.artifact // "-") + ":" + ("-"))
+              end)
+            ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_pkgs.txt || true
+
+          pkgsA=$(wc -l < /tmp/a_pkgs.txt 2>/dev/null || echo 0)
+          pkgsB=$(wc -l < /tmp/b_pkgs.txt 2>/dev/null || echo 0)
           echo "- **Total unique vulnerable package:version**: ${pkgsA} (${A_BRANCH})  |  ${pkgsB} (${B_BRANCH})" >> "${OUT}"
           echo "" >> "${OUT}"
 
-          # Severity table (counts by vulnerability ID)
+          # Severity table (counts by unique vulnerability ID) — normalize severity uppercase
           echo "## Vulnerabilities by severity (counted by unique VulnerabilityID)" >> "${OUT}"
           echo "" >> "${OUT}"
           echo "| Severity | ${A_BRANCH} | ${B_BRANCH} |" >> "${OUT}"
           echo "|---:|---:|---:|" >> "${OUT}"
           for sev in CRITICAL HIGH MEDIUM LOW UNKNOWN; do
-            ca=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select(.severity==$s) | .id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
-            cb=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select(.severity==$s) | .id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+            ca=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select((.severity // "") | ascii_upcase == $s) | .id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+            cb=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select((.severity // "") | ascii_upcase == $s) | .id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
             echo "| $sev | $ca | $cb |" >> "${OUT}"
           done
           echo "" >> "${OUT}"
 
-          # Create lists of unique vulnerability IDs
+          # Prepare lists of unique vulnerability IDs
           jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_ids.txt || true
           jq -r '[ .matches[]?.vulnerability?.id ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_ids.txt || true
-
-          # Create lists of unique package:version pairs
-          jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | .[]' "${A_GRYPE}" 2>/dev/null | sort > /tmp/a_pkgs.txt || true
-          jq -r '[ .matches[]? | "\(.artifact.name // \"-\"):\(.artifact.version // \"-\")" ] | unique | .[]' "${B_GRYPE}" 2>/dev/null | sort > /tmp/b_pkgs.txt || true
 
           # New vulnerabilities in A not in B (by ID)
           echo "## VulnerabilityIDs present in ${A_BRANCH} but NOT in ${B_BRANCH}" >> "${OUT}"
@@ -120,7 +167,11 @@ jobs:
               while read -r id; do
                 jq --arg id "$id" -r '
                   .matches[]? | select(.vulnerability?.id==$id) |
-                  ("- " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + (.artifact.name // "-") + " | " + (.artifact.version // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250]))
+                  ("- " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
+                   ( if (.artifact | type) == "object" then (.artifact.name // .artifact.id // "-") else (.artifact // "-") end ) + " | " +
+                   ( if (.artifact | type) == "object" then (.artifact.version // "-") else "-" end ) + " | " +
+                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250] )
+                  )
                 ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
               done < /tmp/new_in_a_ids.txt
             else
@@ -140,7 +191,11 @@ jobs:
               while read -r id; do
                 jq --arg id "$id" -r '
                   .matches[]? | select(.vulnerability?.id==$id) |
-                  ("- " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + (.artifact.name // "-") + " | " + (.artifact.version // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250]))
+                  ("- " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
+                   ( if (.artifact | type) == "object" then (.artifact.name // .artifact.id // "-") else (.artifact // "-") end ) + " | " +
+                   ( if (.artifact | type) == "object" then (.artifact.version // "-") else "-" end ) + " | " +
+                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:250] )
+                  )
                 ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
               done < /tmp/new_in_b_ids.txt
             else
@@ -158,10 +213,13 @@ jobs:
             comm -23 /tmp/a_pkgs.txt /tmp/b_pkgs.txt > /tmp/new_in_a_pkgs.txt || true
             if [ -s /tmp/new_in_a_pkgs.txt ]; then
               while read -r pv; do
-                # show a sample vulnerability that affects this pkg:version
                 jq -r --arg pv "$pv" '
-                  .matches[]? | select((.artifact.name // "-") + ":" + (.artifact.version // "-") == $pv) |
-                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200]))
+                  .matches[]? | select(
+                    ( if (.artifact|type) == "object" then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-")) else ((.artifact // "-") + ":" + "-") end) == $pv
+                  ) |
+                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
+                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200])
+                  )
                 ' "${A_GRYPE}" | head -n 1 >> "${OUT}"
               done < /tmp/new_in_a_pkgs.txt
             else
@@ -180,8 +238,12 @@ jobs:
             if [ -s /tmp/new_in_b_pkgs.txt ]; then
               while read -r pv; do
                 jq -r --arg pv "$pv" '
-                  .matches[]? | select((.artifact.name // "-") + ":" + (.artifact.version // "-") == $pv) |
-                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + (.vulnerability.severity // "-") + " | " + ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200]))
+                  .matches[]? | select(
+                    ( if (.artifact|type) == "object" then ((.artifact.name // .artifact.id // "-") + ":" + (.artifact.version // "-")) else ((.artifact // "-") + ":" + "-") end) == $pv
+                  ) |
+                  ("- " + $pv + " | " + (.vulnerability.id // "-") + " | " + ((.vulnerability.severity // "") | ascii_upcase // "-") + " | " +
+                   ((.vulnerability.description // "") | gsub("\n"; " ") | .[0:200])
+                  )
                 ' "${B_GRYPE}" | head -n 1 >> "${OUT}"
               done < /tmp/new_in_b_pkgs.txt
             else
@@ -202,11 +264,12 @@ jobs:
 
       - name: Create ZIP of reports
         run: |
+          set -euo pipefail
           cd "${REPORT_DIR}"
           zip -r comparison-artifacts.zip . || true
 
       - name: Upload artifacts (reports)
         uses: actions/upload-artifact@v4
         with:
-          name: vuln-comparison-${{ github.run_id }}
+          name: vuln-comparison-${{ github.run_id }}-${{ github.event.inputs.branch_a }}-vs-${{ github.event.inputs.branch_b }}-$(date +%s)
           path: ${{ env.REPORT_DIR }}
