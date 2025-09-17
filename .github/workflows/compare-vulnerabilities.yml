@@ -1,5 +1,5 @@
 name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches (robust)
-
+run-name: 'Compare vulnerabilities between (Base) ${{ inputs.branch_a }} and (Base) ${{ inputs.branch_b }}  by @${{ github.actor }}'
 on:
   workflow_dispatch:
     inputs:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
 
     steps:
-      # 1) Checkout only the HEAD branch
+      # 1) Checkout head branch only
       - name: Checkout head branch
         uses: actions/checkout@v4
         with:
@@ -24,19 +24,19 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      # 2) Explicitly fetch the BASE branch so it exists locally
+      # 2) Ensure base branch exists locally (fetch)
       - name: Fetch base branch
         run: |
           git fetch origin ${{ github.event.inputs.branch_a }}:refs/remotes/origin/${{ github.event.inputs.branch_a }}
 
-      # 3) Run the vulnerability diff action
+      # 3) Run the action
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v1
         with:
-          # Use refs that are guaranteed to exist locally
-          base_ref: refs/remotes/origin/${{ github.event.inputs.branch_a }}
-          head_ref: ${{ github.sha }}  # safer than branch name to avoid worktree conflicts
+          base_ref: ${{ github.event.inputs.branch_a }}   # pass 'develop'
+          head_ref: ${{ github.event.inputs.branch_b }}   # pass 'TASK-7908'
           build_command: "mvn -q -DskipTests clean package"
           min_severity: "LOW"
           write_summary: "true"
           path: "."
+
