@@ -20,7 +20,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: TASK-7908
+          ref: ${{ github.event.inputs.branch_a }}
+          fetch-tags: true
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch_b }}
           fetch-tags: true
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v1
