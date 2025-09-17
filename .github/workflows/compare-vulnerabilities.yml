@@ -36,7 +36,7 @@ jobs:
           # Use refs that are guaranteed to exist locally
           base_ref: refs/remotes/origin/${{ github.event.inputs.branch_a }}
           head_ref: ${{ github.sha }}  # safer than branch name to avoid worktree conflicts
-          build_command: "mvn -q -DskipTests package"
+          build_command: "mvn -q -DskipTests clean package"
           min_severity: "LOW"
           write_summary: "true"
           path: "."
