@@ -16,6 +16,10 @@ jobs:
   compare-sbom-grype:
     runs-on: ${{ vars.UBUNTU_VERSION }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v1
         with:
