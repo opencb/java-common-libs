@@ -19,8 +19,8 @@ jobs:
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v1
         with:
-          base_ref: main           # o la que quieras comparar como base
-          head_ref: feature/xyz    # tu rama a comparar
+          base_ref: ${{ github.event.inputs.branch_a }}          # o la que quieras comparar como base
+          head_ref: ${{ github.event.inputs.branch_b }}   # tu rama a comparar
           build_command: "mvn -q -DskipTests package"
           min_severity: "LOW"      # o HIGH si quieres ver solo HIGH/CRITICAL
           write_summary: "true"
