@@ -4,35 +4,39 @@ on:
   workflow_dispatch:
     inputs:
       branch_a:
-        description: 'First branch to compare (e.g. main)'
+        description: 'Base branch (e.g. develop)'
         required: true
         default: 'develop'
       branch_b:
-        description: 'Second branch to compare (e.g. feature/fix-branch)'
+        description: 'Head branch (e.g. TASK-1234)'
         required: true
-        default: ''
 
 jobs:
   compare-sbom-grype:
     runs-on: ${{ vars.UBUNTU_VERSION }}
+
     steps:
-      - name: Checkout
+      # 1) Checkout only the HEAD branch
+      - name: Checkout head branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.inputs.branch_a }}
-          fetch-tags: true
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
           ref: ${{ github.event.inputs.branch_b }}
+          fetch-depth: 0
           fetch-tags: true
+
+      # 2) Explicitly fetch the BASE branch so it exists locally
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.inputs.branch_a }}:refs/remotes/origin/${{ github.event.inputs.branch_a }}
+
+      # 3) Run the vulnerability diff action
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v1
         with:
-          base_ref: ${{ github.event.inputs.branch_a }}
-          head_ref: ${{ github.event.inputs.branch_b }}
+          # Use refs that are guaranteed to exist locally
+          base_ref: refs/remotes/origin/${{ github.event.inputs.branch_a }}
+          head_ref: ${{ github.sha }}  # safer than branch name to avoid worktree conflicts
           build_command: "mvn -q -DskipTests package"
           min_severity: "LOW"
           write_summary: "true"
+          path: "."
