@@ -35,8 +35,9 @@ jobs:
         with:
           base_ref: ${{ github.event.inputs.branch_a }}   # pass 'develop'
           head_ref: ${{ github.event.inputs.branch_b }}   # pass 'TASK-7908'
-          build_command: "mvn -q -DskipTests clean package"
-          min_severity: "LOW"
+          build_command: ""
           write_summary: "true"
-          path: "."
+          upload_artifact: "true"
+          report_pdf: "true"
+          min_severity: "LOW"
 
