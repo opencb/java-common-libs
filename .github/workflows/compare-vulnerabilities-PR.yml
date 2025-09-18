@@ -1,0 +1,41 @@
+name: PR – Vulnerability guard
+run-name: 'Compare vulnerabilities between (Base) ${{ github.event.pull_request.base.ref }} and (Head) ${{ github.event.pull_request.head.ref }} (${{ github.event.pull_request.head.sha }}) by @${{ github.actor }}'
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+permissions:
+  contents: read
+  pull-requests: write   # needed to create/update PR comments
+
+jobs:
+  compare-branches:
+    runs-on: ${{ vars.UBUNTU_VERSION }}
+
+    steps:
+      # 1) Checkout head branch only
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Ensure base is available
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }} --tags --prune
+
+      # 3) Run the action
+      - name: Vulnerability Diff (Syft+Grype)
+        uses: sec-open/vuln-diff-action@v1
+        with:
+          base_ref: ${{ github.event.pull_request.base.ref }}
+          head_ref: ${{ github.event.pull_request.head.sha }}
+          build_command: ""
+          write_summary: "true"
+          upload_artifact: "true"
+          report_pdf: "true"
+          min_severity: "LOW"
+          pr_comment: "true"                # << habilita comentario en PR
+          pr_comment_marker: "<!-- vuln-diff-action:comment -->"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
