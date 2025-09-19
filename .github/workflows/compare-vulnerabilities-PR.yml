@@ -39,3 +39,4 @@ jobs:
           pr_comment: "true"                # << habilita comentario en PR
           pr_comment_marker: "<!-- vuln-diff-action:comment -->"
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_webhook_url: ${{ secrets.SLACK_SECURITY_WEBHOOK_URL }}
