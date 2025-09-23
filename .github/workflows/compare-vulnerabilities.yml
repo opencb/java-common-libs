@@ -31,13 +31,16 @@ jobs:
 
       # 3) Run the action
       - name: Vulnerability Diff (Syft+Grype)
-        uses: sec-open/vuln-diff-action@v1
+        uses: sec-open/vuln-diff-action@release-2.x.x
         with:
           base_ref: ${{ github.event.inputs.branch_a }}   # pass 'develop'
           head_ref: ${{ github.event.inputs.branch_b }}   # pass 'TASK-7908'
           build_command: ""
           write_summary: "true"
           upload_artifact: "true"
+          artifact_name: "vulnerability-diff-${{ github.event.inputs.branch_a }}-vs-${{ github.event.inputs.branch_b }}"
+          report_html: "true"
           report_pdf: "true"
           min_severity: "LOW"
+          title_logo_url: "https://zettagenomics.com/wp-content/uploads/2022/10/Zetta-reversed-out-full-logo-dark-background.png"
 
