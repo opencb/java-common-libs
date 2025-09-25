@@ -1,5 +1,5 @@
 name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches (robust)
-run-name: 'Compare vulnerabilities between (Base) ${{ inputs.branch_a }} and (head) ${{ inputs.branch_b }}  by @${{ github.actor }}'
+run-name: 'Compare vulnerabilities between ${{ inputs.branch_a }} (base) and ${{ inputs.branch_b }} (head) by @${{ github.actor }}'
 on:
   workflow_dispatch:
     inputs:
