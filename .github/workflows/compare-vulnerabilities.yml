@@ -1,0 +1,273 @@
+name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches (robust)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_a:
+        description: 'First branch to compare (e.g. main)'
+        required: true
+        default: 'develop'
+      branch_b:
+        description: 'Second branch to compare (e.g. feature/fix-branch)'
+        required: true
+        default: ''
+
+jobs:
+  compare-sbom-grype:
+    runs-on: ubuntu-latest
+    env:
+      REPORT_DIR: reports
+    steps:
+      - name: Prepare workspace
+        run: |
+          set -euo pipefail
+          mkdir -p "${REPORT_DIR}"
+
+      - name: Checkout branch A
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_a }}
+          path: branchA
+          fetch-depth: 0
+
+      - name: Checkout branch B
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch_b }}
+          path: branchB
+          fetch-depth: 0
+
+      - name: Install dependencies (jq, unzip)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+
+      - name: Install Syft
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          syft version
+
+      - name: Install Grype
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo sh -s -- -b /usr/local/bin
+          grype version
+
+      - name: Generate SBOM for branch A (CycloneDX JSON)
+        run: |
+          set -euo pipefail
+          syft dir:./branchA -o cyclonedx-json="${REPORT_DIR}/branchA-sbom.cdx.json"
+
+      - name: Generate SBOM for branch B (CycloneDX JSON)
+        run: |
+          set -euo pipefail
+          syft dir:./branchB -o cyclonedx-json="${REPORT_DIR}/branchB-sbom.cdx.json"
+
+      - name: Scan SBOM with Grype (branch A)
+        run: |
+          set -euo pipefail
+          grype sbom:"${REPORT_DIR}/branchA-sbom.cdx.json" -o json > "${REPORT_DIR}/branchA-grype.json"
+
+      - name: Scan SBOM with Grype (branch B)
+        run: |
+          set -euo pipefail
+          grype sbom:"${REPORT_DIR}/branchB-sbom.cdx.json" -o json > "${REPORT_DIR}/branchB-grype.json"
+
+      - name: "debug - show match counts and sample (for troubleshooting)"
+        id: debug
+        run: |
+          set -euo pipefail
+          echo "---- branchA summary ----"
+          if [ -f "${REPORT_DIR}/branchA-grype.json" ]; then
+            jq '.matches | length' "${REPORT_DIR}/branchA-grype.json" || true
+            jq '.matches[0:5]' "${REPORT_DIR}/branchA-grype.json" || true
+          else
+            echo "branchA-grype.json missing"
+          fi
+          echo "---- branchB summary ----"
+          if [ -f "${REPORT_DIR}/branchB-grype.json" ]; then
+            jq '.matches | length' "${REPORT_DIR}/branchB-grype.json" || true
+            jq '.matches[0:5]' "${REPORT_DIR}/branchB-grype.json" || true
+          else
+            echo "branchB-grype.json missing"
+          fi
+
+      - name: Generate comparison report (table + full MD)
+        id: gen_report
+        run: |
+          set -euo pipefail
+          A_BRANCH="${{ github.event.inputs.branch_a }}"
+          B_BRANCH="${{ github.event.inputs.branch_b }}"
+          A_GRYPE="${REPORT_DIR}/branchA-grype.json"
+          B_GRYPE="${REPORT_DIR}/branchB-grype.json"
+          OUT="${REPORT_DIR}/comparison-report.md"
+          mkdir -p "$(dirname "$OUT")"
+
+          # comprueba que los JSON existen
+          if [ ! -s "$A_GRYPE" ]; then
+            echo "ERROR: ${A_GRYPE} not found or empty" >&2
+            exit 1
+          fi
+          if [ ! -s "$B_GRYPE" ]; then
+            echo "ERROR: ${B_GRYPE} not found or empty" >&2
+            exit 1
+          fi
+
+          # --- extraer entradas formateadas: ID|pkg:version|SEVERITY ---
+          jq -r '[ .matches[]? as $m |
+                    ($m.vulnerability.id // "-") as $id |
+                    ( if ($m.artifact | type) == "object"
+                        then (($m.artifact.name // $m.artifact.id // "-") + ":" + ($m.artifact.version // "-"))
+                        else (($m.artifact // "-") + ":" + "-")
+                      end) as $pv |
+                    (($id + "|" + $pv + "|" + (($m.vulnerability.severity // "") | ascii_upcase)))
+                  ] | .[]' "$A_GRYPE" | sort -u > /tmp/a_entries.txt || true
+
+          jq -r '[ .matches[]? as $m |
+                    ($m.vulnerability.id // "-") as $id |
+                    ( if ($m.artifact | type) == "object"
+                        then (($m.artifact.name // $m.artifact.id // "-") + ":" + ($m.artifact.version // "-"))
+                        else (($m.artifact // "-") + ":" + "-")
+                      end) as $pv |
+                    (($id + "|" + $pv + "|" + (($m.vulnerability.severity // "") | ascii_upcase)))
+                  ] | .[]' "$B_GRYPE" | sort -u > /tmp/b_entries.txt || true
+
+          # union de entradas (unique)
+          cat /tmp/a_entries.txt /tmp/b_entries.txt | sort -u > /tmp/all_entries.txt || true
+
+          # --- crear archivo ordenado por severidad desc (rank) y luego por ID ---
+          awk -F'|' '
+            BEGIN {
+              map["CRITICAL"]=5; map["HIGH"]=4; map["MEDIUM"]=3; map["LOW"]=2; map["UNKNOWN"]=1;
+            }
+            {
+              id=$1; pv=$2; sev=toupper($3);
+              rank = (sev in map ? map[sev] : 0);
+              # output: rank|sev|id|pv
+              printf("%d|%s|%s|%s\n", rank, sev, id, pv);
+            }
+          ' /tmp/all_entries.txt | sort -t'|' -k1,1nr -k3,3 | cut -d'|' -f2- > /tmp/all_sorted.txt || true
+
+          # --- START MD FILE ---
+          echo "# Vulnerability comparison: ${A_BRANCH}  **vs**  ${B_BRANCH}" > "${OUT}"
+          echo "" >> "${OUT}"
+
+          # --- TABLE requested: Severity | VulnerabilityID | package:version | branches ---
+          echo "| Severity | VulnerabilityID | package:version | branches |" >> "${OUT}"
+          echo "|---|---|---|---|" >> "${OUT}"
+
+          if [ -s /tmp/all_sorted.txt ]; then
+            while IFS= read -r line; do
+              # line format: SEV|ID|PKG:VER
+              sev=$(echo "$line" | awk -F'|' '{print $1}')
+              id=$(echo "$line" | awk -F'|' '{print $2}')
+              pv=$(echo "$line" | awk -F'|' '{print $3}')
+
+              inA=0; inB=0
+              # membership checks use original a_entries/b_entries (ID|pkg|sev)
+              entry="${id}|${pv}|${sev}"
+              if grep -Fxq "$entry" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+              if grep -Fxq "$entry" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+
+              if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
+                branches="**BOTH**"
+              elif [ "$inA" -eq 1 ]; then
+                branches="${A_BRANCH}"
+              else
+                branches="${B_BRANCH}"
+              fi
+
+              echo "| ${sev} | ${id} | ${pv} | ${branches} |" >> "${OUT}"
+            done < /tmp/all_sorted.txt
+          else
+            echo "| - | - | - | - |" >> "${OUT}"
+            echo "" >> "${OUT}"
+          fi
+
+          echo "" >> "${OUT}"
+          # --- Totals y resto del MD (se mantienen para contexto) ---
+          totalA=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+          totalB=$(jq -r '[ .matches[]?.vulnerability?.id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+          echo "- **Total unique vulnerability IDs**: ${totalA} (${A_BRANCH})  |  ${totalB} (${B_BRANCH})" >> "${OUT}"
+          echo "" >> "${OUT}"
+
+          # tabla de severidad (como antes)
+          echo "| Severity | ${A_BRANCH} | ${B_BRANCH} |" >> "${OUT}"
+          echo "|---:|---:|---:|" >> "${OUT}"
+          for sev in CRITICAL HIGH MEDIUM LOW UNKNOWN; do
+            ca=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select((.severity // "") | ascii_upcase == $s) | .id ] | unique | length' "${A_GRYPE}" 2>/dev/null || echo 0)
+            cb=$(jq --arg s "$sev" '[ .matches[]?.vulnerability? | select((.severity // "") | ascii_upcase == $s) | .id ] | unique | length' "${B_GRYPE}" 2>/dev/null || echo 0)
+            echo "| $sev | $ca | $cb |" >> "${OUT}"
+          done
+
+          echo "" >> "${OUT}"
+          echo "----" >> "${OUT}"
+          echo "Artifacts included:" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchA-sbom.cdx.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchB-sbom.cdx.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchA-grype.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/branchB-grype.json" >> "${OUT}"
+          echo "- ${REPORT_DIR}/comparison-report.md (this file)" >> "${OUT}"
+
+
+      - name: Create ZIP of reports
+        run: |
+          set -euo pipefail
+          cd "${REPORT_DIR}"
+          zip -r comparison-artifacts.zip . || true
+
+      - name: "Publish table to GitHub Actions summary (only the table, sorted)"
+        if: always()
+        run: |
+          set -euo pipefail
+          SUMMARY="$GITHUB_STEP_SUMMARY"
+          A_BRANCH="${{ github.event.inputs.branch_a }}"
+          B_BRANCH="${{ github.event.inputs.branch_b }}"
+
+          # Si no hay sorted file, intenta generarlo a partir de /tmp/all_entries.txt
+          if [ ! -s /tmp/all_sorted.txt ] && [ -s /tmp/all_entries.txt ]; then
+            awk -F'|' '
+              BEGIN { map["CRITICAL"]=5; map["HIGH"]=4; map["MEDIUM"]=3; map["LOW"]=2; map["UNKNOWN"]=1; }
+              {
+                id=$1; pv=$2; sev=toupper($3);
+                rank = (sev in map ? map[sev] : 0);
+                printf("%d|%s|%s|%s\n", rank, sev, id, pv);
+              }
+            ' /tmp/all_entries.txt | sort -t'|' -k1,1nr -k3,3 | cut -d'|' -f2- > /tmp/all_sorted.txt || true
+          fi
+
+          # Header table for summary
+          echo "| Severity | VulnerabilityID | package:version | branches |" >> "$SUMMARY"
+          echo "|---|---|---|---|" >> "$SUMMARY"
+
+          if [ -s /tmp/all_sorted.txt ]; then
+            while IFS= read -r line; do
+              sev=$(echo "$line" | awk -F'|' '{print $1}')
+              id=$(echo "$line" | awk -F'|' '{print $2}')
+              pv=$(echo "$line" | awk -F'|' '{print $3}')
+
+              inA=0; inB=0
+              entry="${id}|${pv}|${sev}"
+              if grep -Fxq "$entry" /tmp/a_entries.txt 2>/dev/null; then inA=1; fi
+              if grep -Fxq "$entry" /tmp/b_entries.txt 2>/dev/null; then inB=1; fi
+
+              if [ "$inA" -eq 1 ] && [ "$inB" -eq 1 ]; then
+                branches="**BOTH**"
+              elif [ "$inA" -eq 1 ]; then
+                branches="${A_BRANCH}"
+              else
+                branches="${B_BRANCH}"
+              fi
+
+              echo "| ${sev} | ${id} | ${pv} | ${branches} |" >> "$SUMMARY"
+            done < /tmp/all_sorted.txt
+          else
+            echo "| - | - | - | - |" >> "$SUMMARY"
+          fi
+
+      - name: Upload artifacts (reports)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vuln-comparison-${{ github.run_id }}-${{ github.event.inputs.branch_a }}-vs-${{ github.event.inputs.branch_b }}-$(date +%s)
+          path: ${{ env.REPORT_DIR }}
