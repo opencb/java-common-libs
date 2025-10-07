@@ -24,11 +24,12 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      # 2) Ensure base branch exists locally (fetch)
-      - name: Fetch base branch
-        run: |
-          git fetch origin ${{ github.event.inputs.branch_a }}:refs/remotes/origin/${{ github.event.inputs.branch_a }}
-
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
       # 3) Run the action
       - name: Vulnerability Diff (Syft+Grype)
         uses: sec-open/vuln-diff-action@v2.0.0-alpha.1

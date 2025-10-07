@@ -39,14 +39,16 @@ jobs:
         with:
           base_ref: ${{ github.event.pull_request.base.ref }}
           head_ref: ${{ github.event.pull_request.head.sha }}
-          write_summary: "true"
-          upload_artifact: "true"
-          min_severity: "LOW"
-          report_html: "true"
-          report_pdf: "true"
-          pr_comment: "true"
-          artifact_name: "vulnerability-diff-${{ github.event.inputs.branch_a }}-vs-${{ github.event.inputs.branch_b }}"
-          pr_comment_marker: "<!-- vuln-diff-action:comment -->"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_webhook_url: ${{ secrets.SLACK_SECURITY_WEBHOOK_URL }}
-          title_logo_url: "https://zettagenomics.com/wp-content/uploads/2022/10/Zetta-reversed-out-full-logo-dark-background.png"
+
+#          write_summary: "true"
+#          upload_artifact: "true"
+#          min_severity: "LOW"
+#          report_html: "true"
+#          report_pdf: "true"
+#          pr_comment: "true"
+#          artifact_name: "vulnerability-diff-${{ github.event.inputs.branch_a }}-vs-${{ github.event.inputs.branch_b }}"
+#          pr_comment_marker: "<!-- vuln-diff-action:comment -->"
+
+#          title_logo_url: "https://zettagenomics.com/wp-content/uploads/2022/10/Zetta-reversed-out-full-logo-dark-background.png"
