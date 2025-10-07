@@ -36,6 +36,9 @@ jobs:
         with:
           base_ref: ${{ github.event.inputs.branch_a }}   # pass 'develop'
           head_ref: ${{ github.event.inputs.branch_b }}   # pass 'TASK-7908'
+          html_logo_url: "https://zettagenomics.com/wp-content/uploads/2022/10/Zetta-reversed-out-full-logo-dark-background.png"
+
+
 #          build_command: ""
 #          write_summary: "true"
 #          upload_artifact: "true"
