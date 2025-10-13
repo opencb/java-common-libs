@@ -12,10 +12,9 @@ on:
         description: 'Head branch (e.g. TASK-1234)'
         required: true
     secrets:
-      GITHUB_TOKEN:
-        required: true
       SLACK_SECURITY_WEBHOOK_URL:
         required: false
+
   workflow_dispatch:
     inputs:
       branch_a:
