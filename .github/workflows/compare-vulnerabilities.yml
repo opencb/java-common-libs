@@ -1,6 +1,21 @@
-name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches (robust)
+name: Compare vulnerabilities (Syft SBOM -> Grype) between two branches
 run-name: 'Compare vulnerabilities between ${{ inputs.branch_a }} (base) and ${{ inputs.branch_b }} (head) by @${{ github.actor }}'
 on:
+  workflow_call:
+    inputs:
+      branch_a:
+        type: string
+        description: 'Base branch (e.g. develop)'
+        required: true
+      branch_b:
+        type: string
+        description: 'Head branch (e.g. TASK-1234)'
+        required: true
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      SLACK_SECURITY_WEBHOOK_URL:
+        required: false
   workflow_dispatch:
     inputs:
       branch_a:
