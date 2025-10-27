@@ -28,7 +28,7 @@ public abstract class RunnableProcess implements Runnable {
     protected String exception;
     protected int exitValue;
 
-    protected Status status;
+    protected Status status = Status.WAITING;
 
     public enum Status {WAITING, RUNNING, DONE, ERROR, TIMEOUT, KILLED}
 
