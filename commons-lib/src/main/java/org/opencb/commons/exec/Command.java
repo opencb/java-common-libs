@@ -20,6 +20,7 @@ import org.apache.tools.ant.types.Commandline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,6 +28,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class Command extends RunnableProcess {
@@ -46,6 +51,10 @@ public class Command extends RunnableProcess {
     private StringBuffer errorBuffer = new StringBuffer();
     private OutputStream outputOutputStream = null;
     private OutputStream errorOutputStream = null;
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(
+            new NamedThreadFactory("command")
+                    .setDaemon(true));
 
     private final String[] cmdArray;
     private boolean printOutput = true;
@@ -73,8 +82,16 @@ public class Command extends RunnableProcess {
         this.environment = environment;
     }
 
+    public Future<Status> async() {
+        return run(true);
+    }
+
     @Override
     public void run() {
+        run(false);
+    }
+
+    public Future<Status> run(boolean background) {
         try {
             startTime();
             logger.debug(Commandline.describeCommand(cmdArray));
@@ -92,32 +109,19 @@ public class Command extends RunnableProcess {
             }
             setStatus(Status.RUNNING);
 
-            InputStream is = proc.getInputStream();
-            // Thread out = readOutputStream(is);
-            Thread readOutputStreamThread = readOutputStream(is);
-            InputStream es = proc.getErrorStream();
-            // Thread err = readErrorStream(es);
-            Thread readErrorStreamThread = readErrorStream(es);
+            InputStream stdout = proc.getInputStream();
+            Future<?> readOutputStreamThread = readOutputStream(stdout);
+            InputStream stderr = proc.getErrorStream();
+            Future<?> readErrorStreamThread = readErrorStream(stderr);
 
-            proc.waitFor();
-            readOutputStreamThread.join();
-            readErrorStreamThread.join();
-            endTime();
-
-            setExitValue(proc.exitValue());
-            if (proc.exitValue() != 0) {
-                status = Status.ERROR;
-                // output = IOUtils.toString(proc.getInputStream());
-                // error = IOUtils.toString(proc.getErrorStream());
-                output = outputBuffer.toString();
-                error = errorBuffer.toString();
-            }
-            if (status != Status.KILLED && status != Status.TIMEOUT && status != Status.ERROR) {
-                status = Status.DONE;
-                // output = IOUtils.toString(proc.getInputStream());
-                // error = IOUtils.toString(proc.getErrorStream());
-                output = outputBuffer.toString();
-                error = errorBuffer.toString();
+            if (background) {
+                // Wait in the background
+                return EXECUTOR_SERVICE.submit(() -> {
+                    waitFor(readOutputStreamThread, readErrorStreamThread);
+                    return getStatus();
+                });
+            } else {
+                waitFor(readOutputStreamThread, readErrorStreamThread);
             }
 
         } catch (RuntimeException | IOException | InterruptedException e) {
@@ -129,67 +133,97 @@ public class Command extends RunnableProcess {
             exitValue = -1;
             logger.error("Exception occurred while executing Command " + exception, e);
         }
+        return null;
+    }
+
+    private void waitFor(Future<?> readOutputStreamThread, Future<?> readErrorStreamThread) throws InterruptedException {
+        proc.waitFor();
+        try {
+            readOutputStreamThread.get();
+            readErrorStreamThread.get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        endTime();
+
+        setExitValue(proc.exitValue());
+        if (proc.exitValue() != 0) {
+            status = Status.ERROR;
+            // output = IOUtils.toString(proc.getInputStream());
+            // error = IOUtils.toString(proc.getErrorStream());
+            output = outputBuffer.toString();
+            error = errorBuffer.toString();
+        }
+        if (status != Status.KILLED && status != Status.TIMEOUT && status != Status.ERROR) {
+            status = Status.DONE;
+            // output = IOUtils.toString(proc.getInputStream());
+            // error = IOUtils.toString(proc.getErrorStream());
+            output = outputBuffer.toString();
+            error = errorBuffer.toString();
+        }
     }
 
     @Override
     public void destroy() {
-        if (proc != null) {
+        if (proc != null && proc.isAlive()) {
             proc.destroy();
             setStatus(Status.KILLED);
         }
     }
 
-    private Thread readOutputStream(InputStream ins) throws IOException {
+    private Future<?> readOutputStream(InputStream ins) throws IOException {
         return readStream("stdout", outputOutputStream, outputBuffer, ins);
     }
 
-    private Thread readErrorStream(InputStream ins) throws IOException {
+    private Future<?> readErrorStream(InputStream ins) throws IOException {
         return readStream("stderr", errorOutputStream, errorBuffer, ins);
     }
 
-    private Thread readStream(String outputName, OutputStream outputStream, StringBuffer stringBuffer, InputStream in) {
-        Thread thread = new Thread(() -> {
+    private Future<?> readStream(String outputName, OutputStream outputStream, StringBuffer stringBuffer, InputStream in) {
+        return EXECUTOR_SERVICE.submit(() -> {
             try {
-                    int bytesRead = 0;
-                    int bufferLength;
-                    byte[] buffer;
+                int bytesRead = 0;
+                int bufferLength;
+                byte[] buffer;
 
-                    while (bytesRead != -1) {
-                        // int x=in.available();
-                        // if (x<=0)
-                        // continue ;
+                while (bytesRead != -1) {
+                    // int x=in.available();
+                    // if (x<=0)
+                    // continue ;
 
-                        bufferLength = in.available();
-                        bufferLength = Math.max(bufferLength, 1);
+                    bufferLength = in.available();
+                    bufferLength = Math.max(bufferLength, 1);
 
-                        buffer = new byte[bufferLength];
-                        bytesRead = in.read(buffer, 0, bufferLength);
+                    buffer = new byte[bufferLength];
+                    bytesRead = in.read(buffer, 0, bufferLength);
 
-                        if (bytesRead == 0) {
-                            Thread.sleep(500);
+                    if (bytesRead == 0) {
+                        Thread.sleep(500);
+                        if (logger.isTraceEnabled()) {
                             logger.trace(outputName + " - Sleep");
-                        } else if (bytesRead > 0) {
+                        }
+                    } else if (bytesRead > 0) {
+                        if (logger.isTraceEnabled()) {
                             logger.trace(outputName + " - last bytesRead = {})", bytesRead);
-                            if (printOutput) {
-                                System.err.print(new String(buffer));
-                            }
+                        }
+                        if (printOutput) {
+                            System.err.print(new String(buffer));
+                        }
 
-                            if (outputStream == null) {
-                                stringBuffer.append(new String(buffer));
-                            } else {
-                                outputStream.write(buffer);
-                                outputStream.flush();
-                            }
+                        if (outputStream == null) {
+                            stringBuffer.append(new String(buffer));
+                        } else {
+                            outputStream.write(buffer);
+                            outputStream.flush();
                         }
                     }
-                    logger.debug("Read {} - Exit while", outputName);
-                } catch (Exception ex) {
-                    logger.error("Error reading " + outputName, ex);
-                    exception = ex.toString();
                 }
-        }, outputName + "_reader");
-        thread.start();
-        return thread;
+                logger.debug("Read {} - Exit while", outputName);
+            } catch (Exception ex) {
+                logger.error("Error reading " + outputName, ex);
+                exception = ex.toString();
+            }
+        });
     }
 
     /**
@@ -275,4 +309,17 @@ public class Command extends RunnableProcess {
         this.printOutput = printOutput;
         return this;
     }
+
+    public Process getProc() {
+        return proc;
+    }
+
+    public DataOutputStream getStdin() {
+        if (status == Status.RUNNING) {
+            return new DataOutputStream(proc.getOutputStream());
+        } else {
+            throw new IllegalStateException("Process is not running. Process status: " + status);
+        }
+    }
+
 }
