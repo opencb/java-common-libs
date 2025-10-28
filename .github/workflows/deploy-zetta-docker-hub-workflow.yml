@@ -1,4 +1,4 @@
-name: Reusable workflow to push in DockerHub
+name: Reusable workflow to push in Zettagenomics DockerHub
 
 on:
   workflow_call:
@@ -46,4 +46,3 @@ jobs:
           logout: true
       - name: Deploy in Docker Hub
         run: ${{ inputs.cli }} --org zettagenomics
-

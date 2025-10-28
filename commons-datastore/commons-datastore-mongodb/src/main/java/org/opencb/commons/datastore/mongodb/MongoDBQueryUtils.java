@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Projections.*;
+import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.bucket;
 import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.count;
-import static org.opencb.commons.datastore.mongodb.MongoDBQueryUtils.Accumulator.*;
 
 /**
  * Created by imedina on 17/01/16.
@@ -178,6 +178,53 @@ public class MongoDBQueryUtils {
         return filter;
     }
 
+    /**
+     * Splits a string by the given separator, handling quoted values properly.
+     * Quoted values can contain the separator character without being split.
+     * Removes surrounding quotes and trims whitespace from each value.
+     *
+     * @param input the input string to split
+     * @param separator the separator to split by ("," or ";")
+     * @return list of trimmed, unquoted values
+     */
+    public static List<String> smartSplit(String input, String separator) {
+        List<String> result = new ArrayList<>();
+        if (input == null || input.isEmpty()) {
+            return result;
+        }
+
+        boolean inQuotes = false;
+        StringBuilder currentValue = new StringBuilder();
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (!inQuotes && input.substring(i).startsWith(separator)) {
+                // Found separator outside quotes
+                String value = currentValue.toString().trim();
+                if (value.startsWith("\"") && value.endsWith("\"") && value.length() > 1) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                result.add(value.trim());
+                currentValue = new StringBuilder();
+                i += separator.length() - 1; // Skip the separator
+            } else {
+                currentValue.append(c);
+            }
+        }
+
+        // Add the last value
+        String value = currentValue.toString().trim();
+        if (value.startsWith("\"") && value.endsWith("\"") && value.length() > 1) {
+            value = value.substring(1, value.length() - 1);
+        }
+        result.add(value.trim());
+
+        return result;
+    }
+
     private static String getLogicalSeparator(LogicalOperator operator) {
         return (operator != null && operator.equals(LogicalOperator.AND)) ? AND : OR;
     }
@@ -258,8 +305,13 @@ public class MongoDBQueryUtils {
 
     public static Bson createAutoFilter(String mongoDbField, String queryParam, Query query, QueryParam.Type type, LogicalOperator operator)
             throws NumberFormatException {
-
-        List<String> queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
+        List<String> queryParamList;
+        String value = query.getString(queryParam);
+        if (StringUtils.isNotEmpty(value) && value.contains("\"")) {
+            queryParamList = smartSplit(value, getLogicalSeparator(operator));
+        } else {
+            queryParamList = query.getAsStringList(queryParam, getLogicalSeparator(operator));
+        }
         return createAutoFilter(mongoDbField, queryParam, type, operator, queryParamList);
     }
 
