@@ -90,7 +90,7 @@ jobs:
         run: |
           cd opencga-enterprise
           ln -s ../opencga opencga-home
-          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }} -H hdi5.1
+          ./build.sh --test --test-level runShortTests --prepare-branches --test-save-reports --task ${{ inputs.task }} --storage-hadoop ${{ vars.HADOOP_FLAVOUR }} --prepare-hadoop
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
