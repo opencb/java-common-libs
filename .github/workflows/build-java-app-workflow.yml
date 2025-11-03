@@ -17,7 +17,7 @@ on:
       hadoop_flavour:
         type: string
         required: false
-        default: "hdi5.1"
+        default: ""
     outputs:
       version:
         description: "Project version"
