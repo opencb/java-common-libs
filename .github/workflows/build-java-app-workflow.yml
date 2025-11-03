@@ -10,6 +10,10 @@ on:
         type: string
         required: false
         default: "build-folder"
+      upload-artifact:
+        type: boolean
+        required: false
+        default: true
       needs_hadoop_preparation:
         type: boolean
         required: false
@@ -56,6 +60,7 @@ jobs:
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }} --no-transfer-progress
       - uses: actions/upload-artifact@v4
+        if: ${{ inputs.upload-artifact == true }}
         with:
           name: ${{ inputs.build_folder }}
           path: build
