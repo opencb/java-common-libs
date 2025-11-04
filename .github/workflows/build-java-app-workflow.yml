@@ -26,6 +26,9 @@ on:
       version:
         description: "Project version"
         value: ${{ jobs.build-workflow.outputs.version }}
+      cache-key:
+        description: "Cache key used for Maven repository"
+        value: ${{ jobs.build-workflow.outputs.cache-key }}
 
 jobs:
   build-workflow:
