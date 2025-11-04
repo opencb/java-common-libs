@@ -43,6 +43,14 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
           cache: 'maven'
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ github.ref }}-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('**/*.jar') }}
+          restore-keys: |
+            ${{ github.ref }}-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-maven-
+          save-always: true
       - name: Install dependencies branches
         run: |
           if [ -f "./.github/workflows/scripts/get_same_branch.sh" ]; then
