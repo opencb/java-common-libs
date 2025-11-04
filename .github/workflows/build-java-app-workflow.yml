@@ -36,7 +36,7 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
-      cache-key: ${{ steps.cache.outputs.cache-hit-key }}
+      cache-key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
