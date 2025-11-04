@@ -33,6 +33,7 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
+      cache-key: ${{ steps.cache.outputs.cache-hit-key }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,6 +45,7 @@ jobs:
           java-version: '8'
           cache: 'maven'
       - name: Cache local Maven repository
+        id: cache
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
@@ -78,8 +80,3 @@ jobs:
       - name: test-version-from-check
         run: echo "Project version is " ${{ steps.get_project_version.outputs.version }}
 
-
-outputs:
-  cache-key:
-    description: "The key of the maven cache created"
-    value: ${{ jobs.build-workflow.steps.cache-local-maven-repository.outputs.cache-hit-key }}
