@@ -47,9 +47,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ github.ref }}-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('**/*.jar') }}
+          key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ github.sha }}
           restore-keys: |
-            ${{ github.ref }}-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-maven-
+            ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-
       - name: Install dependencies branches
         run: |
           if [ -f "./.github/workflows/scripts/get_same_branch.sh" ]; then
@@ -77,3 +77,9 @@ jobs:
           echo "version=`mvn help:evaluate -q -Dexpression=project.version -DforceStdout`" >> $GITHUB_OUTPUT
       - name: test-version-from-check
         run: echo "Project version is " ${{ steps.get_project_version.outputs.version }}
+
+
+outputs:
+  cache-key:
+    description: "The key of the maven cache created"
+    value: ${{ jobs.build-workflow.steps.cache-local-maven-repository.outputs.cache-hit-key }}
