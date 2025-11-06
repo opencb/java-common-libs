@@ -63,6 +63,11 @@ jobs:
           key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-
+      - name: Show which cache was used
+        run: |
+          echo "hit=${{ steps.maven-cache.outputs['cache-hit'] }}"
+          echo "primary=${{ steps.maven-cache.outputs['cache-primary-key'] }}"
+          echo "matched=${{ steps.maven-cache.outputs['cache-matched-key'] }}"
       - name: Compile dependencies
         run: |
           if [ -f "./.github/workflows/scripts/compile_same_branch.sh" ]; then
