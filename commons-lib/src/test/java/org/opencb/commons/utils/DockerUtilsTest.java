@@ -3,9 +3,12 @@ package org.opencb.commons.utils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class DockerUtilsTest {
 
@@ -23,5 +26,32 @@ public class DockerUtilsTest {
         System.out.println(DockerUtils.buildMountPathsCommandLine("opencb/opencga-ext-tools:2.3.0", command3, dockerOpts));
 
     }
+
+    @Test
+    public void testDockerLogin() throws IOException {
+        // Skip test if environment variables are not set
+        String registry = System.getenv("DOCKER_REGISTRY_URL");
+        String username = System.getenv("DOCKER_USERNAME");
+        String password = System.getenv("DOCKER_PASSWORD");
+
+        // Skip test if credentials are not provided
+        org.junit.Assume.assumeTrue("Skipping test: Docker credentials not provided in environment variables",
+                org.apache.commons.lang3.StringUtils.isNotEmpty(username) && org.apache.commons.lang3.StringUtils.isNotEmpty(password));
+
+        try {
+            // First, check if docker is available
+            DockerUtils.checkDockerDaemonAlive();
+
+            // Execute private docker image with authentication
+            assertTrue(DockerUtils.login(registry, username, password));
+
+            System.out.println("Successfully logged in");
+
+        } catch (IOException e) {
+            System.err.println("Test failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
 
 }
