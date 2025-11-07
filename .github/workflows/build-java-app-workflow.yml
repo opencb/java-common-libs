@@ -53,7 +53,7 @@ jobs:
         with:
           fetch-depth: '10'
       - uses: actions/checkout@v4
-        if: ${{ inputs.dependency_repos != "" }}
+        if: ${{ inputs.dependency_repos != '' }}
         id: "checkout-java-common-libs"
         ## This checkout pulls the code of the java-common-libs repository to get the scripts
         ## Checkout to "java-common-libs" folder.
@@ -72,7 +72,7 @@ jobs:
           cache: 'maven'
       - name: Clone dependencies
         id: clone_dependencies
-        if: ${{ inputs.dependency_repos != "" }}
+        if: ${{ inputs.dependency_repos != '' }}
         run: |
           if [ -f "java-common-libs/.github/workflows/scripts/get_same_branch.sh" ]; then
             chmod +x java-common-libs/.github/workflows/scripts/get_same_branch.sh
@@ -88,7 +88,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-
       - name: Compile dependencies
-        if: ${{ inputs.dependency_repos != "" }}
+        if: ${{ inputs.dependency_repos != '' }}
         run: |
           if [ -f "java-common-libs/.github/workflows/scripts/compile_same_branch.sh" ]; then
             chmod +x java-common-libs/.github/workflows/scripts/compile_same_branch.sh
