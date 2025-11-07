@@ -91,6 +91,8 @@ jobs:
           cd opencga-enterprise
           ln -s ../opencga opencga-home
           ./build.sh --test --test-level runShortTests --prepare-branches --test-save-reports --task ${{ inputs.task }} --storage-hadoop ${{ vars.HADOOP_FLAVOUR }} --prepare-hadoop
+        env:
+          THIRDPARTY_READ_TOKEN: ${{ secrets.THIRDPARTY_READ_TOKEN }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
