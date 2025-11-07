@@ -10,10 +10,15 @@ on:
         type: string
         required: false
         default: "build-folder"
-      upload-artifact:
+      upload_artifact:
         type: boolean
         required: false
         default: true
+      dependency_repos:
+        # Comma-separated list of dependency repositories to clone and build before building the main project.
+        type: string
+        required: false
+        default: ""
       needs_hadoop_preparation:
         type: boolean
         required: false
@@ -22,6 +27,10 @@ on:
         type: string
         required: false
         default: ""
+      java_commons_libs_branch:
+        type: string
+        required: false
+        default: "develop"
     outputs:
       version:
         description: "Project version"
@@ -39,8 +48,22 @@ jobs:
       cache-key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
     steps:
       - uses: actions/checkout@v4
+        id: "checkout-main"
+        ## This checkout pulls the code of the repository where this workflow is being used
         with:
           fetch-depth: '10'
+      - uses: actions/checkout@v4
+        if: ${{ inputs.dependency_repos != "" }}
+        id: "checkout-java-common-libs"
+        ## This checkout pulls the code of the java-common-libs repository to get the scripts
+        ## Checkout to "java-common-libs" folder.
+        ## Filter by ".github" folder
+        with:
+          repository: opencb/java-common-libs
+          ref: ${{ inputs.java_commons_libs_branch }}
+          path: java-common-libs
+          filter: ".github"
+          fetch-depth: '1'
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
@@ -49,11 +72,12 @@ jobs:
           cache: 'maven'
       - name: Clone dependencies
         id: clone_dependencies
+        if: ${{ inputs.dependency_repos != "" }}
         run: |
-          if [ -f "./.github/workflows/scripts/get_same_branch.sh" ]; then
-            chmod +x ./.github/workflows/scripts/get_same_branch.sh
+          if [ -f "java-common-libs/.github/workflows/scripts/get_same_branch.sh" ]; then
+            chmod +x java-common-libs/.github/workflows/scripts/get_same_branch.sh
             export DEPENDENCIES_SHA=${{ github.sha }}
-            ./.github/workflows/scripts/get_same_branch.sh ${{ github.ref_name }}
+            java-common-libs/.github/workflows/scripts/get_same_branch.sh "${{ github.ref_name }}" "${{ inputs.dependency_repos }}"
           fi
       - name: Cache local Maven repository
         id: cache
@@ -69,10 +93,11 @@ jobs:
           echo "primary=${{ steps.cache.outputs['cache-primary-key'] }}"
           echo "matched=${{ steps.cache.outputs['cache-matched-key'] }}"
       - name: Compile dependencies
+        if: ${{ inputs.dependency_repos != "" }}
         run: |
-          if [ -f "./.github/workflows/scripts/compile_same_branch.sh" ]; then
-            chmod +x ./.github/workflows/scripts/compile_same_branch.sh
-            ./.github/workflows/scripts/compile_same_branch.sh
+          if [ -f "java-common-libs/.github/workflows/scripts/compile_same_branch.sh" ]; then
+            chmod +x java-common-libs/.github/workflows/scripts/compile_same_branch.sh
+            java-common-libs/.github/workflows/scripts/compile_same_branch.sh "${{ inputs.dependency_repos }}"
           fi
       - name: Prepare Hadoop profile
         if: ${{ inputs.needs_hadoop_preparation == true }}
