@@ -48,12 +48,14 @@ jobs:
       cache_key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
     steps:
       - uses: actions/checkout@v4
+        name: Checkout main repository
         id: "checkout-main"
         ## This checkout pulls the code of the repository where this workflow is being used
         with:
           fetch-depth: '10'
       - uses: actions/checkout@v4
         if: ${{ inputs.dependency_repos != '' }}
+        name: Checkout java-common-libs repository
         id: "checkout-java-common-libs"
         ## This checkout pulls the code of the java-common-libs repository to get the scripts
         ## Checkout to "java-common-libs" folder.
@@ -62,7 +64,6 @@ jobs:
           repository: opencb/java-common-libs
           ref: ${{ inputs.java_commons_libs_branch }}
           path: java-common-libs
-          filter: ".github"
           fetch-depth: '1'
       - name: Set up JDK 8
         uses: actions/setup-java@v4
