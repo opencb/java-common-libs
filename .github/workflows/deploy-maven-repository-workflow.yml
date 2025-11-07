@@ -6,6 +6,9 @@ on:
       maven_opts:
         type: string
         required: false
+      cache_key:
+        type: string
+        required: false
     secrets:
       MAVEN_GPG_PASSPHRASE:
         required: true
@@ -32,6 +35,14 @@ jobs:
           server-password: MAVEN_NEXUS_PASSWORD                   # env variable for token in deploy
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}   # Value of the GPG private key to import
           gpg-passphrase: MAVEN_GPG_PASSPHRASE                    # env variable for GPG private key passphrase
+      - name: Cache local Maven repository
+        uses: actions/cache/restore@v4
+        if: ${{ inputs.cache_key != '' }}
+        with:
+          path: ~/.m2/repository
+          key: ${{ inputs.cache_key }}
+          ## Force cache hit to avoid analyzing with incomplete dependencies
+          fail-on-cache-miss: true
       - name: Deploy to Maven Central repository
         run: mvn clean deploy -DskipTests -Pdeploy-maven ${{ inputs.maven_opts }} --no-transfer-progress
         env:

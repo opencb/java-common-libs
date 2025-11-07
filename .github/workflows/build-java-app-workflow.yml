@@ -35,9 +35,9 @@ on:
       version:
         description: "Project version"
         value: ${{ jobs.build-workflow.outputs.version }}
-      cache-key:
+      cache_key:
         description: "Cache key used for Maven repository"
-        value: ${{ jobs.build-workflow.outputs.cache-key }}
+        value: ${{ jobs.build-workflow.outputs.cache_key }}
 
 jobs:
   build-workflow:
@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
-      cache-key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
+      cache_key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
     steps:
       - uses: actions/checkout@v4
         id: "checkout-main"
