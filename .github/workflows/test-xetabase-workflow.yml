@@ -105,12 +105,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: report-test
-          path: ./opencga-enterprise/reports/test
+          path: ./opencga-enterprise/reports/
+          if-no-files-found: error
       - name: Upload log
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: ./opencga-enterprise/build.log
+          if-no-files-found: error
       - name: Log summary
         run: |
           cat ./opencga-enterprise/build.log | tee -a $GITHUB_STEP_SUMMARY
