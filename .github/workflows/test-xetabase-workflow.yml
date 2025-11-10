@@ -86,11 +86,21 @@ jobs:
         env:
           SSH_HOST: ${{ env.SSH_HOST }}
           SSH_PORT: ${{ env.SSH_PORT }}
+      - name: Cache local Maven repository
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ vars.HADOOP_FLAVOUR }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ vars.HADOOP_FLAVOUR }}-
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, opencga and opencga-enterprise
         run: |
           cd opencga-enterprise
           ln -s ../opencga opencga-home
-          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }}
+          ./build.sh --test --test-level runShortTests --prepare-branches --test-save-reports --task ${{ inputs.task }} --storage-hadoop ${{ vars.HADOOP_FLAVOUR }} --prepare-hadoop
+        env:
+          THIRDPARTY_READ_TOKEN: ${{ secrets.THIRDPARTY_READ_TOKEN }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:

@@ -14,3 +14,5 @@ jobs:
     uses: ./.github/workflows/deploy-maven-repository-workflow.yml
     needs: build
     secrets: inherit
+    with:
+      cache_key: ${{ needs.build.outputs.cache_key }}
