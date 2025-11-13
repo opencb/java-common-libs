@@ -116,7 +116,7 @@ jobs:
           name: build-log
           path: |
             ./opencga-enterprise/build.log
-            ./opencga-enterprise/*.log.gz
+            ./opencga-enterprise/reports/*.log.gz
           if-no-files-found: error
       - name: Log summary
         run: |
