@@ -109,9 +109,14 @@ jobs:
           if-no-files-found: error
       - name: Upload log
         uses: actions/upload-artifact@v4
+        ## Skip cancelled()
+        ## https://docs.github.com/en/actions/learn-github-actions/expressions#cancelled
+        if: success() || failure()
         with:
           name: build-log
-          path: ./opencga-enterprise/build.log
+          path: |
+            ./opencga-enterprise/build.log
+            ./opencga-enterprise/reports/*.log.gz
           if-no-files-found: error
       - name: Log summary
         run: |
