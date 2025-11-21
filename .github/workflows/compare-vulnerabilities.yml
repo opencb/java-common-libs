@@ -30,13 +30,17 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
 
     steps:
-      # 1) Checkout head branch only
       - name: Checkout head branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch_b }}
           fetch-depth: 0
           fetch-tags: true
+      - name: Restore Puppeteer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}
 
       - name: Set up JDK 8
         uses: actions/setup-java@v4
@@ -46,11 +50,18 @@ jobs:
           cache: 'maven'
       # 3) Run the action
       - name: Vulnerability Diff (Syft+Grype)
-        uses: sec-open/vuln-diff-action@v2.0.0-alpha.1
+        uses: sec-open/vuln-diff-action@v2.0.0-alpha.3
         with:
           base_ref: ${{ github.event.inputs.branch_a }}   # pass 'develop'
           head_ref: ${{ github.event.inputs.branch_b }}   # pass 'TASK-7908'
           html_logo_url: "https://zettagenomics.com/wp-content/uploads/2022/10/Zetta-reversed-out-full-logo-dark-background.png"
+
+      - name: Save Puppeteer cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}
 
 
 #          build_command: ""
