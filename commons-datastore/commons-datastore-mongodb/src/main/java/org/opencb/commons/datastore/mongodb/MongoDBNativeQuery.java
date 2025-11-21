@@ -64,6 +64,10 @@ public class MongoDBNativeQuery {
         }
     }
 
+    public long estimatedCount() {
+        return dbCollection.estimatedDocumentCount();
+    }
+
     public DistinctIterable<Document> distinct(String key) {
         return distinct(key, null, Document.class);
     }
@@ -235,7 +239,11 @@ public class MongoDBNativeQuery {
         Future<Long> countFuture = null;
         if (options != null && options.getBoolean(QueryOptions.COUNT)) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            countFuture = executor.submit(() -> count(clientSession, query));
+            if (clientSession == null && (query == null || query.equals(Filters.empty()) || query.toBsonDocument().isEmpty())) {
+                countFuture = executor.submit(this::estimatedCount);
+            } else {
+                countFuture = executor.submit(() -> count(clientSession, query));
+            }
         }
 
         FindIterable<Document> findIterable = null;
