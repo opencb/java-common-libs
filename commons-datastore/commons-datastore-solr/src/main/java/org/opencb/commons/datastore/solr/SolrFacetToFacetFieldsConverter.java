@@ -103,14 +103,14 @@ public class SolrFacetToFacetFieldsConverter {
 
         List<FacetField.Bucket> buckets = new ArrayList<>();
         for (SimpleOrderedMap<Object> solrBucket: solrBuckets) {
-            int count = 0;
+            long count = 0;
             String value = "";
             FacetField subfield;
             List<FacetField> subfields = new ArrayList<>();
             for (int i = 0; i < solrBucket.size(); i++) {
                 String fullname = solrBucket.getName(i);
                 if ("count".equals(fullname)) {
-                    count = (int) solrBucket.getVal(i);
+                    count = ((Number) solrBucket.getVal(i)).longValue();
                 } else if ("val".equals(fullname)) {
                     value = solrBucket.getVal(i).toString();
                 } else {
