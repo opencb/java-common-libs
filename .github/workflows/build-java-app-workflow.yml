@@ -31,6 +31,10 @@ on:
         type: string
         required: false
         default: "develop"
+      ref-name:
+        type: string
+        required: false
+        default: ""
     outputs:
       version:
         description: "Project version"
@@ -38,6 +42,7 @@ on:
       cache_key:
         description: "Cache key used for Maven repository"
         value: ${{ jobs.build-workflow.outputs.cache_key }}
+
 
 jobs:
   build-workflow:
@@ -53,6 +58,7 @@ jobs:
         ## This checkout pulls the code of the repository where this workflow is being used
         with:
           fetch-depth: '10'
+          ref: ${{ inputs.ref-name != '' && inputs.ref-name || github.ref_name }}
       - uses: actions/checkout@v4
         if: ${{ inputs.dependency_repos != '' }}
         name: Checkout java-common-libs repository
