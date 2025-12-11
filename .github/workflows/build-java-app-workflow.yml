@@ -40,7 +40,7 @@ jobs:
         # This step sets up JDK, clones and optionally compiles dependencies,
         # and configures the Maven cache for the whole job.
         id: setup_java_maven
-        uses: opencb/java-common-libs/.github/actions/setup-java-maven@develop
+        uses: ./.github/actions/setup-java-maven
         with:
           java_version: ${{ inputs.java_version }}
           storage_hadoop: ${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}
