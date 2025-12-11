@@ -121,7 +121,12 @@ jobs:
       - name: Log summary
         run: |
           cat ./opencga-enterprise/build.log | tee -a $GITHUB_STEP_SUMMARY
-          
+      - name: Append test summary to job summary
+        if: success() || failure()
+        uses: ./.github/actions/test-summary
+        with:
+          report_paths: './**/surefire-reports/TEST-*.xml'
+          title: "Xetabase tests summary"
           
 
 

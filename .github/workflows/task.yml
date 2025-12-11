@@ -13,3 +13,12 @@ jobs:
     uses: ./.github/workflows/test-analysis.yml
     needs: build
     secrets: inherit
+
+  test-xetabase:
+    name: "Run all tests before merging"
+    needs: calculate-xetabase-branch
+    uses: ./.github/workflows/test-xetabase-workflow.yml
+    with:
+      branch: TASK-8067
+      task: TASK-8067
+    secrets: inherit
