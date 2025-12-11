@@ -21,7 +21,7 @@ on:
       storage_hadoop:
         type: string
         required: false
-        default: ""
+        default: "hdi5.1"
       dependency_repos:
         type: string
         required: false
@@ -71,7 +71,7 @@ jobs:
           {
             echo "## Java / Build summary"
             echo ""
-            echo "- Build version: \`${{ inputs.java-version }}\`"
+            echo "- Build version: \`${{ inputs.java_version }}\`"
             echo "- Hadoop flavour: \`${{ inputs.storage_hadoop }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
