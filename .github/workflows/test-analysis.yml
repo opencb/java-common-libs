@@ -18,20 +18,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: '0'
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
+      - name: Setup Java and Maven cache
+        # Reuse the composite action to configure Java and Maven cache
+        id: setup_java_maven
+        uses: ./.github/actions/setup-java-maven
         with:
-          distribution: 'temurin'
-          java-version: '11'
-          cache: 'maven'
-      - name: Cache local Maven repository
-        uses: actions/cache/restore@v4
-        if: ${{ inputs.cache_key != '' }}
-        with:
-          path: ~/.m2/repository
-          key: ${{ inputs.cache_key }}
-          ## Force cache hit to avoid analyzing with incomplete dependencies
-          fail-on-cache-miss: true
+          require_cache_hit: true
       - name: Start MongoDB v6.0
         uses: supercharge/mongodb-github-action@1.8.0
         with:
