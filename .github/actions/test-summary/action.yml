@@ -1,0 +1,88 @@
+name: "Test summary to step summary"
+description: "Parse Surefire XML reports and append a test summary table to GITHUB_STEP_SUMMARY"
+
+inputs:
+  report_paths:
+    description: "Glob pattern for Surefire XML reports"
+    required: true
+    default: "./**/surefire-reports/TEST-*.xml"
+  title:
+    description: "Title for the summary section"
+    required: false
+    default: "Test summary"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build test summary from Surefire reports
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        # Input glob for report files
+        report_glob="${{ inputs.report_paths }}"
+
+        # Enable recursive globbing (**)
+        shopt -s globstar nullglob
+
+        files=( $report_glob )
+
+        total_tests=0
+        total_failures=0
+        total_errors=0
+        total_skipped=0
+
+        # Parse all matching XML files
+        # Each Surefire TEST-*.xml contains a <testsuite ...> element with attributes:
+        # tests="x" failures="y" errors="z" skipped="k"
+        for f in "${files[@]}"; do
+          # Skip if not a regular file
+          [ -f "$f" ] || continue
+
+          # Extract attributes using grep + sed
+          tests=$(grep -o 'tests="[0-9]\+"' "$f"    | head -n1 | sed 's/[^0-9]//g' || echo "0")
+          failures=$(grep -o 'failures="[0-9]\+"' "$f" | head -n1 | sed 's/[^0-9]//g' || echo "0")
+          errors=$(grep -o 'errors="[0-9]\+"' "$f"   | head -n1 | sed 's/[^0-9]//g' || echo "0")
+          skipped=$(grep -o 'skipped="[0-9]\+"' "$f"  | head -n1 | sed 's/[^0-9]//g' || echo "0")
+
+          total_tests=$(( total_tests + tests ))
+          total_failures=$(( total_failures + failures ))
+          total_errors=$(( total_errors + errors ))
+          total_skipped=$(( total_skipped + skipped ))
+        done
+
+        total_failed=$(( total_failures + total_errors ))
+        total_passed=$(( total_tests - total_failed - total_skipped ))
+
+        {
+          echo "## ${{ inputs.title }}"
+          echo
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "> No test report files found for pattern: \`$report_glob\`"
+            echo
+          else
+            # High-level status line
+            if [ "$total_tests" -eq 0 ]; then
+              echo "> No tests detected in reports."
+            elif [ "$total_failed" -eq 0 ]; then
+              echo "> ✅ All tests passed."
+            else
+              echo "> ❌ Some tests failed."
+            fi
+            echo
+
+            # Summary table
+            echo "| Metric   | Count |"
+            echo "|----------|-------|"
+            echo "| Tests    | $total_tests |"
+            echo "| Passed   | $total_passed |"
+            echo "| Failed   | $total_failed |"
+            echo "| Skipped  | $total_skipped |"
+            echo
+
+            # Optional extra line for quick scanning
+            echo "**Totals:** $total_tests tests · $total_passed passed · $total_failed failed · $total_skipped skipped"
+            echo
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
