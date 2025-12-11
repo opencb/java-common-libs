@@ -1,88 +1,138 @@
-name: "Test summary to step summary"
-description: "Parse Surefire XML reports and append a test summary table to GITHUB_STEP_SUMMARY"
+name: "Generate Maven test summary"
+description: "Parse Surefire TEST-*.xml reports and write a global and per-module summary in the GitHub step summary"
 
 inputs:
-  report_paths:
-    description: "Glob pattern for Surefire XML reports"
-    required: true
+  report_glob:
+    description: "Glob pattern to find Surefire XML reports"
+    required: false
     default: "./**/surefire-reports/TEST-*.xml"
   title:
-    description: "Title for the summary section"
+    description: "Optional title for the summary section"
     required: false
-    default: "Test summary"
+    default: "Test Summary"
 
 runs:
   using: "composite"
   steps:
-    - name: Build test summary from Surefire reports
+    - name: Generate test summary
+      # This step parses Surefire reports and writes a formatted summary to GITHUB_STEP_SUMMARY.
       shell: bash
+      env:
+        REPORT_GLOB: ${{ inputs.report_glob }}
+        SUMMARY_TITLE: ${{ inputs.title }}
       run: |
-        set -euo pipefail
+        # Append test summary to the GitHub step summary
+        python << 'PY' >> "$GITHUB_STEP_SUMMARY"
+        import glob
+        import os
+        import xml.etree.ElementTree as ET
 
-        # Input glob for report files
-        report_glob="${{ inputs.report_paths }}"
+        pattern = os.environ.get("REPORT_GLOB", "./**/surefire-reports/TEST-*.xml")
+        title = os.environ.get("SUMMARY_TITLE", "Test Summary")
 
-        # Enable recursive globbing (**)
-        shopt -s globstar nullglob
+        files = glob.glob(pattern, recursive=True)
 
-        files=( $report_glob )
+        print(f"## {title}")
+        print()
+        if not files:
+          print(f"> No Surefire reports found for pattern `{pattern}`.")
+          raise SystemExit(0)
 
-        total_tests=0
-        total_failures=0
-        total_errors=0
-        total_skipped=0
+        # Global counters
+        total_tests = 0
+        total_failures = 0
+        total_errors = 0
+        total_skipped = 0
 
-        # Parse all matching XML files
-        # Each Surefire TEST-*.xml contains a <testsuite ...> element with attributes:
-        # tests="x" failures="y" errors="z" skipped="k"
-        for f in "${files[@]}"; do
-          # Skip if not a regular file
-          [ -f "$f" ] || continue
+        # Per-module aggregation
+        modules = {}  # module_name -> dict with tests, failures, errors, skipped
 
-          # Extract attributes using grep + sed
-          tests=$(grep -o 'tests="[0-9]\+"' "$f"    | head -n1 | sed 's/[^0-9]//g' || echo "0")
-          failures=$(grep -o 'failures="[0-9]\+"' "$f" | head -n1 | sed 's/[^0-9]//g' || echo "0")
-          errors=$(grep -o 'errors="[0-9]\+"' "$f"   | head -n1 | sed 's/[^0-9]//g' || echo "0")
-          skipped=$(grep -o 'skipped="[0-9]\+"' "$f"  | head -n1 | sed 's/[^0-9]//g' || echo "0")
+        def update_counts(stats, tests, failures, errors, skipped):
+          stats["tests"] += tests
+          stats["failures"] += failures
+          stats["errors"] += errors
+          stats["skipped"] += skipped
 
-          total_tests=$(( total_tests + tests ))
-          total_failures=$(( total_failures + failures ))
-          total_errors=$(( total_errors + errors ))
-          total_skipped=$(( total_skipped + skipped ))
-        done
+        for path in files:
+          try:
+            tree = ET.parse(path)
+            root = tree.getroot()
+          except Exception:
+            # Skip malformed reports
+            continue
 
-        total_failed=$(( total_failures + total_errors ))
-        total_passed=$(( total_tests - total_failed - total_skipped ))
+          # Surefire can produce <testsuite> or <testsuites> as root
+          suites = []
+          if root.tag == "testsuite":
+            suites = [root]
+          elif root.tag == "testsuites":
+            suites = list(root.findall("testsuite"))
+          else:
+            continue
 
-        {
-          echo "## ${{ inputs.title }}"
-          echo
+          # Determine module name from path
+          parts = path.split("/")
+          module_name = "root"
+          if "target" in parts:
+            idx = parts.index("target")
+            if idx > 0:
+              module_name = parts[idx - 1]
 
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "> No test report files found for pattern: \`$report_glob\`"
-            echo
-          else
-            # High-level status line
-            if [ "$total_tests" -eq 0 ]; then
-              echo "> No tests detected in reports."
-            elif [ "$total_failed" -eq 0 ]; then
-              echo "> ✅ All tests passed."
-            else
-              echo "> ❌ Some tests failed."
-            fi
-            echo
+          if module_name not in modules:
+            modules[module_name] = {
+              "tests": 0,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0,
+            }
 
-            # Summary table
-            echo "| Metric   | Count |"
-            echo "|----------|-------|"
-            echo "| Tests    | $total_tests |"
-            echo "| Passed   | $total_passed |"
-            echo "| Failed   | $total_failed |"
-            echo "| Skipped  | $total_skipped |"
-            echo
+          for suite in suites:
+            # Attributes are usually stored on the testsuite element
+            tests = int(suite.attrib.get("tests", "0") or "0")
+            failures = int(suite.attrib.get("failures", "0") or "0")
+            errors = int(suite.attrib.get("errors", "0") or "0")
+            skipped = int(
+              suite.attrib.get("skipped", suite.attrib.get("disabled", "0") or "0")
+            )
 
-            # Optional extra line for quick scanning
-            echo "**Totals:** $total_tests tests · $total_passed passed · $total_failed failed · $total_skipped skipped"
-            echo
-          fi
-        } >> "$GITHUB_STEP_SUMMARY"
+            total_tests += tests
+            total_failures += failures
+            total_errors += errors
+            total_skipped += skipped
+
+            update_counts(modules[module_name], tests, failures, errors, skipped)
+
+        # Short status line
+        print("### Status")
+        if total_failures == 0 and total_errors == 0:
+          print(f"- ✅ All tests passed ({total_tests} tests, {total_skipped} skipped)")
+        else:
+          print(
+            f"- ❌ Some tests failed "
+            f"({total_tests} total, {total_failures} failed, {total_errors} errors, {total_skipped} skipped)"
+          )
+        print()
+
+        # Global totals table
+        print("### Global totals")
+        print()
+        print("| Total | Failed | Errors | Skipped |")
+        print("| ----- | ------ | ------ | ------- |")
+        print(f"| {total_tests} | {total_failures} | {total_errors} | {total_skipped} |")
+        print()
+
+        # Per-module table
+        print("### Totals by module")
+        print()
+        print("| Module | Total | Failed | Errors | Skipped |")
+        print("| ------ | ----- | ------ | ------ | ------- |")
+
+        # Sort modules by name for stable output
+        for module_name in sorted(modules.keys()):
+          stats = modules[module_name]
+          print(
+            f"| {module_name} | "
+            f"{stats['tests']} | {stats['failures']} | {stats['errors']} | {stats['skipped']} |"
+          )
+        print()
+        PY
