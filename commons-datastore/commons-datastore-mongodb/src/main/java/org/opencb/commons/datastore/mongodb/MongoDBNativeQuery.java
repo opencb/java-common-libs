@@ -453,6 +453,99 @@ public class MongoDBNativeQuery {
         }
     }
 
+    /**
+     * Update documents using an aggregation pipeline.
+     *
+     * @param query    The filter to select the documents to update.
+     * @param pipeline The aggregation pipeline specifying the update operations.
+     * @param upsert   Whether to insert a new document if no documents match the query.
+     * @param multi    Whether to update multiple documents or just one.
+     * @return The result of the update operation.
+     */
+    public UpdateResult updateWithPipeline(Bson query, List<? extends Bson> pipeline, boolean upsert, boolean multi) {
+        return updateWithPipeline(null, query, pipeline, upsert, multi);
+    }
+
+    /**
+     * Update documents using an aggregation pipeline.
+     *
+     * @param clientSession Session in which the operation will be performed. Can be null.
+     * @param query         The filter to select the documents to update.
+     * @param pipeline      The aggregation pipeline specifying the update operations.
+     * @param upsert        Whether to insert a new document if no documents match the query.
+     * @param multi         Whether to update multiple documents or just one.
+     * @return The result of the update operation.
+     */
+    public UpdateResult updateWithPipeline(ClientSession clientSession, Bson query, List<? extends Bson> pipeline,
+                                           boolean upsert, boolean multi) {
+        UpdateOptions updateOptions = new UpdateOptions().upsert(upsert);
+        if (multi) {
+            if (clientSession != null) {
+                return dbCollection.updateMany(clientSession, query, pipeline, updateOptions);
+            } else {
+                return dbCollection.updateMany(query, pipeline, updateOptions);
+            }
+        } else {
+            if (clientSession != null) {
+                return dbCollection.updateOne(clientSession, query, pipeline, updateOptions);
+            } else {
+                return dbCollection.updateOne(query, pipeline, updateOptions);
+            }
+        }
+    }
+
+    /**
+     * Finds and updates a single document using an aggregation pipeline.
+     *
+     * @param query         The filter to select the document to update.
+     * @param projection    The fields to return in the resulting document.
+     * @param sort          The sort criteria to apply before updating.
+     * @param pipeline      The aggregation pipeline specifying the update operations.
+     * @param options       Additional options such as upsert and returnNew.
+     * @return The updated document, or null if no document matched the query.
+     */
+    public Document findAndUpdateWithPipeline(Bson query, Bson projection, Bson sort,
+                                              List<? extends Bson> pipeline, QueryOptions options) {
+        return findAndUpdateWithPipeline(null, query, projection, sort, pipeline, options);
+    }
+
+    /**
+     * Finds and updates a single document using an aggregation pipeline.
+     *
+     * @param clientSession Session in which the operation will be performed. Can be null.
+     * @param query         The filter to select the document to update.
+     * @param projection    The fields to return in the resulting document.
+     * @param sort          The sort criteria to apply before updating.
+     * @param pipeline      The aggregation pipeline specifying the update operations.
+     * @param options       Additional options such as upsert and returnNew.
+     * @return The updated document, or null if no document matched the query.
+     */
+    public Document findAndUpdateWithPipeline(ClientSession clientSession, Bson query, Bson projection, Bson sort,
+                                              List<? extends Bson> pipeline, QueryOptions options) {
+        boolean upsert = false;
+        boolean returnNew = false;
+
+        if (options != null) {
+            if (projection == null) {
+                projection = getProjection(projection, options);
+            }
+            upsert = options.getBoolean("upsert", false);
+            returnNew = options.getBoolean("returnNew", false);
+        }
+
+        FindOneAndUpdateOptions findOneAndUpdateOptions = new FindOneAndUpdateOptions()
+                .sort(sort)
+                .projection(projection)
+                .upsert(upsert)
+                .returnDocument(returnNew ? ReturnDocument.AFTER : ReturnDocument.BEFORE);
+
+        if (clientSession != null) {
+            return dbCollection.findOneAndUpdate(clientSession, query, pipeline, findOneAndUpdateOptions);
+        } else {
+            return dbCollection.findOneAndUpdate(query, pipeline, findOneAndUpdateOptions);
+        }
+    }
+
     private IndexOutOfBoundsException wrongQueryUpdateSize(List<? extends Bson> queries, List<? extends Bson> updates) {
         return new IndexOutOfBoundsException("QueryList.size=" + queries.size()
                 + " and UpdatesList.size=" + updates.size() + " must be the same size.");

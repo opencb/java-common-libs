@@ -444,6 +444,123 @@ public class MongoDBCollection {
                 start);
     }
 
+    /**
+     * Update documents using an aggregation pipeline.
+     *
+     * @param query the filter to select the documents to update
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param options additional options for the query and update operation
+     * @return a DataResult containing the result of the update operation
+     */
+    public DataResult updateWithPipeline(Bson query, List<? extends Bson> pipeline, QueryOptions options) {
+        return updateWithPipeline(null, query, pipeline, options);
+    }
+
+    /**
+     * Update documents using an aggregation pipeline.
+     *
+     * @param clientSession the client session to use for the operation, or null if not using sessions
+     * @param query the filter to select the documents to update
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param options additional options for the query and update operation
+     * @return a DataResult containing the result of the update operation
+     */
+    public DataResult updateWithPipeline(ClientSession clientSession, Bson query, List<? extends Bson> pipeline, QueryOptions options) {
+        long start = startQuery();
+
+        boolean upsert = false;
+        boolean multi = false;
+        if (options != null) {
+            upsert = options.getBoolean(UPSERT);
+            multi = options.getBoolean(MULTI);
+        }
+
+        UpdateResult updateResult = mongoDBNativeQuery.updateWithPipeline(clientSession, query, pipeline, upsert, multi);
+        return endWrite(updateResult.getMatchedCount(), updateResult.getUpsertedId() != null ? 1 : 0,
+                updateResult.getUpsertedId() == null ? updateResult.getModifiedCount() : 0, 0, 0, start);
+    }
+
+    /**
+     * Finds a document matching the given query, applies an aggregation pipeline to update it, and returns the updated document.
+     *
+     * @param query the filter to select the document to update
+     * @param projection the fields to return in the resulting document
+     * @param sort the sort criteria to apply before finding the document
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param options additional options for the query and update operation
+     * @return a DataResult containing the updated document, or an empty result if no document matched
+     */
+    public DataResult<Document> findAndUpdateWithPipeline(Bson query, Bson projection, Bson sort,
+                                                          List<? extends Bson> pipeline, QueryOptions options) {
+        return privateFindAndUpdateWithPipeline(null, query, projection, sort, pipeline, options, null, null);
+    }
+
+    /**
+     * Finds a document matching the given query, applies an aggregation pipeline to update it, and returns the updated document.
+     *
+     * @param clientSession the client session to use for the operation, or null if not using sessions
+     * @param query the filter to select the document to update
+     * @param projection the fields to return in the resulting document
+     * @param sort the sort criteria to apply before finding the document
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param options additional options for the query and update operation
+     * @return a DataResult containing the updated document, or an empty result if no document matched
+     */
+    public DataResult<Document> findAndUpdateWithPipeline(ClientSession clientSession, Bson query, Bson projection, Bson sort,
+                                                          List<? extends Bson> pipeline, QueryOptions options) {
+        return privateFindAndUpdateWithPipeline(clientSession, query, projection, sort, pipeline, options, null, null);
+    }
+
+    /**
+     * Finds a document matching the given query, applies an aggregation pipeline to update it, and returns the updated document.
+     *
+     * @param query the filter to select the document to update
+     * @param projection the fields to return in the resulting document
+     * @param sort the sort criteria to apply before finding the document
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param clazz the class type to convert the result to; if null or Document.class, returns a Document
+     * @param options additional options for the query and update operation
+     * @param <T> the type of the returned result
+     * @return a DataResult containing the updated document, or an empty result if no document matched
+     */
+    public <T> DataResult<T> findAndUpdateWithPipeline(Bson query, Bson projection, Bson sort,
+                                                       List<? extends Bson> pipeline, Class<T> clazz, QueryOptions options) {
+        return privateFindAndUpdateWithPipeline(null, query, projection, sort, pipeline, options, clazz, null);
+    }
+
+    /**
+     * Finds a document matching the given query, applies an aggregation pipeline to update it, and returns the updated document.
+     *
+     * @param clientSession the client session to use for the operation, or null if not using sessions
+     * @param query the filter to select the document to update
+     * @param projection the fields to return in the resulting document
+     * @param sort the sort criteria to apply before finding the document
+     * @param pipeline the aggregation pipeline to apply for the update
+     * @param clazz the class type to convert the result to; if null or Document.class, returns a Document
+     * @param options additional options for the query and update operation
+     * @param <T> the type of the returned result
+     * @return a DataResult containing the updated document, or an empty result if no document matched
+     */
+    public <T> DataResult<T> findAndUpdateWithPipeline(ClientSession clientSession, Bson query, Bson projection, Bson sort,
+                                                       List<? extends Bson> pipeline, Class<T> clazz, QueryOptions options) {
+        return privateFindAndUpdateWithPipeline(clientSession, query, projection, sort, pipeline, options, clazz, null);
+    }
+
+    private <T> DataResult<T> privateFindAndUpdateWithPipeline(ClientSession clientSession, Bson query, Bson projection, Bson sort,
+                                                               List<? extends Bson> pipeline, QueryOptions options, Class<T> clazz,
+                                                               ComplexTypeConverter<T, Document> converter) {
+        long start = startQuery();
+        Document result = mongoDBNativeQuery.findAndUpdateWithPipeline(clientSession, query, projection, sort, pipeline, options);
+        if (clazz != null && !clazz.equals(Document.class)) {
+            try {
+                return endQuery(Collections.singletonList(objectMapper.readValue(objectWriter.writeValueAsString(result), clazz)), start);
+            } catch (IOException e) {
+                logger.error("Error deserializing result: " + e.getMessage(), e);
+            }
+        }
+        return endQuery(Collections.singletonList(result), start);
+    }
+
     public DataResult remove(Bson query, QueryOptions options) {
         return remove(null, query, options);
     }
