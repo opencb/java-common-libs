@@ -58,8 +58,9 @@ jobs:
           name: ${{ inputs.build_folder }}
           path: build
 
-      - id: get_project_version
-        name: Get project version
+      - name: Get project version
+        id: get_project_version
+
         # This step extracts the Maven project version and exposes it as an output.
         run: |
           echo "version=$(mvn help:evaluate -q -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
@@ -71,7 +72,7 @@ jobs:
           {
             echo "## Java / Build summary"
             echo ""
-            echo "- Build version: \`${{ inputs.java_version }}\`"
+            echo "- Build version: \`${{ steps.get_project_version.outputs.version}}\`"
             echo "- Hadoop flavour: \`${{ inputs.storage_hadoop }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
