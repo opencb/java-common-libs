@@ -16,7 +16,6 @@ jobs:
 
   test-xetabase:
     name: "Run all tests before merging"
-    needs: calculate-xetabase-branch
     uses: ./.github/workflows/test-xetabase-workflow.yml
     with:
       branch: TASK-8067
