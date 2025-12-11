@@ -1,77 +1,100 @@
-name: "Generate Maven test summary"
-description: "Parse Surefire TEST-*.xml reports and write a global and per-module summary in the GitHub step summary"
+name: "Test summary"
+description: "Generate a Markdown summary of Surefire test results and write it to GITHUB_STEP_SUMMARY"
 
 inputs:
-  report_glob:
-    description: "Glob pattern to find Surefire XML reports"
+  report_paths:
+    description: "Glob pattern for Surefire XML reports"
     required: false
     default: "./**/surefire-reports/TEST-*.xml"
   title:
-    description: "Optional title for the summary section"
+    description: "Title for the test summary section"
     required: false
-    default: "Test Summary"
+    default: "Test summary"
+  include_module_table:
+    description: "Whether to include the per-module breakdown table"
+    required: false
+    default: "true"
+
+outputs:
+  total_success:
+    description: "Total number of successful tests"
+    value: ${{ steps.generate_summary.outputs.total_success }}
+  total_failed:
+    description: "Total number of failed tests"
+    value: ${{ steps.generate_summary.outputs.total_failed }}
+  total_errors:
+    description: "Total number of tests with errors"
+    value: ${{ steps.generate_summary.outputs.total_errors }}
+  total_skipped:
+    description: "Total number of skipped tests"
+    value: ${{ steps.generate_summary.outputs.total_skipped }}
+  total_tests:
+    description: "Total number of tests"
+    value: ${{ steps.generate_summary.outputs.total_tests }}
 
 runs:
   using: "composite"
   steps:
     - name: Generate test summary
-      # This step parses Surefire reports and writes a formatted summary to GITHUB_STEP_SUMMARY.
+      id: generate_summary
       shell: bash
       env:
-        REPORT_GLOB: ${{ inputs.report_glob }}
+        REPORT_GLOB: ${{ inputs.report_paths }}
         SUMMARY_TITLE: ${{ inputs.title }}
+        INCLUDE_MODULE_TABLE: ${{ inputs.include_module_table }}
       run: |
-        # Append test summary to the GitHub step summary
-        python << 'PY' >> "$GITHUB_STEP_SUMMARY"
+        # Use Python to parse Surefire XML reports and generate a Markdown summary
+        python - << 'PY'
         import glob
         import os
         import xml.etree.ElementTree as ET
+        import sys
 
-        pattern = os.environ.get("REPORT_GLOB", "./**/surefire-reports/TEST-*.xml")
-        title = os.environ.get("SUMMARY_TITLE", "Test Summary")
+        report_glob = os.environ.get("REPORT_GLOB", "./**/surefire-reports/TEST-*.xml")
+        title = os.environ.get("SUMMARY_TITLE", "Test summary")
+        include_module_table = os.environ.get("INCLUDE_MODULE_TABLE", "true").lower() == "true"
+        github_step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        github_output = os.environ.get("GITHUB_OUTPUT")
 
-        files = glob.glob(pattern, recursive=True)
+        # Collect all report files
+        report_files = glob.glob(report_glob, recursive=True)
 
-        print(f"## {title}")
-        print()
-        if not files:
-          print(f"> No Surefire reports found for pattern `{pattern}`.")
-          raise SystemExit(0)
+        # Data structures for totals and per-module aggregation
+        total = {
+            "tests": 0,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+        }
+        modules = {}
 
-        # Global counters
-        total_tests = 0
-        total_failures = 0
-        total_errors = 0
-        total_skipped = 0
+        def update_counts(target, tests, failures, errors, skipped):
+          target["tests"] += tests
+          target["failures"] += failures
+          target["errors"] += errors
+          target["skipped"] += skipped
 
-        # Per-module aggregation
-        modules = {}  # module_name -> dict with tests, failures, errors, skipped
-
-        def update_counts(stats, tests, failures, errors, skipped):
-          stats["tests"] += tests
-          stats["failures"] += failures
-          stats["errors"] += errors
-          stats["skipped"] += skipped
-
-        for path in files:
+        for path in report_files:
           try:
             tree = ET.parse(path)
             root = tree.getroot()
-          except Exception:
-            # Skip malformed reports
+          except Exception as e:
+            # Skip malformed XML files
             continue
 
-          # Surefire can produce <testsuite> or <testsuites> as root
+          # Surefire can be <testsuite> or <testsuites> root
           suites = []
           if root.tag == "testsuite":
             suites = [root]
           elif root.tag == "testsuites":
             suites = list(root.findall("testsuite"))
-          else:
+
+          if not suites:
             continue
 
-          # Determine module name from path
-          parts = path.split("/")
+          # Deduce module name from path (dir before 'target')
+          # Example: some-module/target/surefire-reports/TEST-*.xml -> module = 'some-module'
+          parts = path.split(os.sep)
           module_name = "root"
           if "target" in parts:
             idx = parts.index("target")
@@ -87,52 +110,78 @@ runs:
             }
 
           for suite in suites:
-            # Attributes are usually stored on the testsuite element
-            tests = int(suite.attrib.get("tests", "0") or "0")
-            failures = int(suite.attrib.get("failures", "0") or "0")
-            errors = int(suite.attrib.get("errors", "0") or "0")
-            skipped = int(
-              suite.attrib.get("skipped", suite.attrib.get("disabled", "0") or "0")
-            )
+            def get_int(attr_name):
+              value = suite.attrib.get(attr_name, "0")
+              try:
+                return int(value)
+              except ValueError:
+                return 0
 
-            total_tests += tests
-            total_failures += failures
-            total_errors += errors
-            total_skipped += skipped
+            tests = get_int("tests")
+            failures = get_int("failures")
+            errors = get_int("errors")
+            skipped = get_int("skipped")
 
+            update_counts(total, tests, failures, errors, skipped)
             update_counts(modules[module_name], tests, failures, errors, skipped)
 
-        # Short status line
-        print("### Status")
-        if total_failures == 0 and total_errors == 0:
-          print(f"- ✅ All tests passed ({total_tests} tests, {total_skipped} skipped)")
+        # Compute derived values
+        def compute_success(data):
+          return max(0, data["tests"] - data["failures"] - data["errors"] - data["skipped"])
+
+        total_success = compute_success(total)
+
+        # Build Markdown summary
+        lines = []
+
+        lines.append(f"## {title}")
+        lines.append("")
+        if not report_files:
+          lines.append("_No test reports were found with pattern:_")
+          lines.append(f"`{report_glob}`")
         else:
-          print(
-            f"- ❌ Some tests failed "
-            f"({total_tests} total, {total_failures} failed, {total_errors} errors, {total_skipped} skipped)"
+          # Overall table
+          lines.append("### Overall")
+          lines.append("")
+          lines.append("| Success | Failed | Errors | Skipped | Total |")
+          lines.append("| --- | --- | --- | --- | --- |")
+          lines.append(
+            f"| {total_success} | {total['failures']} | {total['errors']} | {total['skipped']} | {total['tests']} |"
           )
-        print()
+          lines.append("")
 
-        # Global totals table
-        print("### Global totals")
-        print()
-        print("| Total | Failed | Errors | Skipped |")
-        print("| ----- | ------ | ------ | ------- |")
-        print(f"| {total_tests} | {total_failures} | {total_errors} | {total_skipped} |")
-        print()
+          if include_module_table and modules:
+            lines.append("### By module")
+            lines.append("")
+            lines.append("| Module | Success | Failed | Errors | Skipped | Total |")
+            lines.append("| --- | --- | --- | --- | --- | --- |")
+            for module_name in sorted(modules.keys()):
+              data = modules[module_name]
+              success = compute_success(data)
+              lines.append(
+                f"| {module_name} | {success} | {data['failures']} | {data['errors']} | {data['skipped']} | {data['tests']} |"
+              )
+            lines.append("")
 
-        # Per-module table
-        print("### Totals by module")
-        print()
-        print("| Module | Total | Failed | Errors | Skipped |")
-        print("| ------ | ----- | ------ | ------ | ------- |")
+          # Optional detail: number of XML report files found
+          lines.append(f"_Processed {len(report_files)} Surefire report file(s)._")
 
-        # Sort modules by name for stable output
-        for module_name in sorted(modules.keys()):
-          stats = modules[module_name]
-          print(
-            f"| {module_name} | "
-            f"{stats['tests']} | {stats['failures']} | {stats['errors']} | {stats['skipped']} |"
-          )
-        print()
+        markdown = "\n".join(lines)
+
+        # Write to step summary if available
+        if github_step_summary:
+          with open(github_step_summary, "a", encoding="utf-8") as f:
+            f.write(markdown + "\n")
+
+        # Write outputs for reuse
+        if github_output:
+          def write_output(name, value):
+            with open(github_output, "a", encoding="utf-8") as f:
+              f.write(f"{name}={value}\n")
+
+          write_output("total_success", total_success)
+          write_output("total_failed", total["failures"])
+          write_output("total_errors", total["errors"])
+          write_output("total_skipped", total["skipped"])
+          write_output("total_tests", total["tests"])
         PY
