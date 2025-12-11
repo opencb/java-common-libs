@@ -13,7 +13,7 @@ on:
       upload_artifact:
         type: boolean
         required: false
-        default: true
+        default: false
       java_version:
         type: string
         required: false
