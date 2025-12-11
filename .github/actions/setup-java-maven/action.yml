@@ -34,7 +34,7 @@ runs:
       uses: actions/setup-java@v4
       with:
         distribution: "temurin"
-        java-version: ${{ inputs.java-version }}
+        java-version: ${{ inputs.java_version }}
 
     - name: Clone dependencies and compute dependencies_sha
       id: clone_dependencies
@@ -105,7 +105,7 @@ runs:
         {
           echo "## Java / Maven cache summary"
           echo ""
-          echo "- Java version: \`${{ inputs.java-version }}\`"
+          echo "- Java version: \`${{ inputs.java_version }}\`"
           echo "- dependencies_sha: \`${{ steps.clone_dependencies.outputs.dependencies_sha }}\`"
           echo "- Maven cache key: \`${{ runner.os }}-maven-${{ inputs.storage_hadoop }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}\`"
           echo "- Maven cache hit: \`${{ steps.maven_cache.outputs.cache-hit }}\`"
