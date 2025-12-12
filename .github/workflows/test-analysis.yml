@@ -21,7 +21,7 @@ jobs:
       - name: Setup Java and Maven cache
         # Reuse the composite action to configure Java and Maven cache
         id: setup_java_maven
-        uses: ./.github/actions/setup-java-maven
+        uses: opencb/ci-core/.github/actions/setup-java-maven@main
         with:
           require_cache_hit: true
       - name: Start MongoDB v6.0
@@ -36,7 +36,7 @@ jobs:
         run: mvn -B verify surefire-report:report --fail-never org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=opencb_java-common-libs --no-transfer-progress
       - name: Append test summary to job summary
         if: success() || failure()
-        uses: ./.github/actions/test-summary
+        uses: opencb/ci-core/.github/actions/test-summary@main
         with:
           report_paths: './**/surefire-reports/TEST-*.xml'
           title: "Java tests summary"
