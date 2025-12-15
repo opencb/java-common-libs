@@ -29,50 +29,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        # This step checks out the current repository source code
-        uses: actions/checkout@v4
-
-      - name: Setup Java, dependencies and Maven cache
-        # This step sets up JDK, clones and optionally compiles dependencies,
-        # and configures the Maven cache for the whole job.
-        id: setup_java_maven
-        uses: opencb/ci-core/.github/actions/setup-java-maven@main
-        with:
-          java_version: ${{ inputs.java_version }}
-          storage_hadoop: ${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}
-          dependency_repos: ${{ inputs.dependency_repos }}
-
-      - name: Maven Build (skip tests)
-        # This step performs the main Maven build using the configured options.
-        run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }} --no-transfer-progress
-
-      - name: Upload build artifacts
-        # This step uploads the build artifacts if requested by the caller.
-        if: ${{ inputs.upload_artifact == true }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.build_folder }}
-          path: build
-
-      - name: Get project version
-        id: get_project_version
-
-        # This step extracts the Maven project version and exposes it as an output.
-        run: |
-          echo "version=$(mvn help:evaluate -q -Dexpression=project.version -DforceStdout)" >> "$GITHUB_OUTPUT"
-      - name: Build summary
-        # This step writes a small summary into the GitHub job summary, so it is
-        # easy to inspect which dependencies_sha and cache key were used.
-        shell: bash
-        run: |
-          {
-            echo "## Java / Build summary"
-            echo ""
-            echo "- Build version: \`${{ steps.get_project_version.outputs.version}}\`"
-            echo "- Hadoop flavour: \`${{ inputs.storage_hadoop }}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+    uses: opencb/ci-core/./.github/workflows/build.yml
+    with:
+      maven_opts: ${{ inputs.maven_opts }}
+      build_folder: ${{ inputs.build_folder }}
+      upload_artifact: ${{ inputs.upload_artifact }}
+      java_version: ${{ inputs.java_version }}
+      storage_hadoop: ${{ inputs.storage_hadoop }}
+      dependency_repos: ${{ inputs.dependency_repos }}
 
