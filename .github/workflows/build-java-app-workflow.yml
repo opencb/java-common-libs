@@ -29,7 +29,7 @@ on:
 
 jobs:
   build:
-    uses: opencb/ci-core/./.github/workflows/build.yml
+    uses: opencb/ci-core/./.github/workflows/build.yml@main
     with:
       maven_opts: ${{ inputs.maven_opts }}
       build_folder: ${{ inputs.build_folder }}
