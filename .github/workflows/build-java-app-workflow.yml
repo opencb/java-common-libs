@@ -29,7 +29,7 @@ on:
 
 jobs:
   build:
-    uses: opencb/ci-core/./.github/workflows/build.yml@main
+    uses: opencb/ci-core/.github/workflows/build.yml@main
     with:
       maven_opts: ${{ inputs.maven_opts }}
       build_folder: ${{ inputs.build_folder }}
@@ -37,4 +37,3 @@ jobs:
       java_version: ${{ inputs.java_version }}
       storage_hadoop: ${{ inputs.storage_hadoop }}
       dependency_repos: ${{ inputs.dependency_repos }}
-
