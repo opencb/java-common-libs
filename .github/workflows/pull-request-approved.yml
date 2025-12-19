@@ -2,14 +2,15 @@ name: Pull request approve workflow
 
 on:
   workflow_call:
-    target_branch:
-      description: 'Target branch of the PR (github.event.pull_request.base.ref)'
-      required: true
-      type: string
-    head_ref:
-      description: 'Source branch of the PR (github.event.pull_request.head.ref)'
-      required: true
-      type: string
+    inputs:
+      target_branch:
+        description: 'Target branch of the PR (github.event.pull_request.base.ref)'
+        required: true
+        type: string
+      head_ref:
+        description: 'Source branch of the PR (github.event.pull_request.head.ref)'
+        required: true
+        type: string
 
 jobs:
   calculate-xetabase-branch:
