@@ -37,7 +37,7 @@ jobs:
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
         env:
           ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
-      - id: get_xetabase_branch
+      - id: get_ci_core_xetabase_branch
         name: "Get CI-CORE current branch for Xetabase from target branch"
         run: |
           chmod +x ./.github/workflows/scripts/get_opencga_enterprise_branch.sh
