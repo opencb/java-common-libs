@@ -71,7 +71,7 @@ jobs:
           repository: zetta-genomics/opencga-enterprise
           ref: TASK-8067
           token: ${{ env.ZETTA_REPO_ACCESS_TOKEN }}
-          path: opencga-enterprise
+          path: xetbase-opencga-enterprise
           fetch-depth: "10"
 
       - name: Try to clone the private repo with token
