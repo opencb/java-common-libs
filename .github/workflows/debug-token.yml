@@ -1,0 +1,78 @@
+name: Debug ZETTA_REPO_ACCESS_TOKEN and Permissions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-token-and-permissions:
+    runs-on: ${{ vars.UBUNTU_VERSION }}
+    env:
+      ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Show runner and workflow context
+        run: |
+          echo "Runner: $(uname -a)"
+          echo "GitHub Actor: $GITHUB_ACTOR"
+          echo "Workflow: $GITHUB_WORKFLOW"
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Job: $GITHUB_JOB"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "Home: $HOME"
+          echo "Shell: $SHELL"
+          echo "GitHub Ref: $GITHUB_REF"
+          echo "GitHub SHA: $GITHUB_SHA"
+          echo "GitHub Run ID: $GITHUB_RUN_ID"
+          echo "GitHub Run Number: $GITHUB_RUN_NUMBER"
+
+      - name: Show GitHub Actions permissions
+        run: |
+          echo "Permissions JSON:"
+          cat $GITHUB_EVENT_PATH | jq '.workflow_run?.permissions // .permissions // "No permissions found"'
+
+      - name: Check ZETTA_REPO_ACCESS_TOKEN presence and length
+        run: |
+          if [ -z "$ZETTA_REPO_ACCESS_TOKEN" ]; then
+            echo "ZETTA_REPO_ACCESS_TOKEN is NOT set"
+            exit 1
+          else
+            echo "ZETTA_REPO_ACCESS_TOKEN is set"
+            echo "Length: ${#ZETTA_REPO_ACCESS_TOKEN}"
+            echo "First 4 chars: ${ZETTA_REPO_ACCESS_TOKEN:0:4}"
+          fi
+      - id: get_ci_core_xetabase_branch
+        name: "Get CI-CORE current branch for Xetabase from target branch"
+        run: |
+          chmod +x ./.github/workflows/scripts/get_opencga_enterprise_branch.sh
+          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
+          xetabase_branch=$(./.github/workflows/scripts/get_opencga_enterprise_branch.sh "java-common-libs" "develop" "TASK-8067")
+          echo "__CI CORE Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
+          REPO_URI="https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git"
+          echo "$(git ls-remote $REPO_URI TASK-8067)"
+        env:
+          ZETTA_REPO_ACCESS_TOKEN: ${{ env.ZETTA_REPO_ACCESS_TOKEN }}
+
+      - name: Clone OpenCGA Enterprise branch '${{ inputs.branch }}'
+        uses: actions/checkout@v4
+        with:
+          repository: zetta-genomics/opencga-enterprise
+          ref: TASK-8067
+          token: ${{ env.ZETTA_REPO_ACCESS_TOKEN }}
+          path: opencga-enterprise
+          fetch-depth: "10"
+
+      - name: Try to clone the private repo with token
+        run: |
+          set -x
+          git clone https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git || true
+
+      - name: Show authenticated user (if possible)
+        run: |
+          curl -H "Authorization: token $ZETTA_REPO_ACCESS_TOKEN" https://api.github.com/user
+
+      - name: Show environment variables (filtered)
+        run: |
+          env | grep -E 'GITHUB|ZETTA|RUNNER|CI'
