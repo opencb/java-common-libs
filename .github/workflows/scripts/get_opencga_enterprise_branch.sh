@@ -24,7 +24,7 @@ REPO_URI="https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-ent
 if [[ $head_ref == TASK* ]]; then
   if [ "$(git ls-remote "$REPO_URI" "$head_ref" )" ] ; then
     echo "$head_ref";
-    return 0;
+    exit 0
   fi
 fi
 
