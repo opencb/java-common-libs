@@ -1,9 +1,6 @@
 name: Pull request approve workflow
-run-name: 'Pull request approve workflow ${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }} by @${{ github.actor }}'
 
 on:
-  pull_request_review:
-    types: [ submitted ]
   workflow_call:
     target_branch:
       description: 'Target branch of the PR (github.event.pull_request.base.ref)'
@@ -32,10 +29,10 @@ jobs:
         name: "Get current branch for Xetabase from target branch"
         run: |
           chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
-          echo "github.event.pull_request.base.ref: ${{ github.event.pull_request.base.ref || inputs.target_branch }}"
-          echo "github.event.pull_request.head.ref: ${{ github.event.pull_request.head.ref || inputs.head_ref }}"
+          echo "github.event.pull_request.base.ref: ${{ inputs.target_branch }}"
+          echo "github.event.pull_request.head.ref: ${{  inputs.head_ref }}"
           echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
-          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh ${{ github.event.pull_request.base.ref || inputs.target_branch }} ${{ github.event.pull_request.head.ref || inputs.head_ref }})
+          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh ${{ inputs.target_branch }} ${{ inputs.head_ref }})
           echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
           echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
         env:
@@ -47,5 +44,5 @@ jobs:
     uses: ./.github/workflows/test-xetabase-workflow.yml
     with:
       branch: ${{ needs.calculate-xetabase-branch.outputs.xetabase_branch }}
-      task: ${{ github.event.pull_request.head.ref || inputs.head_ref }}
+      task: ${{ inputs.head_ref }}
     secrets: inherit
