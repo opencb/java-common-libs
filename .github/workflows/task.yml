@@ -23,10 +23,9 @@ jobs:
     secrets: inherit
 
 
-  pull-request-xetabase:
-    name: "Run ci-core all tests before merging"
-    uses: opencb/ci-core/.github/workflows/test.yml@main
+  test-pull-request-approve:
+    uses: opencb/ci-core/.github/workflows/pull-request-approve.yml@main
     with:
-      branch: develop
-      task: TASK-8067
+      target_branch: develop
+      head_ref: TASK-8067
     secrets: inherit
