@@ -8,7 +8,7 @@ get_xetabase_branch() {
   target_branch="$1"
   current_branch="$2"
 
-  # If the branch begins with 'TASK' and exists in the opencga-enterprise repository, I return it
+  # 1. If the branch begins with 'TASK' and exists in the opencga-enterprise repository, I return it
   if [[ $current_branch == TASK* ]]; then
     REPO_URI=
     if [ -z "$ZETTA_REPO_ACCESS_TOKEN" ]; then
@@ -22,13 +22,13 @@ get_xetabase_branch() {
     fi
   fi
 
-  # Check if the branch name is "develop" in that case return the same branch name
+  # 2. Check if the branch name is "develop" in that case return the same branch name
   if [[ "$target_branch" == "develop" ]]; then
     echo "develop"
     return 0
   fi
 
-  # Check if the branch name starts with "release-" and follows the patterns "release-a.x.x" or "release-a.b.x"
+  # 3. Check if the branch name starts with "release-" and follows the patterns "release-a.x.x" or "release-a.b.x"
   if [[ "$target_branch" =~ ^release-([0-9]+)\.x\.x$ ]] || [[ "$target_branch" =~ ^release-([0-9]+)\.([0-9]+)\.x$ ]]; then
     # Extract the MAJOR part of the branch name
     MAJOR=${BASH_REMATCH[1]}
