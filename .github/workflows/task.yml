@@ -16,7 +16,7 @@ jobs:
 
   test-xetabase:
     name: "Run all tests before merging java-common-libs TASK-8067 into develop"
-    uses: ./.github/workflows/pull-request-approve.yml
+    uses: ./.github/workflows/pull-request-approved.yml
     with:
       target_branch: develop
       head_ref: TASK-8067
