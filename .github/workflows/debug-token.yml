@@ -53,8 +53,18 @@ jobs:
           REPO_URI="https://$ZETTA_REPO_ACCESS_TOKEN@github.com/zetta-genomics/opencga-enterprise.git"
           echo "$(git ls-remote "$REPO_URI" "TASK-8067")"
         env:
-          ZETTA_REPO_ACCESS_TOKEN: ${{ env.ZETTA_REPO_ACCESS_TOKEN }}
-
+          ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
+      - id: get_xetabase_branch
+        name: "Get JCL current branch for Xetabase from target branch"
+        run: |
+          chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
+          echo "github.event.pull_request.base.ref: develop"
+          echo "github.event.pull_request.head.ref: TASK-8067"
+          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
+          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh "develop" "TASK-8067")
+          echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
+        env:
+          ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
       - name: Clone OpenCGA Enterprise branch '${{ inputs.branch }}'
         uses: actions/checkout@v4
         with:
