@@ -15,15 +15,15 @@ jobs:
     secrets: inherit
 
   test-xetabase:
-    name: "Run all tests before merging"
-    uses: ./.github/workflows/test-xetabase-workflow.yml
+    name: "Run all tests before merging java-common-libs TASK-8067 into develop"
+    uses: ./.github/workflows/pull-request-approve.yml
     with:
-      branch: TASK-8067
-      task: TASK-8067
+      target_branch: develop
+      head_ref: TASK-8067
     secrets: inherit
 
-
   test-pull-request-approve:
+    name: "TEST CI_CORE TASK-8067 into develop"
     uses: opencb/ci-core/.github/workflows/pull-request-approve.yml@main
     with:
       target_branch: develop
