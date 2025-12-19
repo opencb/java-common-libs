@@ -45,8 +45,7 @@ jobs:
           echo "github.event.pull_request.head.ref: ${{  inputs.head_ref }}"
           echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
           xetabase_branch=$(./.github/workflows/scripts/get_opencga_enterprise_branch.sh "java-common-libs" ${{ inputs.target_branch }} ${{ inputs.head_ref }})
-          echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
-          echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
+          echo "__CI CORE Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
         env:
           ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
   
