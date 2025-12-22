@@ -1,18 +1,25 @@
 name: Merge/Push in java-common-libs develop branch
+run-name: 'Push on ${{ github.ref_name }} by @${{ github.actor }}'
 
 on:
   push:
     branches:
       - develop
       - release-*
+      - TASK-*
 
 jobs:
   build:
-    uses: ./.github/workflows/build-java-app-workflow.yml
-
-  deploy-maven:
-    uses: ./.github/workflows/deploy-maven-repository-workflow.yml
-    needs: build
-    secrets: inherit
+    uses: opencb/ci-core/.github/workflows/build.yml@main
     with:
-      cache_key: ${{ needs.build.outputs.cache_key }}
+      upload_artifact: false
+      deploy_maven: ${{ !startsWith(github.ref_name, 'TASK-') }}
+    secrets: inherit
+
+  test:
+    name: Test and push Sonar analysis
+    needs: build
+    uses: opencb/ci-core/.github/workflows/test.yml@main
+    with:
+      cache_key: true
+    secrets: inherit

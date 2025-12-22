@@ -7,15 +7,13 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build-java-app-workflow.yml
-
-  deploy-maven:
-    uses: ./.github/workflows/deploy-maven-repository-workflow.yml
-    needs: build
-    secrets: inherit
+    uses: opencb/ci-core/.github/workflows/build.yml@main
     with:
-      cache_key: ${{ needs.build.outputs.cache_key }}
+      needs_hadoop_preparation: false
+      upload_artifact: false
+      deploy_maven: true
+    secrets: inherit
 
   release:
-    uses: ./.github/workflows/release-github-workflow.yml
-    needs: deploy-maven
+    uses: opencb/ci-core/.github/workflows/release.yml@main
+    needs: build

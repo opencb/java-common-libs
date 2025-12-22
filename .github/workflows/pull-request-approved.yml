@@ -1,4 +1,5 @@
 name: Pull request approve workflow
+run-name: 'Pull request approve workflow ${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }} by @${{ github.actor }}'
 
 on:
   workflow_call:
@@ -13,47 +14,9 @@ on:
         type: string
 
 jobs:
-  calculate-xetabase-branch:
-    name: Calculate Xetabase branch
-    runs-on: ${{ vars.UBUNTU_VERSION }}
-    outputs:
-      xetabase_branch: ${{ steps.get_xetabase_branch.outputs.xetabase_branch }}
-    steps:
-      - name: Clone java-common-libs
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: '10'
-          ## This is important to avoid the error in the next step: "fatal: repository 'https://github.com/zetta-genomics/opencga-enterprise.git/' not found"
-          persist-credentials: false
-      - id: get_xetabase_branch
-        name: "Get JCL current branch for Xetabase from target branch"
-        run: |
-          chmod +x ./.github/workflows/scripts/get-xetabase-branch.sh
-          echo "github.event.pull_request.base.ref: ${{ inputs.target_branch }}"
-          echo "github.event.pull_request.head.ref: ${{  inputs.head_ref }}"
-          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
-          xetabase_branch=$(./.github/workflows/scripts/get-xetabase-branch.sh ${{ inputs.target_branch }} ${{ inputs.head_ref }})
-          echo "__Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
-          echo "xetabase_branch=${xetabase_branch}" >> $GITHUB_OUTPUT
-        env:
-          ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
-      - id: get_ci_core_xetabase_branch
-        name: "Get CI-CORE current branch for Xetabase from target branch"
-        run: |
-          chmod +x ./.github/workflows/scripts/get_opencga_enterprise_branch.sh
-          echo "github.event.pull_request.base.ref: ${{ inputs.target_branch }}"
-          echo "github.event.pull_request.head.ref: ${{  inputs.head_ref }}"
-          echo "secrets.ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}"
-          xetabase_branch=$(./.github/workflows/scripts/get_opencga_enterprise_branch.sh "java-common-libs" ${{ inputs.target_branch }} ${{ inputs.head_ref }})
-          echo "__CI CORE Xetabase ref:__ \"${xetabase_branch}\"" | tee -a ${GITHUB_STEP_SUMMARY}
-        env:
-          ZETTA_REPO_ACCESS_TOKEN: ${{ secrets.ZETTA_REPO_ACCESS_TOKEN }}
-  
-  test:
-    name: "Run all tests before merging"
-    needs: calculate-xetabase-branch
-    uses: ./.github/workflows/test-xetabase-workflow.yml
+  test-xetabase:
+    uses: opencb/ci-core/.github/workflows/pull-request-approve.yml@main
     with:
-      branch: ${{ needs.calculate-xetabase-branch.outputs.xetabase_branch }}
-      task: ${{ inputs.head_ref }}
+      target_branch: ${{ github.event.pull_request.base.ref }}
+      head_ref: ${{ github.event.pull_request.head.ref }}
     secrets: inherit
