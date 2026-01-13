@@ -86,21 +86,38 @@ jobs:
         env:
           SSH_HOST: ${{ env.SSH_HOST }}
           SSH_PORT: ${{ env.SSH_PORT }}
+      - name: Cache local Maven repository
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ vars.HADOOP_FLAVOUR }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ vars.HADOOP_FLAVOUR }}-
       - name: Run all OpenCB Junit tests, ie. java-common-libs, biodata, opencga and opencga-enterprise
         run: |
           cd opencga-enterprise
           ln -s ../opencga opencga-home
-          ./build.sh -t -l runShortTests -b -s -T ${{ inputs.task }}
+          ./build.sh --test --test-level runShortTests --prepare-branches --test-save-reports --task ${{ inputs.task }} --storage-hadoop ${{ vars.HADOOP_FLAVOUR }} --prepare-hadoop
+        env:
+          THIRDPARTY_READ_TOKEN: ${{ secrets.THIRDPARTY_READ_TOKEN }}
       - name: Upload reports results to Github
         uses: actions/upload-artifact@v4
         with:
           name: report-test
-          path: ./opencga-enterprise/reports/test
+          path: ./opencga-enterprise/reports/
+          if-no-files-found: error
       - name: Upload log
         uses: actions/upload-artifact@v4
+        ## Skip cancelled()
+        ## https://docs.github.com/en/actions/learn-github-actions/expressions#cancelled
+        if: success() || failure()
         with:
           name: build-log
-          path: ./opencga-enterprise/build.log
+          path: |
+            ./opencga-enterprise/build.log
+            ./opencga-enterprise/reports/*.log.gz
+          if-no-files-found: error
       - name: Log summary
         run: |
           cat ./opencga-enterprise/build.log | tee -a $GITHUB_STEP_SUMMARY

@@ -10,10 +10,34 @@ on:
         type: string
         required: false
         default: "build-folder"
+      upload_artifact:
+        type: boolean
+        required: false
+        default: true
+      dependency_repos:
+        # Comma-separated list of dependency repositories to clone and build before building the main project.
+        type: string
+        required: false
+        default: ""
+      needs_hadoop_preparation:
+        type: boolean
+        required: false
+        default: false
+      hadoop_flavour:
+        type: string
+        required: false
+        default: ""
+      java_commons_libs_branch:
+        type: string
+        required: false
+        default: "develop"
     outputs:
       version:
         description: "Project version"
         value: ${{ jobs.build-workflow.outputs.version }}
+      cache_key:
+        description: "Cache key used for Maven repository"
+        value: ${{ jobs.build-workflow.outputs.cache_key }}
 
 jobs:
   build-workflow:
@@ -21,25 +45,68 @@ jobs:
     runs-on: ${{ vars.UBUNTU_VERSION }}
     outputs:
       version: ${{ steps.get_project_version.outputs.version }}
+      cache_key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
     steps:
       - uses: actions/checkout@v4
+        name: Checkout main repository
+        id: "checkout-main"
+        ## This checkout pulls the code of the repository where this workflow is being used
         with:
           fetch-depth: '10'
+      - uses: actions/checkout@v4
+        if: ${{ inputs.dependency_repos != '' }}
+        name: Checkout java-common-libs repository
+        id: "checkout-java-common-libs"
+        ## This checkout pulls the code of the java-common-libs repository to get the scripts
+        ## Checkout to "java-common-libs" folder.
+        ## Filter by ".github" folder
+        with:
+          repository: opencb/java-common-libs
+          ref: ${{ inputs.java_commons_libs_branch }}
+          path: java-common-libs
+          fetch-depth: '1'
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '8'
           cache: 'maven'
-      - name: Install dependencies branches
+      - name: Clone dependencies
+        id: clone_dependencies
+        if: ${{ inputs.dependency_repos != '' }}
         run: |
-          if [ -f "./.github/workflows/scripts/get_same_branch.sh" ]; then
-            chmod +x ./.github/workflows/scripts/get_same_branch.sh
-            ./.github/workflows/scripts/get_same_branch.sh ${{ github.ref_name }}
+          if [ -f "java-common-libs/.github/workflows/scripts/get_same_branch.sh" ]; then
+            chmod +x java-common-libs/.github/workflows/scripts/get_same_branch.sh
+            export DEPENDENCIES_SHA=${{ github.sha }}
+            java-common-libs/.github/workflows/scripts/get_same_branch.sh "${{ github.ref_name }}" "${{ inputs.dependency_repos }}"
           fi
+      - name: Cache local Maven repository
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-${{ steps.clone_dependencies.outputs.dependencies_sha }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}-
+      - name: Compile dependencies
+        if: ${{ inputs.dependency_repos != '' }}
+        run: |
+          if [ -f "java-common-libs/.github/workflows/scripts/compile_same_branch.sh" ]; then
+            chmod +x java-common-libs/.github/workflows/scripts/compile_same_branch.sh
+            java-common-libs/.github/workflows/scripts/compile_same_branch.sh "${{ inputs.dependency_repos }}"
+          fi
+      - name: Prepare Hadoop profile
+        if: ${{ inputs.needs_hadoop_preparation == true }}
+        run: |
+          chmod +x ./.github/workflows/scripts/prepare_hadoop.sh
+          ./.github/workflows/scripts/prepare_hadoop.sh --hadoop-flavour "${{ inputs.hadoop_flavour || vars.HADOOP_FLAVOUR }}"
+        env:
+          THIRDPARTY_READ_TOKEN: ${{ secrets.THIRDPARTY_READ_TOKEN }}
+
       - name: Maven Build (skip tests)
         run: mvn -T 2 clean install -DskipTests ${{ inputs.maven_opts }} --no-transfer-progress
       - uses: actions/upload-artifact@v4
+        if: ${{ inputs.upload_artifact == true }}
         with:
           name: ${{ inputs.build_folder }}
           path: build
@@ -49,3 +116,4 @@ jobs:
           echo "version=`mvn help:evaluate -q -Dexpression=project.version -DforceStdout`" >> $GITHUB_OUTPUT
       - name: test-version-from-check
         run: echo "Project version is " ${{ steps.get_project_version.outputs.version }}
+

@@ -56,6 +56,8 @@ public class ParallelTaskRunner<I, O> {
     private static final int RETRY_AWAIT_TERMINATION_TIMEOUT = 50;
     private static final int MAX_SHUTDOWN_RETRIES = 300;
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.000");
+    private long startTime;
+    private boolean interrupted;
 
     @FunctionalInterface
     @Deprecated
@@ -272,6 +274,7 @@ public class ParallelTaskRunner<I, O> {
         }
 
         check();
+        interrupted = false;
     }
 
     /**
@@ -289,6 +292,7 @@ public class ParallelTaskRunner<I, O> {
         this.tasks = new ArrayList<>(tasks);
 
         check();
+        interrupted = false;
     }
 
     private void check()  {
@@ -308,6 +312,8 @@ public class ParallelTaskRunner<I, O> {
     }
 
     private void init() {
+        startTime = System.nanoTime();
+        interrupted = false;
         finishedTasks = 0;
         if (reader != null) {
             readBlockingQueue = new ArrayBlockingQueue<>(config.capacity);
@@ -338,11 +344,31 @@ public class ParallelTaskRunner<I, O> {
     }
 
     public void run(long timeout, TimeUnit unit) throws ExecutionException, InterruptedException {
-        long start = System.nanoTime();
         //If there is any InterruptionException, finish as quick as possible.
-        boolean interrupted = false;
         init();
 
+        Thread hook = new Thread(() -> {
+            logger.warn("Shutdown hook called! Aborting ParallelTaskRunner execution!");
+            logTimes();
+        });
+        Runtime.getRuntime().addShutdownHook(hook);
+        try {
+            start(timeout, unit);
+        } finally {
+            Runtime.getRuntime().removeShutdownHook(hook);
+            logTimes();
+        }
+
+        if (config.abortOnFail && !exceptions.isEmpty()) {
+            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.",
+                    exceptions);
+        }
+        if (interrupted) {
+            throw interruptions.get(0);
+        }
+    }
+
+    private void start(long timeout, TimeUnit unit) throws ExecutionException {
         long auxTime = System.nanoTime();
         if (reader != null) {
             reader.open();
@@ -449,7 +475,9 @@ public class ParallelTaskRunner<I, O> {
             writer.close();
         }
         timeWriting += System.nanoTime() - auxTime;
+    }
 
+    public void logTimes() {
         logger.info(toString());
         if (reader != null) {
             logger.info("read:  timeReading                  = " + durationToString(timeReading));
@@ -464,19 +492,11 @@ public class ParallelTaskRunner<I, O> {
         if (writer != null) {
             logger.info("task:  timeBlockedAtPutWrite        = " + durationToString(timeBlockedAtPutWrite) + " (total)"
                     + ",   ~" + durationToString(timeBlockedAtPutWrite / config.numTasks) + " (per thread)");
-            logger.info("write: timeBlockedWatingDataToWrite = " + durationToString(timeBlockedAtTakeWrite));
+            logger.info("write: timeBlockedWaitingDataToWrite = " + durationToString(timeBlockedAtTakeWrite));
             logger.info("write: timeWriting                  = " + durationToString(timeWriting));
         }
 
-        logger.info("total:                              = " + durationToString(System.nanoTime() - start));
-
-        if (config.abortOnFail && !exceptions.isEmpty()) {
-            throw buildExecutionException("Error while running ParallelTaskRunner. Found " + exceptions.size() + " exceptions.",
-                    exceptions);
-        }
-        if (interrupted) {
-            throw interruptions.get(0);
-        }
+        logger.info("total:                              = " + durationToString(System.nanoTime() - startTime));
     }
 
     private ExecutionException buildExecutionException(String message, List<? extends Throwable> exceptions) {

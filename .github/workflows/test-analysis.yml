@@ -2,6 +2,10 @@ name: Build and test the project
 
 on:
   workflow_call:
+    inputs:
+      cache_key:
+        type: string
+        required: false
     secrets:
       SONAR_TOKEN:
         required: true
@@ -20,6 +24,14 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
+      - name: Cache local Maven repository
+        uses: actions/cache/restore@v4
+        if: ${{ inputs.cache_key != '' }}
+        with:
+          path: ~/.m2/repository
+          key: ${{ inputs.cache_key }}
+          ## Force cache hit to avoid analyzing with incomplete dependencies
+          fail-on-cache-miss: true
       - name: Start MongoDB v6.0
         uses: supercharge/mongodb-github-action@1.8.0
         with:

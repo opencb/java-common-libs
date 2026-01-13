@@ -26,13 +26,13 @@ public class DockerUtils {
      * @param inputBindings Array of bind mounts for docker input volumes (source-target)
      * @param outputBinding Bind mount for docker output volume (source-target)
      * @param cmdParams     Image command parameters
-     * @param dockerParams  Docker parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
      * @return The command line
      * @throws IOException IO exception
      */
     public static String buildCommandLine(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                                           AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
-                                          Map<String, String> dockerParams) throws IOException {
+                                          Map<String, List<String>> dockerParams) throws IOException {
         return buildCommandLine(image, inputBindings, Collections.singletonList(outputBinding), cmdParams, dockerParams);
     }
 
@@ -43,13 +43,13 @@ public class DockerUtils {
      * @param inputBindings  Array of bind mounts for docker input volumes (source-target)
      * @param outputBindings Array of bind mount for docker output volume (source-target)
      * @param cmdParams     Image command parameters
-     * @param dockerParams  Docker parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
      * @return The command line
      * @throws IOException IO exception
      */
     public static String buildCommandLine(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                                           List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
-                                          Map<String, String> dockerParams) throws IOException {
+                                          Map<String, List<String>> dockerParams) throws IOException {
         // Sanity check
         if (outputBindings == null || outputBindings.isEmpty()) {
             throw new IllegalArgumentException("Missing output binding(s)");
@@ -65,16 +65,28 @@ public class DockerUtils {
                 setUser = false;
             }
             for (String key : dockerParams.keySet()) {
-                if (key.equals("user") && StringUtils.isEmpty(dockerParams.get("user"))) {
-                    // User wants to disable user setting
-                    continue;
-                }
-                if (!key.startsWith("-")) {
-                    commandLine.append("--");
-                }
-                commandLine.append(key).append(" ");
-                if (StringUtils.isNotEmpty(dockerParams.get(key))) {
-                    commandLine.append(dockerParams.get(key)).append(" ");
+                List<String> values = dockerParams.get(key);
+                if (values == null || values.isEmpty()) {
+                    if (key.equals("user")) {
+                        // User wants to disable user setting
+                        continue;
+                    }
+                    // Parameter without value (flag)
+                    if (!key.startsWith("-")) {
+                        commandLine.append("--");
+                    }
+                    commandLine.append(key).append(" ");
+                } else {
+                    // Parameter with value(s) - can have multiple values for same key
+                    for (String value : values) {
+                        if (!key.startsWith("-")) {
+                            commandLine.append("--");
+                        }
+                        commandLine.append(key).append(" ");
+                        if (StringUtils.isNotEmpty(value)) {
+                            commandLine.append(value).append(" ");
+                        }
+                    }
                 }
             }
         }
@@ -159,6 +171,58 @@ public class DockerUtils {
         return new ArrayList<>(res);
     }
 
+    /**
+     * Login into dockerhub with the given credentials.
+     *
+     * @param registry  Docker registry URL
+     * @param username  Docker registry username
+     * @param password  Docker registry password
+     * @return True if login was successful, false otherwise
+     * @throws IOException IO exception
+     */
+    public static boolean login(String registry, String username, String password) throws IOException {
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("Username and password are required");
+        }
+        if (registry == null) {
+            // Leave it empty (defaults to dockerhub)
+            registry = "";
+        }
+
+        String commandLine = "docker login " + registry + " --username " + username + " --password-stdin";
+
+        LOGGER.info("Running docker login command");
+        Command cmd = new Command(commandLine, password);
+        cmd.run();
+
+        if (cmd.getExitValue() != 0) {
+            LOGGER.error("Docker login failed: {}", cmd.getError());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create and run the command line to execute the docker image with optional registry authentication.
+     *
+     * @param image         Docker image name
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBinding Bind mount for docker output volume (source-target)
+     * @param cmdParams     Image command parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
+     * @param registry      Docker registry URL
+     * @param username      Optional Docker registry username
+     * @param password      Optional Docker registry password
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
+                             Map<String, List<String>> dockerParams, String registry, String username, String password) throws IOException {
+        return run(image, inputBindings, outputBinding != null ? Collections.singletonList(outputBinding) : null,
+                cmdParams, dockerParams, registry, username, password);
+    }
 
     /**
      * Create and run the command line to execute the docker image.
@@ -167,13 +231,13 @@ public class DockerUtils {
      * @param inputBindings Array of bind mounts for docker input volumes (source-target)
      * @param outputBinding Bind mount for docker output volume (source-target)
      * @param cmdParams     Image command parameters
-     * @param dockerParams  Docker parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
      * @return The command line
      * @throws IOException IO exception
      */
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              AbstractMap.SimpleEntry<String, String> outputBinding, String cmdParams,
-                             Map<String, String> dockerParams) throws IOException {
+                             Map<String, List<String>> dockerParams) throws IOException {
         return run(image, inputBindings, outputBinding != null ? Collections.singletonList(outputBinding) : null, cmdParams, dockerParams);
     }
 
@@ -184,14 +248,43 @@ public class DockerUtils {
      * @param inputBindings Array of bind mounts for docker input volumes (source-target)
      * @param outputBindings Array of bind mount for docker output volume (source-target)
      * @param cmdParams     Image command parameters
-     * @param dockerParams  Docker parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
      * @return The command line
      * @throws IOException IO exception
      */
     public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
                              List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
-                             Map<String, String> dockerParams) throws IOException {
+                             Map<String, List<String>> dockerParams) throws IOException {
+        return run(image, inputBindings, outputBindings, cmdParams, dockerParams, null, null, null);
+    }
+
+    /**
+     * Create and run the command line to execute the docker image with optional registry authentication.
+     *
+     * @param image         Docker image name
+     * @param inputBindings Array of bind mounts for docker input volumes (source-target)
+     * @param outputBindings Array of bind mount for docker output volume (source-target)
+     * @param cmdParams     Image command parameters
+     * @param dockerParams  Docker parameters (each key can have multiple values, e.g., for multiple --env settings)
+     * @param registry      Optional Docker registry URL (null if not using private registry)
+     * @param username      Optional Docker registry username
+     * @param password      Optional Docker registry password
+     * @return The command line
+     * @throws IOException IO exception
+     */
+    public static String run(String image, List<AbstractMap.SimpleEntry<String, String>> inputBindings,
+                             List<AbstractMap.SimpleEntry<String, String>> outputBindings, String cmdParams,
+                             Map<String, List<String>> dockerParams, String registry, String username, String password) throws IOException {
+
         checkDockerDaemonAlive();
+
+        // Login to registry if credentials provided
+        if (StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password)) {
+            boolean loginSuccess = login(registry, username, password);
+            if (!loginSuccess) {
+                throw new IOException("Failed to authenticate to Dockerhub");
+            }
+        }
 
         String commandLine = buildCommandLine(image, inputBindings, outputBindings, cmdParams, dockerParams);
 
@@ -221,7 +314,6 @@ public class DockerUtils {
 
         return commandLine;
     }
-
 
     public static void checkDockerDaemonAlive() throws IOException {
         int maxAttempts = 12;
