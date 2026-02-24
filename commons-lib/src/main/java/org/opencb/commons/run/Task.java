@@ -130,6 +130,48 @@ public interface Task<T, R> {
 
     /**
      * Use to execute multiple Tasks with the same input.
+     * Only the output of the main task will be propagated. The side task runs as a side-effect.
+     *
+     * task = Task.tee(task1, task2);
+     *
+     * @param mainTask    Main task whose output is propagated
+     * @param sideTask    Task to execute with the same input. The output will be discarded.
+     * @param <T>         Input type.
+     * @param <R>         Return type.
+     * @return            Task that runs both tasks with the same input.
+     */
+    static <T, R> Task<T, R> tee(Task<T, R> mainTask, Task<T, ?> sideTask) {
+        return new Task<T, R>() {
+            @Override
+            public void pre() throws Exception {
+                mainTask.pre();
+                sideTask.pre();
+            }
+
+            @Override
+            public List<R> apply(List<T> batch) throws Exception {
+                List<R> apply1 = mainTask.apply(batch);
+                sideTask.apply(batch); // ignore output
+                return apply1;
+            }
+
+            @Override
+            public List<R> drain() throws Exception {
+                List<R> drain1 = mainTask.drain();
+                sideTask.drain(); // ignore output
+                return drain1;
+            }
+
+            @Override
+            public void post() throws Exception {
+                mainTask.post();
+                sideTask.post();
+            }
+        };
+    }
+
+    /**
+     * Use to execute multiple Tasks with the same input.
      * Only the output of the main task will be propagated.
      *
      * task = Task.join(task1, task2);
@@ -139,38 +181,11 @@ public interface Task<T, R> {
      * @param <T>         Input type.
      * @param <R>         Return type.
      * @return            Task that runs both tasks with the same input.
+     * @deprecated Use {@link #tee(Task, Task)} instead.
      */
+    @Deprecated
     static <T, R> Task<T, R> join(Task<T, R> mainTask, Task<T, ?> otherTask) {
-        return new Task<T, R>() {
-            @Override
-            public void pre() throws Exception {
-                mainTask.pre();
-                otherTask.pre();
-            }
-
-            @Override
-            public List<R> apply(List<T> batch) throws Exception {
-                List<R> apply1 = mainTask.apply(batch);
-                otherTask.apply(batch); // ignore output
-                return apply1;
-            }
-
-            @Override
-            public List<R> drain() throws Exception {
-                // Drain both tasks
-                List<R> drain1 = mainTask.drain();
-                otherTask.drain(); // ignore output
-
-                // Return drain1
-                return drain1;
-            }
-
-            @Override
-            public void post() throws Exception {
-                mainTask.post();
-                otherTask.post();
-            }
-        };
+        return tee(mainTask, otherTask);
     }
 
 }

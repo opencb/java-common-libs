@@ -20,6 +20,9 @@ import org.opencb.commons.run.Task;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -94,6 +97,111 @@ public interface DataWriter<T> {
                     DataWriter.this.post();
                     DataWriter.this.close();
                 }
+            }
+        };
+    }
+
+    /**
+     * Fan out to two writers receiving the same batches sequentially.
+     *
+     * @param dw1  First writer
+     * @param dw2  Second writer
+     * @param <T>  Batch element type
+     * @return     Composite writer that writes to both dw1 and dw2 in sequence.
+     */
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2) {
+        return dw1.then(dw2.asTask());
+    }
+
+    /**
+     * Fan out to two writers receiving the same batches.
+     *
+     * <p>When {@code parallel=true} each writer runs in its own background thread.
+     * Batches are enqueued from the caller thread; the background threads consume and write.
+     * Any exception thrown by a background thread is rethrown from {@link #post()}.
+     *
+     * @param dw1      First writer
+     * @param dw2      Second writer
+     * @param parallel Whether to run each writer in its own background thread
+     * @param <T>      Batch element type
+     * @return         Composite writer that writes to both dw1 and dw2.
+     */
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel) {
+        if (!parallel) {
+            return tee(dw1, dw2);
+        }
+        return new DataWriter<T>() {
+            private final BlockingQueue<Optional<List<T>>> queue1 = new LinkedBlockingQueue<>();
+            private final BlockingQueue<Optional<List<T>>> queue2 = new LinkedBlockingQueue<>();
+            private Thread thread1;
+            private Thread thread2;
+            private volatile Throwable error1;
+            private volatile Throwable error2;
+
+            @Override
+            public boolean pre() {
+                thread1 = new Thread(() -> {
+                    try {
+                        dw1.open();
+                        dw1.pre();
+                        Optional<List<T>> item = queue1.take();
+                        while (item.isPresent()) {
+                            dw1.write(item.get());
+                            item = queue1.take();
+                        }
+                        dw1.post();
+                        dw1.close();
+                    } catch (Throwable t) {
+                        error1 = t;
+                    }
+                }, Thread.currentThread().getName() + "writer-1");
+                thread2 = new Thread(() -> {
+                    try {
+                        dw2.open();
+                        dw2.pre();
+                        Optional<List<T>> item = queue2.take();
+                        while (item.isPresent()) {
+                            dw2.write(item.get());
+                            item = queue2.take();
+                        }
+                        dw2.post();
+                        dw2.close();
+                    } catch (Throwable t) {
+                        error2 = t;
+                    }
+                }, Thread.currentThread().getName() + "writer-2");
+                thread1.start();
+                thread2.start();
+                return true;
+            }
+
+            @Override
+            public boolean write(List<T> batch) {
+                if (error1 != null || error2 != null) {
+                    throw new RuntimeException("Tee background writer has failed");
+                }
+                queue1.add(Optional.of(batch));
+                queue2.add(Optional.of(batch));
+                return true;
+            }
+
+            @Override
+            public boolean post() {
+                queue1.add(Optional.empty());
+                queue2.add(Optional.empty());
+                try {
+                    thread1.join();
+                    thread2.join();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                if (error1 != null) {
+                    throw new RuntimeException("Error in tee background writer 1", error1);
+                }
+                if (error2 != null) {
+                    throw new RuntimeException("Error in tee background writer 2", error2);
+                }
+                return true;
             }
         };
     }
