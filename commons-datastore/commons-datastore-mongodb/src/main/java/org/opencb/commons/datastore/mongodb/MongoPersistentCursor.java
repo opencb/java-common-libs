@@ -172,7 +172,7 @@ public class MongoPersistentCursor implements MongoCursor<Document> {
         mongoCursor = iterable
                 .batchSize(batchSize)
                 .limit(limit)
-                .skip(skip)
+                .skip(lastObjectId == null ? skip : 0)
                 .iterator();
     }
 
@@ -213,14 +213,14 @@ public class MongoPersistentCursor implements MongoCursor<Document> {
             activePipeline.add(insertPos, new Document("$sort", new Document("_id", 1)));
         }
 
-        if (skip > 0) {
+        if (skip > 0 && lastObjectId == null) {
             activePipeline.add(new Document("$skip", skip));
         }
         if (limit > 0) {
             activePipeline.add(new Document("$limit", limit));
         }
 
-        AggregateIterable<Document> iterable = collection.nativeQuery().getDbCollection().aggregate(activePipeline);
+        AggregateIterable<Document> iterable = newAggregateIterable(activePipeline);
         if (batchSize > 0) {
             iterable.batchSize(batchSize);
         }
@@ -229,6 +229,10 @@ public class MongoPersistentCursor implements MongoCursor<Document> {
 
     protected FindIterable<Document> newFindIterable(Bson query, Bson projection, QueryOptions options) {
         return this.collection.nativeQuery().nativeFind(null, query, projection, options);
+    }
+
+    protected AggregateIterable<Document> newAggregateIterable(List<Bson> activePipeline) {
+        return collection.nativeQuery().getDbCollection().aggregate(activePipeline);
     }
 
     public Object getLastId() {
