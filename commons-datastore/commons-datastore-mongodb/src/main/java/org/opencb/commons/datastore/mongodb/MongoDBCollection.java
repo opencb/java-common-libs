@@ -133,6 +133,12 @@ public class MongoDBCollection {
         return endQuery(Collections.emptyList(), l, start);
     }
 
+    public DataResult<Long> estimatedCount() {
+        long start = startQuery();
+        long l = mongoDBNativeQuery.estimatedCount();
+        return endQuery(Collections.emptyList(), l, start);
+    }
+
     public DataResult<?> distinct(String key, Bson query) {
         long start = startQuery();
         List l = new ArrayList<>();

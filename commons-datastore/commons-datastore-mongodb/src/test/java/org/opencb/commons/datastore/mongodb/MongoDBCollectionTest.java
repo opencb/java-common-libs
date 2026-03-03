@@ -334,6 +334,12 @@ public class MongoDBCollectionTest {
     }
 
     @Test
+    public void testEstimatedCount() {
+        DataResult<Long> queryResult = mongoDBCollection.estimatedCount();
+        assertEquals("The number of documents must be equals", N, queryResult.getNumMatches());
+    }
+
+    @Test
     public void testDistinct1() throws Exception {
         DataResult<Integer> queryResult = mongoDBCollection.distinct("age", null, Integer.class);
         assertNotNull("Object cannot be null", queryResult);
