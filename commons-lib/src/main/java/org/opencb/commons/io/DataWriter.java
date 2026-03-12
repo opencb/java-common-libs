@@ -113,6 +113,10 @@ public interface DataWriter<T> {
         return dw1.then(dw2.asTask());
     }
 
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel) {
+        return tee(dw1, dw2, parallel, 1);
+    }
+
     /**
      * Fan out to two writers receiving the same batches.
      *
@@ -120,19 +124,20 @@ public interface DataWriter<T> {
      * Batches are enqueued from the caller thread; the background threads consume and write.
      * Any exception thrown by a background thread is rethrown from {@link #post()}.
      *
-     * @param dw1      First writer
-     * @param dw2      Second writer
-     * @param parallel Whether to run each writer in its own background thread
-     * @param <T>      Batch element type
-     * @return         Composite writer that writes to both dw1 and dw2.
+     * @param dw1           First writer
+     * @param dw2           Second writer
+     * @param parallel      Whether to run each writer in its own background thread
+     * @param queueCapacity Maximum number of batches buffered per writer when parallel
+     * @param <T>           Batch element type
+     * @return              Composite writer that writes to both dw1 and dw2.
      */
-    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel) {
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel, int queueCapacity) {
         if (!parallel) {
             return tee(dw1, dw2);
         }
         return new DataWriter<T>() {
-            private final BlockingQueue<Optional<List<T>>> queue1 = new LinkedBlockingQueue<>();
-            private final BlockingQueue<Optional<List<T>>> queue2 = new LinkedBlockingQueue<>();
+            private final BlockingQueue<Optional<List<T>>> queue1 = new LinkedBlockingQueue<>(queueCapacity);
+            private final BlockingQueue<Optional<List<T>>> queue2 = new LinkedBlockingQueue<>(queueCapacity);
             private Thread thread1;
             private Thread thread2;
             private volatile Throwable error1;
@@ -154,7 +159,7 @@ public interface DataWriter<T> {
                     } catch (Throwable t) {
                         error1 = t;
                     }
-                }, Thread.currentThread().getName() + "writer-1");
+                }, Thread.currentThread().getName() + "-writer-1");
                 thread2 = new Thread(() -> {
                     try {
                         dw2.open();
@@ -169,7 +174,7 @@ public interface DataWriter<T> {
                     } catch (Throwable t) {
                         error2 = t;
                     }
-                }, Thread.currentThread().getName() + "writer-2");
+                }, Thread.currentThread().getName() + "-writer-2");
                 thread1.start();
                 thread2.start();
                 return true;
@@ -180,15 +185,25 @@ public interface DataWriter<T> {
                 if (error1 != null || error2 != null) {
                     throw new RuntimeException("Tee background writer has failed");
                 }
-                queue1.add(Optional.of(batch));
-                queue2.add(Optional.of(batch));
+                try {
+                    queue1.put(Optional.of(batch));
+                    queue2.put(Optional.of(batch));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while enqueueing batch", e);
+                }
                 return true;
             }
 
             @Override
             public boolean post() {
-                queue1.add(Optional.empty());
-                queue2.add(Optional.empty());
+                try {
+                    queue1.put(Optional.empty());
+                    queue2.put(Optional.empty());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while sending poison pill", e);
+                }
                 try {
                     thread1.join();
                     thread2.join();
