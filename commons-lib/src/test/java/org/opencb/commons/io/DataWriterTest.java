@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -161,6 +162,60 @@ public class DataWriterTest {
         tee.write(Collections.singletonList("trigger-failure"));
         Thread.sleep(200); // wait for background thread to process and set the error
         tee.write(Collections.singletonList("should-throw")); // error already set → throws
+    }
+
+    @Test(timeout = 5000)
+    public void testTeeParallelPostShouldNotHangWhenBackgroundWriterDies() throws Exception {
+        // Scenario: thread1 dies (exception in write), leaving an unconsumed batch in
+        // its bounded queue. post() tries to enqueue a poison pill into the full queue
+        // and hangs forever because there's no consumer to drain it.
+        CountDownLatch writerStarted = new CountDownLatch(1);
+        CountDownLatch writerCanProceed = new CountDownLatch(1);
+        CountDownLatch okWriterConsumedBatch1 = new CountDownLatch(1);
+
+        DataWriter<String> failing = new DataWriter<String>() {
+            @Override
+            public boolean write(List<String> batch) {
+                writerStarted.countDown();
+                try {
+                    writerCanProceed.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                throw new RuntimeException("write failed");
+            }
+        };
+
+        DataWriter<String> ok = b -> {
+            okWriterConsumedBatch1.countDown();
+            return true;
+        };
+
+        DataWriter<String> tee = DataWriter.tee(failing, ok, true, 1);
+        tee.pre();
+
+        // batch1: thread1 takes it, enters write(), signals writerStarted, blocks on latch
+        tee.write(Collections.singletonList("batch1"));
+        writerStarted.await();
+
+        // Ensure thread2 has consumed batch1 so queue2.put won't block on next write
+        okWriterConsumedBatch1.await();
+
+        // batch2: fills queue1 to capacity (thread1 is blocked, can't consume)
+        tee.write(Collections.singletonList("batch2"));
+
+        // Let thread1 proceed → it throws and dies. queue1 still has batch2 (full).
+        writerCanProceed.countDown();
+        Thread.sleep(200);
+
+        // post() should complete and report the error, not hang.
+        // BUG: queue1.put(poison pill) blocks forever because queue1 is full and thread1 is dead.
+        try {
+            tee.post();
+            Assert.fail("post() should have thrown due to failed background writer");
+        } catch (RuntimeException e) {
+            // Expected: error from failed writer should propagate
+        }
     }
 
     // ===== asTask() =====

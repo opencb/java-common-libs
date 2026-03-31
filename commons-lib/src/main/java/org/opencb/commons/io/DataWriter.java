@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -182,12 +183,10 @@ public interface DataWriter<T> {
 
             @Override
             public boolean write(List<T> batch) {
-                if (error1 != null || error2 != null) {
-                    throw new RuntimeException("Tee background writer has failed");
-                }
+                checkErrors();
                 try {
-                    queue1.put(Optional.of(batch));
-                    queue2.put(Optional.of(batch));
+                    offerIfAlive(queue1, Optional.of(batch), thread1);
+                    offerIfAlive(queue2, Optional.of(batch), thread2);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Interrupted while enqueueing batch", e);
@@ -197,26 +196,60 @@ public interface DataWriter<T> {
 
             @Override
             public boolean post() {
+                boolean pill1Sent = false;
+                boolean pill2Sent = false;
                 try {
-                    queue1.put(Optional.empty());
-                    queue2.put(Optional.empty());
+                    offerIfAlive(queue1, Optional.empty(), thread1);
+                    pill1Sent = true;
+                    offerIfAlive(queue2, Optional.empty(), thread2);
+                    pill2Sent = true;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Interrupted while sending poison pill", e);
+                } finally {
+                    if (!pill1Sent) {
+                        thread1.interrupt();
+                    }
+                    if (!pill2Sent) {
+                        thread2.interrupt();
+                    }
+                    try {
+                        thread1.join();
+                        thread2.join();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
-                try {
-                    thread1.join();
-                    thread2.join();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                checkErrors();
+                return true;
+            }
+
+            /**
+             * Offer an item to the queue, retrying with a timeout. If the consumer thread
+             * is dead (can't drain the queue), clear the queue and return.
+             */
+            private void offerIfAlive(BlockingQueue<Optional<List<T>>> queue, Optional<List<T>> item, Thread thread)
+                    throws InterruptedException {
+                while (!queue.offer(item, 100, TimeUnit.MILLISECONDS)) {
+                    if (!thread.isAlive()) {
+                        queue.clear();
+                        checkErrors();
+                        return;
+                    }
                 }
-                if (error1 != null) {
+            }
+
+            private void checkErrors() {
+                if (error1 != null && error2 != null) {
+                    RuntimeException e = new RuntimeException("Error in tee background writers");
+                    e.addSuppressed(error1);
+                    e.addSuppressed(error2);
+                    throw e;
+                } else if (error1 != null) {
                     throw new RuntimeException("Error in tee background writer 1", error1);
-                }
-                if (error2 != null) {
+                } else if (error2 != null) {
                     throw new RuntimeException("Error in tee background writer 2", error2);
                 }
-                return true;
             }
         };
     }
