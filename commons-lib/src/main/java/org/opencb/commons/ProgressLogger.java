@@ -310,10 +310,14 @@ public class ProgressLogger {
                 if (batch == null || batch.isEmpty()) {
                     return batch;
                 }
-                increment(batch.size(), () -> {
-                    T lastElement = batch.get(batch.size() - 1);
-                    return messageBuilder.apply(lastElement);
-                });
+                if (messageBuilder == null) {
+                    increment(batch.size());
+                } else {
+                    increment(batch.size(), () -> {
+                        T lastElement = batch.get(batch.size() - 1);
+                        return messageBuilder.apply(lastElement);
+                    });
+                }
                 return batch;
             }
         };

@@ -173,4 +173,22 @@ public interface DataReader<T> extends Iterable<T> {
             action.accept(t);
         }
     }
+
+    static <T> DataReader<T> wrap(Iterable<T> iterable) {
+        return wrap(iterable.iterator());
+    }
+
+    static <T> DataReader<T> wrap(Iterator<T> iterator) {
+        return new DataReader<T>() {
+            @Override
+            public List<T> read(int batchSize) {
+                List<T> batch = new ArrayList<>(batchSize);
+                while (iterator.hasNext() && batchSize > batch.size()) {
+                    batch.add(iterator.next());
+                }
+                return batch;
+            }
+        };
+    }
+
 }

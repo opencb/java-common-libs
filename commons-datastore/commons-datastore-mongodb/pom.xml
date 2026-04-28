@@ -55,9 +55,36 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
         </dependency>
+        <!--
+            JUnit and flapdoodle are compile-scope + optional because EmbeddedMongoDBManager
+            and EmbeddedMongoDBRule (under .mongodb.test) ship in the main jar so downstream
+            projects can reuse them. They don't transitively propagate: consumers must add
+            their own test-scope flapdoodle dependency to actually use them.
+        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.process</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.reverse</groupId>
+            <artifactId>de.flapdoodle.reverse</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <!--TODO Review -->

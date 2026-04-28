@@ -20,6 +20,10 @@ import org.opencb.commons.run.Task;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -93,6 +97,158 @@ public interface DataWriter<T> {
                 if (!post.getAndSet(true)) {
                     DataWriter.this.post();
                     DataWriter.this.close();
+                }
+            }
+        };
+    }
+
+    /**
+     * Fan out to two writers receiving the same batches sequentially.
+     *
+     * @param dw1  First writer
+     * @param dw2  Second writer
+     * @param <T>  Batch element type
+     * @return     Composite writer that writes to both dw1 and dw2 in sequence.
+     */
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2) {
+        return dw1.then(dw2.asTask());
+    }
+
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel) {
+        return tee(dw1, dw2, parallel, 1);
+    }
+
+    /**
+     * Fan out to two writers receiving the same batches.
+     *
+     * <p>When {@code parallel=true} each writer runs in its own background thread.
+     * Batches are enqueued from the caller thread; the background threads consume and write.
+     * Any exception thrown by a background thread is rethrown from {@link #post()}.
+     *
+     * @param dw1           First writer
+     * @param dw2           Second writer
+     * @param parallel      Whether to run each writer in its own background thread
+     * @param queueCapacity Maximum number of batches buffered per writer when parallel
+     * @param <T>           Batch element type
+     * @return              Composite writer that writes to both dw1 and dw2.
+     */
+    static <T> DataWriter<T> tee(DataWriter<T> dw1, DataWriter<T> dw2, boolean parallel, int queueCapacity) {
+        if (!parallel) {
+            return tee(dw1, dw2);
+        }
+        return new DataWriter<T>() {
+            private final BlockingQueue<Optional<List<T>>> queue1 = new LinkedBlockingQueue<>(queueCapacity);
+            private final BlockingQueue<Optional<List<T>>> queue2 = new LinkedBlockingQueue<>(queueCapacity);
+            private Thread thread1;
+            private Thread thread2;
+            private volatile Throwable error1;
+            private volatile Throwable error2;
+
+            @Override
+            public boolean pre() {
+                thread1 = new Thread(() -> {
+                    try {
+                        dw1.open();
+                        dw1.pre();
+                        Optional<List<T>> item = queue1.take();
+                        while (item.isPresent()) {
+                            dw1.write(item.get());
+                            item = queue1.take();
+                        }
+                        dw1.post();
+                        dw1.close();
+                    } catch (Throwable t) {
+                        error1 = t;
+                    }
+                }, Thread.currentThread().getName() + "-writer-1");
+                thread2 = new Thread(() -> {
+                    try {
+                        dw2.open();
+                        dw2.pre();
+                        Optional<List<T>> item = queue2.take();
+                        while (item.isPresent()) {
+                            dw2.write(item.get());
+                            item = queue2.take();
+                        }
+                        dw2.post();
+                        dw2.close();
+                    } catch (Throwable t) {
+                        error2 = t;
+                    }
+                }, Thread.currentThread().getName() + "-writer-2");
+                thread1.start();
+                thread2.start();
+                return true;
+            }
+
+            @Override
+            public boolean write(List<T> batch) {
+                checkErrors();
+                try {
+                    offerIfAlive(queue1, Optional.of(batch), thread1);
+                    offerIfAlive(queue2, Optional.of(batch), thread2);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while enqueueing batch", e);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean post() {
+                boolean pill1Sent = false;
+                boolean pill2Sent = false;
+                try {
+                    offerIfAlive(queue1, Optional.empty(), thread1);
+                    pill1Sent = true;
+                    offerIfAlive(queue2, Optional.empty(), thread2);
+                    pill2Sent = true;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while sending poison pill", e);
+                } finally {
+                    if (!pill1Sent) {
+                        thread1.interrupt();
+                    }
+                    if (!pill2Sent) {
+                        thread2.interrupt();
+                    }
+                    try {
+                        thread1.join();
+                        thread2.join();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                checkErrors();
+                return true;
+            }
+
+            /**
+             * Offer an item to the queue, retrying with a timeout. If the consumer thread
+             * is dead (can't drain the queue), clear the queue and return.
+             */
+            private void offerIfAlive(BlockingQueue<Optional<List<T>>> queue, Optional<List<T>> item, Thread thread)
+                    throws InterruptedException {
+                while (!queue.offer(item, 100, TimeUnit.MILLISECONDS)) {
+                    if (!thread.isAlive()) {
+                        queue.clear();
+                        checkErrors();
+                        return;
+                    }
+                }
+            }
+
+            private void checkErrors() {
+                if (error1 != null && error2 != null) {
+                    RuntimeException e = new RuntimeException("Error in tee background writers");
+                    e.addSuppressed(error1);
+                    e.addSuppressed(error2);
+                    throw e;
+                } else if (error1 != null) {
+                    throw new RuntimeException("Error in tee background writer 1", error1);
+                } else if (error2 != null) {
+                    throw new RuntimeException("Error in tee background writer 2", error2);
                 }
             }
         };

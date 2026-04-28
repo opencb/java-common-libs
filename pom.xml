@@ -30,6 +30,10 @@
         <jansi.version>2.4.0</jansi.version>
         <hamcrest.version>1.3</hamcrest.version>
         <junit.version>4.13.2</junit.version>
+        <mockito.version>2.2.27</mockito.version>
+        <flapdoodle.version>4.21.0</flapdoodle.version>
+        <flapdoodle.reverse.version>1.9.1</flapdoodle.reverse.version>
+        <flapdoodle.process.version>4.17.0</flapdoodle.process.version>
         <!-- Other properties -->
         <sonar.organization>opencb</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -186,6 +190,29 @@
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Embedded MongoDB (flapdoodle) - used by EmbeddedMongoDBManager test utility -->
+            <dependency>
+                <groupId>de.flapdoodle.embed</groupId>
+                <artifactId>de.flapdoodle.embed.mongo</artifactId>
+                <version>${flapdoodle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.flapdoodle.embed</groupId>
+                <artifactId>de.flapdoodle.embed.process</artifactId>
+                <version>${flapdoodle.process.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.flapdoodle.reverse</groupId>
+                <artifactId>de.flapdoodle.reverse</artifactId>
+                <version>${flapdoodle.reverse.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
